@@ -12,6 +12,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import os
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Iterable
 
@@ -165,18 +166,37 @@ def apply_extraction(a: dict, r: ex.ExtractResult) -> None:
         a["text"], a["text_source"] = r.text, r.text_source
 
 
+class LowDisk(Exception):
+    pass
+
+
+def free_bytes(path: str) -> int:
+    return shutil.disk_usage(path).free
+
+
 def download_pending(store: Store, client: SamClient, workers: int = 4,
                      retry_errors: bool = False, limit: int | None = None,
                      checkpoint: Callable[[], None] | None = None,
-                     checkpoint_every: int = 200) -> dict:
-    want = {"pending"} | ({"error"} if retry_errors else set())
-    todo = [a for a in store.attachments.values() if a.get("download_status") in want]
+                     checkpoint_every: int = 200,
+                     attachments: list[dict] | None = None,
+                     min_free_bytes: int = 0) -> dict:
+    """Download + extract. With min_free_bytes, stops (raising LowDisk after
+    recording what finished) before free space drops below the guard; rows not
+    attempted stay 'pending'."""
+    if attachments is not None:
+        todo = list(attachments)
+    else:
+        want = {"pending"} | ({"error"} if retry_errors else set())
+        todo = [a for a in store.attachments.values() if a.get("download_status") in want]
     if limit:
         todo = todo[:limit]
     counts: dict[str, int] = {}
     log.info("downloading %d files", len(todo))
+    os.makedirs(store.workdir, exist_ok=True)
 
     def job(a):
+        if min_free_bytes and free_bytes(store.workdir) < min_free_bytes:
+            return a, None, None, None, "LOWDISK"
         rel = file_rel_path(a["notice_id"], a["resource_id"], a.get("filename") or "")
         dest = store.path(rel)
         try:
@@ -194,9 +214,14 @@ def download_pending(store: Store, client: SamClient, workers: int = 4,
         return a, rel, dl, r, None
 
     done = 0
-    with ThreadPoolExecutor(workers) as pool:
+    low_disk = False
+    pool = ThreadPoolExecutor(workers)
+    try:
         for fut in as_completed([pool.submit(job, a) for a in todo]):
             a, rel, dl, r, err = fut.result()
+            if err == "LOWDISK":
+                low_disk = True
+                continue  # stays pending
             if err is not None:
                 if err.startswith("too_large"):
                     status = "too_large"
@@ -215,6 +240,43 @@ def download_pending(store: Store, client: SamClient, workers: int = 4,
             if checkpoint and done % checkpoint_every == 0:
                 log.info("downloads: %d/%d %s", done, len(todo), counts)
                 checkpoint()
+    except BaseException:
+        # Don't let queued jobs keep downloading after the main loop died
+        # (this happened once when a checkpoint hit a full disk).
+        pool.shutdown(wait=True, cancel_futures=True)
+        raise
+    pool.shutdown(wait=True)
+    if low_disk:
+        raise LowDisk(f"free disk below {min_free_bytes / 1e9:.1f} GB; stopped with {counts}")
+    return counts
+
+
+def adopt_existing_files(store: Store) -> dict:
+    """Mark not-yet-recorded attachments whose file is already on disk as
+    downloaded (hash + extract), e.g. after a run was killed between
+    checkpoints. Files are only renamed into place once complete, so a file at
+    its final path is whole; its size is still checked against SAM's."""
+    import hashlib
+
+    counts = {"adopted": 0, "size_mismatch": 0}
+    for a in store.attachments.values():
+        if a.get("download_status") == "ok" or a.get("resource_type") != "file":
+            continue
+        rel = file_rel_path(a["notice_id"], a["resource_id"], a.get("filename") or "")
+        p = store.path(rel)
+        if not os.path.exists(p):
+            continue
+        h = hashlib.sha256()
+        with open(p, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        size = os.path.getsize(p)
+        if a.get("size") and size != a["size"]:
+            counts["size_mismatch"] += 1
+        a.update(download_status="ok", download_error="", downloaded_at=now_iso(),
+                 downloaded_size=size, sha256=h.hexdigest(), file_path=rel, uploaded_at=None)
+        apply_extraction(a, ex.extract_file(p, a.get("filename") or ""))
+        counts["adopted"] += 1
     return counts
 
 

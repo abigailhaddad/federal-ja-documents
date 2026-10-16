@@ -41,7 +41,7 @@ ATTACHMENT_COLUMNS = [
     "extract_error", "transcription_model", "transcription_prompt_version",
     "transcription_input_tokens", "transcription_output_tokens",
     "transcription_cost_usd", "transcribed_pages", "transcribed_at", "transcription_error",
-    "uploaded_at",
+    "uploaded_at", "uploaded_commit", "local_copy",
 ]
 
 EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title", "reason"]
@@ -149,7 +149,7 @@ def _write(path: str, records: Iterable[dict], columns: list[str]) -> None:
     for c in columns:
         if c in INT_COLS:
             df[c] = pd.array(df[c], dtype="Int64")
-        elif c in ("deleted_flag", "in_latest_listing", "needs_transcription"):
+        elif c in ("deleted_flag", "in_latest_listing", "needs_transcription", "local_copy"):
             df[c] = pd.array(df[c], dtype="boolean")
         elif c == "transcription_cost_usd":
             df[c] = pd.array(df[c], dtype="Float64")

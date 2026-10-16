@@ -189,3 +189,51 @@ def test_extraction_never_overwrites_transcription():
     a = {"text": "T", "text_source": "transcription"}
     pipeline.apply_extraction(a, ExtractResult(file_kind="pdf", needs_transcription=True))
     assert a["text"] == "T" and a["text_source"] == "transcription"
+
+
+def test_batches_keep_notices_together():
+    from federal_ja.collect.cli import _batches
+    rows = [{"notice_id": n, "resource_id": r, "size": 10} for n, r in
+            [("a", "1"), ("a", "2"), ("a", "3"), ("b", "1"), ("c", "1"), ("c", "2")]]
+    out = list(_batches(rows, max_files=2, max_bytes=10**9, size_key="size"))
+    assert [[(r["notice_id"], r["resource_id"]) for r in b] for b in out] == [
+        [("a", "1"), ("a", "2"), ("a", "3")], [("b", "1"), ("c", "1"), ("c", "2")]]
+    assert sum(len(b) for b in out) == len(rows)
+
+
+def test_upload_verify_delete(tmp_path):
+    from types import SimpleNamespace
+    from federal_ja.collect import hf_sync
+    s = Store(str(tmp_path))
+    for rid, body in (("1", b"aaa"), ("2", b"bbbb")):
+        rel = f"files/n/{rid}_x.pdf"
+        (tmp_path / "files" / "n").mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_bytes(body)
+        import hashlib
+        s.attachments[("n", rid)] = {"notice_id": "n", "resource_id": rid, "file_path": rel,
+                                     "downloaded_size": len(body), "sha256": hashlib.sha256(body).hexdigest(),
+                                     "download_status": "ok"}
+
+    class Api:
+        def __init__(self, bad=False):
+            self.bad = bad
+        def create_commit(self, *a, **k):
+            return SimpleNamespace(oid="c1")
+        def get_paths_info(self, repo, paths, repo_type):
+            out = []
+            for p in paths:
+                r = next(a for a in s.attachments.values() if a["file_path"] == p)
+                size = r["downloaded_size"] + (1 if self.bad else 0)
+                out.append(SimpleNamespace(path=p, size=size, lfs=SimpleNamespace(sha256=r["sha256"])))
+            return out
+
+    rows = list(s.attachments.values())
+    import pytest
+    with pytest.raises(hf_sync.UploadVerifyError):
+        hf_sync.upload_verify_delete(s, rows, "T", api=Api(bad=True))
+    assert (tmp_path / "files/n/1_x.pdf").exists()            # nothing deleted on a failed verify
+    res = hf_sync.upload_verify_delete(s, rows, "T", api=Api(), keep_local={"files/n/2_x.pdf"})
+    assert res["uploaded"] == 2 and res["commit"] == "c1"
+    assert not (tmp_path / "files/n/1_x.pdf").exists() and (tmp_path / "files/n/2_x.pdf").exists()
+    assert s.attachments[("n", "1")]["uploaded_at"] == "T"
+    assert len((tmp_path / "data" / "upload_manifest.jsonl").read_text().splitlines()) == 2

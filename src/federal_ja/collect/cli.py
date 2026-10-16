@@ -120,6 +120,94 @@ def cmd_download(args, store: Store) -> dict:
     return out
 
 
+def _batches(rows: list[dict], max_files: int, max_bytes: int, size_key: str):
+    """Group rows (kept together by notice) into batches under both limits."""
+    batch, nbytes, last_notice = [], 0, None
+    for r in sorted(rows, key=lambda r: (r["notice_id"], r["resource_id"])):
+        full = len(batch) >= max_files or nbytes >= max_bytes
+        if batch and full and r["notice_id"] != last_notice:
+            yield batch
+            batch, nbytes = [], 0
+        batch.append(r)
+        nbytes += r.get(size_key) or 0
+        last_notice = r["notice_id"]
+    if batch:
+        yield batch
+
+
+def _local_bytes(store: Store) -> int:
+    root = store.path("files")
+    total = 0
+    for d, _dirs, files in os.walk(root):
+        for f in files:
+            total += os.path.getsize(os.path.join(d, f))
+    return total
+
+
+def cmd_stream(args, store: Store) -> dict:
+    """Backfill without holding files locally: per batch, download + extract,
+    upload the originals to HF, verify each file there, delete the local copy.
+    Resumable: rows with uploaded_at set are done; a restart skips them."""
+    from . import hf_sync
+
+    guard = int(args.min_free_gb * 1e9)
+    keep = set()
+    if args.keep_local:
+        keep = {line.strip() for line in open(args.keep_local) if line.strip()}
+    out = {"batches": [], "peak_local_file_bytes": 0, "status": "done"}
+
+    def track():
+        out["peak_local_file_bytes"] = max(out["peak_local_file_bytes"], _local_bytes(store))
+
+    track()
+    out["adopted"] = pipeline.adopt_existing_files(store)
+    # local files from before the per-page rule: re-extract before they go
+    out["reextracted"] = pipeline.reextract(store)
+    store.save()
+    client = SamClient(requests_per_second=args.rps)
+    max_bytes = int(args.batch_gb * 1e9)
+
+    def upload(rows):
+        res = hf_sync.upload_verify_delete(store, rows, pipeline.now_iso(), keep_local=keep)
+        out["batches"].append(res)
+        log.info("uploaded batch: %s", res)
+
+    backlog = [a for a in store.attachments.values()
+               if a.get("download_status") == "ok" and not a.get("uploaded_at")
+               and a.get("file_path") and os.path.exists(store.path(a["file_path"]))]
+    for batch in _batches(backlog, args.batch_files, max_bytes, "downloaded_size"):
+        upload(batch)
+    while True:
+        if pipeline.free_bytes(store.workdir) < guard:
+            out["status"] = f"paused: free disk below {args.min_free_gb} GB"
+            break
+        pending = [a for a in store.attachments.values() if a.get("download_status") == "pending"]
+        if args.retry_errors:
+            pending += [a for a in store.attachments.values() if a.get("download_status") == "error"]
+        if not pending:
+            break
+        batch = next(_batches(pending, args.batch_files, max_bytes, "size"))
+        try:
+            pipeline.download_pending(store, client, workers=args.workers, attachments=batch,
+                                      min_free_bytes=guard)
+        except pipeline.LowDisk as e:
+            out["status"] = f"paused: {e}"
+        track()
+        store.save()
+        upload([a for a in batch if a.get("download_status") == "ok" and not a.get("uploaded_at")])
+        if out["status"] != "done":
+            break
+        if args.retry_errors:
+            args.retry_errors = False  # one retry pass only
+    out["sam_retries"] = client.retry_count
+    out["sam_status_counts"] = client.status_counts
+    out["batches_uploaded"] = len(out["batches"])
+    out["files_uploaded"] = sum(b.get("uploaded", 0) for b in out["batches"])
+    _record_run(store, "stream", {k: v for k, v in out.items() if k != "batches"})
+    store.save()
+    return out
+
+
 def cmd_reextract(args, store: Store) -> dict:
     n = pipeline.reextract(store)
     store.save()
@@ -196,6 +284,11 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("resources", help="fetch attachment lists for pending notices"); net(s)
     s = sub.add_parser("download", help="download pending files and extract text"); net(s)
     s.add_argument("--limit", type=int)
+    s = sub.add_parser("stream", help="backfill in batches: download, upload to HF, verify, delete local"); net(s)
+    s.add_argument("--batch-files", type=int, default=500)
+    s.add_argument("--batch-gb", type=float, default=1.0)
+    s.add_argument("--min-free-gb", type=float, default=3.0)
+    s.add_argument("--keep-local", help="file of file_paths to keep on disk after upload")
     sub.add_parser("reextract", help="re-run native extraction on downloaded files")
     s = sub.add_parser("transcribe", help="transcribe scanned PDFs")
     s.add_argument("--max-usd", type=float, required=True)
