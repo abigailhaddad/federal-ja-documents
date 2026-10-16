@@ -99,7 +99,8 @@ def _remote_sources(args, store: Store, start: dt.date) -> list:
 
 def cmd_resources(args, store: Store) -> dict:
     client = SamClient(requests_per_second=args.rps)
-    out = pipeline.fetch_resources(store, client, workers=args.workers,
+    ids = list(store.notices) if getattr(args, "all", False) else None
+    out = pipeline.fetch_resources(store, client, notice_ids=ids, workers=args.workers,
                                    retry_errors=args.retry_errors, checkpoint=store.save)
     out["sam_retries"] = client.retry_count
     out["sam_status_counts"] = client.status_counts
@@ -216,6 +217,40 @@ def cmd_pages(args, store: Store) -> dict:
     return out
 
 
+def cmd_links(args, store: Store) -> dict:
+    """Fetch J&A documents behind supported LINK resources (links.py), then
+    upload, verify and delete them like the streaming backfill."""
+    from collections import Counter
+    from . import hf_sync, links as lk
+
+    for a in store.attachments.values():
+        if a.get("resource_type") == "file" and not a.get("source_host"):
+            a["source_host"] = "sam.gov"
+    want = {"link"} | ({"link_error"} if args.retry_errors else set())
+    rows = [a for a in store.attachments.values()
+            if a.get("resource_type") == "link" and a.get("download_status") in want
+            and lk.link_kind(a.get("link_url") or "")]
+    out = {"candidates": dict(Counter(lk.link_kind(a["link_url"]) for a in rows)), "fetch": {}}
+    guard = int(args.min_free_gb * 1e9)
+    for i in range(0, len(rows), args.batch_files):
+        batch = rows[i:i + args.batch_files]
+        res = pipeline.fetch_links(store, batch, min_free_bytes=guard)
+        for k, v in res.items():
+            out["fetch"][k] = out["fetch"].get(k, 0) + v
+        store.save()
+        if args.upload:
+            up = [a for a in store.attachments.values() if a.get("download_status") == "ok"
+                  and not a.get("uploaded_at") and a.get("file_path")
+                  and os.path.exists(store.path(a["file_path"]))]
+            hf_sync.upload_verify_delete(store, up, pipeline.now_iso())
+    by_host = Counter((a.get("source_host"), a.get("download_status")) for a in store.attachments.values()
+                      if a.get("resource_type") == "link" and lk.link_kind(a.get("link_url") or ""))
+    out["by_host_status"] = {f"{h} {st}": n for (h, st), n in sorted(by_host.items())}
+    _record_run(store, "links", out)
+    store.save()
+    return out
+
+
 def cmd_reextract_remote(args, store: Store) -> dict:
     """Re-extract, from the HF copies, files whose extraction failed or that
     were extracted by an older rule (images/encrypted PDFs)."""
@@ -239,15 +274,39 @@ def _transcriber(max_usd: float):
 
 
 def cmd_transcribe(args, store: Store) -> dict:
+    """Transcribe image-only pages, fetching files from HF when not local.
+
+    Stops when spend reaches --max-usd, and also (after the first
+    --project-after pages) as soon as the projected total for all candidate
+    pages would exceed --max-usd."""
+    from . import hf_sync
+
     cands = pipeline.transcription_candidates(store)
     if args.ids:
         want = {line.strip() for line in open(args.ids) if line.strip()}
         cands = [a for a in cands if a["resource_id"] in want]
     if args.limit:
         cands = cands[: args.limit]
-    from . import hf_sync
-    out = pipeline.transcribe_pending(store, _transcriber(args.max_usd), cands, checkpoint=store.save,
-                                      fetch=lambda a: hf_sync.fetch_file(store, a))
+    total_pages = sum(len(pipeline.pages_to_transcribe(store, a)) for a in cands)
+    tr = _transcriber(args.max_usd)
+    out_extra = {"candidates": len(cands), "candidate_pages": total_pages, "projection_stop": False}
+
+    def progress(st):
+        if st["pages"] >= args.project_after:
+            projected = tr.budget.spent_usd / st["pages"] * total_pages
+            log.info("transcribe: %d docs, %d pages, $%.4f spent, projected $%.2f for %d pages",
+                     st["done"], st["pages"], tr.budget.spent_usd, projected, total_pages)
+            if projected > args.max_usd and not out_extra["projection_stop"]:
+                out_extra["projection_stop"] = True
+                out_extra["projected_usd"] = projected
+                tr.budget.max_usd = tr.budget.spent_usd  # next check stops the run
+
+    out = pipeline.transcribe_pending(store, tr, cands, checkpoint=store.save,
+                                      fetch=lambda a: hf_sync.fetch_file(store, a),
+                                      workers=args.workers, progress=progress,
+                                      checkpoint_every=50)
+    out.update(out_extra)
+    out["spent_usd"] = tr.budget.spent_usd
     _record_run(store, "transcribe", out)
     store.save()
     return out
@@ -279,6 +338,8 @@ def cmd_daily(args, store: Store) -> dict:
     out = {"scan": cmd_scan(args, store)}
     out["resources"] = cmd_resources(args, store)
     out["download"] = cmd_download(args, store)
+    args.batch_files, args.min_free_gb, args.upload = 100, 1.0, False
+    out["links"] = cmd_links(args, store)
     if args.max_usd > 0:
         out["transcribe"] = cmd_transcribe(args, store)
     if args.publish:
@@ -303,6 +364,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--csv", action="append", help="local CSV path (repeatable); default: remote")
     s.add_argument("--archives", choices=["auto", "always", "never"], default="auto")
     s = sub.add_parser("resources", help="fetch attachment lists for pending notices"); net(s)
+    s.add_argument("--all", action="store_true", help="re-check every notice, not just pending ones")
     s = sub.add_parser("download", help="download pending files and extract text"); net(s)
     s.add_argument("--limit", type=int)
     s = sub.add_parser("stream", help="backfill in batches: download, upload to HF, verify, delete local"); net(s)
@@ -312,11 +374,19 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--keep-local", help="file of file_paths to keep on disk after upload")
     sub.add_parser("reextract", help="re-run native extraction on downloaded files")
     sub.add_parser("pages", help="rebuild per-page rows from stored text")
+    s = sub.add_parser("links", help="fetch J&As behind supported link resources")
+    s.add_argument("--retry-errors", action="store_true")
+    s.add_argument("--batch-files", type=int, default=100)
+    s.add_argument("--min-free-gb", type=float, default=3.0)
+    s.add_argument("--upload", action="store_true", help="upload, verify and delete each batch")
     sub.add_parser("reextract_remote", help="re-extract failed/unknown files from their HF copies")
     s = sub.add_parser("transcribe", help="transcribe scanned PDFs")
     s.add_argument("--max-usd", type=float, required=True)
     s.add_argument("--limit", type=int)
     s.add_argument("--ids", help="file of resource_ids to restrict to")
+    s.add_argument("--workers", type=int, default=1)
+    s.add_argument("--project-after", type=int, default=500,
+                   help="pages after which to start enforcing the cost projection")
     sub.add_parser("report", help="print counts")
     s = sub.add_parser("publish", help="upload to Hugging Face")
     s.add_argument("--mode", choices=["delta", "full"], default="delta")
@@ -327,6 +397,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--max-usd", type=float, default=0.0)
     s.add_argument("--limit", type=int)
     s.add_argument("--ids", help=argparse.SUPPRESS)
+    s.add_argument("--project-after", type=int, default=10**9, help=argparse.SUPPRESS)
     s.add_argument("--publish", action="store_true")
     s.add_argument("--allow-empty", action="store_true")
     s.add_argument("--mode", default="delta", help=argparse.SUPPRESS)
@@ -335,6 +406,8 @@ def main(argv: list[str] | None = None) -> None:
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    for noisy in ("httpx", "httpx2", "huggingface_hub", "pypdf"):
+        logging.getLogger(noisy).setLevel(logging.ERROR if noisy == "pypdf" else logging.WARNING)
     os.makedirs(args.workdir, exist_ok=True)
     store = Store(args.workdir).load()
     fn = globals()[f"cmd_{args.cmd}"]

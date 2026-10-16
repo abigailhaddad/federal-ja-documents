@@ -42,6 +42,7 @@ ATTACHMENT_COLUMNS = [
     "transcription_input_tokens", "transcription_output_tokens",
     "transcription_cost_usd", "transcribed_pages", "transcribed_at", "transcription_error",
     "uploaded_at", "uploaded_commit", "local_copy",
+    "source_host", "parent_resource_id", "link_documents",
 ]
 
 # One row per PDF page. text is the page's final text: the native text layer,
@@ -61,7 +62,7 @@ _SURR = re.compile("[\ud800-\udfff]")
 INT_COLS = {"size", "downloaded_size", "page_count", "pages_with_text",
             "native_text_chars", "transcription_input_tokens",
             "transcription_output_tokens", "attachment_order", "attachment_count",
-            "page_number", "text_layer_chars"}
+            "page_number", "text_layer_chars", "link_documents"}
 
 
 def safe_filename(name: str, max_len: int = 120) -> str:

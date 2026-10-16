@@ -83,12 +83,17 @@ class BudgetTracker:
     max_usd: float
     spent_usd: float = 0.0
 
+    def __post_init__(self):
+        import threading
+        self._lock = threading.Lock()
+
     def check(self) -> None:
         if self.spent_usd >= self.max_usd:
             raise BudgetExceeded(f"spent ${self.spent_usd:.4f} >= cap ${self.max_usd:.2f}")
 
     def add(self, usd: float) -> None:
-        self.spent_usd += usd
+        with self._lock:
+            self.spent_usd += usd
 
 
 @dataclass

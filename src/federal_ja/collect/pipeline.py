@@ -13,6 +13,7 @@ import datetime as dt
 import logging
 import os
 import shutil
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Iterable
 
@@ -78,7 +79,9 @@ def initial_download_status(a: dict) -> str:
         return "link"
     if a["resource_type"] != "file":
         return "unsupported_type"
-    if a["deleted_flag"]:
+    if a["deleted_flag"] or a.get("effective_deleted_date"):
+        # effectiveDeletedDate with deletedFlag "0" was seen on all 48 files
+        # whose download then failed with "The resource has been deleted."
         return "deleted"
     if (a.get("access_level") or "").lower() != "public":
         return "not_public"
@@ -319,6 +322,57 @@ def adopt_existing_files(store: Store) -> dict:
     return counts
 
 
+def fetch_links(store: Store, rows: list[dict] | None = None, retry_errors: bool = False,
+                fetcher=None, pause: float = 1.0, min_free_bytes: int = 0) -> dict:
+    """Fetch the J&A documents behind SAM LINK resources on supported hosts
+    (see links.py). The first document stays on the link's own row; extra
+    documents from one link (a PIEE page can list several) get rows with
+    resource_id '<link resource_id>-<n>' and parent_resource_id set."""
+    import hashlib
+    from . import links as lk
+
+    fetcher = fetcher or lk.fetch_link
+    want = {"link"} | ({"link_error"} if retry_errors else set())
+    if rows is None:
+        rows = [a for a in store.attachments.values()
+                if a.get("resource_type") == "link" and a.get("download_status") in want
+                and lk.link_kind(a.get("link_url") or "")]
+    counts: dict[str, int] = {}
+    for a in list(rows):
+        if min_free_bytes and free_bytes(store.workdir) < min_free_bytes:
+            raise LowDisk("free disk below guard during link fetch")
+        url = a["link_url"]
+        a["source_host"] = lk.source_host(url)
+        try:
+            docs = fetcher(url)
+        except Exception as e:  # noqa: BLE001 - recorded per row
+            a.update(download_status="link_error", download_error=f"{type(e).__name__}: {e}"[:300])
+            counts["link_error"] = counts.get("link_error", 0) + 1
+            time.sleep(pause)
+            continue
+        for k, d in enumerate(docs):
+            if k == 0:
+                row = a
+            else:
+                rid = f"{a['resource_id']}-{k + 1}"
+                row = dict(a, resource_id=rid, parent_resource_id=a["resource_id"],
+                           attachment_id="", attachment_order=a.get("attachment_order"))
+                store.attachments[(a["notice_id"], rid)] = row
+            rel = file_rel_path(row["notice_id"], row["resource_id"], d.name)
+            dest = store.path(rel)
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            with open(dest, "wb") as f:
+                f.write(d.data)
+            row.update(download_status="ok", download_error="", downloaded_at=now_iso(),
+                       downloaded_size=len(d.data), sha256=hashlib.sha256(d.data).hexdigest(),
+                       file_path=rel, filename=d.name, uploaded_at=None, source_host=a["source_host"],
+                       link_documents=len(docs))
+            apply_extraction(row, ex.extract_file(dest, d.name), store)
+            counts["ok"] = counts.get("ok", 0) + 1
+        time.sleep(pause)
+    return counts
+
+
 def reextract_remote(store: Store, rows: list[dict], fetch: Callable[[dict], str]) -> int:
     """Re-extract files that are no longer local: fetch, extract, delete."""
     n = 0
@@ -414,58 +468,100 @@ def apply_transcription(store: Store, a: dict, t) -> None:
 def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None = None,
                        checkpoint: Callable[[], None] | None = None,
                        fetch: Callable[[dict], str] | None = None,
-                       keep_fetched: bool = False) -> dict:
+                       keep_fetched: bool = False, workers: int = 1,
+                       checkpoint_every: int = 25, progress: Callable[[dict], None] | None = None) -> dict:
     """Transcribe the image-only pages of each candidate PDF.
 
     The file is read from the workdir if present, else obtained with
     ``fetch(row) -> local path`` (e.g. from the HF dataset) and deleted
     afterwards unless keep_fetched. Native page texts are re-extracted from
     the file first, so page rows and counts are exact for every transcribed
-    PDF."""
+    PDF. With workers > 1, files are fetched and transcribed in threads;
+    all table updates happen in the calling thread."""
     from .transcribe import BudgetExceeded
 
-    todo = attachments if attachments is not None else transcription_candidates(store)
-    stats = {"done": 0, "errors": 0, "cost_usd": 0.0, "pages": 0, "stopped_on_budget": False}
-    for a in todo:
+    todo = list(attachments if attachments is not None else transcription_candidates(store))
+    stats = {"done": 0, "errors": 0, "cost_usd": 0.0, "pages": 0, "stopped_on_budget": False,
+             "no_pages_left": 0}
+
+    def job(a):
         path = store.path(a["file_path"])
         fetched = False
-        if not os.path.exists(path):
-            if fetch is None:
-                a["transcription_error"] = "file not available locally"
-                stats["errors"] += 1
-                continue
-            path, fetched = fetch(a), True
         try:
+            if not os.path.exists(path):
+                if fetch is None:
+                    return a, None, None, "file not available locally"
+                path, fetched = fetch(a), True
             if a.get("file_kind") == "image":
-                t = transcriber.transcribe_image(path)
-            else:
-                native = ex.pdf_page_texts(path)
-                set_pdf_pages(store, a, native)
-                tl = ex.textless_pages(native)
-                a.update(textless_pages=tl, pages_with_text=len(native) - len(tl),
-                         needs_transcription=bool(tl))
-                pages = pages_to_transcribe(store, a)
-                if not pages:
-                    a["text"], a["text_source"] = doc_text_from_pages(
-                        store.pages[(a["notice_id"], a["resource_id"])])
-                    continue
-                t = transcriber.transcribe_pdf(path, len(native), pages)
+                return a, None, transcriber.transcribe_image(path), None
+            native = ex.pdf_page_texts(path)
+            done_pages = {r["page_number"] for r in store.pages.get((a["notice_id"], a["resource_id"]), [])
+                          if r["text_source"] == "transcription"}
+            pages = [p for p in ex.textless_pages(native) if p not in done_pages]
+            t = transcriber.transcribe_pdf(path, len(native), pages) if pages else None
+            return a, native, t, None
         except BudgetExceeded:
-            stats["stopped_on_budget"] = True
-            break
+            return a, None, None, "BUDGET"
         except Exception as e:  # noqa: BLE001
-            a["transcription_error"] = f"{type(e).__name__}: {e}"[:300]
-            stats["errors"] += 1
-            continue
+            return a, None, None, f"{type(e).__name__}: {e}"[:300]
         finally:
             if fetched and not keep_fetched and os.path.exists(path):
                 os.remove(path)
+
+    def apply(res) -> bool:
+        a, native, t, err = res
+        if err == "BUDGET":
+            stats["stopped_on_budget"] = True
+            return False
+        if err is not None:
+            a["transcription_error"] = err
+            stats["errors"] += 1
+            return True
+        if native is not None:
+            set_pdf_pages(store, a, native)
+            tl = ex.textless_pages(native)
+            a.update(textless_pages=tl, pages_with_text=len(native) - len(tl),
+                     needs_transcription=bool(tl))
+        if t is None:
+            a["text"], a["text_source"] = doc_text_from_pages(store.pages[(a["notice_id"], a["resource_id"])])
+            stats["no_pages_left"] += 1
+            return True
         apply_transcription(store, a, t)
-        stats["done"] += 1
-        stats["pages"] += t.pages
+        if t.error:
+            stats["errors"] += 1
+        else:
+            stats["done"] += 1
+        stats["pages"] += len(t.page_texts)
         stats["cost_usd"] += t.cost_usd
-        if checkpoint and stats["done"] % 25 == 0:
+        n = stats["done"] + stats["errors"]
+        if checkpoint and n % checkpoint_every == 0:
             checkpoint()
+        if progress and n % checkpoint_every == 0:
+            progress(stats)
+        return True
+
+    if workers <= 1:
+        for a in todo:
+            if not apply(job(a)):
+                break
+        return stats
+
+    from concurrent.futures import FIRST_COMPLETED, wait
+    pool = ThreadPoolExecutor(workers)
+    pending, it, stop = set(), iter(todo), False
+    try:
+        while True:
+            while not stop and len(pending) < workers * 2:
+                a = next(it, None)
+                if a is None:
+                    break
+                pending.add(pool.submit(job, a))
+            if not pending:
+                break
+            finished, pending = wait(pending, return_when=FIRST_COMPLETED)
+            for f in finished:
+                if not apply(f.result()):
+                    stop = True
+    finally:
+        pool.shutdown(wait=True, cancel_futures=True)
     return stats
-
-

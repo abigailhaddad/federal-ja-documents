@@ -90,12 +90,17 @@ Code and issue tracker: {project_url}
 ## Scope and what is not here
 
 * Only notices with `PostedDate` on or after {start_date}.
-* Attachments that SAM marks deleted (`download_status = deleted`), not
-  public (`not_public`), or that are links to other websites (`link`; the URL
-  is kept in `link_url`, the target is not fetched) are listed but have no
-  file.
-* A notice whose attachment list could not be fetched has a
-  `resources_status` starting with `error`; it is listed, with no attachments.
+* Every attachment SAM lists has a row in `attachments`, but not every one
+  has a file. Attachments without a file, by `download_status`:
+{not_downloaded_lines}
+* {n_res_error:,} notices return HTTP 404 from SAM's attachment-list endpoint
+  (and from its notice endpoint), so their attachments are unknown; they are
+  listed in `notices` with `resources_status` starting with `error`.
+  {n_no_att:,} notices list no attachments at all.
+* Each SAM notice is one row. A J&A that was re-posted or amended under a new
+  notice ID appears as separate rows; they are not merged.
+  {n_multi_groups:,} agency + solicitation-number pairs have more than one
+  notice ({n_multi_notices:,} notices).
 * A J&A that was posted and removed between two daily snapshots, and never
   reached an archive file, is not in the source CSVs and cannot be here.
 * SAM's `Type` is set by the posting office. J&As posted under another type
@@ -130,14 +135,26 @@ typed, and its OCR text is kept as is, errors included.
 
 ### Machine transcriptions: read with care
 
-Scanned PDFs are transcribed by an AI model (`transcription_model`, currently
-`{model}`; prompt version in `transcription_prompt_version`). The model is
-told to transcribe verbatim, mark redacted content `[REDACTED]`, mark
-unreadable text `[illegible]`, and never guess redacted content.
+Only image-only pages are transcribed; pages with a text layer keep their
+native text. Transcriptions were made by Anthropic's Claude
+(`transcription_model`: `{model}`; prompt version in
+`transcription_prompt_version`). The model is told to transcribe verbatim,
+mark redacted content `[REDACTED]`, mark unreadable text `[illegible]`, and
+never guess redacted content. Pages transcribed: {n_tx_pages:,}.
 
-**Transcriptions are machine-made and may contain errors**: misread numbers,
-names and dates, dropped or duplicated lines, and, especially around
-redactions, text that is not on the page or redactions that are not marked.
+**Transcriptions are machine-made and may contain errors.** A hand check of
+52 pages against the page images (a 25-file pilot plus a spot check of the
+full run) found no invented text inside redactions and no visible redaction
+left unmarked, but did find these error types:
+
+* adjacent redaction boxes merged into one `[REDACTED]` marker, or
+  occasionally an extra marker, so marker counts are approximate;
+* a thick blank fill-in line marked as `[REDACTED]`;
+* `[signature]` inserted where only a redaction box or an empty cell was;
+* digital-signature text collapsed to `[signature]`;
+* omitted letterheads, page footers and handwritten notes;
+* words cut off at the edge of a cropped image completed by the model.
+
 Check the original file in `files/` before relying on any transcribed detail.
 Token counts and cost are recorded per document.
 
@@ -155,6 +172,21 @@ Token counts and cost are recorded per document.
 
 def render_card(store: Store, start_date: str, built_at: str) -> str:
     s = summarize(store)
+    from collections import Counter
+    dl = Counter(a.get("download_status") for a in store.attachments.values())
+    labels = {"link": "link to another website (URL kept in `link_url`, not fetched)",
+              "not_public": "not public on SAM",
+              "deleted": "marked deleted by SAM",
+              "deleted_at_download": "SAM answered 'The resource has been deleted' when downloaded",
+              "too_large": "over the size limit", "error": "download failed",
+              "pending": "not yet downloaded", "unsupported_type": "unsupported resource type"}
+    not_downloaded_lines = "\n".join(f"  * `{k}`: {v:,} ({labels.get(k, k)})"
+                                      for k, v in sorted(dl.items()) if k != "ok")
+    groups = Counter((n.get("agency"), n.get("solicitation_number")) for n in store.notices.values()
+                     if n.get("solicitation_number"))
+    multi = [v for v in groups.values() if v > 1]
+    res_status = Counter((n.get("resources_status") or "").split(":")[0] for n in store.notices.values())
+    n_tx_pages = sum(1 for v in store.pages.values() for r in v if r["text_source"] == "transcription")
     src = store.state.get("sources", {})
     source_lines = "\n".join(
         f"  * `{k}`: {v.get('last_modified', '?')}" for k, v in sorted(src.items())) or "  * (none recorded)"
@@ -170,5 +202,7 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         by_kind=s["downloaded_by_file_kind"], by_text=s["text_source"],
         n_scanned=s["pdfs_needing_transcription"], n_pdfs=s["pdfs"],
         n_pages_scanned=s["textless_pages"],
-        model=config.TRANSCRIBE_MODEL,
+        model=config.TRANSCRIBE_MODEL, not_downloaded_lines=not_downloaded_lines,
+        n_res_error=res_status.get("error", 0), n_no_att=res_status.get("no_attachments", 0),
+        n_multi_groups=len(multi), n_multi_notices=sum(multi), n_tx_pages=n_tx_pages,
     )

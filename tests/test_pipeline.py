@@ -63,6 +63,7 @@ def test_initial_download_status():
     assert pipeline.initial_download_status(att("1", resource_type="link")) == "link"
     assert pipeline.initial_download_status(att("1", deleted_flag=True)) == "deleted"
     assert pipeline.initial_download_status(att("1", access_level="private")) == "not_public"
+    assert pipeline.initial_download_status(att("1", effective_deleted_date="2026-03-13T15:11:56Z")) == "deleted"
 
 
 def test_apply_listing_tracks_changes(tmp_path):
@@ -305,3 +306,41 @@ def test_store_survives_lone_surrogates(tmp_path):
     s.attachments[("n", "1")] = {"notice_id": "n", "resource_id": "1", "text": "x\udfc1y"}
     s.save()
     assert Store(str(tmp_path)).load().attachments[("n", "1")]["text"] == "x�y"
+
+
+def test_transcribe_pending_parallel(tmp_path):
+    from tests.test_extract import blank_pdf
+    s = Store(str(tmp_path))
+    for i in range(12):
+        _pdf_row(s, tmp_path, str(i), blank_pdf(2), f"s{i}.pdf")
+    out = pipeline.transcribe_pending(s, FakeTranscriber(), workers=4)
+    assert out["done"] == 12 and out["pages"] == 24 and out["errors"] == 0
+    assert all(a["text_source"] == "transcription" for a in s.attachments.values())
+    assert pipeline.transcription_candidates(s) == []
+
+
+def test_transcribe_pending_parallel_budget_stop(tmp_path):
+    from tests.test_extract import blank_pdf
+    import threading
+    s = Store(str(tmp_path))
+    for i in range(30):
+        _pdf_row(s, tmp_path, str(i), blank_pdf(1), f"s{i}.pdf")
+
+    class T(FakeTranscriber):
+        lock = threading.Lock()
+        def transcribe_pdf(self, *a, **k):
+            with self.lock:
+                return super().transcribe_pdf(*a, **k)
+    out = pipeline.transcribe_pending(s, T(budget_after=5), workers=3)
+    assert out["stopped_on_budget"] and out["done"] == 5
+    assert len(pipeline.transcription_candidates(s)) == 25
+
+
+def test_cli_parses_every_command(tmp_path, capsys):
+    import pytest
+    from federal_ja.collect import cli
+    for cmd in ("scan", "resources", "download", "stream", "transcribe", "report", "publish",
+                "daily", "pages", "reextract", "reextract_remote", "links"):
+        with pytest.raises(SystemExit) as e:
+            cli.main(["--workdir", str(tmp_path), cmd, "--help"])
+        assert e.value.code == 0
