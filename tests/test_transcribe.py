@@ -132,3 +132,20 @@ def test_budget_stops_before_call(tmp_path):
     with pytest.raises(tr.BudgetExceeded):
         t.transcribe_pdf(str(p), 1)
     assert msgs.calls == []
+
+
+def test_relative_page_numbers_are_mapped_back(tmp_path):
+    p = tmp_path / "s.pdf"
+    p.write_bytes(blank_pdf(5))
+    msgs = FakeMessages([("end_turn", "--- page 1 ---\nX\n--- page 2 ---\nY")])
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    res = t.transcribe_pdf(str(p), 5, pages=[4, 5])
+    assert res.page_texts == {4: "X", 5: "Y"} and res.requests == 1
+
+
+def test_zero_width_chars_removed(tmp_path):
+    p = tmp_path / "s.pdf"
+    p.write_bytes(blank_pdf(1))
+    msgs = FakeMessages([("end_turn", "--- page 1 ---\nID 13966349​84")])
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    assert t.transcribe_pdf(str(p), 1).page_texts == {1: "ID 1396634984"}

@@ -149,6 +149,15 @@ def merge_page_texts(native: list[str], transcribed: dict[int, str]) -> str:
     return "\n\n".join(parts)
 
 
+_INVISIBLE = re.compile("[\u200b\u200c\u200d\u2060\ufeff]")
+
+
+def _clean_output(text: str) -> str:
+    """Drop zero-width characters (one appeared inside a transcribed ID in
+    the pilot; they are never on the page)."""
+    return _INVISIBLE.sub("", text).strip()
+
+
 MAX_CHUNK_BYTES = 20_000_000  # request limit is 32 MB including base64 overhead
 
 
@@ -219,7 +228,7 @@ class Transcriber:
             return self._halves(data, pages, total, res)
         msg = self._call(chunk, pages, total)
         self._account(msg, res)
-        text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text").strip()
+        text = _clean_output("".join(b.text for b in msg.content if getattr(b, "type", "") == "text"))
         if msg.stop_reason == "refusal":
             res.error = "refusal"
             return {}
@@ -236,6 +245,11 @@ class Transcriber:
             return {pages[0]: body}
         if sorted(k for k in parts if k) == sorted(pages) and 0 not in parts:
             return {p: parts[p] for p in pages}
+        # Seen in the pilot: for a chunk starting mid-document the model
+        # sometimes numbers pages 1..n within the chunk. Map those back when
+        # the numbering is exactly 1..n and nothing precedes the first marker.
+        if 0 not in parts and sorted(parts) == list(range(1, len(pages) + 1)):
+            return {pages[i - 1]: parts[i] for i in range(1, len(pages) + 1)}
         # Markers don't line up with the pages sent: redo page by page rather
         # than guess which text belongs to which page.
         log.warning("page markers %s != requested %s; retrying per page",
@@ -244,6 +258,31 @@ class Transcriber:
         for p in pages:
             out.update(self._transcribe_pages(data, [p], total, res))
         return out
+
+    def transcribe_image(self, path: str) -> TranscriptionResult:
+        """Transcribe an image attachment (PNG/JPEG) as page 1."""
+        data = open(path, "rb").read()
+        media = "image/png" if data.startswith(b"\x89PNG") else "image/jpeg"
+        res = TranscriptionResult(text="", model=self.model, prompt_version=PROMPT_VERSION, pages=1)
+        if self.budget:
+            self.budget.check()
+        b64 = base64.standard_b64encode(data).decode("ascii")
+        kwargs = dict(model=self.model, max_tokens=self.max_tokens, system=SYSTEM_PROMPT,
+                      thinking={"type": "disabled"}, output_config={"effort": "low"},
+                      messages=[{"role": "user", "content": [
+                          {"type": "image", "source": {"type": "base64", "media_type": media, "data": b64}},
+                          {"type": "text", "text": "This image is page 1 of a 1-page document. "
+                                                   "Transcribe it, starting with '--- page 1 ---'."}]}])
+        with self.client.messages.stream(**kwargs) as stream:
+            msg = stream.get_final_message()
+        self._account(msg, res)
+        if msg.stop_reason == "refusal":
+            res.error = "refusal"
+            return res
+        text = _clean_output("".join(b.text for b in msg.content if getattr(b, "type", "") == "text"))
+        res.page_texts = {1: _PAGE_MARK.sub("", text).strip()}
+        res.text = f"--- page 1 ---\n{res.page_texts[1]}"
+        return res
 
     def transcribe_pdf(self, path: str, page_count: int,
                        pages: list[int] | None = None) -> TranscriptionResult:

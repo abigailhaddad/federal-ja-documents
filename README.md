@@ -60,21 +60,24 @@ read as latin-1 with the csv field-size limit raised.
   (python-docx), `xlsx` (openpyxl), `text`, `transcription` (every page of
   the PDF was image-only), `pdf_text+transcription` (native text for typed
   pages, transcription for image-only pages), or `none`.
-* **Scanned pages:** the decision is per page. A PDF page with fewer than 100
-  letters/digits in its text layer is listed in `textless_pages`, and only
-  those pages are transcribed with the Anthropic API (`claude-haiku-5-5`),
+* **Scanned pages:** the decision is per page. A PDF page whose text layer
+  has fewer than 300 characters (after stripping whitespace) is listed in
+  `textless_pages`, and only those pages are transcribed with the Anthropic API (`claude-haiku-5-5`),
   sent as PDF documents with instructions to transcribe verbatim, mark
   `[REDACTED]` and `[illegible]`, and never guess redacted content. This
   matters: many J&As are typed documents with one or more pages rasterized
   (often the redacted or signed pages), and a whole-document rule would lose
-  them. Tokens and cost are recorded per document; a spend cap (`--max-usd`)
-  stops a run.
+  them. PNG/JPEG attachments are transcribed as one page. Tokens and cost are
+  recorded per document; a spend cap (`--max-usd`) stops a run.
 
 ## Dataset layout (Hugging Face)
 
 ```
 data/notices.parquet          one row per J&A notice
-data/attachments.parquet      one row per attachment, with text
+data/attachments.parquet      one row per attachment, with whole-document text
+data/pages.parquet            one row per PDF page / image attachment: page_number,
+                              text_layer_chars, text, text_source (native|transcription|none),
+                              transcription model; join on notice_id + resource_id (+ sha256)
 data/exclusions.parquet       CSV J&A rows not in notices, with reason
 data/collection_state.json    source ETags, run history
 files/<notice_id>/<resource_id>_<safe filename>   original files
@@ -106,6 +109,18 @@ uv run ja-collect --workdir $W publish --mode full --delete-stale
 
 Every step is resumable: it only works on rows still `pending` (add
 `--retry-errors` to retry failures).
+
+For a backfill on a machine with little disk, use `stream` instead of
+`download`: it works in batches (default 500 files or 1 GB), commits each
+batch's original files to the HF dataset, verifies every file there (size,
+and sha256 where the hub reports one), deletes the local copies, and records
+progress in `data/upload_manifest.jsonl`. It stops cleanly if free disk drops
+below `--min-free-gb` (default 3). `transcribe` then fetches each PDF from
+the HF dataset, transcribes it, and deletes it again.
+
+```sh
+uv run ja-collect --workdir $W stream
+```
 
 ### Daily job
 

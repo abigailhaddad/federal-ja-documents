@@ -61,7 +61,7 @@ def cmd_scan(args, store: Store) -> dict:
         for p in paths:
             st = os.stat(p)
             store.state["sources"][os.path.basename(p)] = {
-                "local_path": p, "content_length": st.st_size,
+                "content_length": st.st_size,
                 "local_mtime": dt.datetime.fromtimestamp(st.st_mtime, dt.timezone.utc).isoformat(),
             }
     else:
@@ -209,6 +209,24 @@ def cmd_stream(args, store: Store) -> dict:
     return out
 
 
+def cmd_pages(args, store: Store) -> dict:
+    """Build data/pages.parquet from stored text (files already deleted)."""
+    out = pipeline.pages_from_stored_text(store)
+    store.save()
+    return out
+
+
+def cmd_reextract_remote(args, store: Store) -> dict:
+    """Re-extract, from the HF copies, files whose extraction failed or that
+    were extracted by an older rule (images/encrypted PDFs)."""
+    from . import hf_sync
+    rows = [a for a in store.attachments.values() if a.get("download_status") == "ok" and (
+        (a.get("extract_error") or "") or a.get("file_kind") == "other")]
+    n = pipeline.reextract_remote(store, rows, lambda a: hf_sync.fetch_file(store, a))
+    store.save()
+    return {"reextracted": n, "still_failing": sum(1 for a in rows if a.get("extract_error"))}
+
+
 def cmd_reextract(args, store: Store) -> dict:
     n = pipeline.reextract(store)
     store.save()
@@ -227,7 +245,9 @@ def cmd_transcribe(args, store: Store) -> dict:
         cands = [a for a in cands if a["resource_id"] in want]
     if args.limit:
         cands = cands[: args.limit]
-    out = pipeline.transcribe_pending(store, _transcriber(args.max_usd), cands, checkpoint=store.save)
+    from . import hf_sync
+    out = pipeline.transcribe_pending(store, _transcriber(args.max_usd), cands, checkpoint=store.save,
+                                      fetch=lambda a: hf_sync.fetch_file(store, a))
     _record_run(store, "transcribe", out)
     store.save()
     return out
@@ -291,6 +311,8 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--min-free-gb", type=float, default=3.0)
     s.add_argument("--keep-local", help="file of file_paths to keep on disk after upload")
     sub.add_parser("reextract", help="re-run native extraction on downloaded files")
+    sub.add_parser("pages", help="rebuild per-page rows from stored text")
+    sub.add_parser("reextract_remote", help="re-extract failed/unknown files from their HF copies")
     s = sub.add_parser("transcribe", help="transcribe scanned PDFs")
     s.add_argument("--max-usd", type=float, required=True)
     s.add_argument("--limit", type=int)

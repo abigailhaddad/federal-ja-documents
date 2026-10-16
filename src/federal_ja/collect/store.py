@@ -44,13 +44,24 @@ ATTACHMENT_COLUMNS = [
     "uploaded_at", "uploaded_commit", "local_copy",
 ]
 
+# One row per PDF page. text is the page's final text: the native text layer,
+# or the transcription for pages whose text layer was too thin. For
+# transcribed pages the thin native layer is kept in text_layer_text.
+PAGE_COLUMNS = [
+    "notice_id", "resource_id", "sha256", "page_number", "page_count",
+    "text_layer_chars", "needs_transcription", "text", "text_source",
+    "text_layer_text", "transcription_model", "transcription_prompt_version",
+    "transcribed_at",
+]
+
 EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title", "reason"]
 
 _SURR = re.compile("[\ud800-\udfff]")
 
 INT_COLS = {"size", "downloaded_size", "page_count", "pages_with_text",
             "native_text_chars", "transcription_input_tokens",
-            "transcription_output_tokens", "attachment_order", "attachment_count"}
+            "transcription_output_tokens", "attachment_order", "attachment_count",
+            "page_number", "text_layer_chars"}
 
 
 def safe_filename(name: str, max_len: int = 120) -> str:
@@ -79,6 +90,8 @@ class Store:
         self.notices: dict[str, dict] = {}
         self.attachments: dict[tuple[str, str], dict] = {}
         self.exclusions: list[dict] = []
+        # (notice_id, resource_id) -> list of page rows, page_number order
+        self.pages: dict[tuple[str, str], list[dict]] = {}
         self.state: dict = {"layout": LAYOUT_VERSION, "sources": {}, "runs": []}
 
     # paths
@@ -102,6 +115,12 @@ class Store:
         p = self.path("data", "exclusions.parquet")
         if os.path.exists(p):
             self.exclusions = _read_records(p)
+        p = self.path("data", "pages.parquet")
+        if os.path.exists(p):
+            for rec in _read_records(p):
+                self.pages.setdefault((rec["notice_id"], rec["resource_id"]), []).append(rec)
+            for v in self.pages.values():
+                v.sort(key=lambda r: r["page_number"])
         p = self.path("data", "collection_state.json")
         if os.path.exists(p):
             with open(p) as f:
@@ -117,6 +136,8 @@ class Store:
                       key=lambda r: (r["notice_id"], r.get("attachment_order") or 0, r["resource_id"])),
                ATTACHMENT_COLUMNS)
         _write(self.path("data", "exclusions.parquet"), self.exclusions, EXCLUSION_COLUMNS)
+        _write(self.path("data", "pages.parquet"),
+               [r for k in sorted(self.pages) for r in self.pages[k]], PAGE_COLUMNS)
         tmp = self.path("data", "collection_state.json.tmp")
         with open(tmp, "w") as f:
             json.dump(self.state, f, indent=2, sort_keys=True, default=str)

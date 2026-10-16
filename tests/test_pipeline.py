@@ -157,37 +157,96 @@ class FakeTranscriber:
                                    page_texts={p: "[REDACTED]" for p in pages})
 
 
+def _pdf_row(s, tmp_path, rid, data, fname):
+    from federal_ja.collect import extract as ex
+    (tmp_path / "files").mkdir(exist_ok=True)
+    (tmp_path / "files" / fname).write_bytes(data)
+    a = {"notice_id": "n", "resource_id": rid, "download_status": "ok", "sha256": "h" + rid,
+         "file_path": f"files/{fname}", "filename": fname}
+    s.attachments[("n", rid)] = a
+    pipeline.apply_extraction(a, ex.extract_file(str(tmp_path / "files" / fname), fname), s)
+    return a
+
+
+def test_page_rows_and_doc_text(tmp_path):
+    from tests.test_extract import LONG, text_pdf
+    s = Store(str(tmp_path))
+    a = _pdf_row(s, tmp_path, "1", text_pdf([LONG, "short header"]), "m.pdf")
+    rows = s.pages[("n", "1")]
+    assert [r["page_number"] for r in rows] == [1, 2]
+    assert rows[0]["text_source"] == "native" and not rows[0]["needs_transcription"]
+    assert rows[1]["needs_transcription"] and rows[1]["text_layer_chars"] == len("short header")
+    assert rows[0]["sha256"] == "h1"
+    assert a["text_source"] == "pdf_text" and a["needs_transcription"] and a["textless_pages"] == [2]
+    s.save()
+    t = Store(str(tmp_path)).load()
+    assert len(t.pages[("n", "1")]) == 2 and t.pages[("n", "1")][1]["needs_transcription"] is True
+
+
 def test_transcribe_pending_merges_and_stops_on_budget(tmp_path):
     from tests.test_extract import LONG, blank_pdf, text_pdf
     s = Store(str(tmp_path))
-    (tmp_path / "files").mkdir()
-    (tmp_path / "files" / "mixed.pdf").write_bytes(text_pdf([LONG, "x"]))
-    (tmp_path / "files" / "scan.pdf").write_bytes(blank_pdf(2))
-    (tmp_path / "files" / "scan2.pdf").write_bytes(blank_pdf(1))
-    for rid, f, tp in (("1", "mixed.pdf", [2]), ("2", "scan.pdf", [1, 2]), ("3", "scan2.pdf", [1])):
-        s.attachments[("n", rid)] = {"notice_id": "n", "resource_id": rid, "download_status": "ok",
-                                     "file_kind": "pdf", "needs_transcription": True,
-                                     "text_source": "pdf_text" if rid == "1" else "none",
-                                     "page_count": 2, "textless_pages": tp, "file_path": f"files/{f}"}
-    s.attachments[("n", "4")] = {"notice_id": "n", "resource_id": "4", "download_status": "ok",
-                                 "file_kind": "pdf", "needs_transcription": False,
-                                 "text_source": "pdf_text", "page_count": 2}
+    m = _pdf_row(s, tmp_path, "1", text_pdf([LONG, "x"]), "mixed.pdf")
+    sc = _pdf_row(s, tmp_path, "2", blank_pdf(2), "scan.pdf")
+    _pdf_row(s, tmp_path, "3", blank_pdf(1), "scan2.pdf")
+    _pdf_row(s, tmp_path, "4", text_pdf([LONG, LONG]), "typed.pdf")
     assert len(pipeline.transcription_candidates(s)) == 3
     ft = FakeTranscriber(budget_after=2)
     out = pipeline.transcribe_pending(s, ft)
     assert out["done"] == 2 and out["stopped_on_budget"] is True and out["pages"] == 3
     assert ft.calls[0] == (2, [2]) and ft.calls[1] == (2, [1, 2])
-    m = s.attachments[("n", "1")]
     assert m["text_source"] == "pdf_text+transcription" and m["transcribed_pages"] == [2]
     assert "Justification for other" in m["text"] and "--- page 2 ---\n[REDACTED]" in m["text"]
-    assert s.attachments[("n", "2")]["text_source"] == "transcription"
+    p2 = s.pages[("n", "1")][1]
+    assert p2["text_source"] == "transcription" and p2["text_layer_text"] == "x" and p2["transcription_model"] == "m"
+    assert s.pages[("n", "1")][0]["text_source"] == "native"
+    assert sc["text_source"] == "transcription"
     assert len(pipeline.transcription_candidates(s)) == 1
+    # re-extraction keeps the transcription of pages that still need one
+    from federal_ja.collect import extract as ex
+    pipeline.apply_extraction(m, ex.extract_file(str(tmp_path / "files/mixed.pdf"), "mixed.pdf"), s)
+    assert s.pages[("n", "1")][1]["text"] == "[REDACTED]" and m["text_source"] == "pdf_text+transcription"
+
+
+def test_transcribe_fetches_missing_file_and_deletes_it(tmp_path):
+    from tests.test_extract import blank_pdf
+    s = Store(str(tmp_path))
+    a = _pdf_row(s, tmp_path, "1", blank_pdf(1), "scan.pdf")
+    src = tmp_path / "files" / "scan.pdf"
+    data = src.read_bytes()
+    src.unlink()
+    fetched = []
+
+    def fetch(row):
+        p = tmp_path / "fetched.pdf"
+        p.write_bytes(data)
+        fetched.append(row["resource_id"])
+        return str(p)
+    out = pipeline.transcribe_pending(s, FakeTranscriber(), fetch=fetch)
+    assert out["done"] == 1 and fetched == ["1"] and not (tmp_path / "fetched.pdf").exists()
+    assert a["text_source"] == "transcription"
+
+
+def test_pages_from_stored_text(tmp_path):
+    s = Store(str(tmp_path))
+    s.attachments[("n", "1")] = {"notice_id": "n", "resource_id": "1", "download_status": "ok",
+                                 "file_kind": "pdf", "page_count": 3, "sha256": "h",
+                                 "text": "--- page 1 ---\n" + "a" * 400 + "\n\n--- page 2 ---\nhdr\n\n--- page 3 ---\n" + "b" * 250,
+                                 "text_source": "pdf_text"}
+    s.attachments[("n", "2")] = {"notice_id": "n", "resource_id": "2", "download_status": "ok",
+                                 "file_kind": "pdf", "page_count": 2, "text": "", "text_source": "none"}
+    out = pipeline.pages_from_stored_text(s)
+    assert out == {"pdfs": 2, "pages": 5, "no_text_pdfs": 1, "marker_mismatch": 0}
+    a = s.attachments[("n", "1")]
+    assert a["textless_pages"] == [2, 3]   # 250 chars < 300 threshold
+    assert [r["text_layer_chars"] for r in s.pages[("n", "1")]] == [400, 3, 250]
+    assert s.attachments[("n", "2")]["textless_pages"] == [1, 2]
 
 
 def test_extraction_never_overwrites_transcription():
     from federal_ja.collect.extract import ExtractResult
     a = {"text": "T", "text_source": "transcription"}
-    pipeline.apply_extraction(a, ExtractResult(file_kind="pdf", needs_transcription=True))
+    pipeline.apply_extraction(a, ExtractResult(file_kind="docx", needs_transcription=True))
     assert a["text"] == "T" and a["text_source"] == "transcription"
 
 

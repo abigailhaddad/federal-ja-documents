@@ -24,6 +24,8 @@ configs:
 - config_name: attachments
   data_files: data/attachments.parquet
   default: true
+- config_name: pages
+  data_files: data/pages.parquet
 ---
 
 # Federal Justification & Approval (J&A) Documents
@@ -47,7 +49,8 @@ Code and issue tracker: {project_url}
 | Path | What |
 |---|---|
 | `data/notices.parquet` | one row per J&A notice ({n_notices:,} rows) |
-| `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including extracted text |
+| `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
+| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | J&A rows found in the source CSVs that are not in `notices` and why ({n_exclusions:,} rows) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
@@ -115,8 +118,11 @@ Code and issue tracker: {project_url}
 | `none` | no text: unsupported format, unreadable file, or not yet transcribed |
 
 PDF text has `--- page N ---` markers. The scanned/typed decision is made per
-page: a page with fewer than 100 letters/digits in its text layer is listed in
-`textless_pages`, and only those pages are transcribed (`transcribed_pages`).
+page: a page whose text layer has fewer than 300 characters (whitespace
+stripped; `text_layer_chars` in `pages`) is listed in `textless_pages`, and
+only those pages are transcribed (`transcribed_pages`). For a transcribed
+page, `pages.text` is the transcription and `pages.text_layer_text` keeps the
+thin native layer. PNG/JPEG attachments are treated as one image-only page.
 Many J&As are typed documents in which one or more pages (often the redacted
 or signed ones) were flattened to images, so these pages would otherwise have
 no text. A PDF whose text layer came from OCR before it was posted counts as
@@ -157,6 +163,7 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         posted_max=(s["posted_date_max"] or "")[:10], source_lines=source_lines,
         n_notices=s["notices"], n_attachments=s["attachments"],
         n_exclusions=len(store.exclusions),
+        n_pages=sum(len(v) for v in store.pages.values()),
         n_files=s["attachments_by_download_status"].get("ok", 0),
         gb=s["downloaded_bytes"] / 1e9, by_type=s["notices_by_type"],
         by_res=s["notices_by_resources_status"], by_dl=s["attachments_by_download_status"],

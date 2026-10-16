@@ -156,11 +156,50 @@ def fetch_resources(store: Store, client: SamClient, notice_ids: Iterable[str] |
 
 TRANSCRIBED_SOURCES = ("transcription", "pdf_text+transcription")
 
-def apply_extraction(a: dict, r: ex.ExtractResult) -> None:
+def set_pdf_pages(store: Store, a: dict, page_texts: list[str]) -> None:
+    """(Re)build the per-page rows of a PDF from its native page texts.
+    Existing transcriptions of pages that still need one are kept."""
+    key = (a["notice_id"], a["resource_id"])
+    old = {r["page_number"]: r for r in store.pages.get(key, [])}
+    rows = []
+    for i, t in enumerate(page_texts, 1):
+        t = (t or "").strip()
+        needs = not ex.page_has_text(t)
+        row = {"notice_id": a["notice_id"], "resource_id": a["resource_id"],
+               "sha256": a.get("sha256"), "page_number": i, "page_count": len(page_texts),
+               "text_layer_chars": len(t), "needs_transcription": needs,
+               "text": t, "text_source": "native" if t else "none", "text_layer_text": None,
+               "transcription_model": None, "transcription_prompt_version": None,
+               "transcribed_at": None}
+        prev = old.get(i)
+        if needs and prev and prev.get("text_source") == "transcription":
+            row.update({k: prev[k] for k in ("text", "text_source", "transcription_model",
+                                              "transcription_prompt_version", "transcribed_at")})
+            row["text_layer_text"] = t
+        rows.append(row)
+    store.pages[key] = rows
+
+
+def doc_text_from_pages(rows: list[dict]) -> tuple[str, str]:
+    """Attachment-level (text, text_source) from its page rows."""
+    sources = {r["text_source"] for r in rows}
+    if not rows or sources == {"none"}:
+        return "", "none"
+    text = "\n\n".join(f"--- page {r['page_number']} ---\n{r['text'] or ''}" for r in rows)
+    if "transcription" in sources:
+        return text, ("pdf_text+transcription" if "native" in sources else "transcription")
+    return text, "pdf_text"
+
+
+def apply_extraction(a: dict, r: ex.ExtractResult, store: Store | None = None) -> None:
     a.update(file_kind=r.file_kind, page_count=r.page_count,
              pages_with_text=r.pages_with_text, textless_pages=list(r.textless_pages),
              native_text_chars=r.native_text_chars,
              needs_transcription=r.needs_transcription, extract_error=r.extract_error)
+    if store is not None and r.file_kind in ("pdf", "image") and r.page_count:
+        set_pdf_pages(store, a, r.page_texts)
+        a["text"], a["text_source"] = doc_text_from_pages(store.pages[(a["notice_id"], a["resource_id"])])
+        return
     # never overwrite a transcription with an empty native result
     if a.get("text_source") not in TRANSCRIBED_SOURCES:
         a["text"], a["text_source"] = r.text, r.text_source
@@ -234,7 +273,7 @@ def download_pending(store: Store, client: SamClient, workers: int = 4,
                 a.update(download_status="ok", download_error="", downloaded_at=now_iso(),
                          downloaded_size=dl.bytes_written, sha256=dl.sha256, file_path=rel,
                          uploaded_at=None)
-                apply_extraction(a, r)
+                apply_extraction(a, r, store)
             counts[a["download_status"]] = counts.get(a["download_status"], 0) + 1
             done += 1
             if checkpoint and done % checkpoint_every == 0:
@@ -275,9 +314,22 @@ def adopt_existing_files(store: Store) -> dict:
             counts["size_mismatch"] += 1
         a.update(download_status="ok", download_error="", downloaded_at=now_iso(),
                  downloaded_size=size, sha256=h.hexdigest(), file_path=rel, uploaded_at=None)
-        apply_extraction(a, ex.extract_file(p, a.get("filename") or ""))
+        apply_extraction(a, ex.extract_file(p, a.get("filename") or ""), store)
         counts["adopted"] += 1
     return counts
+
+
+def reextract_remote(store: Store, rows: list[dict], fetch: Callable[[dict], str]) -> int:
+    """Re-extract files that are no longer local: fetch, extract, delete."""
+    n = 0
+    for a in rows:
+        p = fetch(a)
+        try:
+            apply_extraction(a, ex.extract_file(p, a.get("filename") or ""), store)
+            n += 1
+        finally:
+            os.remove(p)
+    return n
 
 
 def reextract(store: Store, only_old_rule: bool = False) -> int:
@@ -290,46 +342,114 @@ def reextract(store: Store, only_old_rule: bool = False) -> int:
         if a.get("download_status") == "ok" and a.get("file_path"):
             p = store.path(a["file_path"])
             if os.path.exists(p):
-                apply_extraction(a, ex.extract_file(p, a.get("filename") or ""))
+                apply_extraction(a, ex.extract_file(p, a.get("filename") or ""), store)
                 n += 1
     return n
 
 
+def pages_from_stored_text(store: Store) -> dict:
+    """Build page rows for downloaded PDFs from the stored attachment text
+    (which carries our own '--- page N ---' markers), for files no longer on
+    disk. Also re-applies the current page rule to needs_transcription /
+    textless_pages. A PDF stored with no text at all gets page_count empty
+    pages (every page was below the old threshold; the exact thin-layer
+    count is refreshed when the file is transcribed)."""
+    counts = {"pdfs": 0, "pages": 0, "no_text_pdfs": 0, "marker_mismatch": 0}
+    for a in store.attachments.values():
+        if a.get("download_status") != "ok" or a.get("file_kind") != "pdf" or not a.get("page_count"):
+            continue
+        n = a["page_count"]
+        parts = transcribe_mod.split_by_markers(a.get("text") or "")
+        parts.pop(0, None)
+        if not a.get("text"):
+            counts["no_text_pdfs"] += 1
+        elif sorted(parts) != list(range(1, n + 1)):
+            counts["marker_mismatch"] += 1
+        texts = [parts.get(i, "") for i in range(1, n + 1)]
+        set_pdf_pages(store, a, texts)
+        tl = ex.textless_pages(texts)
+        a["textless_pages"], a["pages_with_text"] = tl, n - len(tl)
+        a["needs_transcription"] = bool(tl)
+        a["text"], a["text_source"] = doc_text_from_pages(store.pages[(a["notice_id"], a["resource_id"])])
+        counts["pdfs"] += 1
+        counts["pages"] += n
+    return counts
+
+
 # --------------------------------------------------------------------------- transcription
+
+def pages_to_transcribe(store: Store, a: dict) -> list[int]:
+    return [r["page_number"] for r in store.pages.get((a["notice_id"], a["resource_id"]), [])
+            if r["needs_transcription"] and r["text_source"] != "transcription"]
+
 
 def transcription_candidates(store: Store) -> list[dict]:
     return [a for a in store.attachments.values()
-            if a.get("download_status") == "ok" and a.get("file_kind") == "pdf"
-            and a.get("needs_transcription") and a.get("text_source") not in TRANSCRIBED_SOURCES
-            and (a.get("page_count") or 0) > 0]
+            if a.get("download_status") == "ok" and a.get("file_kind") in ("pdf", "image")
+            and a.get("needs_transcription") and pages_to_transcribe(store, a)]
 
 
-def apply_transcription(a: dict, t, native_page_texts: list[str]) -> None:
-    """Merge a page-level transcription into an attachment row."""
+def apply_transcription(store: Store, a: dict, t) -> None:
+    """Write a page-level transcription into the page rows and the attachment."""
+    key = (a["notice_id"], a["resource_id"])
+    now = now_iso()
+    prev_pages = list(a.get("transcribed_pages") or [])
     a.update(transcription_model=t.model, transcription_prompt_version=t.prompt_version,
-             transcription_input_tokens=t.input_tokens,
-             transcription_output_tokens=t.output_tokens,
-             transcription_cost_usd=round(t.cost_usd, 6), transcribed_at=now_iso(),
-             transcription_error=t.error, transcribed_pages=sorted(t.page_texts))
-    if t.error or not t.page_texts:
-        return
-    a["text"] = transcribe_mod.merge_page_texts(native_page_texts, t.page_texts)
-    all_pages = set(range(1, len(native_page_texts) + 1))
-    a["text_source"] = "transcription" if set(t.page_texts) >= all_pages else "pdf_text+transcription"
+             transcription_input_tokens=(a.get("transcription_input_tokens") or 0) + t.input_tokens,
+             transcription_output_tokens=(a.get("transcription_output_tokens") or 0) + t.output_tokens,
+             transcription_cost_usd=round((a.get("transcription_cost_usd") or 0) + t.cost_usd, 6),
+             transcribed_at=now, transcription_error=t.error,
+             transcribed_pages=sorted(set(prev_pages) | set(t.page_texts)))
+    by_page = {r["page_number"]: r for r in store.pages.get(key, [])}
+    for p, text in t.page_texts.items():
+        r = by_page.get(p)
+        if r is None:
+            continue
+        layer = r["text"] if r["text_source"] != "transcription" else r.get("text_layer_text")
+        r.update(text_layer_text=layer, text=text, text_source="transcription", transcription_model=t.model,
+                 transcription_prompt_version=t.prompt_version, transcribed_at=now)
+    a["text"], a["text_source"] = doc_text_from_pages(store.pages.get(key, []))
 
 
 def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None = None,
-                       checkpoint: Callable[[], None] | None = None) -> dict:
+                       checkpoint: Callable[[], None] | None = None,
+                       fetch: Callable[[dict], str] | None = None,
+                       keep_fetched: bool = False) -> dict:
+    """Transcribe the image-only pages of each candidate PDF.
+
+    The file is read from the workdir if present, else obtained with
+    ``fetch(row) -> local path`` (e.g. from the HF dataset) and deleted
+    afterwards unless keep_fetched. Native page texts are re-extracted from
+    the file first, so page rows and counts are exact for every transcribed
+    PDF."""
     from .transcribe import BudgetExceeded
 
     todo = attachments if attachments is not None else transcription_candidates(store)
     stats = {"done": 0, "errors": 0, "cost_usd": 0.0, "pages": 0, "stopped_on_budget": False}
     for a in todo:
         path = store.path(a["file_path"])
+        fetched = False
+        if not os.path.exists(path):
+            if fetch is None:
+                a["transcription_error"] = "file not available locally"
+                stats["errors"] += 1
+                continue
+            path, fetched = fetch(a), True
         try:
-            native = ex.pdf_page_texts(path)
-            pages = list(a.get("textless_pages") or ex.textless_pages(native))
-            t = transcriber.transcribe_pdf(path, len(native), pages)
+            if a.get("file_kind") == "image":
+                t = transcriber.transcribe_image(path)
+            else:
+                native = ex.pdf_page_texts(path)
+                set_pdf_pages(store, a, native)
+                tl = ex.textless_pages(native)
+                a.update(textless_pages=tl, pages_with_text=len(native) - len(tl),
+                         needs_transcription=bool(tl))
+                pages = pages_to_transcribe(store, a)
+                if not pages:
+                    a["text"], a["text_source"] = doc_text_from_pages(
+                        store.pages[(a["notice_id"], a["resource_id"])])
+                    continue
+                t = transcriber.transcribe_pdf(path, len(native), pages)
         except BudgetExceeded:
             stats["stopped_on_budget"] = True
             break
@@ -337,10 +457,15 @@ def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None
             a["transcription_error"] = f"{type(e).__name__}: {e}"[:300]
             stats["errors"] += 1
             continue
-        apply_transcription(a, t, native)
+        finally:
+            if fetched and not keep_fetched and os.path.exists(path):
+                os.remove(path)
+        apply_transcription(store, a, t)
         stats["done"] += 1
         stats["pages"] += t.pages
         stats["cost_usd"] += t.cost_usd
         if checkpoint and stats["done"] % 25 == 0:
             checkpoint()
     return stats
+
+

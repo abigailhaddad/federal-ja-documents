@@ -16,8 +16,23 @@ from .store import LAYOUT_VERSION, Store
 
 log = logging.getLogger(__name__)
 
-TABLE_FILES = ["data/notices.parquet", "data/attachments.parquet",
+TABLE_FILES = ["data/notices.parquet", "data/attachments.parquet", "data/pages.parquet",
                "data/exclusions.parquet", "data/collection_state.json"]
+
+
+def fetch_file(store: Store, row: dict, repo_id: str = config.HF_REPO_ID) -> str:
+    """Download one stored original from the HF dataset into the workdir
+    (same relative path) and check its sha256 against the table."""
+    import hashlib
+
+    from huggingface_hub import hf_hub_download
+
+    p = hf_hub_download(repo_id, row["file_path"], repo_type="dataset", local_dir=store.workdir)
+    h = hashlib.sha256(open(p, "rb").read()).hexdigest()
+    if row.get("sha256") and h != row["sha256"]:
+        os.remove(p)
+        raise UploadVerifyError(f"sha256 mismatch fetching {row['file_path']}")
+    return p
 
 
 def _api():

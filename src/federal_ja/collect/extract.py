@@ -15,7 +15,7 @@ text_source values written to the dataset:
                  PDF not yet transcribed)
 
 Decision is per page: a page lacks text when its text layer has fewer than
-MIN_ALNUM_PER_TEXT_PAGE letters/digits. Many J&As are typed documents with one
+MIN_CHARS_PER_TEXT_PAGE characters (stripped). Many J&As are typed documents with one
 or more pages rasterized (often the pages that were redacted or signed), so a
 whole-document rule would silently lose those pages. A PDF needs
 transcription if ANY page lacks text; ``textless_pages`` lists them.
@@ -31,10 +31,13 @@ from dataclasses import dataclass, field
 
 log = logging.getLogger(__name__)
 
-# A page "has text" if its text layer has at least this many letters/digits.
-# A typical typed J&A page has 1,500-4,000; a scanned page with no OCR has 0;
-# a page with only a stamp or page number has well under 100.
-MIN_ALNUM_PER_TEXT_PAGE = 100
+# A page "has text" if its text layer, stripped of leading/trailing
+# whitespace, has at least this many characters. A typical typed J&A page has
+# 2,000-5,000; a scanned page with no OCR has 0; a page with only a header,
+# stamp or page number has well under 300. 300 matches the threshold used by
+# downstream consumers of the dataset, so "transcribed" means the same thing
+# on both sides.
+MIN_CHARS_PER_TEXT_PAGE = 300
 
 _ALNUM = re.compile(r"[A-Za-z0-9]")
 
@@ -64,6 +67,8 @@ def detect_kind(data_head: bytes, filename: str = "") -> str:
         if name.endswith((".xlsx", ".xlsm")):
             return "xlsx"
         return "zip"  # resolved further in sniff_zip
+    if data_head.startswith((b"\x89PNG\r\n\x1a\n", b"\xff\xd8\xff")):
+        return "image"
     if data_head.startswith(b"\xd0\xcf\x11\xe0"):
         return "ole"  # legacy .doc/.xls
     if name.endswith((".txt", ".csv")):
@@ -99,8 +104,12 @@ def count_alnum(s: str) -> int:
     return len(_ALNUM.findall(s or ""))
 
 
+def text_layer_chars(text: str) -> int:
+    return len((text or "").strip())
+
+
 def page_has_text(text: str) -> bool:
-    return count_alnum(text) >= MIN_ALNUM_PER_TEXT_PAGE
+    return text_layer_chars(text) >= MIN_CHARS_PER_TEXT_PAGE
 
 
 def textless_pages(page_texts: list[str]) -> list[int]:
@@ -236,4 +245,9 @@ def extract_file(path: str, filename: str = "") -> ExtractResult:
         return extract_xlsx(path)
     if kind == "text":
         return extract_text_file(path)
+    if kind == "image":
+        # A picture of a page (seen: scanned J&A pages, screenshots of
+        # approval emails). One page, no text layer, to be transcribed.
+        return ExtractResult(file_kind="image", page_count=1, pages_with_text=0,
+                             textless_pages=[1], needs_transcription=True, page_texts=[""])
     return ExtractResult(file_kind=kind)

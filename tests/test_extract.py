@@ -46,7 +46,7 @@ def blank_pdf(n: int) -> bytes:
     return b.getvalue()
 
 
-LONG = "Justification for other than full and open competition " * 4  # >100 alnum chars
+LONG = "Justification for other than full and open competition " * 8  # >300 chars
 
 
 def test_classification_rule_is_per_page():
@@ -60,11 +60,11 @@ def test_classification_rule_is_per_page():
 
 
 def test_threshold_boundary():
-    just_under = "a" * (ex.MIN_ALNUM_PER_TEXT_PAGE - 1)
-    at = "a" * ex.MIN_ALNUM_PER_TEXT_PAGE
+    just_under = "a" * (ex.MIN_CHARS_PER_TEXT_PAGE - 1)
+    at = "a" * ex.MIN_CHARS_PER_TEXT_PAGE
     assert ex.textless_pages([just_under, at]) == [1]
-    # punctuation and whitespace do not count
-    assert ex.textless_pages(["- . , ;" * 100]) == [1]
+    # surrounding whitespace does not count
+    assert ex.textless_pages(["  \n" * 200 + just_under + "\n" * 50]) == [1]
 
 
 def test_text_pdf(tmp_path):
@@ -151,3 +151,10 @@ def test_text_file_latin1(tmp_path):
     p.write_bytes("caf\xe9".encode("latin-1"))
     r = ex.extract_file(str(p), "a.txt")
     assert r.text_source == "text" and r.text == "café"
+
+
+def test_image_attachment_is_one_textless_page(tmp_path):
+    p = tmp_path / "a.png"
+    p.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 50)
+    r = ex.extract_file(str(p), "a.png")
+    assert r.file_kind == "image" and r.needs_transcription and r.textless_pages == [1]

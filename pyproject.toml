@@ -13,6 +13,7 @@ dependencies = [
     "pyarrow>=17",
     "anthropic>=0.70",
     "huggingface_hub>=0.30",
+    "cryptography>=42",
 ]
 
 [project.scripts]
