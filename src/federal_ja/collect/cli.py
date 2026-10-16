@@ -161,8 +161,9 @@ def cmd_stream(args, store: Store) -> dict:
 
     track()
     out["adopted"] = pipeline.adopt_existing_files(store)
+    store.save()
     # local files from before the per-page rule: re-extract before they go
-    out["reextracted"] = pipeline.reextract(store)
+    out["reextracted"] = pipeline.reextract(store, only_old_rule=True)
     store.save()
     client = SamClient(requests_per_second=args.rps)
     max_bytes = int(args.batch_gb * 1e9)

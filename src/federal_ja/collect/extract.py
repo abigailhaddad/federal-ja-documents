@@ -86,6 +86,15 @@ def sniff_zip(path: str) -> str:
     return "zip"
 
 
+_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
+def clean_text(s: str) -> str:
+    """Replace lone UTF-16 surrogates (pypdf emits them for some CJK/odd
+    font encodings) with U+FFFD; they cannot be written as UTF-8."""
+    return _SURROGATE.sub("\ufffd", s or "")
+
+
 def count_alnum(s: str) -> int:
     return len(_ALNUM.findall(s or ""))
 
@@ -116,7 +125,7 @@ def pdf_page_texts(path: str) -> list[str]:
     out = []
     for page in reader.pages:
         try:
-            out.append(page.extract_text() or "")
+            out.append(clean_text(page.extract_text()))
         except Exception:  # noqa: BLE001
             out.append("")
     return out
@@ -137,7 +146,7 @@ def extract_pdf(path: str) -> ExtractResult:
         texts = []
         for page in reader.pages:
             try:
-                texts.append(page.extract_text() or "")
+                texts.append(clean_text(page.extract_text()))
             except Exception as e:  # noqa: BLE001 - one bad page shouldn't sink the file
                 log.warning("page extract failed in %s: %s", path, e)
                 texts.append("")
@@ -169,7 +178,7 @@ def extract_docx(path: str) -> ExtractResult:
         for table in d.tables:
             for row in table.rows:
                 parts.append("\t".join(c.text.strip() for c in row.cells))
-        res.text = "\n".join(parts).strip()
+        res.text = clean_text("\n".join(parts).strip())
     except Exception as e:  # noqa: BLE001
         res.extract_error = f"python-docx: {type(e).__name__}: {e}"[:500]
         return res

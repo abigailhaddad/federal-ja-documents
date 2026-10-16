@@ -46,6 +46,8 @@ ATTACHMENT_COLUMNS = [
 
 EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title", "reason"]
 
+_SURR = re.compile("[\ud800-\udfff]")
+
 INT_COLS = {"size", "downloaded_size", "page_count", "pages_with_text",
             "native_text_chars", "transcription_input_tokens",
             "transcription_output_tokens", "attachment_order", "attachment_count"}
@@ -143,8 +145,13 @@ def _read_records(path: str) -> list[dict]:
     return [{k: _clean(v) for k, v in r.items()} for r in df.to_dict("records")]
 
 
+def _san(v):
+    # A lone UTF-16 surrogate anywhere would make the whole parquet write fail.
+    return _SURR.sub("\ufffd", v) if isinstance(v, str) else v
+
+
 def _write(path: str, records: Iterable[dict], columns: list[str]) -> None:
-    rows = [{c: r.get(c) for c in columns} for r in records]
+    rows = [{c: _san(r.get(c)) for c in columns} for r in records]
     df = pd.DataFrame(rows, columns=columns)
     for c in columns:
         if c in INT_COLS:
@@ -158,6 +165,8 @@ def _write(path: str, records: Iterable[dict], columns: list[str]) -> None:
         elif c in ("textless_pages", "transcribed_pages"):
             df[c] = df[c].map(lambda v: [int(x) for x in v] if v is not None else None)
         else:
+            # last line of defence: a lone surrogate anywhere would make the
+            # whole parquet write fail
             df[c] = df[c].map(lambda v: None if v is None else str(v)).astype("string")
     tmp = path + ".tmp"
     df.to_parquet(tmp, index=False)

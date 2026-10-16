@@ -280,10 +280,13 @@ def adopt_existing_files(store: Store) -> dict:
     return counts
 
 
-def reextract(store: Store) -> int:
-    """Re-run native extraction on every downloaded file (after rule changes)."""
+def reextract(store: Store, only_old_rule: bool = False) -> int:
+    """Re-run native extraction on downloaded files still on disk (after rule
+    changes). only_old_rule: just PDFs extracted before textless_pages existed."""
     n = 0
     for a in store.attachments.values():
+        if only_old_rule and not (a.get("file_kind") == "pdf" and a.get("textless_pages") is None):
+            continue
         if a.get("download_status") == "ok" and a.get("file_path"):
             p = store.path(a["file_path"])
             if os.path.exists(p):

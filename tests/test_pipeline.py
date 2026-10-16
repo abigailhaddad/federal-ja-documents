@@ -237,3 +237,12 @@ def test_upload_verify_delete(tmp_path):
     assert not (tmp_path / "files/n/1_x.pdf").exists() and (tmp_path / "files/n/2_x.pdf").exists()
     assert s.attachments[("n", "1")]["uploaded_at"] == "T"
     assert len((tmp_path / "data" / "upload_manifest.jsonl").read_text().splitlines()) == 2
+
+
+def test_store_survives_lone_surrogates(tmp_path):
+    from federal_ja.collect.extract import clean_text
+    assert clean_text("a\udfc1b") == "a�b"
+    s = Store(str(tmp_path))
+    s.attachments[("n", "1")] = {"notice_id": "n", "resource_id": "1", "text": "x\udfc1y"}
+    s.save()
+    assert Store(str(tmp_path)).load().attachments[("n", "1")]["text"] == "x�y"
