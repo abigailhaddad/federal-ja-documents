@@ -1,0 +1,62 @@
+name: Daily J&A collection
+
+# Runs daily after SAM.gov refreshes its active-notices CSV (~03:30 UTC).
+# The scheduled run is OFF until the repository variable DAILY_ENABLED is set
+# to "true" (Settings -> Secrets and variables -> Actions -> Variables).
+# Manual runs (workflow_dispatch) always work.
+on:
+  schedule:
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+    inputs:
+      archives:
+        description: "Yearly archive CSVs: auto (only when their ETag changed), always, never"
+        default: auto
+      max_usd:
+        description: "Transcription spend cap for this run (USD)"
+        default: "2"
+      publish:
+        description: "Publish to Hugging Face"
+        type: boolean
+        default: true
+
+concurrency:
+  group: daily-collection
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: github.event_name == 'workflow_dispatch' || vars.DAILY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest -q
+      - name: Collect
+        shell: bash  # bash -eo pipefail, so `| tee` cannot hide a failure
+        run: |
+          PUBLISH_FLAG=""
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.publish }}" = "true" ]; then
+            PUBLISH_FLAG="--publish"
+          fi
+          uv run ja-collect --workdir work daily \
+            --archives "${{ inputs.archives || 'auto' }}" \
+            --max-usd "${{ inputs.max_usd || '2' }}" \
+            $PUBLISH_FLAG | tee run_summary.json
+      - name: Disk usage
+        if: always()
+        run: df -h . && du -sh work || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run-summary
+          path: |
+            run_summary.json
+            work/data/collection_state.json
+          if-no-files-found: ignore

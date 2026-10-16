@@ -1,0 +1,32 @@
+[project]
+name = "federal-ja"
+version = "0.1.0"
+description = "Mirror of federal Justification & Approval (J&A) documents posted on SAM.gov"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32",
+    "pypdf>=5.0",
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    "pandas>=2.2",
+    "pyarrow>=17",
+    "anthropic>=0.70",
+    "huggingface_hub>=0.30",
+]
+
+[project.scripts]
+ja-collect = "federal_ja.collect.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/federal_ja"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

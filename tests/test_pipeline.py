@@ -1,0 +1,176 @@
+import datetime as dt
+
+from federal_ja.collect import pipeline
+from federal_ja.collect.sources import CollectResult, CollectStats
+from federal_ja.collect.store import Store, file_rel_path, safe_filename
+
+
+def notice(nid, fp="f1", posted="2025-03-01 00:00:00", src="active.csv"):
+    return {"notice_id": nid, "title": "t", "posted_date": posted, "type": "Justification",
+            "row_fingerprint": fp, "source_file": src, "source_files": [src]}
+
+
+def result(*recs, exclusions=()):
+    return CollectResult(notices={r["notice_id"]: r for r in recs}, exclusions=list(exclusions),
+                         stats=CollectStats(start_date=dt.date(2025, 1, 20)))
+
+
+def test_merge_new_changed_unchanged(tmp_path):
+    s = Store(str(tmp_path))
+    d = pipeline.merge_notices(s, result(notice("a"), notice("b")), now="T0")
+    assert sorted(d["new"]) == ["a", "b"] and d["changed"] == []
+    assert s.notices["a"]["resources_status"] == "pending"
+    s.notices["a"]["resources_status"] = "ok"
+    s.notices["b"]["resources_status"] = "ok"
+    d = pipeline.merge_notices(s, result(notice("a"), notice("b", fp="f2", posted="2025-04-01 00:00:00",
+                                                             src="FY2025.csv"), notice("c")), now="T1")
+    assert d == {"new": ["c"], "changed": ["b"]}
+    assert s.notices["a"]["resources_status"] == "ok"          # unchanged keeps state
+    assert s.notices["b"]["resources_status"] == "pending"     # edited -> recheck
+    assert s.notices["b"]["first_seen_at"] == "T0"
+    assert s.notices["b"]["source_files"] == ["active.csv", "FY2025.csv"]
+
+
+def test_merge_ignores_older_row(tmp_path):
+    s = Store(str(tmp_path))
+    pipeline.merge_notices(s, result(notice("a", posted="2025-05-01 00:00:00")))
+    s.notices["a"]["resources_status"] = "ok"
+    d = pipeline.merge_notices(s, result(notice("a", fp="old", posted="2025-04-01 00:00:00", src="FY.csv")))
+    assert d["changed"] == []
+    assert s.notices["a"]["row_fingerprint"] == "f1"
+    assert s.notices["a"]["source_files"] == ["active.csv", "FY.csv"]
+
+
+def test_merge_exclusions_dedup(tmp_path):
+    s = Store(str(tmp_path))
+    e = {"notice_id": "z", "source_file": "a.csv", "reason": "unparseable_posted_date",
+         "posted_date": "x", "type": "Justification", "title": ""}
+    pipeline.merge_notices(s, result(exclusions=[e]))
+    pipeline.merge_notices(s, result(exclusions=[e]))
+    assert len(s.exclusions) == 1
+
+
+def att(rid, **kw):
+    base = {"resource_id": rid, "attachment_id": "a" + rid, "resource_type": "file",
+            "filename": f"{rid}.pdf", "link_url": "", "size": 10, "access_level": "public",
+            "deleted_flag": False}
+    base.update(kw)
+    return base
+
+
+def test_initial_download_status():
+    assert pipeline.initial_download_status(att("1")) == "pending"
+    assert pipeline.initial_download_status(att("1", resource_type="link")) == "link"
+    assert pipeline.initial_download_status(att("1", deleted_flag=True)) == "deleted"
+    assert pipeline.initial_download_status(att("1", access_level="private")) == "not_public"
+
+
+def test_apply_listing_tracks_changes(tmp_path):
+    s = Store(str(tmp_path))
+    pipeline.apply_resource_listing(s, "n", [att("1"), att("2", resource_type="link")])
+    s.attachments[("n", "1")]["download_status"] = "ok"
+    s.attachments[("n", "1")]["sha256"] = "abc"
+    # second listing: res 1 now deleted on SAM, res 2 gone, res 3 new
+    pipeline.apply_resource_listing(s, "n", [att("1", deleted_flag=True), att("3")])
+    a1 = s.attachments[("n", "1")]
+    assert a1["download_status"] == "ok" and a1["sha256"] == "abc" and a1["deleted_flag"] is True
+    assert s.attachments[("n", "2")]["in_latest_listing"] is False
+    assert s.attachments[("n", "3")]["download_status"] == "pending"
+
+
+def test_private_then_public_becomes_pending(tmp_path):
+    s = Store(str(tmp_path))
+    pipeline.apply_resource_listing(s, "n", [att("1", access_level="private")])
+    assert s.attachments[("n", "1")]["download_status"] == "not_public"
+    pipeline.apply_resource_listing(s, "n", [att("1")])
+    assert s.attachments[("n", "1")]["download_status"] == "pending"
+
+
+class FakeSam:
+    def __init__(self, listings, fail=()):
+        self.listings, self.fail = listings, set(fail)
+
+    def list_resources(self, nid):
+        from federal_ja.collect.sam_api import SamError
+        if nid in self.fail:
+            raise SamError("resources HTTP 500", 500)
+        return self.listings.get(nid, [])
+
+
+def test_fetch_resources_statuses(tmp_path):
+    s = Store(str(tmp_path))
+    pipeline.merge_notices(s, result(notice("a"), notice("b"), notice("c")))
+    out = pipeline.fetch_resources(s, FakeSam({"a": [att("1")]}, fail={"c"}), workers=2)
+    assert out == {"ok": 1, "no_attachments": 1, "error": 1}
+    assert s.notices["a"]["resources_status"] == "ok" and s.notices["a"]["attachment_count"] == 1
+    assert s.notices["b"]["resources_status"] == "no_attachments"
+    assert s.notices["c"]["resources_status"].startswith("error")
+    # errors are retried only on request
+    out = pipeline.fetch_resources(s, FakeSam({"c": [att("9")]}))
+    assert out == {"ok": 0, "no_attachments": 0, "error": 0}
+    out = pipeline.fetch_resources(s, FakeSam({"c": [att("9")]}), retry_errors=True)
+    assert out["ok"] == 1
+
+
+def test_store_roundtrip(tmp_path):
+    s = Store(str(tmp_path))
+    pipeline.merge_notices(s, result(notice("a")))
+    pipeline.apply_resource_listing(s, "a", [att("1"), att("2", resource_type="link", link_url="https://x")])
+    s.attachments[("a", "1")].update(download_status="ok", page_count=3, needs_transcription=True,
+                                     transcription_cost_usd=0.0012, text="héllo")
+    s.save()
+    t = Store(str(tmp_path)).load()
+    assert t.notices["a"]["source_files"] == ["active.csv"]
+    a = t.attachments[("a", "1")]
+    assert a["page_count"] == 3 and a["needs_transcription"] is True and a["text"] == "héllo"
+    assert abs(a["transcription_cost_usd"] - 0.0012) < 1e-9
+    assert t.attachments[("a", "2")]["link_url"] == "https://x"
+
+
+def test_safe_filename():
+    assert safe_filename("J&A Redacted (final).pdf") == "J_A_Redacted_final_.pdf"
+    assert safe_filename("../../etc/passwd") == "etc_passwd"
+    assert safe_filename("résumé.PDF") == "resume.PDF"
+    assert safe_filename("") == "file"
+    long = "a" * 300 + ".pdf"
+    out = safe_filename(long)
+    assert len(out) == 120 and out.endswith(".pdf")
+    assert file_rel_path("n1", "res1", "x y.pdf") == "files/n1/res1_x_y.pdf"
+
+
+class FakeTranscriber:
+    def __init__(self, budget_after=None):
+        self.n = 0
+        self.budget_after = budget_after
+
+    def transcribe_pdf(self, path, pages):
+        from federal_ja.collect.transcribe import BudgetExceeded, TranscriptionResult
+        self.n += 1
+        if self.budget_after is not None and self.n > self.budget_after:
+            raise BudgetExceeded("cap")
+        return TranscriptionResult(text="--- page 1 ---\n[REDACTED]", model="m", prompt_version="v1",
+                                   pages=pages, input_tokens=100, output_tokens=10, cost_usd=0.001)
+
+
+def test_transcribe_pending_and_budget_stop(tmp_path):
+    s = Store(str(tmp_path))
+    for rid in "123":
+        s.attachments[("n", rid)] = {"notice_id": "n", "resource_id": rid, "download_status": "ok",
+                                     "file_kind": "pdf", "needs_transcription": True,
+                                     "text_source": "none", "page_count": 2, "file_path": f"files/n/{rid}"}
+    s.attachments[("n", "4")] = {"notice_id": "n", "resource_id": "4", "download_status": "ok",
+                                 "file_kind": "pdf", "needs_transcription": False,
+                                 "text_source": "pdf_text", "page_count": 2}
+    assert len(pipeline.transcription_candidates(s)) == 3
+    out = pipeline.transcribe_pending(s, FakeTranscriber(budget_after=2))
+    assert out["done"] == 2 and out["stopped_on_budget"] is True and out["pages"] == 4
+    done = [a for a in s.attachments.values() if a.get("text_source") == "transcription"]
+    assert len(done) == 2 and done[0]["transcription_model"] == "m"
+    assert len(pipeline.transcription_candidates(s)) == 1
+
+
+def test_extraction_never_overwrites_transcription():
+    from federal_ja.collect.extract import ExtractResult
+    a = {"text": "T", "text_source": "transcription"}
+    pipeline.apply_extraction(a, ExtractResult(file_kind="pdf", needs_transcription=True))
+    assert a["text"] == "T" and a["text_source"] == "transcription"
