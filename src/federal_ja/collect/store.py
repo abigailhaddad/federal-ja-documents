@@ -34,13 +34,13 @@ ATTACHMENT_COLUMNS = [
     "notice_id", "resource_id", "attachment_id", "attachment_order",
     "resource_type", "filename", "link_url", "mime_type", "size",
     "access_level", "access_status", "export_controlled", "file_exists",
-    "deleted_flag", "deleted_date", "sam_posted_date", "in_latest_listing",
+    "deleted_flag", "deleted_date", "effective_deleted_date", "sam_posted_date", "in_latest_listing",
     "download_status", "download_error", "downloaded_at", "downloaded_size",
-    "sha256", "file_path", "file_kind", "page_count", "pages_with_text",
+    "sha256", "file_path", "file_kind", "page_count", "pages_with_text", "textless_pages",
     "native_text_chars", "needs_transcription", "text", "text_source",
     "extract_error", "transcription_model", "transcription_prompt_version",
     "transcription_input_tokens", "transcription_output_tokens",
-    "transcription_cost_usd", "transcribed_at", "transcription_error",
+    "transcription_cost_usd", "transcribed_pages", "transcribed_at", "transcription_error",
     "uploaded_at",
 ]
 
@@ -154,7 +154,9 @@ def _write(path: str, records: Iterable[dict], columns: list[str]) -> None:
         elif c == "transcription_cost_usd":
             df[c] = pd.array(df[c], dtype="Float64")
         elif c == "source_files":
-            df[c] = df[c].map(lambda v: list(v) if v is not None else [])
+            df[c] = df[c].map(lambda v: [str(x) for x in v] if v is not None else [])
+        elif c in ("textless_pages", "transcribed_pages"):
+            df[c] = df[c].map(lambda v: [int(x) for x in v] if v is not None else None)
         else:
             df[c] = df[c].map(lambda v: None if v is None else str(v)).astype("string")
     tmp = path + ".tmp"

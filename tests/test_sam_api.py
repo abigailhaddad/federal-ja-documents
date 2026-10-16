@@ -132,3 +132,26 @@ def test_rate_limiter_spacing():
     for _ in range(3):
         rl.wait()
     assert slept == [0.25, 0.25]
+
+
+def test_download_deleted_message():
+    class R(FakeResp):
+        def json(self):
+            return {"errors": {"message": "The resource has been deleted."}}
+    s = FakeSession([R(400)])
+    c = SamClient(requests_per_second=0, session=s, sleep=lambda x: None)
+    try:
+        c.download("res", "/nonexistent/x")
+        assert False
+    except sam_api.SamError as e:
+        assert e.status == 400 and "has been deleted" in str(e)
+
+
+def test_s3_403_is_retried(tmp_path, monkeypatch):
+    s = FakeSession([FakeResp(303, headers={"Location": "https://s3/a"}),
+                     FakeResp(303, headers={"Location": "https://s3/b"})])
+    resps = [FakeResp(403), FakeResp(200, body=b"%PDF ok")]
+    monkeypatch.setattr(sam_api.requests, "get", lambda url, **kw: resps.pop(0))
+    c = SamClient(requests_per_second=0, session=s, sleep=lambda x: None)
+    res = c.download("res", str(tmp_path / "f.pdf"))
+    assert res.bytes_written == 7 and len(s.calls) == 2

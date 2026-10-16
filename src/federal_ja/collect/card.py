@@ -59,7 +59,7 @@ Code and issue tracker: {project_url}
 * Attachments by download status: {by_dl}
 * Downloaded files by kind: {by_kind}
 * Text source of downloaded files: {by_text}
-* PDFs judged scanned / image-only: {n_scanned:,} of {n_pdfs:,}
+* PDFs with at least one image-only page: {n_scanned:,} of {n_pdfs:,} ({n_pages_scanned:,} such pages)
 
 ## Sources
 
@@ -110,13 +110,17 @@ Code and issue tracker: {project_url}
 | `docx` | `python-docx` (paragraphs, then table rows) |
 | `xlsx` | `openpyxl`, every sheet, tab-separated |
 | `text` | plain-text attachment |
-| `transcription` | machine transcription of page images (see below) |
+| `transcription` | machine transcription of page images; every page of the PDF was image-only (see below) |
+| `pdf_text+transcription` | text-layer pages keep their native text; image-only pages are machine-transcribed |
 | `none` | no text: unsupported format, unreadable file, or not yet transcribed |
 
-PDF text from `pdf_text` has `--- page N ---` markers. A PDF is treated as
-scanned when fewer than half of its pages have at least 100 letters/digits in
-the text layer (`needs_transcription`); `page_count`, `pages_with_text` and
-`native_text_chars` let you apply a different rule.
+PDF text has `--- page N ---` markers. The scanned/typed decision is made per
+page: a page with fewer than 100 letters/digits in its text layer is listed in
+`textless_pages`, and only those pages are transcribed (`transcribed_pages`).
+Many J&As are typed documents in which one or more pages (often the redacted
+or signed ones) were flattened to images, so these pages would otherwise have
+no text. A PDF whose text layer came from OCR before it was posted counts as
+typed, and its OCR text is kept as is, errors included.
 
 ### Machine transcriptions: read with care
 
@@ -158,5 +162,6 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         by_res=s["notices_by_resources_status"], by_dl=s["attachments_by_download_status"],
         by_kind=s["downloaded_by_file_kind"], by_text=s["text_source"],
         n_scanned=s["pdfs_needing_transcription"], n_pdfs=s["pdfs"],
+        n_pages_scanned=s["textless_pages"],
         model=config.TRANSCRIBE_MODEL,
     )

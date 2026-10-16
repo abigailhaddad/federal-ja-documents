@@ -46,12 +46,22 @@ in the request.
 - Output only the transcription."""
 
 
-def page_prompt(first_page: int, last_page: int, total_pages: int) -> str:
+def describe_pages(pages: list[int]) -> str:
+    if len(pages) == 1:
+        return f"page {pages[0]}"
+    if pages == list(range(pages[0], pages[-1] + 1)):
+        return f"pages {pages[0]} through {pages[-1]}"
+    return "pages " + ", ".join(map(str, pages[:-1])) + f" and {pages[-1]}"
+
+
+def page_prompt(pages: list[int], total_pages: int) -> str:
+    """pages: the original 1-based page numbers contained in this chunk, in order."""
     return (
-        f"This document chunk contains pages {first_page} through {last_page} "
-        f"of a {total_pages}-page document. Transcribe every page in order, "
-        f"starting each with '--- page N ---' where N runs from {first_page} "
-        f"to {last_page}."
+        f"This PDF contains {describe_pages(pages)} of a {total_pages}-page "
+        f"document, in that order ({len(pages)} page{'s' if len(pages) > 1 else ''}). "
+        f"Transcribe every page in order. Start each page with a line "
+        f"'--- page N ---' where N is its original page number: "
+        f"{', '.join(map(str, pages))}."
     )
 
 
@@ -93,16 +103,17 @@ class TranscriptionResult:
     requests: int = 0
     stop_reasons: list[str] = field(default_factory=list)
     error: str = ""
+    page_texts: dict[int, str] = field(default_factory=dict)  # 1-based page -> text
 
 
-def split_pdf(data: bytes, start: int, end: int) -> bytes:
-    """Return a new PDF holding pages [start, end) (0-based)."""
+def split_pdf(data: bytes, pages: list[int]) -> bytes:
+    """Return a new PDF holding the given 1-based pages, in order."""
     from pypdf import PdfReader, PdfWriter
 
     reader = PdfReader(io.BytesIO(data))
     w = PdfWriter()
-    for i in range(start, end):
-        w.add_page(reader.pages[i])
+    for p in pages:
+        w.add_page(reader.pages[p - 1])
     buf = io.BytesIO()
     w.write(buf)
     return buf.getvalue()
@@ -115,6 +126,29 @@ def pages_marked(text: str) -> list[int]:
     return [int(m) for m in _PAGE_MARK.findall(text)]
 
 
+def split_by_markers(text: str) -> dict[int, str]:
+    """'--- page N ---' sections -> {N: body}. Text before the first marker is dropped
+    only if blank; otherwise it is kept under key 0 so the caller can notice."""
+    out: dict[int, str] = {}
+    marks = list(_PAGE_MARK.finditer(text))
+    head = text[: marks[0].start()].strip() if marks else text.strip()
+    if head:
+        out[0] = head
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+        out[int(m.group(1))] = text[m.end():end].strip()
+    return out
+
+
+def merge_page_texts(native: list[str], transcribed: dict[int, str]) -> str:
+    """Per page: the transcription if there is one, else the native text."""
+    parts = []
+    for i, t in enumerate(native, 1):
+        body = transcribed.get(i, t)
+        parts.append(f"--- page {i} ---\n{(body or '').strip()}")
+    return "\n\n".join(parts)
+
+
 MAX_CHUNK_BYTES = 20_000_000  # request limit is 32 MB including base64 overhead
 
 
@@ -123,15 +157,20 @@ class Transcriber:
                  pages_per_chunk: int = config.TRANSCRIBE_PAGES_PER_CHUNK,
                  budget: BudgetTracker | None = None, max_tokens: int = 32000):
         if client is None:
+            import os
+
             import anthropic
-            client = anthropic.Anthropic(max_retries=6)
+            # Keys that are not scoped to a workspace need this header.
+            ws = os.environ.get("ANTHROPIC_WORKSPACE_ID")
+            headers = {"anthropic-workspace-id": ws} if ws else None
+            client = anthropic.Anthropic(max_retries=6, default_headers=headers)
         self.client = client
         self.model = model
         self.pages_per_chunk = pages_per_chunk
         self.budget = budget
         self.max_tokens = max_tokens
 
-    def _call(self, pdf_bytes: bytes, first: int, last: int, total: int):
+    def _call(self, pdf_bytes: bytes, pages: list[int], total: int):
         b64 = base64.standard_b64encode(pdf_bytes).decode("ascii")
         kwargs = dict(
             model=self.model,
@@ -145,22 +184,13 @@ class Transcriber:
             messages=[{"role": "user", "content": [
                 {"type": "document", "source": {
                     "type": "base64", "media_type": "application/pdf", "data": b64}},
-                {"type": "text", "text": page_prompt(first, last, total)},
+                {"type": "text", "text": page_prompt(pages, total)},
             ]}],
         )
         with self.client.messages.stream(**kwargs) as stream:
             return stream.get_final_message()
 
-    def _transcribe_range(self, data: bytes, start: int, end: int, total: int,
-                          res: TranscriptionResult) -> list[str]:
-        if self.budget:
-            self.budget.check()
-        chunk = data if (start == 0 and end == total) else split_pdf(data, start, end)
-        if len(chunk) > MAX_CHUNK_BYTES and end - start > 1:
-            mid = (start + end) // 2
-            return (self._transcribe_range(data, start, mid, total, res)
-                    + self._transcribe_range(data, mid, end, total, res))
-        msg = self._call(chunk, start + 1, end, total)
+    def _account(self, msg, res: TranscriptionResult) -> None:
         u = msg.usage
         inp = (u.input_tokens or 0) + (getattr(u, "cache_creation_input_tokens", 0) or 0) \
             + (getattr(u, "cache_read_input_tokens", 0) or 0)
@@ -172,24 +202,61 @@ class Transcriber:
         res.stop_reasons.append(msg.stop_reason or "")
         if self.budget:
             self.budget.add(c)
-        text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
-        if msg.stop_reason == "max_tokens" and end - start > 1:
-            mid = (start + end) // 2
-            return (self._transcribe_range(data, start, mid, total, res)
-                    + self._transcribe_range(data, mid, end, total, res))
-        if msg.stop_reason == "max_tokens":
-            text += "\n[transcription truncated: output limit reached]"
+
+    def _halves(self, data, pages, total, res):
+        mid = len(pages) // 2
+        out = self._transcribe_pages(data, pages[:mid], total, res)
+        out.update(self._transcribe_pages(data, pages[mid:], total, res))
+        return out
+
+    def _transcribe_pages(self, data: bytes, pages: list[int], total: int,
+                          res: TranscriptionResult) -> dict[int, str]:
+        if self.budget:
+            self.budget.check()
+        whole = pages == list(range(1, total + 1))
+        chunk = data if whole else split_pdf(data, pages)
+        if len(chunk) > MAX_CHUNK_BYTES and len(pages) > 1:
+            return self._halves(data, pages, total, res)
+        msg = self._call(chunk, pages, total)
+        self._account(msg, res)
+        text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text").strip()
         if msg.stop_reason == "refusal":
             res.error = "refusal"
-        return [text.strip()]
+            return {}
+        if msg.stop_reason == "max_tokens" and len(pages) > 1:
+            return self._halves(data, pages, total, res)
+        if msg.stop_reason == "max_tokens":
+            text += "\n[transcription truncated: output limit reached]"
+        parts = split_by_markers(text)
+        if len(pages) == 1:
+            # one page: everything belongs to it, marker or not
+            body = parts.get(pages[0])
+            if body is None or len(parts) > 1:
+                body = _PAGE_MARK.sub("", text).strip()
+            return {pages[0]: body}
+        if sorted(k for k in parts if k) == sorted(pages) and 0 not in parts:
+            return {p: parts[p] for p in pages}
+        # Markers don't line up with the pages sent: redo page by page rather
+        # than guess which text belongs to which page.
+        log.warning("page markers %s != requested %s; retrying per page",
+                    sorted(parts), pages)
+        out: dict[int, str] = {}
+        for p in pages:
+            out.update(self._transcribe_pages(data, [p], total, res))
+        return out
 
-    def transcribe_pdf(self, path: str, page_count: int) -> TranscriptionResult:
+    def transcribe_pdf(self, path: str, page_count: int,
+                       pages: list[int] | None = None) -> TranscriptionResult:
+        """Transcribe the given 1-based pages (default: all) of a PDF."""
         data = open(path, "rb").read()
+        pages = list(pages) if pages else list(range(1, page_count + 1))
         res = TranscriptionResult(text="", model=self.model,
-                                  prompt_version=PROMPT_VERSION, pages=page_count)
-        parts: list[str] = []
-        for start in range(0, page_count, self.pages_per_chunk):
-            end = min(start + self.pages_per_chunk, page_count)
-            parts.extend(self._transcribe_range(data, start, end, page_count, res))
-        res.text = "\n\n".join(p for p in parts if p)
+                                  prompt_version=PROMPT_VERSION, pages=len(pages))
+        for i in range(0, len(pages), self.pages_per_chunk):
+            res.page_texts.update(
+                self._transcribe_pages(data, pages[i:i + self.pages_per_chunk], page_count, res))
+            if res.error:
+                break
+        res.text = "\n\n".join(f"--- page {p} ---\n{res.page_texts[p]}"
+                                for p in sorted(res.page_texts))
         return res

@@ -26,15 +26,17 @@ def summarize(store: Store) -> dict:
         "file_attachments": len(files),
         "attachments_by_download_status": dict(Counter(x.get("download_status") for x in a)),
         "download_errors": dict(Counter((x.get("download_error") or "")[:80]
-                                        for x in a if x.get("download_status") in ("error", "too_large"))),
+                                        for x in a if x.get("download_status") in ("error", "too_large", "deleted_at_download"))),
         "downloaded_bytes": sum(x.get("downloaded_size") or 0 for x in ok),
         "declared_size_mismatches": len(size_mismatch),
         "downloaded_by_file_kind": dict(Counter(x.get("file_kind") for x in ok)),
         "text_source": dict(Counter(x.get("text_source") for x in ok)),
         "pdfs": sum(1 for x in ok if x.get("file_kind") == "pdf"),
         "pdfs_needing_transcription": sum(1 for x in ok if x.get("file_kind") == "pdf" and x.get("needs_transcription")),
-        "pages_needing_transcription": sum(x.get("page_count") or 0 for x in ok
-                                           if x.get("file_kind") == "pdf" and x.get("needs_transcription")),
+        "pdf_pages": sum(x.get("page_count") or 0 for x in ok if x.get("file_kind") == "pdf"),
+        "textless_pages": sum(len(x.get("textless_pages") or []) for x in ok if x.get("file_kind") == "pdf"),
+        "pdfs_all_pages_textless": sum(1 for x in ok if x.get("file_kind") == "pdf"
+                                       and x.get("page_count") and x.get("pages_with_text") == 0),
         "pdf_extract_errors": sum(1 for x in ok if x.get("file_kind") == "pdf" and x.get("extract_error")),
         "not_in_latest_listing": sum(1 for x in a if x.get("in_latest_listing") is False),
         "notices_with_downloaded_text": len({x["notice_id"] for x in ok if x.get("text")}),

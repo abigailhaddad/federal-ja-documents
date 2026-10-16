@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Iterable
 
 from . import extract as ex
+from . import transcribe as transcribe_mod
 from .sam_api import FileTooLarge, SamClient, SamError
 from .sources import CollectResult
 from .store import Store, file_rel_path
@@ -152,12 +153,15 @@ def fetch_resources(store: Store, client: SamClient, notice_ids: Iterable[str] |
 
 # --------------------------------------------------------------------------- download
 
+TRANSCRIBED_SOURCES = ("transcription", "pdf_text+transcription")
+
 def apply_extraction(a: dict, r: ex.ExtractResult) -> None:
     a.update(file_kind=r.file_kind, page_count=r.page_count,
-             pages_with_text=r.pages_with_text, native_text_chars=r.native_text_chars,
+             pages_with_text=r.pages_with_text, textless_pages=list(r.textless_pages),
+             native_text_chars=r.native_text_chars,
              needs_transcription=r.needs_transcription, extract_error=r.extract_error)
     # never overwrite a transcription with an empty native result
-    if a.get("text_source") != "transcription":
+    if a.get("text_source") not in TRANSCRIBED_SOURCES:
         a["text"], a["text_source"] = r.text, r.text_source
 
 
@@ -194,7 +198,12 @@ def download_pending(store: Store, client: SamClient, workers: int = 4,
         for fut in as_completed([pool.submit(job, a) for a in todo]):
             a, rel, dl, r, err = fut.result()
             if err is not None:
-                status = "too_large" if err.startswith("too_large") else "error"
+                if err.startswith("too_large"):
+                    status = "too_large"
+                elif "has been deleted" in err:
+                    status = "deleted_at_download"
+                else:
+                    status = "error"
                 a.update(download_status=status, download_error=err[:300])
             else:
                 a.update(download_status="ok", download_error="", downloaded_at=now_iso(),
@@ -226,18 +235,22 @@ def reextract(store: Store) -> int:
 def transcription_candidates(store: Store) -> list[dict]:
     return [a for a in store.attachments.values()
             if a.get("download_status") == "ok" and a.get("file_kind") == "pdf"
-            and a.get("needs_transcription") and a.get("text_source") != "transcription"
+            and a.get("needs_transcription") and a.get("text_source") not in TRANSCRIBED_SOURCES
             and (a.get("page_count") or 0) > 0]
 
 
-def apply_transcription(a: dict, t) -> None:
+def apply_transcription(a: dict, t, native_page_texts: list[str]) -> None:
+    """Merge a page-level transcription into an attachment row."""
     a.update(transcription_model=t.model, transcription_prompt_version=t.prompt_version,
              transcription_input_tokens=t.input_tokens,
              transcription_output_tokens=t.output_tokens,
              transcription_cost_usd=round(t.cost_usd, 6), transcribed_at=now_iso(),
-             transcription_error=t.error)
-    if t.text and not t.error:
-        a["text"], a["text_source"] = t.text, "transcription"
+             transcription_error=t.error, transcribed_pages=sorted(t.page_texts))
+    if t.error or not t.page_texts:
+        return
+    a["text"] = transcribe_mod.merge_page_texts(native_page_texts, t.page_texts)
+    all_pages = set(range(1, len(native_page_texts) + 1))
+    a["text_source"] = "transcription" if set(t.page_texts) >= all_pages else "pdf_text+transcription"
 
 
 def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None = None,
@@ -247,8 +260,11 @@ def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None
     todo = attachments if attachments is not None else transcription_candidates(store)
     stats = {"done": 0, "errors": 0, "cost_usd": 0.0, "pages": 0, "stopped_on_budget": False}
     for a in todo:
+        path = store.path(a["file_path"])
         try:
-            t = transcriber.transcribe_pdf(store.path(a["file_path"]), a["page_count"])
+            native = ex.pdf_page_texts(path)
+            pages = list(a.get("textless_pages") or ex.textless_pages(native))
+            t = transcriber.transcribe_pdf(path, len(native), pages)
         except BudgetExceeded:
             stats["stopped_on_budget"] = True
             break
@@ -256,9 +272,9 @@ def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None
             a["transcription_error"] = f"{type(e).__name__}: {e}"[:300]
             stats["errors"] += 1
             continue
-        apply_transcription(a, t)
+        apply_transcription(a, t, native)
         stats["done"] += 1
-        stats["pages"] += a["page_count"]
+        stats["pages"] += t.pages
         stats["cost_usd"] += t.cost_usd
         if checkpoint and stats["done"] % 25 == 0:
             checkpoint()

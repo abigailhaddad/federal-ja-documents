@@ -5,13 +5,20 @@ text_source values written to the dataset:
   docx           python-docx (paragraphs, then tables)
   xlsx           openpyxl (every sheet, tab-separated cells)
   text           plain-text attachment (.txt/.csv), decoded as UTF-8/latin-1
-  transcription  machine transcription of page images (scanned PDFs)
-  none           no text (unsupported type, unreadable file, or scanned PDF
-                 not yet transcribed)
+  transcription  machine transcription of page images (every page of the
+                 PDF lacked a text layer)
+  pdf_text+transcription
+                 PDF with some text-layer pages and some image-only pages;
+                 text-layer pages keep their native text and only the
+                 image-only pages are transcribed
+  none           no text (unsupported type, unreadable file, or image-only
+                 PDF not yet transcribed)
 
-A PDF needs transcription when too few of its pages carry a usable text layer
-(see ``pdf_needs_transcription``). Thresholds are module constants so they can
-be audited and tuned.
+Decision is per page: a page lacks text when its text layer has fewer than
+MIN_ALNUM_PER_TEXT_PAGE letters/digits. Many J&As are typed documents with one
+or more pages rasterized (often the pages that were redacted or signed), so a
+whole-document rule would silently lose those pages. A PDF needs
+transcription if ANY page lacks text; ``textless_pages`` lists them.
 """
 
 from __future__ import annotations
@@ -28,8 +35,6 @@ log = logging.getLogger(__name__)
 # A typical typed J&A page has 1,500-4,000; a scanned page with no OCR has 0;
 # a page with only a stamp or page number has well under 100.
 MIN_ALNUM_PER_TEXT_PAGE = 100
-# A PDF needs transcription if fewer than this share of pages has text.
-MIN_TEXT_PAGE_SHARE = 0.5
 
 _ALNUM = re.compile(r"[A-Za-z0-9]")
 
@@ -41,6 +46,7 @@ class ExtractResult:
     text_source: str = "none"
     page_count: int | None = None
     pages_with_text: int | None = None
+    textless_pages: list[int] = field(default_factory=list)  # 1-based
     native_text_chars: int = 0
     needs_transcription: bool = False
     extract_error: str = ""
@@ -84,15 +90,36 @@ def count_alnum(s: str) -> int:
     return len(_ALNUM.findall(s or ""))
 
 
+def page_has_text(text: str) -> bool:
+    return count_alnum(text) >= MIN_ALNUM_PER_TEXT_PAGE
+
+
+def textless_pages(page_texts: list[str]) -> list[int]:
+    """1-based numbers of pages whose text layer is missing or too thin."""
+    return [i for i, t in enumerate(page_texts, 1) if not page_has_text(t)]
+
+
 def pdf_needs_transcription(page_texts: list[str]) -> bool:
-    if not page_texts:
-        return True
-    with_text = sum(1 for t in page_texts if count_alnum(t) >= MIN_ALNUM_PER_TEXT_PAGE)
-    return with_text / len(page_texts) < MIN_TEXT_PAGE_SHARE
+    return not page_texts or bool(textless_pages(page_texts))
 
 
 def join_pages(page_texts: list[str]) -> str:
     return "\n\n".join(f"--- page {i} ---\n{t.strip()}" for i, t in enumerate(page_texts, 1))
+
+
+def pdf_page_texts(path: str) -> list[str]:
+    from pypdf import PdfReader
+
+    reader = PdfReader(path)
+    if reader.is_encrypted:
+        reader.decrypt("")
+    out = []
+    for page in reader.pages:
+        try:
+            out.append(page.extract_text() or "")
+        except Exception:  # noqa: BLE001
+            out.append("")
+    return out
 
 
 def extract_pdf(path: str) -> ExtractResult:
@@ -119,15 +146,16 @@ def extract_pdf(path: str) -> ExtractResult:
         return res
     res.page_texts = texts
     res.page_count = len(texts)
-    res.pages_with_text = sum(1 for t in texts if count_alnum(t) >= MIN_ALNUM_PER_TEXT_PAGE)
+    res.textless_pages = textless_pages(texts)
+    res.pages_with_text = len(texts) - len(res.textless_pages)
     res.native_text_chars = sum(len(t) for t in texts)
     res.needs_transcription = pdf_needs_transcription(texts)
-    if res.needs_transcription:
-        # Keep whatever native text exists out of `text`; the transcription
-        # will replace it. native_text_chars still records how much there was.
-        res.text, res.text_source = "", "none"
-    else:
+    if res.pages_with_text:
+        # Native text of every page (empty pages keep their marker) until a
+        # transcription fills the textless pages in.
         res.text, res.text_source = join_pages(texts), "pdf_text"
+    else:
+        res.text, res.text_source = "", "none"
     return res
 
 

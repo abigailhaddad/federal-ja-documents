@@ -117,13 +117,15 @@ def test_store_roundtrip(tmp_path):
     pipeline.merge_notices(s, result(notice("a")))
     pipeline.apply_resource_listing(s, "a", [att("1"), att("2", resource_type="link", link_url="https://x")])
     s.attachments[("a", "1")].update(download_status="ok", page_count=3, needs_transcription=True,
-                                     transcription_cost_usd=0.0012, text="héllo")
+                                     transcription_cost_usd=0.0012, text="héllo",
+                                     textless_pages=[2, 3])
     s.save()
     t = Store(str(tmp_path)).load()
     assert t.notices["a"]["source_files"] == ["active.csv"]
     a = t.attachments[("a", "1")]
     assert a["page_count"] == 3 and a["needs_transcription"] is True and a["text"] == "héllo"
     assert abs(a["transcription_cost_usd"] - 0.0012) < 1e-9
+    assert a["textless_pages"] == [2, 3] and a["transcribed_pages"] is None
     assert t.attachments[("a", "2")]["link_url"] == "https://x"
 
 
@@ -142,30 +144,43 @@ class FakeTranscriber:
     def __init__(self, budget_after=None):
         self.n = 0
         self.budget_after = budget_after
+        self.calls = []
 
-    def transcribe_pdf(self, path, pages):
+    def transcribe_pdf(self, path, page_count, pages=None):
         from federal_ja.collect.transcribe import BudgetExceeded, TranscriptionResult
         self.n += 1
+        self.calls.append((page_count, pages))
         if self.budget_after is not None and self.n > self.budget_after:
             raise BudgetExceeded("cap")
-        return TranscriptionResult(text="--- page 1 ---\n[REDACTED]", model="m", prompt_version="v1",
-                                   pages=pages, input_tokens=100, output_tokens=10, cost_usd=0.001)
+        return TranscriptionResult(text="", model="m", prompt_version="v1", pages=len(pages),
+                                   input_tokens=100, output_tokens=10, cost_usd=0.001,
+                                   page_texts={p: "[REDACTED]" for p in pages})
 
 
-def test_transcribe_pending_and_budget_stop(tmp_path):
+def test_transcribe_pending_merges_and_stops_on_budget(tmp_path):
+    from tests.test_extract import LONG, blank_pdf, text_pdf
     s = Store(str(tmp_path))
-    for rid in "123":
+    (tmp_path / "files").mkdir()
+    (tmp_path / "files" / "mixed.pdf").write_bytes(text_pdf([LONG, "x"]))
+    (tmp_path / "files" / "scan.pdf").write_bytes(blank_pdf(2))
+    (tmp_path / "files" / "scan2.pdf").write_bytes(blank_pdf(1))
+    for rid, f, tp in (("1", "mixed.pdf", [2]), ("2", "scan.pdf", [1, 2]), ("3", "scan2.pdf", [1])):
         s.attachments[("n", rid)] = {"notice_id": "n", "resource_id": rid, "download_status": "ok",
                                      "file_kind": "pdf", "needs_transcription": True,
-                                     "text_source": "none", "page_count": 2, "file_path": f"files/n/{rid}"}
+                                     "text_source": "pdf_text" if rid == "1" else "none",
+                                     "page_count": 2, "textless_pages": tp, "file_path": f"files/{f}"}
     s.attachments[("n", "4")] = {"notice_id": "n", "resource_id": "4", "download_status": "ok",
                                  "file_kind": "pdf", "needs_transcription": False,
                                  "text_source": "pdf_text", "page_count": 2}
     assert len(pipeline.transcription_candidates(s)) == 3
-    out = pipeline.transcribe_pending(s, FakeTranscriber(budget_after=2))
-    assert out["done"] == 2 and out["stopped_on_budget"] is True and out["pages"] == 4
-    done = [a for a in s.attachments.values() if a.get("text_source") == "transcription"]
-    assert len(done) == 2 and done[0]["transcription_model"] == "m"
+    ft = FakeTranscriber(budget_after=2)
+    out = pipeline.transcribe_pending(s, ft)
+    assert out["done"] == 2 and out["stopped_on_budget"] is True and out["pages"] == 3
+    assert ft.calls[0] == (2, [2]) and ft.calls[1] == (2, [1, 2])
+    m = s.attachments[("n", "1")]
+    assert m["text_source"] == "pdf_text+transcription" and m["transcribed_pages"] == [2]
+    assert "Justification for other" in m["text"] and "--- page 2 ---\n[REDACTED]" in m["text"]
+    assert s.attachments[("n", "2")]["text_source"] == "transcription"
     assert len(pipeline.transcription_candidates(s)) == 1
 
 

@@ -57,13 +57,18 @@ read as latin-1 with the csv field-size limit raised.
   with `download_status` one of `ok`, `link` (off-site URL, recorded, not
   fetched), `deleted`, `not_public`, `too_large`, `error`.
 * **Text:** `text_source` is `pdf_text` (pypdf text layer), `docx`
-  (python-docx), `xlsx` (openpyxl), `text`, `transcription`, or `none`.
-* **Scanned PDFs:** a PDF where fewer than half the pages have >= 100
-  letters/digits of native text is marked `needs_transcription` and
-  transcribed with the Anthropic API (`claude-haiku-5-5`), page chunks sent as
-  PDF documents, with instructions to transcribe verbatim, mark
-  `[REDACTED]` and `[illegible]`, and never guess redacted content. Tokens and
-  cost are recorded per document; a spend cap (`--max-usd`) stops a run.
+  (python-docx), `xlsx` (openpyxl), `text`, `transcription` (every page of
+  the PDF was image-only), `pdf_text+transcription` (native text for typed
+  pages, transcription for image-only pages), or `none`.
+* **Scanned pages:** the decision is per page. A PDF page with fewer than 100
+  letters/digits in its text layer is listed in `textless_pages`, and only
+  those pages are transcribed with the Anthropic API (`claude-haiku-5-5`),
+  sent as PDF documents with instructions to transcribe verbatim, mark
+  `[REDACTED]` and `[illegible]`, and never guess redacted content. This
+  matters: many J&As are typed documents with one or more pages rasterized
+  (often the redacted or signed pages), and a whole-document rule would lose
+  them. Tokens and cost are recorded per document; a spend cap (`--max-usd`)
+  stops a run.
 
 ## Dataset layout (Hugging Face)
 

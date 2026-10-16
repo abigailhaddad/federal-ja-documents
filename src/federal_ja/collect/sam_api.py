@@ -86,6 +86,9 @@ def parse_resources(payload: dict) -> list[dict]:
                 "file_exists": str(a.get("fileExists") or ""),
                 "deleted_flag": str(a.get("deletedFlag") or "0") == "1",
                 "deleted_date": a.get("deletedDate") or "",
+                # Seen with deletedFlag "0" on files whose download then fails
+                # with "The resource has been deleted."
+                "effective_deleted_date": a.get("effectiveDeletedDate") or "",
                 "sam_posted_date": a.get("postedDate") or "",
             })
     return out
@@ -104,6 +107,7 @@ class SamClient:
         self.sleep = sleep
         self.retry_count = 0          # observability: total retries performed
         self.status_counts: dict[int, int] = {}
+        self._count_lock = threading.Lock()
 
     def _backoff(self, attempt: int, retry_after: str | None) -> float:
         if retry_after:
@@ -122,13 +126,17 @@ class SamClient:
             except (requests.ConnectionError, requests.Timeout) as e:
                 last = e
                 if attempt < self.max_retries:
-                    self.retry_count += 1
+                    log.info("sam.gov %s -> %s, retrying", url, type(e).__name__)
+                    with self._count_lock:
+                        self.retry_count += 1
                     self.sleep(self._backoff(attempt, None))
                     continue
                 raise SamError(f"connection error: {e}") from e
-            self.status_counts[r.status_code] = self.status_counts.get(r.status_code, 0) + 1
+            with self._count_lock:
+                self.status_counts[r.status_code] = self.status_counts.get(r.status_code, 0) + 1
             if r.status_code in RETRY_STATUS and attempt < self.max_retries:
-                self.retry_count += 1
+                with self._count_lock:
+                    self.retry_count += 1
                 log.info("sam.gov %s -> %s, retrying", url, r.status_code)
                 self.sleep(self._backoff(attempt, r.headers.get("Retry-After")))
                 continue
@@ -155,7 +163,7 @@ class SamClient:
             if r.status_code == 200:
                 return _write_bytes(r.content, dest, max_bytes, cd)
             if r.status_code not in (301, 302, 303, 307, 308):
-                raise SamError(f"download HTTP {r.status_code}", r.status_code)
+                raise SamError(f"download HTTP {r.status_code}: {_error_message(r)}", r.status_code)
             target = r.headers.get("Location", "")
             # S3 leg (signed URL; a fresh one is minted on each retry)
             try:
@@ -163,7 +171,9 @@ class SamClient:
                                     headers={"User-Agent": config.USER_AGENT})
                 if resp.status_code == 200:
                     return _stream_to_file(resp, dest, max_bytes, cd)
-                if resp.status_code not in RETRY_STATUS:
+                # 403 from S3 has been seen transiently on a signed URL that
+                # worked on retry, so it is retried with a fresh URL.
+                if resp.status_code not in RETRY_STATUS | {403}:
                     raise SamError(f"s3 HTTP {resp.status_code}", resp.status_code)
                 last_err = SamError(f"s3 HTTP {resp.status_code}", resp.status_code)
             except (requests.ConnectionError, requests.Timeout,
@@ -173,6 +183,15 @@ class SamClient:
                 self.retry_count += 1
                 self.sleep(self._backoff(attempt, None))
         raise SamError(f"download failed after retries: {last_err}")
+
+
+def _error_message(r) -> str:
+    """sam.gov error bodies look like {"errors": {"message": "..."}}."""
+    try:
+        body = r.json()
+        return str((body.get("errors") or {}).get("message") or body.get("message") or "")[:200]
+    except Exception:  # noqa: BLE001
+        return (getattr(r, "text", "") or "")[:200]
 
 
 class FileTooLarge(SamError):

@@ -49,13 +49,22 @@ def blank_pdf(n: int) -> bytes:
 LONG = "Justification for other than full and open competition " * 4  # >100 alnum chars
 
 
-def test_classification_rule():
+def test_classification_rule_is_per_page():
     assert ex.pdf_needs_transcription([]) is True
     assert ex.pdf_needs_transcription([""]) is True
     assert ex.pdf_needs_transcription([LONG]) is False
-    assert ex.pdf_needs_transcription([LONG, ""]) is False      # 1/2 pages text -> share 0.5, ok
-    assert ex.pdf_needs_transcription([LONG, "", ""]) is True    # 1/3 -> scanned
-    assert ex.pdf_needs_transcription(["Page 1 of 3"] * 3) is True  # stamps only
+    assert ex.pdf_needs_transcription([LONG, LONG]) is False
+    # one rasterized page in an otherwise typed document still needs transcription
+    assert ex.pdf_needs_transcription([LONG, LONG, ""]) is True
+    assert ex.textless_pages([LONG, "", LONG, "Page 4 of 4"]) == [2, 4]
+
+
+def test_threshold_boundary():
+    just_under = "a" * (ex.MIN_ALNUM_PER_TEXT_PAGE - 1)
+    at = "a" * ex.MIN_ALNUM_PER_TEXT_PAGE
+    assert ex.textless_pages([just_under, at]) == [1]
+    # punctuation and whitespace do not count
+    assert ex.textless_pages(["- . , ;" * 100]) == [1]
 
 
 def test_text_pdf(tmp_path):
@@ -63,7 +72,7 @@ def test_text_pdf(tmp_path):
     p.write_bytes(text_pdf([LONG, LONG]))
     r = ex.extract_file(str(p), "a.pdf")
     assert r.file_kind == "pdf" and r.page_count == 2 and r.pages_with_text == 2
-    assert r.text_source == "pdf_text" and not r.needs_transcription
+    assert r.text_source == "pdf_text" and not r.needs_transcription and r.textless_pages == []
     assert "--- page 1 ---" in r.text and "--- page 2 ---" in r.text
     assert "Justification for other" in r.text
 
@@ -73,14 +82,15 @@ def test_scanned_pdf(tmp_path):
     p.write_bytes(blank_pdf(3))
     r = ex.extract_file(str(p), "s.pdf")
     assert r.needs_transcription and r.text_source == "none" and r.text == ""
-    assert r.page_count == 3 and r.pages_with_text == 0
+    assert r.page_count == 3 and r.pages_with_text == 0 and r.textless_pages == [1, 2, 3]
 
 
-def test_mixed_pdf_mostly_scanned(tmp_path):
+def test_mixed_pdf_keeps_native_text_and_flags_pages(tmp_path):
     p = tmp_path / "m.pdf"
-    p.write_bytes(text_pdf([LONG, "x", "y"]))
+    p.write_bytes(text_pdf([LONG, "x", LONG]))
     r = ex.extract_file(str(p), "m.pdf")
-    assert r.needs_transcription and r.native_text_chars > 0 and r.text == ""
+    assert r.needs_transcription and r.textless_pages == [2] and r.pages_with_text == 2
+    assert r.text_source == "pdf_text" and "--- page 3 ---" in r.text
 
 
 def test_corrupt_pdf_records_error(tmp_path):
