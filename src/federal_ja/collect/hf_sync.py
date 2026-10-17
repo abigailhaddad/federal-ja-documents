@@ -130,6 +130,40 @@ def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
     return {"deleted_stale": deleted}
 
 
+def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
+                   delete_stale: bool = False) -> dict:
+    """One commit with the tables and the dataset card; optionally a second
+    that deletes remote files that are neither tables nor stored originals
+    (i.e. leftovers of an older layout). Original files must already be on
+    the hub (stream / publish_delta), and every one is checked first."""
+    from huggingface_hub import CommitOperationAdd, CommitOperationDelete
+
+    api = _api()
+    remote = set(api.list_repo_files(repo_id, repo_type="dataset"))
+    expected = {a["file_path"] for a in store.attachments.values()
+                if a.get("download_status") == "ok" and a.get("file_path")}
+    missing = sorted(expected - remote)
+    if missing:
+        raise UploadVerifyError(f"{len(missing)} stored files are not on the hub, e.g. {missing[:3]}")
+    store.save()
+    with open(store.path("README.md"), "w") as f:
+        f.write(card_text)
+    ops = [CommitOperationAdd(path_in_repo=p, path_or_fileobj=store.path(p))
+           for p in TABLE_FILES + ["README.md"]]
+    info = api.create_commit(repo_id, ops, repo_type="dataset",
+                             commit_message="Notices, attachments and pages tables; dataset card")
+    out = {"tables_commit": getattr(info, "oid", ""), "deleted_stale": []}
+    if delete_stale:
+        keep = set(TABLE_FILES) | {"README.md", ".gitattributes"} | expected
+        stale = sorted(p for p in api.list_repo_files(repo_id, repo_type="dataset") if p not in keep)
+        if stale:
+            api.create_commit(repo_id, [CommitOperationDelete(path_in_repo=p) for p in stale],
+                              repo_type="dataset",
+                              commit_message="Remove files from the previous snapshot layout")
+        out["deleted_stale"] = stale
+    return out
+
+
 # --------------------------------------------------------------------------- streaming backfill
 
 MANIFEST = "data/upload_manifest.jsonl"

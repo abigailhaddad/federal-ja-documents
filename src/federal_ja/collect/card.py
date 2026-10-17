@@ -144,8 +144,8 @@ never guess redacted content. Pages transcribed: {n_tx_pages:,}.
 
 **Transcriptions are machine-made and may contain errors.** A hand check of
 52 pages against the page images (a 25-file pilot plus a spot check of the
-full run) found no invented text inside redactions and no visible redaction
-left unmarked, but did find these error types:
+full run) found no invented text inside redactions and no black redaction
+box left unmarked, but did find these error types:
 
 * adjacent redaction boxes merged into one `[REDACTED]` marker, or
   occasionally an extra marker, so marker counts are approximate;
@@ -153,7 +153,17 @@ left unmarked, but did find these error types:
 * `[signature]` inserted where only a redaction box or an empty cell was;
 * digital-signature text collapsed to `[signature]`;
 * omitted letterheads, page footers and handwritten notes;
-* words cut off at the edge of a cropped image completed by the model.
+* words cut off at the edge of a cropped image completed by the model;
+* white-out redactions (values covered by white boxes) marked `[illegible]`
+  instead of `[REDACTED]`;
+* occasional silent correction of a misspelling in the source.
+
+Pages are sent one per request. An earlier run that sent up to ten pages per
+request sometimes skipped a page and shifted the following pages' text by
+one; all such pages were re-transcribed one per request before publication.
+Transcription failed for {n_tx_failed_pages:,} image-only pages in
+{n_tx_failed_docs:,} files (the model declined or its output was blocked);
+those pages have `text_source = none` or their thin native text.
 
 Check the original file in `files/` before relying on any transcribed detail.
 Token counts and cost are recorded per document.
@@ -187,6 +197,8 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
     multi = [v for v in groups.values() if v > 1]
     res_status = Counter((n.get("resources_status") or "").split(":")[0] for n in store.notices.values())
     n_tx_pages = sum(1 for v in store.pages.values() for r in v if r["text_source"] == "transcription")
+    failed = [(k, r) for k, v in store.pages.items() for r in v
+              if r["needs_transcription"] and r["text_source"] != "transcription"]
     src = store.state.get("sources", {})
     source_lines = "\n".join(
         f"  * `{k}`: {v.get('last_modified', '?')}" for k, v in sorted(src.items())) or "  * (none recorded)"
@@ -205,4 +217,5 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         model=config.TRANSCRIBE_MODEL, not_downloaded_lines=not_downloaded_lines,
         n_res_error=res_status.get("error", 0), n_no_att=res_status.get("no_attachments", 0),
         n_multi_groups=len(multi), n_multi_notices=sum(multi), n_tx_pages=n_tx_pages,
+        n_tx_failed_pages=len(failed), n_tx_failed_docs=len({k for k, _ in failed}),
     )

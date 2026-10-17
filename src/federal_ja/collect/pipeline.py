@@ -437,6 +437,28 @@ def pages_to_transcribe(store: Store, a: dict) -> list[int]:
             if r["needs_transcription"] and r["text_source"] != "transcription"]
 
 
+def reset_multipage_transcriptions(store: Store) -> dict:
+    """Undo page transcriptions of every PDF that had two or more pages
+    transcribed (those were sent in multi-page chunks), so they are redone
+    one page per request. The thin native layer is restored as the text."""
+    docs = pages = 0
+    for key, rows in store.pages.items():
+        tx = [r for r in rows if r["text_source"] == "transcription"]
+        if len(tx) < 2:
+            continue
+        docs += 1
+        for r in tx:
+            layer = r.get("text_layer_text") or ""
+            r.update(text=layer, text_source="native" if layer else "none", text_layer_text=None,
+                     transcription_model=None, transcription_prompt_version=None, transcribed_at=None)
+            pages += 1
+        a = store.attachments.get(key)
+        if a is not None:
+            a["transcribed_pages"] = sorted(r["page_number"] for r in rows if r["text_source"] == "transcription")
+            a["text"], a["text_source"] = doc_text_from_pages(rows)
+    return {"docs": docs, "pages": pages}
+
+
 def transcription_candidates(store: Store) -> list[dict]:
     return [a for a in store.attachments.values()
             if a.get("download_status") == "ok" and a.get("file_kind") in ("pdf", "image")

@@ -167,6 +167,15 @@ def _read_records(path: str) -> list[dict]:
     return [{k: _clean(v) for k, v in r.items()} for r in df.to_dict("records")]
 
 
+def _missing(v) -> bool:
+    if v is None:
+        return True
+    try:
+        return not isinstance(v, str) and bool(pd.isna(v))
+    except (TypeError, ValueError):
+        return False
+
+
 def _san(v):
     # A lone UTF-16 surrogate anywhere would make the whole parquet write fail.
     return _SURR.sub("\ufffd", v) if isinstance(v, str) else v
@@ -189,7 +198,9 @@ def _write(path: str, records: Iterable[dict], columns: list[str]) -> None:
         else:
             # last line of defence: a lone surrogate anywhere would make the
             # whole parquet write fail
-            df[c] = df[c].map(lambda v: None if v is None else str(v)).astype("string")
+            # pandas 3 infers a str dtype and turns None into NaN, which
+            # str() would write as the text "nan"; keep missing values missing.
+            df[c] = pd.array([None if _missing(v) else str(v) for v in df[c]], dtype="string")
     tmp = path + ".tmp"
     df.to_parquet(tmp, index=False)
     os.replace(tmp, path)

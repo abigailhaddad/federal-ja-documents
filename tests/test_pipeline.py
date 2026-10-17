@@ -344,3 +344,35 @@ def test_cli_parses_every_command(tmp_path, capsys):
         with pytest.raises(SystemExit) as e:
             cli.main(["--workdir", str(tmp_path), cmd, "--help"])
         assert e.value.code == 0
+
+
+def test_missing_strings_stay_missing(tmp_path):
+    s = Store(str(tmp_path))
+    s.attachments[("n", "1")] = {"notice_id": "n", "resource_id": "1", "download_error": None}
+    s.attachments[("n", "2")] = {"notice_id": "n", "resource_id": "2", "download_error": "boom"}
+    s.save()
+    import pandas as pd
+    d = pd.read_parquet(tmp_path / "data" / "attachments.parquet")
+    assert d.download_error.isna().sum() == 1 and (d.download_error == "nan").sum() == 0
+    t = Store(str(tmp_path)).load()
+    assert t.attachments[("n", "1")]["download_error"] is None
+
+
+def test_reset_multipage_transcriptions(tmp_path):
+    from tests.test_extract import LONG, blank_pdf, text_pdf
+    s = Store(str(tmp_path))
+    _pdf_row(s, tmp_path, "1", text_pdf([LONG, "thin", "x"]), "m.pdf")
+    _pdf_row(s, tmp_path, "2", blank_pdf(1), "one.pdf")
+    pipeline.transcribe_pending(s, FakeTranscriber())
+    out = pipeline.reset_multipage_transcriptions(s)
+    assert out == {"docs": 1, "pages": 2}
+    rows = s.pages[("n", "1")]
+    assert rows[1]["text"] == "thin" and rows[1]["text_source"] == "native"
+    assert rows[2]["text"] == "x" and rows[2]["transcription_model"] is None
+    assert s.pages[("n", "2")][0]["text_source"] == "transcription"   # single page kept
+    assert [a["resource_id"] for a in pipeline.transcription_candidates(s)] == ["1"]
+
+
+def test_default_is_one_page_per_request():
+    from federal_ja.collect import config
+    assert config.TRANSCRIBE_PAGES_PER_CHUNK == 1

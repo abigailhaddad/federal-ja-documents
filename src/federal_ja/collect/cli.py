@@ -281,6 +281,9 @@ def cmd_transcribe(args, store: Store) -> dict:
     pages would exceed --max-usd."""
     from . import hf_sync
 
+    if getattr(args, "redo_chunked", False):
+        log.info("reset multi-page transcriptions: %s", pipeline.reset_multipage_transcriptions(store))
+        store.save()
     cands = pipeline.transcription_candidates(store)
     if args.ids:
         want = {line.strip() for line in open(args.ids) if line.strip()}
@@ -324,6 +327,8 @@ def cmd_publish(args, store: Store) -> dict:
     card = render_card(store, args.start_date, now)
     if args.mode == "full":
         return hf_sync.publish_full(store, card, now=now, delete_stale=args.delete_stale)
+    if args.mode == "tables":
+        return hf_sync.publish_tables(store, card, delete_stale=args.delete_stale)
     return {"uploaded_files": hf_sync.publish_delta(store, card, now=now)}
 
 
@@ -338,8 +343,9 @@ def cmd_daily(args, store: Store) -> dict:
     out = {"scan": cmd_scan(args, store)}
     out["resources"] = cmd_resources(args, store)
     out["download"] = cmd_download(args, store)
-    args.batch_files, args.min_free_gb, args.upload = 100, 1.0, False
-    out["links"] = cmd_links(args, store)
+    if args.links:
+        args.batch_files, args.min_free_gb, args.upload = 100, 1.0, False
+        out["links"] = cmd_links(args, store)
     if args.max_usd > 0:
         out["transcribe"] = cmd_transcribe(args, store)
     if args.publish:
@@ -385,11 +391,13 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--limit", type=int)
     s.add_argument("--ids", help="file of resource_ids to restrict to")
     s.add_argument("--workers", type=int, default=1)
+    s.add_argument("--redo-chunked", action="store_true",
+                   help="redo PDFs whose pages were transcribed in multi-page chunks")
     s.add_argument("--project-after", type=int, default=500,
                    help="pages after which to start enforcing the cost projection")
     sub.add_parser("report", help="print counts")
     s = sub.add_parser("publish", help="upload to Hugging Face")
-    s.add_argument("--mode", choices=["delta", "full"], default="delta")
+    s.add_argument("--mode", choices=["delta", "full", "tables"], default="delta")
     s.add_argument("--delete-stale", action="store_true")
     s = sub.add_parser("daily", help="pull, scan, fetch, transcribe, publish"); net(s)
     s.add_argument("--csv", action="append", help=argparse.SUPPRESS)
@@ -400,6 +408,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--project-after", type=int, default=10**9, help=argparse.SUPPRESS)
     s.add_argument("--publish", action="store_true")
     s.add_argument("--allow-empty", action="store_true")
+    s.add_argument("--links", action="store_true", help="also fetch supported link-hosted J&As")
     s.add_argument("--mode", default="delta", help=argparse.SUPPRESS)
     s.add_argument("--delete-stale", action="store_true", help=argparse.SUPPRESS)
 

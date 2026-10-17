@@ -59,4 +59,8 @@ PRICE_INPUT_PER_M = 0.10
 PRICE_OUTPUT_PER_M = 0.50
 PRICE_INPUT_PER_M_LONG = 0.50
 PRICE_OUTPUT_PER_M_LONG = 2.50
-TRANSCRIBE_PAGES_PER_CHUNK = 10
+# One page per request. With multi-page chunks the model sometimes skipped a
+# page and shifted the rest up while still emitting the requested page
+# markers, so a marker check cannot catch it (found in the full run's spot
+# check, reproduced on 2026-10-16). Per-page requests cost about the same.
+TRANSCRIBE_PAGES_PER_CHUNK = 1

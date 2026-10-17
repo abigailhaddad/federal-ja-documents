@@ -89,7 +89,7 @@ def test_only_requested_pages_are_sent(tmp_path):
     p = tmp_path / "s.pdf"
     p.write_bytes(blank_pdf(6))
     msgs = FakeMessages([("end_turn", "--- page 2 ---\nX\n--- page 5 ---\nY")])
-    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs), pages_per_chunk=10)
     res = t.transcribe_pdf(str(p), 6, pages=[2, 5])
     assert res.page_texts == {2: "X", 5: "Y"} and res.pages == 2
     sent = base64.b64decode(msgs.calls[0]["messages"][0]["content"][0]["source"]["data"])
@@ -101,7 +101,7 @@ def test_marker_mismatch_falls_back_to_per_page(tmp_path):
     p.write_bytes(blank_pdf(2))
     msgs = FakeMessages([("end_turn", "--- page 1 ---\nboth pages run together"),
                          ("end_turn", "--- page 1 ---\nfirst"), ("end_turn", "second, no marker")])
-    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs), pages_per_chunk=10)
     res = t.transcribe_pdf(str(p), 2)
     assert res.page_texts == {1: "first", 2: "second, no marker"} and res.requests == 3
 
@@ -119,7 +119,7 @@ def test_refusal_records_error(tmp_path):
     p = tmp_path / "s.pdf"
     p.write_bytes(blank_pdf(1))
     msgs = FakeMessages([("refusal", "")])
-    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs), pages_per_chunk=10)
     res = t.transcribe_pdf(str(p), 1)
     assert res.error == "refusal" and res.page_texts == {}
 
@@ -138,7 +138,7 @@ def test_relative_page_numbers_are_mapped_back(tmp_path):
     p = tmp_path / "s.pdf"
     p.write_bytes(blank_pdf(5))
     msgs = FakeMessages([("end_turn", "--- page 1 ---\nX\n--- page 2 ---\nY")])
-    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs), pages_per_chunk=10)
     res = t.transcribe_pdf(str(p), 5, pages=[4, 5])
     assert res.page_texts == {4: "X", 5: "Y"} and res.requests == 1
 
@@ -147,5 +147,5 @@ def test_zero_width_chars_removed(tmp_path):
     p = tmp_path / "s.pdf"
     p.write_bytes(blank_pdf(1))
     msgs = FakeMessages([("end_turn", "--- page 1 ---\nID 13966349​84")])
-    t = tr.Transcriber(client=SimpleNamespace(messages=msgs))
+    t = tr.Transcriber(client=SimpleNamespace(messages=msgs), pages_per_chunk=10)
     assert t.transcribe_pdf(str(p), 1).page_texts == {1: "ID 1396634984"}
