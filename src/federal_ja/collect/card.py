@@ -7,9 +7,7 @@ from .report import summarize
 from .store import Store
 
 CARD_TEMPLATE = """---
-license: other
-license_name: us-government-public-records
-license_link: {project_url}
+license: cc0-1.0
 pretty_name: Federal Justification & Approval (J&A) Documents
 language:
 - en
@@ -208,6 +206,19 @@ Token counts and cost are recorded per document.
   may be mis-encoded at the source.
 * These are U.S. government records obtained from a public website. Some
   attachments may contain contractor-supplied material.
+
+## License
+
+The dataset is released under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/):
+use it for any purpose, including commercially, without asking.
+
+* The J&A documents and the USAspending figures are U.S. government records,
+  which are generally not protected by copyright in the United States
+  (17 U.S.C. 105). Material a contractor supplied to the government may be an
+  exception; CC0 covers only rights this project holds.
+* The transcriptions, metadata tables and match columns are dedicated to the
+  public domain under CC0.
+* The code that builds the dataset is Apache-2.0: {project_url}
 """
 
 

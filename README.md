@@ -225,3 +225,8 @@ What the statuses mean:
 - **Recall:** recall counts only positives the answer key found.
 - **Who judged:** the answer key was judged by Claude Opus 5.5 instances, not by a person.
 - **Redaction warning:** a quote can come from text that sits under a black redaction box in an improperly redacted PDF. Check the page image before reusing a quote.
+
+## License
+
+- **Code:** [Apache-2.0](LICENSE). See [NOTICE](NOTICE) for attribution.
+- **Dataset on Hugging Face:** [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). The J&A documents and USAspending figures are U.S. government records and generally not copyrighted (17 U.S.C. 105). Material a contractor supplied may be an exception.
