@@ -21,9 +21,9 @@ tags:
 configs:
 - config_name: notices
   data_files: data/notices.parquet
+  default: true
 - config_name: attachments
   data_files: data/attachments.parquet
-  default: true
 - config_name: pages
   data_files: data/pages.parquet
 ---
