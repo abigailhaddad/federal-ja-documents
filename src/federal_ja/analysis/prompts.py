@@ -162,6 +162,41 @@ OUTPUT JSON: {"answer": bool, "quote": string|null, "quote2": string|null, "n_fi
 <<EXCERPTS>>
 <<<EXCERPTS END>>>"""
 
+# Round-4 workforce_cause method (regex gate, then confirm). Written
+# 2026-10-17 on design data only (round-1 dev/holdout documents and the
+# round-3 keyword-enriched workforce set), then frozen before testing.
+WORKFORCE_CONFIRM_VERSION = "2026-10-17.wfgate1"
+CONFIRM_TEMPLATES["workforce_cause"] = """You are a careful federal-procurement reviewer reading ONE publicly posted sole-source Justification & Approval (J&A) / limited-sources / exception-to-fair-opportunity document (text extracted from a PDF or transcribed from a scan; may contain OCR errors, redactions, and missing pages). You are shown EXCERPTS from it (the passages around keyword matches), not the whole document.
+
+QUESTION: Does the document say that a FEDERAL workforce or administrative event caused or contributed to the need for THIS action, its timing, or a delay in the competitive action?
+
+Events that count: DOGE / the Department of Government Efficiency; the Deferred Resignation Program; reductions in force; hiring freezes; federal staff losses, departures, retirements, resignations, reassignments, vacancies or shortages; VERA/VSIP; executive orders on the federal workforce or cost efficiency; administration-directed contract terminations; agency reorganization or consolidation; a government shutdown, lapse in appropriations or furlough.
+
+Answer true ONLY if BOTH are shown in the excerpts:
+(1) the event itself, affecting the federal government (the agency, its contracting office or program office), and
+(2) that the event is a reason for this sole-source/bridge/extension action, for its timing, or for a delay of the competitive follow-on.
+An agency reorganization, consolidation or centralization initiative, or a cost-efficiency executive order (e.g. EO 14222), counts as an event when the document gives it as such a reason. A federal staffing shortage counts when the document gives it as a reason for this action.
+
+Answer false when:
+- the agency merely lacks in-house expertise or capacity, with no loss or reduction of federal staff described;
+- the staffing problem is the CONTRACTOR's or vendor's, or a labor-market shortage outside the government;
+- the event is only mentioned (history, background, a consequence of something else, or boilerplate) and is not given as a reason for this action or its timing;
+- the cause is a bid protest, a court, a disaster, a funding or budget decision, a change of contractor, equipment failure, a surge in workload, or an ordinary contract expiration, with no workforce or administrative event behind it;
+- the keyword is a false match (e.g. "VERA" as Veterans Equitable Resource Allocation, "restructuring" of a contract or a debt, a "vacant" building or lot).
+
+QUOTE RULES (strict)
+- "quote" must be an EXACT, contiguous excerpt copied character-for-character from the EXCERPTS, 8-60 words, and it must NAME the workforce or administrative event. Copy OCR errors and odd spellings exactly. You may only collapse line breaks to single spaces.
+- If the link to this action is in a different sentence, put that sentence in "quote2" (same rules). Never stitch passages together and never use "...".
+- If you cannot quote the event, answer false with quote null.
+- "answer" must agree with your explanation: if you conclude both conditions are met, answer true.
+
+OUTPUT JSON: {"answer": bool, "quote": string|null, "quote2": string|null, "explanation": string}
+
+<<METADATA>>
+<<<EXCERPTS START>>>
+<<EXCERPTS>>
+<<<EXCERPTS END>>>"""
+
 FULL_SCHEMA: dict = {
     "type": "object",
     "properties": {
@@ -201,7 +236,7 @@ CONFIRM_SCHEMA_N_FIRMS: dict = {
 
 # Tool names the frozen runs used (part of what the model sees).
 FULL_TOOL = "ja_review"
-CONFIRM_TOOL = {"agency_delay_cause": "ja_confirm", "political_direction": "ja_confirm2",
+CONFIRM_TOOL = {"agency_delay_cause": "ja_confirm", "workforce_cause": "ja_confirm_wf", "political_direction": "ja_confirm2",
                 "sources_rejected": "ja_confirm2", "expiring_funds": "ja_confirm2"}
 
 
@@ -223,4 +258,10 @@ def confirm_prompt(category: str, meta: dict, excerpts: list[str]) -> str:
 
 
 def confirm_schema(category: str) -> dict:
-    return CONFIRM_SCHEMA if category == "agency_delay_cause" else CONFIRM_SCHEMA_N_FIRMS
+    return CONFIRM_SCHEMA if category in ("agency_delay_cause", "workforce_cause") else CONFIRM_SCHEMA_N_FIRMS
+
+
+def prompt_version(category: str) -> str:
+    """Each category's prompt is versioned on its own, so changing one
+    category's method does not re-review the others."""
+    return WORKFORCE_CONFIRM_VERSION if category == "workforce_cause" else PROMPT_VERSION

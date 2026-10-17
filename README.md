@@ -173,14 +173,14 @@ uv run python -m federal_ja.analysis tag --help    # categories and their status
 ### Category status (validated 2026-10-17; details in [docs/analysis_validation.md](docs/analysis_validation.md))
 
 Precision and recall below were measured on 400 random J&As, with Wilson 95%
-intervals.
+intervals. `workforce_cause` was measured on a separate, fresh set of 400.
 
 | Category | What it tags | Status | Precision | Recall |
 |---|---|---|---|---|
 | `agency_delay_cause` | The J&A says the agency's own planning, reviews, approvals or staffing delayed the competitive action. | **screening** | 80% (55–93%) | 34% (21–51%) |
 | `sources_rejected` | Other firms responded and were found not capable (a tracked fact, not an issue). | **screening** | 71% (54–83%) | 71% (54–83%) |
 | `political_direction` | The action is attributed to the administration, an Executive Order or the agency head. | not shipped | 71% (45–88%) | 67% (42–85%) |
-| `workforce_cause` | A shutdown, staff losses, DOGE or a reorganisation caused the need or a delay. | not shipped | 47% (31–64%) | 88% (66–97%) |
+| `workforce_cause` | A shutdown, staff losses, DOGE or a reorganisation caused the need or a delay (round-4 method: keyword gate, then the model confirms). | **screening** | 92% (65–99%) | 69% (44–86%) |
 | `expiring_funds` | Expiring funds are given as a reason. | not shipped | 1 of 3 | 1 of 4 |
 | `repeat_bridge`, `lack_of_planning` | | not shipped | | |
 
@@ -191,3 +191,4 @@ What the statuses mean:
 - **not shipped:** the CLI refuses to run the category.
 - **Recall:** recall counts only positives the answer key found.
 - **Who judged:** the answer key was judged by Claude Opus 5.5 instances, not by a person.
+- **Redaction warning:** a quote can come from text that sits under a black redaction box in an improperly redacted PDF. Check the page image before reusing a quote.

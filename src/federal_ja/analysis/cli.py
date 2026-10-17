@@ -95,8 +95,9 @@ def cmd_tag(a) -> int:
 
     a.out.mkdir(parents=True, exist_ok=True)
     reviews_p, tags_p, skipped_p = a.out / "reviews.jsonl", a.out / "tags.jsonl", a.out / "skipped.jsonl"
-    done = {(r["notice_id"], c) for r in _load_jsonl(reviews_p)
-            if r["model"] == a.model and r["prompt_version"] == prompts.PROMPT_VERSION for c in r["categories"]}
+    done = {(r["notice_id"], c) for r in _load_jsonl(reviews_p) if r["model"] == a.model
+            for c in r["categories"]
+            if r.get("prompt_versions", {}).get(c, r.get("prompt_version")) == prompts.prompt_version(c)}
     skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
 
     todo, skipped = [], {}
@@ -112,7 +113,7 @@ def cmd_tag(a) -> int:
     if a.limit is not None:
         todo = todo[:a.limit]
     summary = {"experimental": True, "dataset_revision": rev.get("sha"), "categories": cats,
-               "model": a.model, "prompt_version": prompts.PROMPT_VERSION,
+               "model": a.model, "prompt_versions": {c: prompts.prompt_version(c) for c in cats},
                "notices": len(notices), "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
                "to_review": len(todo)}
     print(json.dumps(summary), file=sys.stderr)

@@ -153,16 +153,10 @@ def test_tag_document_rows(doc, shipped_all):
         "DEFINITION\nsources_rejected": {
             "answer": True, "quote": "two firms responded to the sources sought notice and were found not capable",
             "quote2": None, "explanation": "rejected", "n_firms": 2},
-        "Flag ONLY the 3 kinds": lambda p: {"none_found": False, "issues": [
-            {"category": "workforce_cause", "quote": "Due to the Deferred Resignation Program, the office lost three",
-             "quote2": None, "explanation": "tracking", "evidence_quote": None},
-            # other categories in the frozen prompt are discarded
-            {"category": "repeat_bridge", "quote": PAGE2[:80], "quote2": None, "explanation": "x",
-             "evidence_quote": None},
-            # unverifiable quote: dropped
-            {"category": "workforce_cause", "quote": "a hiring freeze stopped all work for many months",
-             "quote2": None, "explanation": "x", "evidence_quote": None},
-        ]} if p == 1 else {"none_found": True, "issues": []},
+        "QUESTION: Does the document say that a FEDERAL workforce": lambda p: {
+            "answer": True, "quote": "Due to the Deferred Resignation Program, the office lost three contracting officers",
+            "quote2": None, "explanation": "tracking"} if p == 1 else
+            {"answer": False, "quote": None, "quote2": None, "explanation": ""},
     }
     call = fake_call(responses)
     cats = ["workforce_cause", "agency_delay_cause", "sources_rejected", "expiring_funds"]
@@ -172,7 +166,7 @@ def test_tag_document_rows(doc, shipped_all):
     # expiring_funds has no keyword hit, so no call is made for it
     assert review["categories"]["expiring_funds"] == "no_candidate_passages"
     assert not any("expiring_funds" in pr for _t, _p, pr in call.calls)
-    assert len(call.calls) == 6       # 3 categories x 2 passes
+    assert len(call.calls) == 6       # 3 categories with keyword hits x 2 passes
     rows = tagger.output_rows(review, doc, "deadbeef")
     by_cat = {r["category"]: r for r in rows}
     assert set(by_cat) == {"workforce_cause", "agency_delay_cause", "sources_rejected"}
@@ -224,16 +218,22 @@ def test_prompt_is_frozen():
     # new validation round. Update this hash only together with both.
     import hashlib
     h = hashlib.sha256((prompts.WORKFORCE_PROMPT + "".join(
-        prompts.CONFIRM_TEMPLATES[c] for c in sorted(prompts.CONFIRM_TEMPLATES))).encode()).hexdigest()[:16]
+        prompts.CONFIRM_TEMPLATES[c] for c in sorted(prompts.CONFIRM_TEMPLATES)
+        if c != "workforce_cause")).encode()).hexdigest()[:16]
     assert (prompts.PROMPT_VERSION, h) == ("2026-10-16.frozen1", FROZEN_HASH)
+    # The round-4 workforce_cause method: prompt and gate patterns together.
+    h4 = hashlib.sha256((prompts.CONFIRM_TEMPLATES["workforce_cause"]
+                         + json.dumps(patterns.WORKFORCE_PATTERNS, sort_keys=True)).encode()).hexdigest()[:16]
+    assert (prompts.WORKFORCE_CONFIRM_VERSION, h4) == ("2026-10-17.wfgate1", WORKFORCE_HASH)
 
 
 FROZEN_HASH = "6506c770e58cbd47"
+WORKFORCE_HASH = "22199f4bf415584f"
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("cat", ["repeat_bridge", "lack_of_planning", "workforce_cause",
+@pytest.mark.parametrize("cat", ["repeat_bridge", "lack_of_planning",
                                  "political_direction", "expiring_funds"])
 def test_cli_refuses_unshipped(cat, tmp_path):
     with pytest.raises(SystemExit) as e:
@@ -249,4 +249,38 @@ def test_cli_help_says_experimental(capsys):
 
 def test_shipped_categories_match_validation():
     # Only categories with a "screening" or better status may run.
-    assert sorted(tagger.shipped()) == ["agency_delay_cause", "sources_rejected"]
+    assert sorted(tagger.shipped()) == ["agency_delay_cause", "sources_rejected", "workforce_cause"]
+
+
+# ── workforce_cause gate (round 4) ──────────────────────────────────────────
+
+@pytest.mark.parametrize("t", [
+    "due to the Deferred-\nResignation Program",            # hyphen + line wrap
+    "the agency lost three contracting officers",
+    "reduc-\ntions in force at the regional office",          # word split across a line
+    "the 43-day government shut-\ndown delayed the award",
+    "a hiring  freeze is in effect",
+    "RE-ORGANIZATION of the program office",
+    "the Department\u2019s staffing shortages",              # curly apostrophe
+    "per E.O. 14222 and the DOGE review",
+    "the COR left the Government in March",
+    "Defened Resignation",                                    # OCR misspelling
+])
+def test_workforce_gate_matches_messy_text(t):
+    assert patterns.find_hits(t, "workforce_cause")
+
+
+def test_workforce_gate_ignores_plain_text():
+    assert patterns.find_hits("The contractor has unique expertise and proprietary software.",
+                              "workforce_cause") == []
+
+
+def test_workforce_quote_must_name_the_event(doc, shipped_all):
+    # The model says yes but quotes only the reason, not the workforce event:
+    # the tag is dropped by the deterministic check.
+    responses = {"QUESTION: Does the document say that a FEDERAL workforce": {
+        "answer": True, "quote": "the recompetition could not be awarded before the current contract ends",
+        "quote2": None, "explanation": "x"}}
+    review = tagger.tag_document(doc, ["workforce_cause"], call_fn=fake_call(responses))
+    assert review["tags"] == [] and review["categories"]["workforce_cause"] == "not_tagged"
+    assert review["prompt_versions"] == {"workforce_cause": prompts.WORKFORCE_CONFIRM_VERSION}
