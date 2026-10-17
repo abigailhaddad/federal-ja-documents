@@ -14,14 +14,14 @@ without full and open competition. Agencies post them on SAM.gov as
 ```
 src/federal_ja/
   collect/     builds the dataset from SAM.gov and publishes it (this README)
-  analysis/    analysis of the published dataset -- coming
-tests/         tests for collection (parsing, diffing, text-source logic)
+  analysis/    EXPERIMENTAL issue tagging on the published dataset (below)
+tests/         tests (collection, and the analysis package on synthetic fixtures)
+docs/analysis_validation.md   how the analysis categories were validated
 .github/workflows/daily.yml   daily collection job
 ```
 
-`analysis/` will read only the published dataset (the parquet tables and
-files on Hugging Face), never collection internals, so the two can evolve
-separately.
+`analysis/` reads only the published dataset (the parquet tables on Hugging
+Face), never collection internals, so the two can evolve separately.
 
 ## Sources
 
@@ -139,3 +139,55 @@ uv run ja-collect --workdir $W stream
 
 The schedule is gated by the repository variable `DAILY_ENABLED` (off unless
 set to `true`). Secrets: `HF_TOKEN`, `ANTHROPIC_API_KEY`.
+
+## Experimental: issue tagging (`federal_ja.analysis`)
+
+**This is experimental.** It uses a language model (Claude Haiku 5.5) to tag
+passages in J&As that a person may want to check. Every tag is a **possible
+issue for a person to check against the document, never a finding** that
+anything was wrong. Every output row carries `"experimental": true`.
+
+```sh
+export ANTHROPIC_API_KEY=...        # and ANTHROPIC_WORKSPACE_ID if your key needs it
+uv run python -m federal_ja.analysis tag --category agency_delay_cause --limit 20 --out work/tags
+uv run python -m federal_ja.analysis tag --help    # categories and their status
+```
+
+### Input
+
+- **Document text.** Each J&A's text is its pages from `data/pages.parquet`, in attachment and page order. That includes native text layers and machine transcriptions of scanned pages. A `.docx` counts as one page. Spreadsheets are left out.
+- **Scope.** Documents of 200 to 60,000 characters are reviewed. The rest are written to `skipped.jsonl` with a reason.
+
+### Tags
+
+- **Verified quote.** A tag is kept only if its verbatim quote is found in the page text, exactly or after whitespace and quote-mark normalisation.
+- **Page provenance.** The tag records which page the quote is on, and whether that page was machine-transcribed.
+- **Two passes.** Each document is reviewed in two passes, and the union is kept. Each tag records which passes found it.
+
+### Output
+
+- **Files.** The run writes `reviews.jsonl` (one line per document, including documents with no tags), `tags.jsonl` (one line per tag) and `skipped.jsonl`.
+- **Keys.** Results are keyed by model and `PROMPT_VERSION`, and a rerun resumes.
+- **Spend cap.** `--max-usd` stops a run once the cap is reached.
+
+### Category status (validated 2026-10-17; details in [docs/analysis_validation.md](docs/analysis_validation.md))
+
+Precision and recall below were measured on 400 random J&As, with Wilson 95%
+intervals.
+
+| Category | What it tags | Status | Precision | Recall |
+|---|---|---|---|---|
+| `agency_delay_cause` | The J&A says the agency's own planning, reviews, approvals or staffing delayed the competitive action. | **screening** | 80% (55–93%) | 34% (21–51%) |
+| `sources_rejected` | Other firms responded and were found not capable (a tracked fact, not an issue). | **screening** | 71% (54–83%) | 71% (54–83%) |
+| `political_direction` | The action is attributed to the administration, an Executive Order or the agency head. | not shipped | 71% (45–88%) | 67% (42–85%) |
+| `workforce_cause` | A shutdown, staff losses, DOGE or a reorganisation caused the need or a delay. | not shipped | 47% (31–64%) | 88% (66–97%) |
+| `expiring_funds` | Expiring funds are given as a reason. | not shipped | 1 of 3 | 1 of 4 |
+| `repeat_bridge`, `lack_of_planning` | | not shipped | | |
+
+What the statuses mean:
+
+- **ready:** the precision lower bound is at least 80%, and stability is at least 90%. No category is ready.
+- **screening:** the precision lower bound is at least 50%. Use these to find candidates for a person to read, not to count anything.
+- **not shipped:** the CLI refuses to run the category.
+- **Recall:** recall counts only positives the answer key found.
+- **Who judged:** the answer key was judged by Claude Opus 5.5 instances, not by a person.
