@@ -89,6 +89,39 @@ EXCLUDE2 = {
     "sources_rejected": re.compile(r"\bno\s+(?:responses?|vendors?|firms?|other)\b|did\s+not\s+receive\s+any", re.I),
 }
 
+# ── workforce_cause gate (round 4, written 2026-10-17 on design data only) ──
+# A federal workforce / administrative event: deferred resignation, RIF,
+# hiring freeze, DOGE / workforce or cost-efficiency EOs, VERA/VSIP, staff
+# losses, vacancies, attrition, retirements, reassignments, shutdown /
+# lapse / furlough, reorganisation. Broad on purpose: the model then decides
+# whether the document ties the event to THIS action.
+_WN = r"(?:personnel|staff|staffing|employees|workforce|FTEs?|contracting\s+officers?|contract\s+specialists?|" \
+      r"billets|positions|manning|manpower|team\s+members|CORs?|program\s+managers?|engineers|officers)"
+WORKFORCE_PATTERNS: dict[str, str] = {
+    "drp": r"\bdef\w{0,4}ed[\s-]*resig\w*|\bDRP\b|fork\s+in\s+the\s+road",
+    "rif": r"reductions?[\s-]+in[\s-]+force|\bRIFs?\b|\bRIF'?d\b",
+    "hiring_freeze": r"hiring[\s-]+(?:freeze|pause|restrictions?)",
+    "doge": r"\bDOGE\b|department\s+of\s+government\s+efficiency",
+    "workforce_eo": r"(?:executive\s+order|\bE\.?\s?O\.?)\s*(?:no\.?\s*)?1(?:4158|4170|4210|4222|4240)\b",
+    "vera_vsip": r"\bVERA\b|\bVSIP\b|voluntary\s+(?:early\s+)?(?:retirement|separation)",
+    "staff_loss": (r"(?:loss|losses|lost|departures?|attrition|reductions?|shortages?|decrease|turnover|vacanc\w+)\s+"
+                   r"(?:of|in)\s+" + _W1 + r"{0,4}" + _WN),
+    "staff_noun_loss": (r"(?:staff|staffing|personnel|workforce|manning|manpower)\s+"
+                        r"(?:shortages?|reductions?|losses|cuts|constraints|challenges|deficits?|changes|turnover|levels)"),
+    "lost_n": r"\blost\s+" + _W1 + r"{0,3}" + _WN,
+    "vacancy": r"\bvacan(?:t|cy|cies)\b",
+    "attrition": r"\battrition\b|\bturnover\b|short[\s-]*staffed|understaffed",
+    "departure": (r"\b(?:departure|reassignment|retirement|resignation)\s+of\s+" + _W1 + r"{0,4}" + _WN +
+                  r"|\b(?:departed|retired|resigned|reassigned)\b|left\s+(?:the\s+)?(?:agency|government|federal\s+service)"),
+    "workforce_reduction": r"workforce\s+(?:reduction|optimization|realignment|restructur\w*|cuts?)",
+    "backfill": r"(?:cannot|can\s*not|could\s+not|unable\s+to|not)\s+(?:be\s+)?backfill\w*",
+    "shutdown": r"(?:government|federal)\s+(?:government\s+)?shutdowns?|\bshutdown\b|lapses?\s+in\s+(?:federal\s+)?appropriations?|furlough\w*",
+    "reorg": r"\bre-?organiz\w+|\bre-?structur\w+|\bconsolidation\s+of\s+" + _W1 + r"{0,3}(?:offices?|operations|functions|agencies)",
+    "retirements": r"\bretirements\b|\bresignations?\b",
+}
+_CW = {name: re.compile(p, re.I) for name, p in WORKFORCE_PATTERNS.items()}
+
+
 _C1 = {name: re.compile(p, re.I) for name, p in AGENCY_DELAY_PATTERNS.items()}
 _C2 = {c: [re.compile(p, re.I) for p in ps] for c, ps in PATTERNS2.items()}
 _INWORD_HYPHEN = re.compile(r"(?<=[a-z])-(?=[a-z])")
@@ -146,7 +179,31 @@ def _hits2(norm: str, cat: str) -> list[Hit]:
     return out
 
 
-PATTERN_CATEGORIES = ("agency_delay_cause", *PATTERNS2)
+def _workforce_hits(norm: str) -> list[Hit]:
+    """Same mechanics as agency_delay_cause (normalised + de-hyphenated
+    variants, sentence context, dedupe per pattern and sentence), without
+    the protest exclusion."""
+    variants = [norm]
+    dehyph = _INWORD_HYPHEN.sub("", norm)
+    if dehyph != norm:
+        variants.append(dehyph)
+    hits: list[Hit] = []
+    seen: set[tuple[str, str]] = set()
+    for name, rx in _CW.items():
+        for v in variants:
+            for m in rx.finditer(v):
+                s, e = _sentence_bounds(v, m.start(), m.end(), 400)
+                sent = v[s:e].strip()
+                if (name, sent) in seen:
+                    continue
+                seen.add((name, sent))
+                pos = norm.find(sent[:40]) if v is not norm else m.start()
+                pos = max(pos, 0)
+                hits.append((pos, pos + (m.end() - m.start()), sent))
+    return hits
+
+
+PATTERN_CATEGORIES = ("agency_delay_cause", "workforce_cause", *PATTERNS2)
 
 
 def find_hits(raw_text: str, category: str) -> list[Hit]:
@@ -155,6 +212,8 @@ def find_hits(raw_text: str, category: str) -> list[Hit]:
     norm = normalize(raw_text)
     if category == "agency_delay_cause":
         return _agency_delay_hits(norm)
+    if category == "workforce_cause":
+        return _workforce_hits(norm)
     if category in PATTERNS2:
         return _hits2(norm, category)
     raise ValueError(f"no patterns for {category!r}")

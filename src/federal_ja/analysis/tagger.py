@@ -39,7 +39,7 @@ class Category:
 # Statuses come from docs/analysis_validation.md. Only categories in SHIPPED
 # can be run; see STATUS for each one's measured numbers.
 CATEGORIES: dict[str, Category] = {c.name: c for c in (
-    Category("workforce_cause", "full", "tracked fact",
+    Category("workforce_cause", "confirm", "tracked fact",
              "The J&A says a federal workforce or administrative event (DOGE, the Deferred Resignation "
              "Program, a RIF, a hiring freeze, staff losses, a reorganisation, a shutdown) caused or "
              "contributed to the need, the timing or a delay."),
@@ -106,6 +106,12 @@ def _verify(cat: str, item: dict, nd: str) -> dict | None:
     q2 = item.get("quote2") or None
     if q2 and not quote_ok(q2, nd):
         q2 = None
+    # workforce_cause: the quoted text itself must name the workforce or
+    # administrative event (a gate-pattern hit in quote or quote2), so a tag
+    # can't rest on a passage that only states the reason for the action.
+    if cat == "workforce_cause" and not (patterns.find_hits(item["quote"], cat)
+                                         or (q2 and patterns.find_hits(q2, cat))):
+        return None
     return {"category": cat, "quote": clean_quote(item["quote"]),
             "quote2": clean_quote(q2) if q2 else None,
             "explanation": (item.get("explanation") or "").strip(),
@@ -146,9 +152,6 @@ def tag_document(doc: Document, categories: list[str], *, model: str = llm.DEFAU
     pass_nos = list(range(first_pass, first_pass + passes))
     jobs: list[tuple[str, str, dict, str, int]] = []   # (category, prompt, schema, tool, pass)
     candidates: dict[str, int] = {}
-    if "workforce_cause" in categories:
-        pr = prompts.full_prompt(doc.meta, doc.model_text())
-        jobs += [("workforce_cause", pr, prompts.FULL_SCHEMA, prompts.FULL_TOOL, p) for p in pass_nos]
     vt = doc.verification_text()
     for c in categories:
         if CATEGORIES[c].method != "confirm":
@@ -171,10 +174,7 @@ def tag_document(doc: Document, categories: list[str], *, model: str = llm.DEFAU
         usage["input_tokens"] += int(u.get("input_tokens") or 0)
         usage["output_tokens"] += int(u.get("output_tokens") or 0)
         usage["cost_usd"] += float(u.get("cost_usd") or 0)
-        if cat == "workforce_cause":
-            items = [i for i in parsed.get("issues") or [] if i.get("category") == "workforce_cause"]
-        else:
-            items = [{**parsed, "category": cat}] if parsed.get("answer") else []
+        items = [{**parsed, "category": cat}] if parsed.get("answer") else []
         for it in items:
             v = _verify(cat, it, nd)
             if v:
@@ -204,6 +204,7 @@ def tag_document(doc: Document, categories: list[str], *, model: str = llm.DEFAU
         "notice_id": doc.notice_id,
         "model": model,
         "prompt_version": prompts.PROMPT_VERSION,
+        "prompt_versions": {c: prompts.prompt_version(c) for c in categories},
         "passes": pass_nos,
         "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "categories": status,
@@ -240,7 +241,7 @@ def output_rows(review: dict, doc: Document, dataset_revision: str | None) -> li
             "all_passes": len(t["passes"]) == len(review["passes"]),
             "method": t["method"],
             "model": review["model"],
-            "prompt_version": review["prompt_version"],
+            "prompt_version": prompts.prompt_version(t["category"]),
             "dataset_revision": dataset_revision,
             "run_at": review["run_at"],
         })
