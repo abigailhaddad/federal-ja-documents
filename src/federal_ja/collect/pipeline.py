@@ -462,6 +462,29 @@ def reset_multipage_transcriptions(store: Store) -> dict:
 PERMANENT_TX_ERRORS = ("refusal", "content filtering")
 
 
+def recheck_page_rule(store: Store) -> dict:
+    """Re-apply the current page rule to stored native page text (no file
+    access): pages whose text layer is now judged unusable become
+    needs_transcription, and their files' textless_pages are updated."""
+    pages = docs = 0
+    for key, rows in store.pages.items():
+        changed = False
+        for r in rows:
+            if r["text_source"] == "transcription" or r["needs_transcription"]:
+                continue
+            if not ex.page_has_text(r["text"] or ""):
+                r["needs_transcription"] = True
+                pages += 1
+                changed = True
+        if changed:
+            docs += 1
+            a = store.attachments.get(key)
+            if a is not None:
+                tl = [r["page_number"] for r in rows if r["needs_transcription"]]
+                a.update(textless_pages=tl, pages_with_text=len(rows) - len(tl), needs_transcription=True)
+    return {"pages": pages, "docs": docs}
+
+
 def transcription_candidates(store: Store, retry_declined: bool = False) -> list[dict]:
     """Files with image-only pages still to transcribe. Files the model
     declined (refusal / output blocked by content filtering) are skipped

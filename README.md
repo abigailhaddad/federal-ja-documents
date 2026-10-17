@@ -61,7 +61,8 @@ read as latin-1 with the csv field-size limit raised.
   the PDF was image-only), `pdf_text+transcription` (native text for typed
   pages, transcription for image-only pages), or `none`.
 * **Scanned pages:** the decision is per page. A PDF page whose text layer
-  has fewer than 300 characters (after stripping whitespace) is listed in
+  has fewer than 300 characters (after stripping whitespace), or is
+  font-encoding garbage (glyph codes like `/0 /i255`), is listed in
   `textless_pages`, and only those pages are transcribed with the Anthropic API (`claude-haiku-5-5`),
   sent as PDF documents with instructions to transcribe verbatim, mark
   `[REDACTED]` and `[illegible]`, and never guess redacted content. This

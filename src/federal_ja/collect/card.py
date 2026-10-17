@@ -145,8 +145,10 @@ pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
 
 PDF text has `--- page N ---` markers. The scanned/typed decision is made per
 page: a page whose text layer has fewer than 300 characters (whitespace
-stripped; `text_layer_chars` in `pages`) is listed in `textless_pages`, and
-only those pages are transcribed (`transcribed_pages`). For a transcribed
+stripped; `text_layer_chars` in `pages`), or whose text layer is
+font-encoding garbage (mostly glyph codes such as `/0 /i255 /3` or control
+characters), is listed in `textless_pages`, and only those pages are
+transcribed (`transcribed_pages`). For a transcribed
 page, `pages.text` is the transcription and `pages.text_layer_text` keeps the
 thin native layer. PNG/JPEG attachments are treated as one image-only page.
 Many J&As are typed documents in which one or more pages (often the redacted

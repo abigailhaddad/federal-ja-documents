@@ -158,3 +158,25 @@ def test_image_attachment_is_one_textless_page(tmp_path):
     p.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 50)
     r = ex.extract_file(str(p), "a.png")
     assert r.file_kind == "image" and r.needs_transcription and r.textless_pages == [1]
+
+
+def test_garbled_text_layers_count_as_textless():
+    glyphs = " ".join(f"/{i % 40}" for i in range(400)) + " /i255 /X20/X53/X50"
+    assert ex.text_layer_garbled(glyphs) and not ex.page_has_text(glyphs)
+    control = "\x19\x08\x06 \x0f \x06\x02 \x05 \x16\x13\x1a " * 40
+    assert ex.text_layer_garbled(control)
+    table = "Page 6 of 13 14F0721 - 03/31/2026 P00076 P00049 " * 10
+    assert not ex.text_layer_garbled(table) and ex.page_has_text(table)
+    assert not ex.text_layer_garbled(LONG) and not ex.text_layer_garbled("")
+
+
+def test_recheck_marks_garbled_pages(tmp_path):
+    from federal_ja.collect import pipeline
+    from federal_ja.collect.store import Store
+    s = Store(str(tmp_path))
+    garb = " ".join(f"/{i % 40}" for i in range(400))
+    s.attachments[("n", "1")] = {"notice_id": "n", "resource_id": "1", "download_status": "ok", "file_kind": "pdf"}
+    pipeline.set_pdf_pages(s, s.attachments[("n", "1")], [LONG, LONG])
+    s.pages[("n", "1")][1]["text"] = garb      # as stored by the older rule
+    assert pipeline.recheck_page_rule(s) == {"pages": 1, "docs": 1}
+    assert s.attachments[("n", "1")]["textless_pages"] == [2]

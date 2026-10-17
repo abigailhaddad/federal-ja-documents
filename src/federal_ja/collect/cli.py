@@ -262,6 +262,12 @@ def cmd_reextract_remote(args, store: Store) -> dict:
     return {"reextracted": n, "still_failing": sum(1 for a in rows if a.get("extract_error"))}
 
 
+def cmd_recheck_pages(args, store: Store) -> dict:
+    out = pipeline.recheck_page_rule(store)
+    store.save()
+    return out
+
+
 def cmd_reextract(args, store: Store) -> dict:
     n = pipeline.reextract(store)
     store.save()
@@ -332,6 +338,15 @@ def cmd_publish(args, store: Store) -> dict:
     return {"uploaded_files": hf_sync.publish_delta(store, card, now=now)}
 
 
+def cmd_pull(args, store: Store) -> dict:
+    from . import hf_sync
+    if not hf_sync.pull_tables(args.workdir):
+        raise SystemExit("remote dataset is not in this project's layout")
+    s = Store(args.workdir).load()
+    return {"notices": len(s.notices), "attachments": len(s.attachments),
+            "pages": sum(len(v) for v in s.pages.values())}
+
+
 def cmd_daily(args, store: Store) -> dict:
     from . import hf_sync
 
@@ -380,6 +395,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--keep-local", help="file of file_paths to keep on disk after upload")
     sub.add_parser("reextract", help="re-run native extraction on downloaded files")
     sub.add_parser("pages", help="rebuild per-page rows from stored text")
+    sub.add_parser("recheck_pages", help="re-apply the page text rule to stored native text")
     s = sub.add_parser("links", help="fetch J&As behind supported link resources")
     s.add_argument("--retry-errors", action="store_true")
     s.add_argument("--batch-files", type=int, default=100)
@@ -396,6 +412,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--project-after", type=int, default=500,
                    help="pages after which to start enforcing the cost projection")
     sub.add_parser("report", help="print counts")
+    sub.add_parser("pull", help="download the table files from the HF dataset into the workdir")
     s = sub.add_parser("publish", help="upload to Hugging Face")
     s.add_argument("--mode", choices=["delta", "full", "tables"], default="delta")
     s.add_argument("--delete-stale", action="store_true")

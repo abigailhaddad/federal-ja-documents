@@ -340,7 +340,7 @@ def test_cli_parses_every_command(tmp_path, capsys):
     import pytest
     from federal_ja.collect import cli
     for cmd in ("scan", "resources", "download", "stream", "transcribe", "report", "publish",
-                "daily", "pages", "reextract", "reextract_remote", "links"):
+                "daily", "pages", "reextract", "reextract_remote", "links", "recheck_pages", "pull"):
         with pytest.raises(SystemExit) as e:
             cli.main(["--workdir", str(tmp_path), cmd, "--help"])
         assert e.value.code == 0

@@ -108,8 +108,25 @@ def text_layer_chars(text: str) -> int:
     return len((text or "").strip())
 
 
+_GLYPH_TOKEN = re.compile(r"(/[A-Za-z]{0,3}\d+)+")
+_CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def text_layer_garbled(text: str) -> bool:
+    """True for text layers that are font-encoding garbage rather than words:
+    mostly glyph-name tokens ('/0 /i255 /3', '/X20/X53') or many control
+    characters. Seen on ~3% of pages that were otherwise counted as typed."""
+    t = (text or "").strip()
+    if not t:
+        return False
+    toks = t.split()
+    glyph = sum(1 for x in toks if _GLYPH_TOKEN.fullmatch(x)) / len(toks)
+    control = len(_CONTROL.findall(t)) / len(t)
+    return glyph > 0.3 or control > 0.1
+
+
 def page_has_text(text: str) -> bool:
-    return text_layer_chars(text) >= MIN_CHARS_PER_TEXT_PAGE
+    return text_layer_chars(text) >= MIN_CHARS_PER_TEXT_PAGE and not text_layer_garbled(text)
 
 
 def textless_pages(page_texts: list[str]) -> list[int]:
