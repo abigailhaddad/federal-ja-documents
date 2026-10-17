@@ -114,3 +114,30 @@ def test_public_sam_link_and_fingerprint_changes():
     assert res.notices["a"]["csv_link"].startswith("https://sam.gov/workspace")
     assert row_fingerprint(r1) != row_fingerprint(dict(r1, Description="edited"))
     assert row_fingerprint(r1) == row_fingerprint(dict(r1, Link="other"))
+
+
+def test_open_csv_url_keeps_session_alive(monkeypatch):
+    import gc
+    import weakref
+    from federal_ja.collect import sources
+
+    class Raw(io.BytesIO):
+        decode_content = False
+        auto_close = True
+
+    class Resp:
+        def __init__(self):
+            self.raw = Raw("NoticeId,Type,PostedDate\na,Justification,2025-03-01\n".encode("latin-1"))
+        def raise_for_status(self):
+            pass
+
+    class Sess:
+        def get(self, *a, **k):
+            return Resp()
+    s = Sess()
+    ref = weakref.ref(s)
+    fh = sources.open_csv_url("https://x", session=s)
+    del s
+    gc.collect()
+    assert ref() is not None          # held by the stream
+    assert "Justification" in fh.read()

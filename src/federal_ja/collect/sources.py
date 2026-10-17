@@ -239,7 +239,16 @@ def open_csv_url(url: str, session: requests.Session | None = None) -> IO[str]:
               headers={"User-Agent": config.USER_AGENT})
     r.raise_for_status()
     r.raw.decode_content = True
-    return io.TextIOWrapper(r.raw, encoding="latin-1", newline="")
+    # urllib3 closes the response as soon as it is fully read, and a
+    # TextIOWrapper then raises "I/O operation on closed file" instead of
+    # returning EOF.
+    r.raw.auto_close = False
+    fh = io.TextIOWrapper(r.raw, encoding="latin-1", newline="")
+    # Keep the response and session alive for as long as the stream is read;
+    # otherwise they are garbage-collected and the socket is closed.
+    fh._response = r  # type: ignore[attr-defined]
+    fh._session = s  # a collected Session closes its connection pool
+    return fh
 
 
 def head_etag(url: str) -> dict:
