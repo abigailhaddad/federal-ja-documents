@@ -11,7 +11,7 @@ import json
 import logging
 import os
 
-from . import config
+from . import config, published
 from .store import LAYOUT_VERSION, Store
 
 log = logging.getLogger(__name__)
@@ -63,6 +63,18 @@ def pull_tables(workdir: str, repo_id: str = config.HF_REPO_ID) -> bool:
     return True
 
 
+def _table_ops(store: Store, tables: dict[str, str]) -> list:
+    """Commit operations for the published tables (built by published.write,
+    which are not the working copies in data/) and the dataset card."""
+    from huggingface_hub import CommitOperationAdd
+
+    if set(tables) != set(TABLE_FILES):
+        raise ValueError(f"expected tables {TABLE_FILES}, got {sorted(tables)}")
+    ops = [CommitOperationAdd(path_in_repo=rel, path_or_fileobj=tables[rel]) for rel in TABLE_FILES]
+    ops.append(CommitOperationAdd(path_in_repo="README.md", path_or_fileobj=store.path("README.md")))
+    return ops
+
+
 def files_to_upload(store: Store) -> list[str]:
     return sorted(a["file_path"] for a in store.attachments.values()
                   if a.get("download_status") == "ok" and a.get("file_path")
@@ -70,7 +82,7 @@ def files_to_upload(store: Store) -> list[str]:
 
 
 def publish_delta(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
-                  batch_size: int = 500, now: str = "") -> int:
+                  batch_size: int = 500, now: str = "", *, us_cols: dict | None) -> int:
     """Commit new files in batches, then the tables and the dataset card."""
     from huggingface_hub import CommitOperationAdd
 
@@ -87,15 +99,14 @@ def publish_delta(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID
     store.save()
     with open(store.path("README.md"), "w") as f:
         f.write(card_text)
-    ops = [CommitOperationAdd(path_in_repo=p, path_or_fileobj=store.path(p))
-           for p in TABLE_FILES + ["README.md"]]
+    ops = _table_ops(store, published.write(store, us_cols))
     api.create_commit(repo_id, ops, repo_type="dataset",
                       commit_message="Update notices, attachments and dataset card")
     return len(paths)
 
 
 def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
-                 now: str = "", delete_stale: bool = False) -> dict:
+                 now: str = "", delete_stale: bool = False, *, us_cols: dict | None) -> dict:
     """Initial upload of a complete local workdir (replaces an older layout).
 
     Uses upload_large_folder (resumable, multi-commit). With delete_stale,
@@ -113,8 +124,7 @@ def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
     store.save()
     with open(store.path("README.md"), "w") as f:
         f.write(card_text)
-    ops = [CommitOperationAdd(path_in_repo=p, path_or_fileobj=store.path(p))
-           for p in TABLE_FILES + ["README.md"]]
+    ops = _table_ops(store, published.write(store, us_cols))
     api.create_commit(repo_id, ops, repo_type="dataset",
                       commit_message="Notices, attachments and dataset card")
     deleted = 0
@@ -131,7 +141,7 @@ def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
 
 
 def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
-                   delete_stale: bool = False) -> dict:
+                   delete_stale: bool = False, *, us_cols: dict | None) -> dict:
     """One commit with the tables and the dataset card; optionally a second
     that deletes remote files that are neither tables nor stored originals
     (i.e. leftovers of an older layout). Original files must already be on
@@ -148,8 +158,7 @@ def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_I
     store.save()
     with open(store.path("README.md"), "w") as f:
         f.write(card_text)
-    ops = [CommitOperationAdd(path_in_repo=p, path_or_fileobj=store.path(p))
-           for p in TABLE_FILES + ["README.md"]]
+    ops = _table_ops(store, published.write(store, us_cols))
     info = api.create_commit(repo_id, ops, repo_type="dataset",
                              commit_message="Notices, attachments and pages tables; dataset card")
     out = {"tables_commit": getattr(info, "oid", ""), "deleted_stale": []}

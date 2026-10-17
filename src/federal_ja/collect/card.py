@@ -48,12 +48,18 @@ Code and issue tracker: {project_url}
 
 | Path | What |
 |---|---|
-| `data/notices.parquet` | one row per J&A notice ({n_notices:,} rows) |
+| `data/notices.parquet` | one row per J&A notice ({n_notices:,} rows): agency, sub-tier, office, dates, award number, and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
 | `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | J&A rows found in the source CSVs that are not in `notices` and why ({n_exclusions:,} rows) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
+
+`attachments` and `pages` repeat the main fields of their notice right after
+`notice_id`, so every table shows which J&A a row belongs to: `agency`,
+`sub_tier`, `office`, `notice_title` (notices `title`), `posted_date`,
+`notice_type` (notices `type`), `award_number`, `sam_link`. They are copies
+made when the tables are published; `notices` is the source.
 
 ### Coverage at build time
 
@@ -63,6 +69,8 @@ Code and issue tracker: {project_url}
 * Downloaded files by kind: {by_kind}
 * Text source of downloaded files: {by_text}
 * PDFs with at least one image-only page: {n_scanned:,} of {n_pdfs:,} ({n_pages_scanned:,} such pages)
+
+{usaspending_section}
 
 ## Sources
 
@@ -203,7 +211,8 @@ Token counts and cost are recorded per document.
 """
 
 
-def render_card(store: Store, start_date: str, built_at: str) -> str:
+def render_card(store: Store, start_date: str, built_at: str,
+                us_cols: dict | None = None) -> str:
     s = summarize(store)
     from collections import Counter
     dl = Counter(a.get("download_status") for a in store.attachments.values())
@@ -247,5 +256,149 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         model=config.TRANSCRIBE_MODEL, not_downloaded_lines=not_downloaded_lines,
         n_res_error=res_status.get("error", 0), n_no_att=res_status.get("no_attachments", 0),
         n_multi_groups=len(multi), n_multi_notices=sum(multi), n_tx_pages=n_tx_pages,
+        usaspending_section=usaspending_section(store, us_cols),
         n_tx_failed_pages=len(failed), link_lines=link_lines, n_tx_failed_docs=len({k for k, _ in failed}),
     )
+
+
+USASPENDING_TEMPLATE = """## Vendor and amount from USAspending (`usaspending_*` columns in `notices`)
+
+SAM's J&A notices rarely say who got the contract or for how much. Each
+notice's `award_number` is looked up in USAspending's prime-contract
+transactions, read from the public Hugging Face dataset
+[`{hf_dataset}`](https://huggingface.co/datasets/{hf_dataset}) (a Parquet
+mirror of USAspending's Award Data Archive; only its `serve/contracts/<FY>.parquet`
+files, FY{fy_first}-FY{fy_last}, which hold each transaction once).
+
+**As of:** the USAspending data runs through **{as_of}** (latest
+`last_modified_date` in the files read; column `usaspending_as_of`). The join
+was rebuilt on {joined_at} (UTC) and is rebuilt on every publish. Per-file
+dates are in `data/collection_state.json` under `usaspending`.
+
+**Match rate:** {matched:,} of {n:,} notices ({rate:.1%}) matched one
+USAspending award.
+
+| `usaspending_match_method` | notices | meaning |
+|---|---|---|
+{method_lines}
+
+Notices posted more than 90 days before {as_of}: {old_matched:,} of {old_n:,}
+matched ({old_rate:.1%}); posted in the last 90 days: {new_matched:,} of {new_n:,}
+({new_rate:.1%}), mostly because of the reporting lag described below.
+
+By agency (agencies with at least 50 notices). Most GSA J&As without a match
+are Public Buildings Service real-property leases (`award_number` like
+`LGA48151` or `GS-09P-LCA02608`), which are not reported as contracts to
+USAspending; legislative-branch agencies (e.g. Library of Congress) do not
+report to it either.
+
+| agency | notices | matched |
+|---|---|---|
+{agency_lines}
+
+**Read the amounts carefully.**
+
+* `usaspending_total_obligated` is the sum of `federal_action_obligation`
+  over every transaction of the matched award in FY{fy_first}-FY{fy_last}:
+  money **obligated so far**. It is **not** the J&A's estimated value, which
+  is often the ceiling over all option years. Obligations can be negative
+  (de-obligations). Awards with transactions before FY{fy_first} are undercounted.
+* For an IDV (an indefinite-delivery contract, BPA, or GWAC) the IDV's own
+  transactions usually obligate nothing; money is obligated on the orders
+  under it. `usaspending_idv_orders` and `usaspending_idv_orders_obligated`
+  count the orders whose parent is that IDV and sum their obligations, for
+  all ordering agencies (a GSA schedule or NASA SEWP contract can have orders
+  from many agencies, so this is not the amount of the order the J&A is
+  about). Only direct orders count; calls under a BPA that was set up under
+  the IDV do not.
+* `usaspending_current_total_value` and `usaspending_potential_total_value`
+  are USAspending's award-level values (base and exercised options; base and
+  all options) from the latest transaction.
+* **Reporting lag.** USAspending publishes Department of Defense contract
+  data about 90 days after the action, and an award is in USAspending only
+  once its first action is reported. Recent J&As, DoD ones especially, may
+  not match yet, and many J&As are posted before the award. A missing match
+  is not evidence that no contract was signed.
+* A match is by award number only. A notice's `award_number` is typed by the
+  posting office and can be wrong, can be the IDV when the J&A is for one
+  order, or can list several awards.
+
+Columns:
+
+| column | meaning |
+|---|---|
+| `usaspending_matched` | true if exactly one award was chosen |
+| `usaspending_match_method` | how (table above) |
+| `usaspending_match_note` | for `ambiguous`: the candidate award keys; for `piid_not_found`: whether the number looks like a solicitation number; for a match at another agency: says so |
+| `usaspending_candidates` | number of USAspending awards with this PIID |
+| `usaspending_award_key` | USAspending `contract_award_unique_key` |
+| `usaspending_permalink` | the award's page on usaspending.gov |
+| `usaspending_award_or_idv` | `AWARD` or `IDV` |
+| `usaspending_award_type` | e.g. DEFINITIVE CONTRACT, DELIVERY ORDER, IDC, BPA |
+| `usaspending_piid` | the matched `award_id_piid` as USAspending writes it |
+| `usaspending_parent_award_piid` | for an order: the PIID of the IDV it was placed under |
+| `usaspending_recipient_name`, `usaspending_recipient_uei` | the vendor (from the latest transaction) |
+| `usaspending_recipient_parent_name` | the vendor's parent company |
+| `usaspending_awarding_agency`, `usaspending_awarding_sub_agency`, `usaspending_awarding_office` | USAspending's awarding agency, sub-agency and office |
+| `usaspending_same_agency` | USAspending's awarding agency is the notice's agency, by agency code (Army, Navy and Air Force count as Defense) or name; false is common and expected when an agency orders under another agency's contract (GSA schedules, NASA SEWP); empty when USAspending gives no agency |
+| `usaspending_total_obligated` | sum of `federal_action_obligation`, US dollars (see above) |
+| `usaspending_transactions` | number of transactions summed |
+| `usaspending_current_total_value` | award-level base and exercised options value |
+| `usaspending_potential_total_value` | award-level base and all options value |
+| `usaspending_first_action_date`, `usaspending_latest_action_date` | earliest and latest `action_date` |
+| `usaspending_extent_competed` | as reported on the latest transaction |
+| `usaspending_other_than_full_and_open` | the exception cited on the latest transaction |
+| `usaspending_idv_orders`, `usaspending_idv_orders_obligated` | IDVs only: orders under it and their summed obligations |
+| `usaspending_as_of` | latest `last_modified_date` in the USAspending files read |
+"""
+
+METHOD_MEANING = {
+    "exact": "the award number equals one award's PIID (ignoring case, spaces and punctuation)",
+    "exact+agency": "several awards share the PIID; exactly one is at the notice's agency",
+    "without_modification_number": "matched after dropping a trailing modification number (e.g. `_P00003`)",
+    "without_modification_number+agency": "as above, then the notice's agency picked one of several",
+    "ambiguous": "several awards share the PIID and the agency does not pick one; none chosen",
+    "piid_not_found": "no USAspending award has this PIID (yet)",
+    "no_piid": "`award_number` is empty or a placeholder (TBD, N/A, See J&A, XXXX, too short)",
+    "multiple_award_numbers": "`award_number` lists several awards; not matched",
+}
+
+
+def usaspending_section(store: Store, us_cols: dict | None) -> str:
+    from collections import Counter
+
+    from . import usaspending
+
+    info = store.state.get("usaspending")
+    if us_cols is None or not info:
+        return ""
+    n = len(us_cols)
+    matched = sum(1 for c in us_cols.values() if c["usaspending_matched"])
+    methods = Counter(c["usaspending_match_method"] for c in us_cols.values())
+    order = list(METHOD_MEANING)
+    method_lines = "\n".join(
+        f"| `{m}` | {k:,} | {METHOD_MEANING.get(m, '')} |"
+        for m, k in sorted(methods.items(), key=lambda x: (order.index(x[0]) if x[0] in order else 99)))
+    by_agency = Counter()
+    by_agency_m = Counter()
+    for nid, c in us_cols.items():
+        a = (store.notices.get(nid) or {}).get("agency") or "(none)"
+        by_agency[a] += 1
+        by_agency_m[a] += bool(c["usaspending_matched"])
+    agency_lines = "\n".join(
+        f"| {a} | {k:,} | {by_agency_m[a]:,} ({by_agency_m[a] / k:.0%}) |"
+        for a, k in by_agency.most_common() if k >= 50)
+    import datetime as dt
+    cutoff = (dt.date.fromisoformat(info["as_of"][:10]) - dt.timedelta(days=90)).isoformat()
+    recent = {nid: (store.notices.get(nid) or {}).get("posted_date", "")[:10] >= cutoff for nid in us_cols}
+    old_n = sum(1 for nid in us_cols if not recent[nid])
+    old_m = sum(1 for nid, c in us_cols.items() if not recent[nid] and c["usaspending_matched"])
+    new_n, new_m = n - old_n, matched - old_m
+    years = [y["fiscal_year"] for y in info.get("fiscal_years", [])]
+    return USASPENDING_TEMPLATE.format(
+        hf_dataset=usaspending.HF_DATASET, fy_first=min(years), fy_last=max(years),
+        as_of=info.get("as_of"), joined_at=(info.get("joined_at") or "")[:19],
+        matched=matched, n=n, rate=matched / n if n else 0,
+        method_lines=method_lines, agency_lines=agency_lines,
+        old_n=old_n, old_matched=old_m, old_rate=old_m / old_n if old_n else 0,
+        new_n=new_n, new_matched=new_m, new_rate=new_m / new_n if new_n else 0)
