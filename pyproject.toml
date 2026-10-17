@@ -3,6 +3,8 @@ name = "federal-ja"
 version = "0.1.0"
 description = "Mirror of federal Justification & Approval (J&A) documents posted on SAM.gov"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32",
