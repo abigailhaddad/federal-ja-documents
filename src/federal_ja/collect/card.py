@@ -282,7 +282,15 @@ USAspending award.
 |---|---|---|
 {method_lines}
 
-By agency (agencies with at least 50 notices):
+Notices posted more than 90 days before {as_of}: {old_matched:,} of {old_n:,}
+matched ({old_rate:.1%}); posted in the last 90 days: {new_matched:,} of {new_n:,}
+({new_rate:.1%}), mostly because of the reporting lag described below.
+
+By agency (agencies with at least 50 notices). Most GSA J&As without a match
+are Public Buildings Service real-property leases (`award_number` like
+`LGA48151` or `GS-09P-LCA02608`), which are not reported as contracts to
+USAspending; legislative-branch agencies (e.g. Library of Congress) do not
+report to it either.
 
 | agency | notices | matched |
 |---|---|---|
@@ -380,9 +388,17 @@ def usaspending_section(store: Store, us_cols: dict | None) -> str:
     agency_lines = "\n".join(
         f"| {a} | {k:,} | {by_agency_m[a]:,} ({by_agency_m[a] / k:.0%}) |"
         for a, k in by_agency.most_common() if k >= 50)
+    import datetime as dt
+    cutoff = (dt.date.fromisoformat(info["as_of"][:10]) - dt.timedelta(days=90)).isoformat()
+    recent = {nid: (store.notices.get(nid) or {}).get("posted_date", "")[:10] >= cutoff for nid in us_cols}
+    old_n = sum(1 for nid in us_cols if not recent[nid])
+    old_m = sum(1 for nid, c in us_cols.items() if not recent[nid] and c["usaspending_matched"])
+    new_n, new_m = n - old_n, matched - old_m
     years = [y["fiscal_year"] for y in info.get("fiscal_years", [])]
     return USASPENDING_TEMPLATE.format(
         hf_dataset=usaspending.HF_DATASET, fy_first=min(years), fy_last=max(years),
         as_of=info.get("as_of"), joined_at=(info.get("joined_at") or "")[:19],
         matched=matched, n=n, rate=matched / n if n else 0,
-        method_lines=method_lines, agency_lines=agency_lines)
+        method_lines=method_lines, agency_lines=agency_lines,
+        old_n=old_n, old_matched=old_m, old_rate=old_m / old_n if old_n else 0,
+        new_n=new_n, new_matched=new_m, new_rate=new_m / new_n if new_n else 0)
