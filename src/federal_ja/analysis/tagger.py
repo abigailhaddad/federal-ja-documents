@@ -62,11 +62,12 @@ CATEGORIES: dict[str, Category] = {c.name: c for c in (
 # applied mechanically by rules fixed before scoring: "ready" needs a 95%
 # Wilson lower bound on random-sample precision >= 80% and run-to-run
 # stability >= 90%; "screening" needs the lower bound >= 50%; anything else is
-# not shipped. No category reached "ready".
+# not shipped. No category reached "ready". workforce_cause was re-tested in
+# round 4 with a new method (keyword gate, then confirm) on fresh documents.
 STATUS: dict[str, str] = {
     "agency_delay_cause": "screening",
     "sources_rejected": "screening",
-    "workforce_cause": "not shipped",
+    "workforce_cause": "screening",
     "political_direction": "not shipped",
     "expiring_funds": "not shipped",
 }
@@ -75,7 +76,8 @@ STATUS: dict[str, str] = {
 STATUS_NOTE: dict[str, str] = {
     "agency_delay_cause": "precision 12/15 = 80% (55-93%), recall 34% (21-51%) on 400 random J&As",
     "sources_rejected": "precision 24/34 = 71% (54-83%), recall 71% (54-83%) on 400 random J&As",
-    "workforce_cause": "not shipped: precision 15/32 = 47% (31-64%) on 400 random J&As",
+    "workforce_cause": ("keyword gate + confirm (round 4): precision 11/12 = 92% (65-99%), recall 11/16 = 69% "
+                        "(44-86%) on 400 fresh random J&As"),
     "political_direction": "not shipped: precision 10/14 = 71% (45-88%) on 400 random J&As",
     "expiring_funds": "not shipped: precision 1/3 on 400 random J&As (too rare to measure)",
 }

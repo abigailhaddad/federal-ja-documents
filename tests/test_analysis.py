@@ -233,7 +233,7 @@ WORKFORCE_HASH = "22199f4bf415584f"
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("cat", ["repeat_bridge", "lack_of_planning", "workforce_cause",
+@pytest.mark.parametrize("cat", ["repeat_bridge", "lack_of_planning",
                                  "political_direction", "expiring_funds"])
 def test_cli_refuses_unshipped(cat, tmp_path):
     with pytest.raises(SystemExit) as e:
@@ -249,7 +249,7 @@ def test_cli_help_says_experimental(capsys):
 
 def test_shipped_categories_match_validation():
     # Only categories with a "screening" or better status may run.
-    assert sorted(tagger.shipped()) == ["agency_delay_cause", "sources_rejected"]
+    assert sorted(tagger.shipped()) == ["agency_delay_cause", "sources_rejected", "workforce_cause"]
 
 
 # ── workforce_cause gate (round 4) ──────────────────────────────────────────
