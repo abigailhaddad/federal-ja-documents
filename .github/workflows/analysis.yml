@@ -1,0 +1,39 @@
+# EXPERIMENTAL issue tagging (federal_ja.analysis) over the published dataset.
+# Manual only. Output is uploaded as a workflow artifact; nothing is published.
+name: Experimental J&A tagging
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_usd:
+        description: "Spend cap for this run (USD)"
+        default: "40"
+      workers:
+        description: "Documents reviewed in parallel"
+        default: "8"
+      since:
+        description: "Only notices posted on or after YYYY-MM-DD (blank = all)"
+        default: ""
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Tag
+        run: |
+          args=(--out work/tags --max-usd "${{ inputs.max_usd }}" --workers "${{ inputs.workers }}")
+          if [ -n "${{ inputs.since }}" ]; then args+=(--since "${{ inputs.since }}"); fi
+          uv run python -m federal_ja.analysis tag "${args[@]}" 2> >(tee work_tag.log >&2) || echo "some documents failed; see log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tags
+          path: |
+            work/tags/
+            work_tag.log

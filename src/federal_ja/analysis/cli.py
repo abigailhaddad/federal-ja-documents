@@ -17,6 +17,8 @@ import argparse
 import json
 import os
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from . import data, llm, prompts, tagger
@@ -60,6 +62,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"model (default {llm.DEFAULT_MODEL}, the only validated one)")
     t.add_argument("--max-usd", type=float, default=5.0, help="stop once this much has been spent (default 5)")
     t.add_argument("--dry-run", action="store_true", help="count documents in scope; make no model calls")
+    t.add_argument("--workers", type=int, default=1,
+                   help="documents reviewed in parallel (default 1). The spend cap is checked as "
+                        "each document finishes, so it can overshoot by up to one document per worker.")
     return ap
 
 
@@ -125,23 +130,35 @@ def cmd_tag(a) -> int:
         return 0
 
     spent, failed = 0.0, 0
-    for doc, need in todo:
-        if spent >= a.max_usd:
-            print(f"spend cap ${a.max_usd} reached; stopping", file=sys.stderr)
-            break
+    lock = threading.Lock()
+    stop = threading.Event()
+
+    def review_one(item):
+        nonlocal spent, failed
+        doc, need = item
+        if stop.is_set():
+            return
         try:
             review = tagger.tag_document(doc, need, model=a.model)
         except llm.ModelError as exc:
-            failed += 1
-            print(f"{doc.notice_id}: {exc}", file=sys.stderr)
-            continue
+            with lock:
+                failed += 1
+                print(f"{doc.notice_id}: {exc}", file=sys.stderr)
+            return
         review["dataset_revision"] = rev.get("sha")
-        spent += review["usage"]["cost_usd"] or 0
-        with open(reviews_p, "a") as f:
-            f.write(json.dumps(review, ensure_ascii=False) + "\n")
-        with open(tags_p, "a") as f:
-            for row in tagger.output_rows(review, doc, rev.get("sha")):
-                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        with lock:
+            spent += review["usage"]["cost_usd"] or 0
+            with open(reviews_p, "a") as f:
+                f.write(json.dumps(review, ensure_ascii=False) + "\n")
+            with open(tags_p, "a") as f:
+                for row in tagger.output_rows(review, doc, rev.get("sha")):
+                    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            if spent >= a.max_usd and not stop.is_set():
+                stop.set()
+                print(f"spend cap ${a.max_usd} reached; stopping", file=sys.stderr)
+
+    with ThreadPoolExecutor(max_workers=max(1, a.workers)) as ex:
+        list(ex.map(review_one, todo))
     print(json.dumps({"spent_usd": round(spent, 4), "failed": failed}), file=sys.stderr)
     return 1 if failed else 0
 
