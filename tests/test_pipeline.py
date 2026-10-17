@@ -376,3 +376,15 @@ def test_reset_multipage_transcriptions(tmp_path):
 def test_default_is_one_page_per_request():
     from federal_ja.collect import config
     assert config.TRANSCRIBE_PAGES_PER_CHUNK == 1
+
+
+def test_declined_files_are_not_retried_by_default(tmp_path):
+    from tests.test_extract import blank_pdf
+    s = Store(str(tmp_path))
+    a = _pdf_row(s, tmp_path, "1", blank_pdf(1), "a.pdf")
+    b = _pdf_row(s, tmp_path, "2", blank_pdf(1), "b.pdf")
+    a["transcription_error"] = "refusal"
+    b["transcription_error"] = "APIStatusError: Output blocked by content filtering policy"
+    _pdf_row(s, tmp_path, "3", blank_pdf(1), "c.pdf")["transcription_error"] = "RemoteProtocolError: x"
+    assert [x["resource_id"] for x in pipeline.transcription_candidates(s)] == ["3"]
+    assert len(pipeline.transcription_candidates(s, retry_declined=True)) == 3

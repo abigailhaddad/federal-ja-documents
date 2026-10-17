@@ -87,6 +87,27 @@ Code and issue tracker: {project_url}
    which redirects to SAM's file storage. `sha256` and `downloaded_size` are
    computed on the bytes received.
 
+## Documents hosted outside SAM.gov
+
+Some notices attach a LINK instead of a file. Two kinds of link lead
+straight to the J&A document and are fetched:
+
+* `www.neco.navy.mil/synopsis_file/...` PDFs (Navy and DLA offices). That
+  server does not send its intermediate TLS certificate, so the collector
+  adds that one DigiCert intermediate (pinned by SHA-256) to the standard
+  certificate bundle; certificate verification stays on.
+* `piee.eb.mil` J&A notice pages (`noticeType=JustificationAndApproval`),
+  whose attachments are public and downloaded the way the page's own
+  "view attachment" button does.
+
+These rows have `resource_type = link`, the original URL in `link_url`, and
+the host in `source_host` (`sam.gov` for SAM files). One PIEE page can hold
+several documents; extra ones get rows with `resource_id`
+`<link resource_id>-<n>` and `parent_resource_id`. Other links (agency home
+pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
+
+{link_lines}
+
 ## Scope and what is not here
 
 * Only notices with `PostedDate` on or after {start_date}.
@@ -184,10 +205,11 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
     s = summarize(store)
     from collections import Counter
     dl = Counter(a.get("download_status") for a in store.attachments.values())
-    labels = {"link": "link to another website (URL kept in `link_url`, not fetched)",
+    labels = {"link": "link to another website that is not fetched (URL kept in `link_url`)",
               "not_public": "not public on SAM",
               "deleted": "marked deleted by SAM",
               "deleted_at_download": "SAM answered 'The resource has been deleted' when downloaded",
+              "link_error": "supported link whose document could not be fetched (see `download_error`)",
               "too_large": "over the size limit", "error": "download failed",
               "pending": "not yet downloaded", "unsupported_type": "unsupported resource type"}
     not_downloaded_lines = "\n".join(f"  * `{k}`: {v:,} ({labels.get(k, k)})"
@@ -197,6 +219,12 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
     multi = [v for v in groups.values() if v > 1]
     res_status = Counter((n.get("resources_status") or "").split(":")[0] for n in store.notices.values())
     n_tx_pages = sum(1 for v in store.pages.values() for r in v if r["text_source"] == "transcription")
+    from .links import link_kind, source_host
+    lk = Counter((source_host(a.get("link_url") or ""), a.get("download_status"))
+                 for a in store.attachments.values()
+                 if a.get("resource_type") == "link" and link_kind(a.get("link_url") or ""))
+    link_lines = "Fetch results by host and status:\n\n" + ("\n".join(
+        f"* `{h}` `{st}`: {n:,}" for (h, st), n in sorted(lk.items())) or "* none yet")
     failed = [(k, r) for k, v in store.pages.items() for r in v
               if r["needs_transcription"] and r["text_source"] != "transcription"]
     src = store.state.get("sources", {})
@@ -217,5 +245,5 @@ def render_card(store: Store, start_date: str, built_at: str) -> str:
         model=config.TRANSCRIBE_MODEL, not_downloaded_lines=not_downloaded_lines,
         n_res_error=res_status.get("error", 0), n_no_att=res_status.get("no_attachments", 0),
         n_multi_groups=len(multi), n_multi_notices=sum(multi), n_tx_pages=n_tx_pages,
-        n_tx_failed_pages=len(failed), n_tx_failed_docs=len({k for k, _ in failed}),
+        n_tx_failed_pages=len(failed), link_lines=link_lines, n_tx_failed_docs=len({k for k, _ in failed}),
     )

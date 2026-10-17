@@ -459,10 +459,23 @@ def reset_multipage_transcriptions(store: Store) -> dict:
     return {"docs": docs, "pages": pages}
 
 
-def transcription_candidates(store: Store) -> list[dict]:
-    return [a for a in store.attachments.values()
-            if a.get("download_status") == "ok" and a.get("file_kind") in ("pdf", "image")
-            and a.get("needs_transcription") and pages_to_transcribe(store, a)]
+PERMANENT_TX_ERRORS = ("refusal", "content filtering")
+
+
+def transcription_candidates(store: Store, retry_declined: bool = False) -> list[dict]:
+    """Files with image-only pages still to transcribe. Files the model
+    declined (refusal / output blocked by content filtering) are skipped
+    unless retry_declined, so the daily run does not pay for them again."""
+    out = []
+    for a in store.attachments.values():
+        if not (a.get("download_status") == "ok" and a.get("file_kind") in ("pdf", "image")
+                and a.get("needs_transcription") and pages_to_transcribe(store, a)):
+            continue
+        err = a.get("transcription_error") or ""
+        if not retry_declined and any(m in err for m in PERMANENT_TX_ERRORS):
+            continue
+        out.append(a)
+    return out
 
 
 def apply_transcription(store: Store, a: dict, t) -> None:

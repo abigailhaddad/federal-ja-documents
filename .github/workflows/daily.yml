@@ -49,6 +49,7 @@ jobs:
           uv run ja-collect --workdir work daily \
             --archives "${{ inputs.archives || 'auto' }}" \
             --max-usd "${{ inputs.max_usd || '2' }}" \
+            --links \
             $PUBLISH_FLAG | tee run_summary.json
       - name: Disk usage
         if: always()
