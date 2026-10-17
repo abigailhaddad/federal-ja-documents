@@ -325,17 +325,44 @@ def cmd_report(args, store: Store) -> dict:
     return report.summarize(store)
 
 
+def usaspending_join(store: Store, skip: bool = False) -> dict | None:
+    """Join every notice to USAspending (see usaspending.py) and record the
+    summary in collection_state.json. Runs before anything is uploaded, so a
+    failure leaves the published dataset untouched."""
+    from . import usaspending
+
+    if skip:
+        store.state.pop("usaspending", None)
+        return None
+    cols, summary = usaspending.join(list(store.notices.values()),
+                                     temp_dir=store.path("duckdb_tmp"))
+    summary["joined_at"] = pipeline.now_iso()
+    store.state["usaspending"] = summary
+    return cols
+
+
 def cmd_publish(args, store: Store) -> dict:
-    from . import hf_sync
+    from . import hf_sync, published
     from .card import render_card
 
+    us_cols = usaspending_join(store, skip=getattr(args, "no_usaspending", False))
     now = pipeline.now_iso()
-    card = render_card(store, args.start_date, now)
+    card = render_card(store, args.start_date, now, us_cols=us_cols)
+    if getattr(args, "dry_run", False):
+        paths = published.write(store, us_cols)
+        with open(store.path(published.PUBLISH_DIR, "README.md"), "w") as f:
+            f.write(card)
+        return {"dry_run": True, "tables": paths, "usaspending": store.state.get("usaspending")}
     if args.mode == "full":
-        return hf_sync.publish_full(store, card, now=now, delete_stale=args.delete_stale)
-    if args.mode == "tables":
-        return hf_sync.publish_tables(store, card, delete_stale=args.delete_stale)
-    return {"uploaded_files": hf_sync.publish_delta(store, card, now=now)}
+        out = hf_sync.publish_full(store, card, now=now, delete_stale=args.delete_stale,
+                                   us_cols=us_cols)
+    elif args.mode == "tables":
+        out = hf_sync.publish_tables(store, card, delete_stale=args.delete_stale, us_cols=us_cols)
+    else:
+        out = {"uploaded_files": hf_sync.publish_delta(store, card, now=now, us_cols=us_cols)}
+    if us_cols is not None:
+        out["usaspending"] = {k: v for k, v in store.state["usaspending"].items() if k != "fiscal_years"}
+    return out
 
 
 def cmd_pull(args, store: Store) -> dict:
@@ -416,6 +443,10 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("publish", help="upload to Hugging Face")
     s.add_argument("--mode", choices=["delta", "full", "tables"], default="delta")
     s.add_argument("--delete-stale", action="store_true")
+    s.add_argument("--dry-run", action="store_true",
+                   help="build the published tables and card under <workdir>/publish/ without uploading")
+    s.add_argument("--no-usaspending", action="store_true",
+                   help="publish without the USAspending columns")
     s = sub.add_parser("daily", help="pull, scan, fetch, transcribe, publish"); net(s)
     s.add_argument("--csv", action="append", help=argparse.SUPPRESS)
     s.add_argument("--archives", choices=["auto", "always", "never"], default="auto")
