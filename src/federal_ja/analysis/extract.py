@@ -42,7 +42,7 @@ EXTRACT_VERSION = "2026-10-17.extract2"
 # The deterministic checks (quote search, value-in-quote parsers, tier
 # guard) have their own version: they can be re-applied to stored model
 # answers without new model calls (``extract --reverify``).
-CHECKS_VERSION = "2026-10-18.checks2"
+CHECKS_VERSION = "2026-10-18.checks3"
 TOOL_NAME = "record_ja_fields"
 
 # ~100K tokens. Haiku 5.5's price rises 5x above 100K prompt tokens and the
@@ -231,11 +231,16 @@ _AMOUNT = re.compile(
     re.I)
 
 
+# OCR'd stray spaces around a thousands comma or inside the leading group
+# ("$ 11, 640", "$5 ,180.00", "$1 70,584.05").
+_NUM_SPACE = re.compile(r"(?<=\d)\s+(?=,\d)|(?<=\d,)\s+(?=\d{3}\b)|(?<=\$\d)\s+(?=\d{1,2},\d{3})")
+
+
 def amounts_in(text: str) -> list[float]:
     """Dollar amounts written in text: "$1,234,567.89", "$1.2M", "$ 3.5 million",
-    "2.4 million", "USD 50,000". OCR'd spaces inside numbers are not repaired."""
+    "2.4 million", "USD 50,000", with OCR'd spaces around commas repaired."""
     out = []
-    for m in _AMOUNT.finditer(normalize(text)):
+    for m in _AMOUNT.finditer(_NUM_SPACE.sub("", normalize(text))):
         if m.group(1):
             num, mult = m.group(1), m.group(2)
         elif m.group(3):
@@ -263,14 +268,21 @@ TIER_AMOUNTS = frozenset({
     13_500_000, 15_000_000, 20_000_000,
     68_000_000, 75_000_000, 85_500_000, 90_000_000, 93_000_000, 100_000_000, 150_000_000,
 })
+# Threshold language: an approval or review word, or a dollar RANGE ("or
+# less", "exceeding $X but not exceeding $Y"). A bare "not to exceed" is NOT
+# threshold language: "a not-to-exceed value of $750,000" is the action's
+# value. (The first version of this guard also matched "over", "below" and
+# "not to exceed"; on the full run 8 of its 9 drops were real values.)
 _TIER_LANG = re.compile(
-    r"(not\s+(to\s+)?exceed(ing)?|exceed(s|ing)?|or\s+less|or\s+more|greater\s+than|less\s+than|"
-    r"more\s+than|above|below|\bover\b|\bunder\b|up\s+to|threshold|approv)", re.I)
+    r"approv|competition\s+advocate|head\s+of\s+(the\s+)?(contracting|agency)|senior\s+procurement|"
+    r"\bHCA\b|\bSPE\b|threshold|\blevels?\b|or\s+less|or\s+more|less\s+than|greater\s+than|"
+    r"exceed(s|ing)?\s+\$\s*[0-9.,]+\s*(k|m|million|billion)?,?\s+(but|and)\s+(does\s+)?not|"
+    r"\bover\s+\$\s*[0-9.,]+\s*(k|m|million|billion)?,?\s+(but|and)\b", re.I)
 
 
 def looks_like_tier(value: float, quote: str) -> bool:
-    """A figure that is a standard approval threshold, quoted in threshold
-    language, is treated as an approval tier, not the action's value."""
+    """A figure that is a standard approval threshold, quoted in approval
+    or range language, is treated as an approval tier, not the value."""
     return any(abs(value - t) < 1 for t in TIER_AMOUNTS) and bool(_TIER_LANG.search(quote))
 
 
@@ -288,13 +300,16 @@ def name_in(name: str, text: str) -> bool:
 
 _MONTHS = {m: i for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+# Digit runs are delimited by (?<!\d) / (?!\d), not \b, because signature
+# stamps glue dates to times and names ("2025.03.2513:35:44",
+# "9/24/2026Christopher").
 _D_PATTERNS = [
-    (re.compile(r"\b(20\d\d)[./-](\d{1,2})[./-](\d{1,2})\b"), "ymd"),
-    (re.compile(r"\b(\d{1,2})[./-](\d{1,2})[./-](20\d\d|\d\d)\b"), "mdy"),
-    (re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(20\d\d)\b"), "Mdy"),
-    (re.compile(r"\b(\d{1,2})\s*-?\s*([A-Za-z]{3,9})\.?\s*-?,?\s*(20\d\d|\d\d)\b"), "dMy"),
-    (re.compile(r"\b(20\d\d)(\d\d)(\d\d)\b"), "ymd"),
-    (re.compile(r"\b(20\d\d)\s+([A-Za-z]{3,9})\.?\s+(\d{1,2})\b"), "yMd"),
+    (re.compile(r"(?<!\d)(20\d\d)[./ -](\d{1,2})[./ -](\d{1,2})(?=\d{2}:|T\d|[^0-9]|$)"), "ymd"),
+    (re.compile(r"(?<![\d.])(\d{1,2})[./-](\d{1,2})[./-](20\d\d|\d\d)(?!\d)"), "mdy"),
+    (re.compile(r"\b([A-Za-z]{3,9})\.?\s*(\d{1,2})(?:st|nd|rd|th)?,?\s*(20\d\d)(?!\d)"), "Mdy"),
+    (re.compile(r"(?<!\d)(\d{1,2})(?:st|nd|rd|th)?\s*-?\s*([A-Za-z]{3,9})\.?\s*-?,?\s*(20\d\d|\d\d)(?!\d)"), "dMy"),
+    (re.compile(r"(?<!\d)(20\d\d)(\d\d)(\d\d)(?!\d)"), "ymd"),
+    (re.compile(r"(?<!\d)(20\d\d)\s*([A-Za-z]{3,9})\.?\s*(\d{1,2})(?!\d)"), "yMd"),
 ]
 
 

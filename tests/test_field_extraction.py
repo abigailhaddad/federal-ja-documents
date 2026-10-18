@@ -87,6 +87,8 @@ def fake(*answers):
     ("is $1,250,000.00 including", 1_250_000), ("about $1.2M total", 1_200_000),
     ("$ 3.5 million", 3_500_000), ("2.4 million dollars", 2_400_000), ("USD 50,000", 50_000),
     ("$750K", 750_000), ("$12,345", 12_345), ("Estimated Value | 1,950,000", 1_950_000),
+    ("is $ 11, 640 including", 11_640), ("$5 ,180.00.", 5_180), ("$1 70,584.05", 170_584.05),
+    ("USD 13, 000.00", 13_000),
 ])
 def test_amounts_in(text, value):
     assert extract.value_in_quote(value, text)
@@ -102,7 +104,9 @@ def test_amount_not_in_quote():
     "Date: 2026.02.12 09:15", "Date: 02/12/2026", "Date: 2/12/26", "February 12, 2026",
     "12 Feb 2026", "12-FEB-2026", "12FEB2026", "2026-02-12",
     "Date: _02/12/2026___", "2/ 12/2026 Name", "_____2/ 12/ 2026______", "2026 Feb 12", "Oate: 2026 .02.12 13:~",
-    "12 February, 2026____ SIGNATURE DATE",
+    "12 February, 2026____ SIGNATURE DATE", "Date:2026.02.1213:35:44-05'00'", "2026-02-12T12:51:44",
+    "Feb 12,2026", "February 12th, 2026", "February12,2026", "Date: 2026 02 12 13:24", "2/12/2026Christopher",
+    "Date: 2026FEB12",
 ])
 def test_dates_in(text):
     assert date(2026, 2, 12) in extract.dates_in(text)
@@ -110,6 +114,11 @@ def test_dates_in(text):
 
 def test_tier_guard():
     assert extract.looks_like_tier(20_000_000, "exceeds $900,000 but does not exceed $20 million")
+    assert extract.looks_like_tier(15_000_000, "$15 million or less: approved by the Competition Advocate")
+    # real values written with "not to exceed", "over", "below" (all seen in the full run)
+    assert not extract.looks_like_tier(750_000, "a not to exceed (NTE) value of $750,000.00")
+    assert not extract.looks_like_tier(75_000_000, "This contract, valued at $75,000,000 over a 36-month period")
+    assert not extract.looks_like_tier(15_000_000, "The estimated total value is $15M as set forth in the table below.")
     assert not extract.looks_like_tier(1_250_000, "exceeds $900,000 but does not exceed $1,250,000")
     assert not extract.looks_like_tier(20_000_000, "The estimated value is $20,000,000.")
 
