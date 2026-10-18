@@ -497,6 +497,21 @@ def _n_dropped_factual(dropped: list[dict]) -> int:
 
 _REDACTED_NAME = re.compile(r"redact", re.I)
 
+# Some PDFs' text layers come out letter-shifted by three code points
+# ("7KH" for "The", "WKH" for "the"), a font-encoding fault the collection's
+# garbage check does not catch. The model can't read those passages and the
+# fields may be missing or wrong; the record flags it. Three hits of these
+# shifted common words mark a document as partly or wholly garbled (checked
+# 2026-10-18 against every document with 1-15 hits: 1-2 hits are sometimes
+# noise; at 3+ every one inspected had shifted passages). "IRU" ("for") is
+# left out: it is also an acronym (Indefeasible Right of Use).
+_SHIFTED = re.compile(r"7KH|WKH|DQG|WKDW|ZLWK")
+GARBLED_MIN_HITS = 3
+
+
+def garbled_text_layer(doc: Document) -> bool:
+    return len(_SHIFTED.findall(doc.verification_text())) >= GARBLED_MIN_HITS
+
 
 def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=None,
                      retries: int = 1, effort: str | None = None) -> dict:
@@ -545,6 +560,7 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         "truncated": truncated,
         "redaction_marker_in_text": "[REDACTED" in doc.verification_text(),
         "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments()),
+        "garbled_text_layer": garbled_text_layer(doc),
         "fields": fields,
         "dropped": dropped,
         "raw": raw,
@@ -557,7 +573,8 @@ def reverify(rec: dict, doc: Document) -> dict:
     model call). Returns the updated record."""
     fields, dropped = verify(rec["raw"], doc)
     return {**rec, "fields": fields, "dropped": dropped, "checks_version": CHECKS_VERSION,
-            "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments())}
+            "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments()),
+            "garbled_text_layer": garbled_text_layer(doc)}
 
 
 # ---------------------------------------------------------------------------
@@ -638,6 +655,7 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "pages": rec["pages"],
         "transcribed_pages": rec["transcribed_pages"],
         "truncated": rec["truncated"],
+        "garbled_text_layer": rec.get("garbled_text_layer"),
         "chars_sent": rec["chars_sent"],
         "chars_total": rec["chars_total"],
         "model": rec["model"],

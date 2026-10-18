@@ -257,3 +257,13 @@ def test_reverify_reapplies_checks(doc):
     again = extract.reverify(rec, doc)
     assert again["checks_version"] == extract.CHECKS_VERSION and again["raw"] == rec["raw"]
     assert again["fields"]["signature_date"] == "2026-02-12" and again["usage"] == rec["usage"]
+
+
+def test_garbled_text_layer_flag():
+    shifted = "7KH FRQWUDFW ZLOO EH DZDUGHG DQG WKH YHQGRU LV WKH RQO\\ VRXUFH ZLWK WKH GDWD."
+    pages = [{"notice_id": NID, "resource_id": "r1", "page_number": 1, "text": PAGE1 + "\n" + shifted,
+              "text_source": "native"}]
+    d = data.build_documents(*tables(pages=pages))[NID]
+    assert extract.garbled_text_layer(d)
+    clean = data.build_documents(*tables())[NID]
+    assert not extract.garbled_text_layer(clean)
