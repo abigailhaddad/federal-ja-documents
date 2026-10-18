@@ -139,8 +139,9 @@ about $0.03-0.05 per document (about $300-470 for the dataset); Haiku with
 - **Page images.** For three values and six signature dates whose quotes sit
   on machine-transcribed pages, the rendered page image was checked against
   the transcription. All nine matched.
-- **Per-row detail** is in the proof file `handcheck_proof.csv`, kept with
-  the run outputs and not published. Each row has our value, our quote and
+- **Per-row detail** is in the proof file `handcheck_proof.csv`, published
+  with the answer key and the pilot outputs on Hugging Face under
+  `analysis/validation/field_extraction/`. Each row has our value, our quote and
   its page, the checker's value and source text, and the verdict.
 
 ### Random sample (32 notices)

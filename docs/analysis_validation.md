@@ -13,7 +13,9 @@ tables below still describe the old method for that category. Every tag is a pos
 to check against the document. It is never a finding.
 
 This page holds aggregate results only: counts, rates and 95% intervals. The
-per-document judgements are not published.
+per-document judgements (the answer key) are not published. The tagger's own
+outputs from both runs of rounds 3 and 4 are published on Hugging Face under
+`analysis/validation/theme_tags/`.
 
 ## What was tested
 

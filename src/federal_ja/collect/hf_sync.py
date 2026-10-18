@@ -19,6 +19,17 @@ log = logging.getLogger(__name__)
 TABLE_FILES = ["data/notices.parquet", "data/attachments.parquet", "data/pages.parquet",
                "data/exclusions.parquet", "data/collection_state.json"]
 
+# Remote paths under these prefixes are never deleted by --delete-stale. The
+# experimental analysis/ tables are a static snapshot uploaded separately
+# (not built by the daily job), so they are not in TABLE_FILES or in the
+# attachments table, and would otherwise look stale.
+KEEP_PREFIXES = ("analysis/",)
+
+
+def stale_paths(remote: list[str], keep: set[str]) -> list[str]:
+    """Remote files that are neither in keep nor under a KEEP_PREFIXES prefix."""
+    return sorted(p for p in remote if p not in keep and not p.startswith(KEEP_PREFIXES))
+
 
 def fetch_file(store: Store, row: dict, repo_id: str = config.HF_REPO_ID) -> str:
     """Download one stored original from the HF dataset into the workdir
@@ -131,7 +142,7 @@ def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
     if delete_stale:
         keep = set(TABLE_FILES) | {"README.md", ".gitattributes"} | set(
             a["file_path"] for a in store.attachments.values() if a.get("file_path"))
-        stale = [p for p in api.list_repo_files(repo_id, repo_type="dataset") if p not in keep]
+        stale = stale_paths(api.list_repo_files(repo_id, repo_type="dataset"), keep)
         for i in range(0, len(stale), 1000):
             ops = [CommitOperationDelete(path_in_repo=p) for p in stale[i:i + 1000]]
             api.create_commit(repo_id, ops, repo_type="dataset",
@@ -164,7 +175,7 @@ def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_I
     out = {"tables_commit": getattr(info, "oid", ""), "deleted_stale": []}
     if delete_stale:
         keep = set(TABLE_FILES) | {"README.md", ".gitattributes"} | expected
-        stale = sorted(p for p in api.list_repo_files(repo_id, repo_type="dataset") if p not in keep)
+        stale = stale_paths(api.list_repo_files(repo_id, repo_type="dataset"), keep)
         if stale:
             api.create_commit(repo_id, [CommitOperationDelete(path_in_repo=p) for p in stale],
                               repo_type="dataset",
