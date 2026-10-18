@@ -204,7 +204,7 @@ Each factual field has a `*_quote` column with the verbatim text it came from.
 | `agency_delay_cause` | the agency's own planning, reviews, approvals or staffing delayed competing it |
 | `sources_rejected` | other firms responded but were found not capable |
 
-Prompts: [extraction](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/extract.py) (`PROMPT`); [themes](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.py), after a [keyword screen](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/patterns.py).
+The model name and every prompt are in [prompts.yaml](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.yaml); themes are only asked about passages that pass a [keyword screen](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/patterns.py).
 
 To rebuild them (needs `ANTHROPIC_API_KEY`):
 

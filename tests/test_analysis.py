@@ -159,13 +159,10 @@ def test_tag_document_rows(doc, shipped_all):
             {"answer": False, "quote": None, "quote2": None, "explanation": ""},
     }
     call = fake_call(responses)
-    cats = ["workforce_cause", "agency_delay_cause", "sources_rejected", "expiring_funds"]
+    cats = ["workforce_cause", "agency_delay_cause", "sources_rejected"]
     review = tagger.tag_document(doc, cats, call_fn=call)
     assert review["experimental"] is True
     assert review["prompt_version"] == prompts.PROMPT_VERSION
-    # expiring_funds has no keyword hit, so no call is made for it
-    assert review["categories"]["expiring_funds"] == "no_candidate_passages"
-    assert not any("expiring_funds" in pr for _t, _p, pr in call.calls)
     assert len(call.calls) == 6       # 3 categories with keyword hits x 2 passes
     rows = tagger.output_rows(review, doc, "deadbeef")
     by_cat = {r["category"]: r for r in rows}
@@ -205,7 +202,6 @@ def test_patterns_and_excerpts(doc):
     assert hits
     ex = patterns.excerpts(doc.normalized(), hits)
     assert "requirements package was not completed" in " ".join(ex)
-    assert patterns.find_hits(doc.verification_text(), "expiring_funds") == []
 
 
 def test_protest_delay_is_not_a_candidate():
@@ -217,9 +213,8 @@ def test_prompt_is_frozen():
     # Any edit to the frozen text must come with a new PROMPT_VERSION and a
     # new validation round. Update this hash only together with both.
     import hashlib
-    h = hashlib.sha256((prompts.WORKFORCE_PROMPT + "".join(
-        prompts.CONFIRM_TEMPLATES[c] for c in sorted(prompts.CONFIRM_TEMPLATES)
-        if c != "workforce_cause")).encode()).hexdigest()[:16]
+    h = hashlib.sha256("".join(prompts.CONFIRM_TEMPLATES[c]
+                               for c in ("agency_delay_cause", "sources_rejected")).encode()).hexdigest()[:16]
     assert (prompts.PROMPT_VERSION, h) == ("2026-10-16.frozen1", FROZEN_HASH)
     # The round-4 workforce_cause method: prompt and gate patterns together.
     h4 = hashlib.sha256((prompts.CONFIRM_TEMPLATES["workforce_cause"]
@@ -227,18 +222,17 @@ def test_prompt_is_frozen():
     assert (prompts.WORKFORCE_CONFIRM_VERSION, h4) == ("2026-10-17.wfgate1", WORKFORCE_HASH)
 
 
-FROZEN_HASH = "6506c770e58cbd47"
+FROZEN_HASH = "341859a1880247af"
 WORKFORCE_HASH = "22199f4bf415584f"
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("cat", ["repeat_bridge", "lack_of_planning",
-                                 "political_direction", "expiring_funds"])
-def test_cli_refuses_unshipped(cat, tmp_path):
+@pytest.mark.parametrize("cat", ["repeat_bridge", "political_direction", "expiring_funds"])
+def test_cli_refuses_unknown_category(cat, tmp_path):
     with pytest.raises(SystemExit) as e:
         cli.main(["tag", "--category", cat, "--out", str(tmp_path)])
-    assert "not shipped" in str(e.value)
+    assert "unknown category" in str(e.value)
 
 
 def test_cli_help_says_experimental(capsys):

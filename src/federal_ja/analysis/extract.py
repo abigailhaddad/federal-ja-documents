@@ -36,9 +36,10 @@ import re
 from datetime import date, datetime, timezone
 
 from . import llm
+from .promptfile import CONFIG
 from .text import Document, display_quote, locate_quote, normalize
 
-EXTRACT_VERSION = "2026-10-17.extract2"  # prompt; see TRUNCATION_VERSION for long-document layout
+EXTRACT_VERSION = CONFIG["extraction"]["version"]  # prompt (prompts.yaml); see TRUNCATION_VERSION for long-document layout
 TRUNCATION_VERSION = "2026-10-18.trunc2"
 # The deterministic checks (quote search, value-in-quote parsers, tier
 # guard) have their own version: they can be re-applied to stored model
@@ -138,42 +139,7 @@ SCHEMA = {
     },
 }
 
-PROMPT = """You are extracting facts from ONE document posted on SAM.gov as a "Justification" notice. Most are federal Justifications & Approvals (J&As) for other than full and open competition, limited-sources justifications (FAR 8.405-6), or exceptions to fair opportunity (FAR 16.505(b)(2)), but some postings are other documents. The text below is every attachment of the notice; scanned pages were machine-transcribed and mark redactions as [REDACTED] and unreadable text as [illegible]. Text may contain OCR errors.
-
-Call the tool """ + TOOL_NAME + """ exactly once with these fields. Use null (or an empty list) whenever the document does not state something. Never guess, never use outside knowledge, never fill in what a redaction hides.
-
-QUOTES. Every *_quote and every authorities[].quote must be copied character-for-character from the document text: one contiguous passage of about 5-40 words that CONTAINS the value you report. Copy OCR errors and odd spellings exactly. You may collapse line breaks to single spaces. Never use "..." and never join separate passages. Never quote the "=== ATTACHMENT" headers or the notice metadata block. If you cannot quote the passage that shows a value, report the value as null.
-
-FIELDS
-- is_ja: "yes" if the document is a justification for not using full and open competition or fair opportunity (J&A, limited-sources justification, exception to fair opportunity, brand-name justification, sole-source justification under simplified acquisition, or similar); "no" if it is some other document (an award notice, a contract, a modification without a justification, a D&F only, a synopsis, a price list...); "unclear" if you cannot tell. If the notice has a justification plus other attachments (an order, a statement of work), is_ja is "yes".
-- doc_kind: the closest kind, by the authority the justification uses:
-  * justification_and_approval: other than full and open competition under FAR 6.302 / RFO 6.103, 10 U.S.C. 3204, 41 U.S.C. 3304 (including "J&A" forms for these).
-  * limited_sources_justification: GSA Schedule orders or BPAs under FAR 8.405-6 or GSAR 538.7104 (RFO numbering).
-  * exception_to_fair_opportunity: orders under multiple-award contracts under FAR 16.505(b)(2), RFO 16.507-6 / 16.507-7, 10 U.S.C. 3406(c), 41 U.S.C. 4106(c).
-  * simplified_acquisition_sole_source: FAR 13.106-1(b), FAR 13.501, 41 U.S.C. 1901 (simplified or commercial procedures).
-  * brand_name_justification: a justification whose sole basis is a brand-name requirement.
-  * other_sole_source_justification: a justification that fits none of the above (e.g. 8(a), other statutes).
-  * the rest for documents that are not justifications.
-  doc_kind_quote: the title or heading that shows what the document is.
-- authorities: each statutory or regulatory authority the document cites AS THE BASIS for not competing (e.g. "FAR 6.302-1(a)(2)", "10 U.S.C. 3204(a)(1)", "41 U.S.C. 3304(a)(2)", "FAR 16.505(b)(2)(i)(B)", "FAR 8.405-6(a)(1)(i)(B)", "FAR 13.106-1(b)(1)"). cited = the citation as written; plain = the closest category from the list; quote = the passage containing the citation. Do not list authorities that are only mentioned in passing (e.g. FAR 6.303 as the format requirement, approval-level rules in FAR 6.304, pricing rules in FAR 15.4). Most documents have one; list at most three.
-- summary: one or two plain-English sentences, written by you, saying what is being bought and why the agency says competition is not being used. summary_quote: the one passage that best states that reason.
-- estimated_value_usd: the estimated dollar value of THIS action as stated IN THE JUSTIFICATION, as a number (e.g. 1250000). Do not take it from an attached order, award notice, price list or the SAM metadata. value_quote must contain that figure. value_basis: what the figure covers (total including options; base period only; total where the document does not say whether options are included; the amount of a modification or increase; a ceiling or maximum; an annual or per-period amount; other), or "no_value" when estimated_value_usd is null.
-  * Approval thresholds are NOT the value. Approval blocks often say who may approve at a dollar level ("exceeding $900,000 but not exceeding $20 million", "$15 million or less", "over $100 million"); checkboxes such as ">SAT and <= $750K" are also thresholds. If the only dollar figures are thresholds, estimated_value_usd is null.
-  * REDACTED VALUES. In scanned pages a redaction is marked [REDACTED]. In typed PDFs a redacted figure usually just DISAPPEARS from the text: you see "is $ ." or "an estimated value of ." or "The IGCE amount is , which includes" with the figure missing, often in files named "..._Redacted.pdf". If the justification's value is redacted or blank in either way, estimated_value_usd is null and value_redacted is true. Otherwise value_redacted is false.
-  * If several figures appear, prefer the total estimated value of the action including options; explain in notes if it is ambiguous.
-- vendor: the name of the proposed contractor (the firm the agency intends to award to), exactly as written. vendor_quote must contain the name exactly as you give it. null if not named or redacted. If the justification covers several contractors, put the first one named in vendor and the others in additional_vendors (names exactly as written), and set covers_multiple_actions to true.
-- covers_multiple_actions: true if the notice's attachments are justifications for different actions (different items, contracts or vendors), or one class justification covering several contracts; then describe the fields' choice in notes. false otherwise (a justification plus its own supporting documents is one action).
-- period_of_performance: the period of performance as stated (dates or duration, including options if stated), short. period_quote must contain it.
-- signature_date: the LATEST date on which anyone signed or approved the justification (signature blocks, "Digitally signed by ... Date: 2025.03.04", "Date: 3/4/2025"), as YYYY-MM-DD. signature_quote must contain that date copied exactly as the document writes it. Not the date of an attached order or award. null if no signature date is legible.
-- market_research_summary: one short sentence, in your words, saying what market research the document describes and what it found (e.g. "A sources-sought notice drew two responses; neither could meet the requirement."). market_research_quote: the passage that best states the result. other_firms_named: names of firms OTHER than the proposed vendor(s) that the document names in connection with market research, responses, quotes or capability (exactly as written); empty list if none.
-- redacted: "yes" if the document shows that portions were redacted: [REDACTED] markers, FOIA exemption markers such as "(b)(4)" or "(b)(6)" standing in for withheld text, statements that information was withheld, or blanks where a figure or name was clearly removed (see REDACTED VALUES). Note that "(b)(4)" can also be part of a citation such as "FAR 6.302-1(b)(4)"; that is not a redaction. Else "no". redaction_quote: a passage showing a redaction or a blank.
-- notes: anything a reader needs to know to use these fields (several attachments that are different actions, several values, an amended J&A, a value given only per year, illegible pages...). null if nothing.
-
-NOTICE METADATA (from SAM.gov, not part of the document; do not quote it)
-<<METADATA>>
-
-DOCUMENT
-<<DOCUMENT>>"""
+PROMPT = CONFIG["extraction"]["prompt"]  # text in prompts.yaml
 
 
 # ---------------------------------------------------------------------------

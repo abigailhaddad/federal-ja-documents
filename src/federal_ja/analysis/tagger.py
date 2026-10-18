@@ -46,16 +46,9 @@ CATEGORIES: dict[str, Category] = {c.name: c for c in (
     Category("agency_delay_cause", "confirm", "possible issue",
              "The J&A's own narrative says the agency's own planning, staffing, requirements, reviews, "
              "approvals or funding delayed the competitive action (FAR 6.301(c)(1))."),
-    Category("political_direction", "confirm", "tracked fact",
-             "The J&A attributes the requirement, its timing or the sole-source decision to political "
-             "leadership or the administration (a named Executive Order being implemented, DOGE, the White "
-             "House, the agency head personally)."),
     Category("sources_rejected", "confirm", "tracked fact",
              "Other firms responded or expressed interest and the agency found them not capable or not "
              "acceptable."),
-    Category("expiring_funds", "confirm", "possible issue",
-             "The J&A gives expiring or end-of-year funds as a reason for not competing or for the timing "
-             "(FAR 6.301(c)(2))."),
 )}
 
 # Statuses from the round-3 validation (2026-10-17, docs/analysis_validation.md),
@@ -68,8 +61,6 @@ STATUS: dict[str, str] = {
     "agency_delay_cause": "screening",
     "sources_rejected": "screening",
     "workforce_cause": "screening",
-    "political_direction": "not shipped",
-    "expiring_funds": "not shipped",
 }
 # Random-sample precision (95% Wilson interval) behind each status, for help
 # text and refusals. The full table is in docs/analysis_validation.md.
@@ -78,17 +69,9 @@ STATUS_NOTE: dict[str, str] = {
     "sources_rejected": "precision 24/34 = 71% (54-83%), recall 71% (54-83%) on 400 random J&As",
     "workforce_cause": ("keyword gate + confirm (round 4): precision 11/12 = 92% (65-99%), recall 11/16 = 69% "
                         "(44-86%) on 400 fresh random J&As"),
-    "political_direction": "not shipped: precision 10/14 = 71% (45-88%) on 400 random J&As",
-    "expiring_funds": "not shipped: precision 1/3 on 400 random J&As (too rare to measure)",
 }
 SHIPPED_STATUSES = ("ready", "screening")
 
-# Never shipped and not implemented here: no method reached a usable
-# precision on held-out documents in earlier rounds.
-NOT_SHIPPED = {
-    "repeat_bridge": "not shipped: 5-8% precision on random J&As; models tag ordinary first extensions",
-    "lack_of_planning": "not shipped: no held-out document was confirmed positive; precision could not be measured",
-}
 
 
 def shipped() -> list[str]:

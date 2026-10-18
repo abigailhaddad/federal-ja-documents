@@ -33,7 +33,7 @@ def test_experimental_section_labels():
     s = EXPERIMENTAL_SECTION
     for must in ["claude-haiku-5-5", "11a221ab5ae9583a95ae645883de75237a46d44d", "not refreshed daily",
                  "not 100% right", "workforce_cause", "agency_delay_cause", "sources_rejected",
-                 "estimated_value_usd", "prompts.py", "extract.py"]:
+                 "estimated_value_usd", "prompts.yaml", "patterns.py"]:
         assert must in s, must
 
 

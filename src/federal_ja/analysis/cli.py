@@ -23,6 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from . import data, extract, llm, prompts, spreadsheet, tagger
+from .promptfile import CONFIG
 
 EXPERIMENTAL_BANNER = (
     "EXPERIMENTAL. Tags are possible issues for a person to check against the document, never findings. "
@@ -34,8 +35,6 @@ def _status_lines() -> str:
     out = []
     for c, cat in tagger.CATEGORIES.items():
         out.append(f"  {c:20s} {tagger.STATUS.get(c, '?'):12s} {cat.kind}; {tagger.STATUS_NOTE.get(c, '')}")
-    for c, why in tagger.NOT_SHIPPED.items():
-        out.append(f"  {c:20s} {why}")
     return "\n".join(out)
 
 
@@ -81,9 +80,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"model (default {llm.DEFAULT_MODEL})")
     x.add_argument("--retries", type=int, default=1,
                    help="re-ask up to N times when a value fails the quote checks (default 1)")
-    x.add_argument("--effort", default=None, choices=["low", "medium", "high"],
-                   help="send this effort level and let the model think before answering (default: none, "
-                        "a forced tool call)")
+    x.add_argument("--effort", default=CONFIG["extraction"].get("effort"), choices=["low", "medium", "high"],
+                   help="effort level; the model thinks before answering (default from prompts.yaml: "
+                        f"{CONFIG['extraction'].get('effort')})")
     x.add_argument("--max-usd", type=float, default=5.0, help="stop once this much has been spent (default 5)")
     x.add_argument("--dry-run", action="store_true", help="count notices in scope; make no model calls")
     x.add_argument("--workers", type=int, default=1, help="notices extracted in parallel (default 1)")
@@ -116,8 +115,6 @@ def cmd_tag(a) -> int:
     print(EXPERIMENTAL_BANNER, file=sys.stderr)
     cats = a.category or tagger.shipped()
     for c in cats:
-        if c in tagger.NOT_SHIPPED:
-            raise SystemExit(f"{c}: {tagger.NOT_SHIPPED[c]}")
         if c not in tagger.CATEGORIES:
             raise SystemExit(f"unknown category {c!r}; choose from {', '.join(tagger.CATEGORIES)}")
         if tagger.STATUS.get(c) not in tagger.SHIPPED_STATUSES:

@@ -418,6 +418,7 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pypdf" },
     { name = "python-docx" },
+    { name = "pyyaml" },
     { name = "requests" },
 ]
 
@@ -437,6 +438,7 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=17" },
     { name = "pypdf", specifier = ">=5.0" },
     { name = "python-docx", specifier = ">=1.1" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "requests", specifier = ">=2.32" },
 ]
 
