@@ -44,30 +44,11 @@ AGENCY_DELAY_PATTERNS: dict[str, str] = {
 # excludes protest-caused delay.
 PROTEST = re.compile(r"protest|\bGAO\b|court\s+of\s+federal\s+claims|\bCOFC\b|corrective\s+action", re.I)
 
-# ── political_direction, sources_rejected, expiring_funds (frozen 2026-10-16) ──
+# ── sources_rejected (frozen 2026-10-16) ──
 
 _W2 = r"(?:[\w'()/,.&$-]+\s+)"
 
 PATTERNS2: dict[str, list[str]] = {
-    "expiring_funds": [
-        r"expir\w*\s+" + _W2 + r"{0,3}(?:funds|funding|appropriations?|money)",
-        r"(?:funds|funding|appropriations?)\s+" + _W2 + r"{0,6}(?:expir\w*|cancel\w*|lapse\w*)",
-        r"end\s+of\s+(?:the\s+)?(?:fiscal\s+year|FY)",
-        r"(?:fiscal\s+year|\bFY)\s*-?\s*\d{2,4}\s+(?:funds|funding|dollars|money)",
-        r"(?:one|1|single)[\s-]year\s+(?:funds|money|appropriation)",
-        r"obligat\w+\s+" + _W2 + r"{0,4}(?:by|before|prior\s+to)\s+(?:the\s+)?(?:end|30\s+september|september\s+30|expiration)",
-        r"use[\s-]or[\s-]lose",
-    ],
-    "political_direction": [
-        r"executive\s+orders?\b",
-        r"\bE\.?\s?O\.?\s*1\d{4}\b",
-        r"\bDOGE\b|department\s+of\s+government\s+efficiency",
-        r"white\s+house|\bthe\s+president\b|presidential\s+(?:directive|memorandum|priority|initiative|action)",
-        r"administration(?:'s)?\s+(?:priorit\w+|direct\w+|initiative\w*|polic\w+|goals?|agenda)",
-        r"(?:directed|mandated|ordered|tasked|requested)\s+by\s+(?:the\s+)?(?:secretary|administrator|deputy\s+secretary|under\s+secretary|director|commissioner|attorney\s+general|chief\s+of\s+staff)",
-        r"(?:secretary|administrator|attorney\s+general)(?:'s)?\s+" + _W2 + r"{0,3}(?:direct\w*|priorit\w+|initiative|mandate|guidance|memorandum|intent)",
-        r"\bNSPM\b|national\s+security\s+presidential",
-    ],
     "sources_rejected": [
         r"(?:responses?|responded|replies|replied)\s+" + _W2 + r"{0,6}(?:sources?[\s-]+sought|\bRFI\b|request\s+for\s+information|synopsis|notice|announcement|posting)",
         r"(?:sources?[\s-]+sought|\bRFI\b|request\s+for\s+information|synopsis|notice\s+of\s+intent|special\s+notice)\s+" + _W2 + r"{0,10}(?:responses?|responded|yielded|received|resulted\s+in)",
@@ -80,12 +61,6 @@ PATTERNS2: dict[str, list[str]] = {
 
 # Sentences dropped for a category: boilerplate the category excludes.
 EXCLUDE2 = {
-    "expiring_funds": re.compile(r"desire\s+to\s+expend\s+funds|not\s+(?:the\s+result\s+of|based\s+on|due\s+to)\s+" + _W2 + r"{0,4}(?:expir|funds)", re.I),
-    # The RFO boilerplate ("...Revolutionary FAR Overhaul (RFO), implemented in
-    # response to Executive Order 14275"), class deviations and holiday
-    # clauses all cite EOs without any political direction of THIS action.
-    "political_direction": re.compile(r"executive\s+order\s+11246|executive\s+order\s+1[13]\d{3}|E\.?O\.?\s*1[13]\d{3}|"
-                                      r"revolutionary\s+FAR\s+overhaul|class\s+deviation|holiday", re.I),
     "sources_rejected": re.compile(r"\bno\s+(?:responses?|vendors?|firms?|other)\b|did\s+not\s+receive\s+any", re.I),
 }
 

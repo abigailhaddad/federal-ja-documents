@@ -17,6 +17,7 @@ dependencies = [
     "huggingface_hub>=0.30",
     "cryptography>=42",
     "duckdb>=1.5.6",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]

@@ -25,7 +25,9 @@ import re
 import time
 from typing import Any
 
-DEFAULT_MODEL = "claude-haiku-5-5"
+from .promptfile import CONFIG
+
+DEFAULT_MODEL = CONFIG["model"]  # set in prompts.yaml
 VALIDATED_MODELS = frozenset({"claude-haiku-5-5"})
 
 # USD per 1M tokens (input, output), list prices. Haiku 5.5's price applies

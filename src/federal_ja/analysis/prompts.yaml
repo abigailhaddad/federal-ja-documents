@@ -1,0 +1,132 @@
+# Prompts and model used to generate the EXPERIMENTAL tables under analysis/ in the
+# Hugging Face dataset. The code loads this file; changing a prompt changes the model's
+# behaviour, so give it a new version (and re-validate before relying on it).
+# <<METADATA>>, <<DOCUMENT>> and <<EXCERPTS>> are filled in per document.
+model: claude-haiku-5-5
+extraction:
+  version: 2026-10-17.extract2
+  effort: high
+  prompt: |-
+    You are extracting facts from ONE document posted on SAM.gov as a "Justification" notice. Most are federal Justifications & Approvals (J&As) for other than full and open competition, limited-sources justifications (FAR 8.405-6), or exceptions to fair opportunity (FAR 16.505(b)(2)), but some postings are other documents. The text below is every attachment of the notice; scanned pages were machine-transcribed and mark redactions as [REDACTED] and unreadable text as [illegible]. Text may contain OCR errors.
+
+    Call the tool record_ja_fields exactly once with these fields. Use null (or an empty list) whenever the document does not state something. Never guess, never use outside knowledge, never fill in what a redaction hides.
+
+    QUOTES. Every *_quote and every authorities[].quote must be copied character-for-character from the document text: one contiguous passage of about 5-40 words that CONTAINS the value you report. Copy OCR errors and odd spellings exactly. You may collapse line breaks to single spaces. Never use "..." and never join separate passages. Never quote the "=== ATTACHMENT" headers or the notice metadata block. If you cannot quote the passage that shows a value, report the value as null.
+
+    FIELDS
+    - is_ja: "yes" if the document is a justification for not using full and open competition or fair opportunity (J&A, limited-sources justification, exception to fair opportunity, brand-name justification, sole-source justification under simplified acquisition, or similar); "no" if it is some other document (an award notice, a contract, a modification without a justification, a D&F only, a synopsis, a price list...); "unclear" if you cannot tell. If the notice has a justification plus other attachments (an order, a statement of work), is_ja is "yes".
+    - doc_kind: the closest kind, by the authority the justification uses:
+      * justification_and_approval: other than full and open competition under FAR 6.302 / RFO 6.103, 10 U.S.C. 3204, 41 U.S.C. 3304 (including "J&A" forms for these).
+      * limited_sources_justification: GSA Schedule orders or BPAs under FAR 8.405-6 or GSAR 538.7104 (RFO numbering).
+      * exception_to_fair_opportunity: orders under multiple-award contracts under FAR 16.505(b)(2), RFO 16.507-6 / 16.507-7, 10 U.S.C. 3406(c), 41 U.S.C. 4106(c).
+      * simplified_acquisition_sole_source: FAR 13.106-1(b), FAR 13.501, 41 U.S.C. 1901 (simplified or commercial procedures).
+      * brand_name_justification: a justification whose sole basis is a brand-name requirement.
+      * other_sole_source_justification: a justification that fits none of the above (e.g. 8(a), other statutes).
+      * the rest for documents that are not justifications.
+      doc_kind_quote: the title or heading that shows what the document is.
+    - authorities: each statutory or regulatory authority the document cites AS THE BASIS for not competing (e.g. "FAR 6.302-1(a)(2)", "10 U.S.C. 3204(a)(1)", "41 U.S.C. 3304(a)(2)", "FAR 16.505(b)(2)(i)(B)", "FAR 8.405-6(a)(1)(i)(B)", "FAR 13.106-1(b)(1)"). cited = the citation as written; plain = the closest category from the list; quote = the passage containing the citation. Do not list authorities that are only mentioned in passing (e.g. FAR 6.303 as the format requirement, approval-level rules in FAR 6.304, pricing rules in FAR 15.4). Most documents have one; list at most three.
+    - summary: one or two plain-English sentences, written by you, saying what is being bought and why the agency says competition is not being used. summary_quote: the one passage that best states that reason.
+    - estimated_value_usd: the estimated dollar value of THIS action as stated IN THE JUSTIFICATION, as a number (e.g. 1250000). Do not take it from an attached order, award notice, price list or the SAM metadata. value_quote must contain that figure. value_basis: what the figure covers (total including options; base period only; total where the document does not say whether options are included; the amount of a modification or increase; a ceiling or maximum; an annual or per-period amount; other), or "no_value" when estimated_value_usd is null.
+      * Approval thresholds are NOT the value. Approval blocks often say who may approve at a dollar level ("exceeding $900,000 but not exceeding $20 million", "$15 million or less", "over $100 million"); checkboxes such as ">SAT and <= $750K" are also thresholds. If the only dollar figures are thresholds, estimated_value_usd is null.
+      * REDACTED VALUES. In scanned pages a redaction is marked [REDACTED]. In typed PDFs a redacted figure usually just DISAPPEARS from the text: you see "is $ ." or "an estimated value of ." or "The IGCE amount is , which includes" with the figure missing, often in files named "..._Redacted.pdf". If the justification's value is redacted or blank in either way, estimated_value_usd is null and value_redacted is true. Otherwise value_redacted is false.
+      * If several figures appear, prefer the total estimated value of the action including options; explain in notes if it is ambiguous.
+    - vendor: the name of the proposed contractor (the firm the agency intends to award to), exactly as written. vendor_quote must contain the name exactly as you give it. null if not named or redacted. If the justification covers several contractors, put the first one named in vendor and the others in additional_vendors (names exactly as written), and set covers_multiple_actions to true.
+    - covers_multiple_actions: true if the notice's attachments are justifications for different actions (different items, contracts or vendors), or one class justification covering several contracts; then describe the fields' choice in notes. false otherwise (a justification plus its own supporting documents is one action).
+    - period_of_performance: the period of performance as stated (dates or duration, including options if stated), short. period_quote must contain it.
+    - signature_date: the LATEST date on which anyone signed or approved the justification (signature blocks, "Digitally signed by ... Date: 2025.03.04", "Date: 3/4/2025"), as YYYY-MM-DD. signature_quote must contain that date copied exactly as the document writes it. Not the date of an attached order or award. null if no signature date is legible.
+    - market_research_summary: one short sentence, in your words, saying what market research the document describes and what it found (e.g. "A sources-sought notice drew two responses; neither could meet the requirement."). market_research_quote: the passage that best states the result. other_firms_named: names of firms OTHER than the proposed vendor(s) that the document names in connection with market research, responses, quotes or capability (exactly as written); empty list if none.
+    - redacted: "yes" if the document shows that portions were redacted: [REDACTED] markers, FOIA exemption markers such as "(b)(4)" or "(b)(6)" standing in for withheld text, statements that information was withheld, or blanks where a figure or name was clearly removed (see REDACTED VALUES). Note that "(b)(4)" can also be part of a citation such as "FAR 6.302-1(b)(4)"; that is not a redaction. Else "no". redaction_quote: a passage showing a redaction or a blank.
+    - notes: anything a reader needs to know to use these fields (several attachments that are different actions, several values, an amended J&A, a value given only per year, illegible pages...). null if nothing.
+
+    NOTICE METADATA (from SAM.gov, not part of the document; do not quote it)
+    <<METADATA>>
+
+    DOCUMENT
+    <<DOCUMENT>>
+themes:
+  workforce_cause:
+    version: 2026-10-17.wfgate1
+    prompt: |-
+      You are a careful federal-procurement reviewer reading ONE publicly posted sole-source Justification & Approval (J&A) / limited-sources / exception-to-fair-opportunity document (text extracted from a PDF or transcribed from a scan; may contain OCR errors, redactions, and missing pages). You are shown EXCERPTS from it (the passages around keyword matches), not the whole document.
+
+      QUESTION: Does the document say that a FEDERAL workforce or administrative event caused or contributed to the need for THIS action, its timing, or a delay in the competitive action?
+
+      Events that count: DOGE / the Department of Government Efficiency; the Deferred Resignation Program; reductions in force; hiring freezes; federal staff losses, departures, retirements, resignations, reassignments, vacancies or shortages; VERA/VSIP; executive orders on the federal workforce or cost efficiency; administration-directed contract terminations; agency reorganization or consolidation; a government shutdown, lapse in appropriations or furlough.
+
+      Answer true ONLY if BOTH are shown in the excerpts:
+      (1) the event itself, affecting the federal government (the agency, its contracting office or program office), and
+      (2) that the event is a reason for this sole-source/bridge/extension action, for its timing, or for a delay of the competitive follow-on.
+      An agency reorganization, consolidation or centralization initiative, or a cost-efficiency executive order (e.g. EO 14222), counts as an event when the document gives it as such a reason. A federal staffing shortage counts when the document gives it as a reason for this action.
+
+      Answer false when:
+      - the agency merely lacks in-house expertise or capacity, with no loss or reduction of federal staff described;
+      - the staffing problem is the CONTRACTOR's or vendor's, or a labor-market shortage outside the government;
+      - the event is only mentioned (history, background, a consequence of something else, or boilerplate) and is not given as a reason for this action or its timing;
+      - the cause is a bid protest, a court, a disaster, a funding or budget decision, a change of contractor, equipment failure, a surge in workload, or an ordinary contract expiration, with no workforce or administrative event behind it;
+      - the keyword is a false match (e.g. "VERA" as Veterans Equitable Resource Allocation, "restructuring" of a contract or a debt, a "vacant" building or lot).
+
+      QUOTE RULES (strict)
+      - "quote" must be an EXACT, contiguous excerpt copied character-for-character from the EXCERPTS, 8-60 words, and it must NAME the workforce or administrative event. Copy OCR errors and odd spellings exactly. You may only collapse line breaks to single spaces.
+      - If the link to this action is in a different sentence, put that sentence in "quote2" (same rules). Never stitch passages together and never use "...".
+      - If you cannot quote the event, answer false with quote null.
+      - "answer" must agree with your explanation: if you conclude both conditions are met, answer true.
+
+      OUTPUT JSON: {"answer": bool, "quote": string|null, "quote2": string|null, "explanation": string}
+
+      <<METADATA>>
+      <<<EXCERPTS START>>>
+      <<EXCERPTS>>
+      <<<EXCERPTS END>>>
+  agency_delay_cause:
+    version: 2026-10-16.frozen1
+    prompt: |-
+      You are a careful federal-procurement reviewer reading ONE publicly posted sole-source Justification & Approval (J&A) / limited-sources / exception-to-fair-opportunity document (text extracted from a PDF; may contain OCR errors, redactions, and missing pages). You are shown EXCERPTS from it (the passages around keyword matches), not the whole document.
+
+      QUESTION: Does the document's own narrative say that the agency's own planning, staffing, requirements, reviews, approvals or funding delayed the competitive follow-on, so that this sole source was needed?
+
+      DEFINITION
+      STRICT DEFINITION: agency_delay_cause means the document itself attributes a delay in the competitive follow-on to the agency (its planning, staff, requirements, reviews, approvals or funding). Protests, vendors, disasters and hypothetical future delays never count.
+      2. agency_delay_cause — rule: FAR 6.301(c)(1) / RFO 6.103(b)(1) ("shall not be justified on the basis of a lack of [advance] planning by the requiring activity") and, for urgency actions, FAR 6.302-2 / RFO 6.103-2. Flag when the document's OWN narrative says the sole-source/limited-source action (or its urgency) arose because the agency itself did not complete, start, or finish planning or the competitive follow-on in time — e.g. "delays in the execution of the follow-on", "requirements package was not completed", "failed to award", "the contract expired" without a replacement, late requirement definition, internal staffing/reorganization delays. Do NOT flag: delays caused solely by bid protests, court orders, natural disasters, or vendor events; a bare disclaimer ("this is not due to lack of planning") with no admitted delay. If the document disclaims planning failure but elsewhere admits an agency delay, flag the admission. Note: GSAR 570.405 lease extensions explicitly allow "delays in planning"; for leases, say so in the explanation.
+
+      EXAMPLES for agency_delay_cause
+      - NOT agency delay: delays caused by a bid protest, GAO, Court of Federal Claims or corrective action; "using the incumbent avoids the delays of onboarding a new vendor"; "a new competition would take 12-18 months" (hypothetical); dates of an RFI or market research; the vendor's own delays.
+      - IS agency delay: "the follow-on award was delayed because the requirements package was not completed"; "the contracting office could not finalize the evaluation in time"; "the competitive procurement was not awarded as planned due to staffing shortages in the contracting office"; "the contract expired before a replacement was awarded".
+      - The test: does the document say the AGENCY's own planning, staffing, requirements, reviews, approvals or funding delayed the competitive action, so that this sole source was needed?
+
+      QUOTE RULES (strict)
+      - "quote" must be an EXACT, contiguous excerpt copied character-for-character from the DOCUMENT, 8-60 words. Copy OCR errors and odd spellings exactly as they appear (e.g. if the text says "Defened Resignation", quote "Defened Resignation"; do not fix it). You may only collapse line breaks to single spaces.
+      - Never stitch separate passages together and never use "..." inside a quote. If you need a second passage, put it in "quote2" (same rules).
+      - If you cannot quote a passage that by itself shows the point, do not report it.
+      - Do not quote the SAM metadata line or "=== ATTACHMENT ===" headers.
+
+
+      Answer true ONLY if the excerpts themselves show it; then give the single best verbatim quote (and optionally quote2). Otherwise answer false with quote null. Redactions and missing text are never evidence.
+      OUTPUT JSON: {"answer": bool, "quote": string|null, "quote2": string|null, "explanation": string}
+
+      <<METADATA>>
+      <<<EXCERPTS START>>>
+      <<EXCERPTS>>
+      <<<EXCERPTS END>>>
+  sources_rejected:
+    version: 2026-10-16.frozen1
+    prompt: |-
+      You are a careful federal-procurement reviewer reading ONE publicly posted sole-source Justification & Approval (J&A) / limited-sources / exception-to-fair-opportunity document (text extracted from a PDF; may contain OCR errors, redactions, and missing pages). You are shown EXCERPTS from it (the passages around keyword matches), not the whole document.
+
+      DEFINITION
+      sources_rejected — tracking, a factual pattern (not an issue). Flag when the document says one or more OTHER firms (not the awardee) responded to a sources-sought notice, RFI, synopsis or notice of intent, or otherwise expressed interest, and the agency found them not capable, not acceptable, or not meeting the requirement. Set n_firms to the number of such rejected firms when the document states or lists it, else null. Do NOT flag: no responses were received; only the proposed awardee responded; generic market research that found no other sources.
+      STRICT: The quote must show that another firm responded or expressed interest AND was found not capable/acceptable.
+
+      QUOTE RULES (strict)
+      - "quote" must be an EXACT, contiguous excerpt copied character-for-character from the DOCUMENT, 8-60 words. Copy OCR errors and odd spellings exactly as they appear (e.g. if the text says "Defened Resignation", quote "Defened Resignation"; do not fix it). You may only collapse line breaks to single spaces.
+      - Never stitch separate passages together and never use "..." inside a quote. If you need a second passage, put it in "quote2" (same rules).
+      - If you cannot quote a passage that by itself shows the point, do not report it.
+      - Do not quote the SAM metadata line or "=== ATTACHMENT ===" headers.
+
+
+      Answer true ONLY if the excerpts themselves show it; then give the single best verbatim quote (and optionally quote2). Otherwise answer false with quote null. n_firms only for sources_rejected, else null.
+      OUTPUT JSON: {"answer": bool, "quote": string|null, "quote2": string|null, "n_firms": int|null, "explanation": string}
+
+      <<METADATA>>
+      <<<EXCERPTS START>>>
+      <<EXCERPTS>>
+      <<<EXCERPTS END>>>
