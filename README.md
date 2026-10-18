@@ -297,6 +297,26 @@ copied from the two docs above; update it together with them and with any
 re-upload. `publish --delete-stale` never deletes anything under `analysis/`
 (`hf_sync.KEEP_PREFIXES`).
 
+## Spreadsheet for readers (`federal_ja.analysis spreadsheet`)
+
+```sh
+uv run python -m federal_ja.analysis spreadsheet --out federal_JA_documents.xlsx
+```
+
+Builds an Excel workbook from the published dataset alone (about 20 seconds; no
+API key, no local files). It reads the `analysis/` tables and the `data/` tables
+at the dataset commit the AI tables were built from, so every row joins.
+
+- **Rows:** notices with a downloaded document that the extraction read as an
+  actual J&A, newest posting first. Everything left out is counted, with
+  reasons, on the About sheet.
+- **Sheets:** About (method, accuracy, caveats, as-of dates), J&As (SAM.gov,
+  USAspending and AI columns; AI columns are marked), Theme tags (every quote
+  with its page).
+- Document links point at that dataset commit, so they keep working.
+- J&As posted after the AI snapshot appear only after the `analysis/` tables are
+  rebuilt (`tag`, then `extract`, then republish).
+
 ## License
 
 - **Code:** [Apache-2.0](LICENSE). See [NOTICE](NOTICE) for attribution.

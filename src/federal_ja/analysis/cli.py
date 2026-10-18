@@ -22,7 +22,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from . import data, extract, llm, prompts, tagger
+from . import data, extract, llm, prompts, spreadsheet, tagger
 
 EXPERIMENTAL_BANNER = (
     "EXPERIMENTAL. Tags are possible issues for a person to check against the document, never findings. "
@@ -93,6 +93,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="make no model calls; re-apply the current quote/value checks to the stored model "
                         "answers in extractions.jsonl, keeping the latest record per notice (rewritten in "
                         "place, previous copy kept as .bak), then rebuild extractions.csv")
+    w = sub.add_parser("spreadsheet", help="build a reader-friendly .xlsx from the published dataset "
+                                           "(includes the EXPERIMENTAL AI columns)")
+    w.add_argument("--out", required=True, type=Path, help="output .xlsx path")
+    w.add_argument("--revision", default=None,
+                   help="dataset commit to read the AI tables from (default: latest)")
     return ap
 
 
@@ -337,6 +342,9 @@ def main(argv=None) -> int:
         return cmd_tag(a)
     if a.cmd == "extract":
         return cmd_extract(a)
+    if a.cmd == "spreadsheet":
+        print(json.dumps(spreadsheet.main(a.out, a.revision), default=str), file=sys.stderr)
+        return 0
     return 2
 
 
