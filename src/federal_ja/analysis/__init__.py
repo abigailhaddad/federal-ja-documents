@@ -19,7 +19,12 @@ status ("ready", "screening" or not shipped) are in
 ``docs/analysis_validation.md``. Only categories with a "screening" or better
 status can be run.
 
+A second command, ``extract``, pulls fields (authority, value, vendor,
+dates, market research, redaction) from every J&A, each factual value backed
+by a verified quote; see ``extract.py`` and ``docs/field_extraction.md``.
+
 Usage::
 
     python -m federal_ja.analysis tag --category agency_delay_cause --limit 20 --out work/tags
+    python -m federal_ja.analysis extract --effort high --limit 20 --out work/extract
 """

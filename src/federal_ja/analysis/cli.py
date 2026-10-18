@@ -207,8 +207,7 @@ def _latest_by_notice(rows: list[dict]) -> dict[str, dict]:
 
 def write_extract_csv(out: Path, docs_meta: dict[str, dict], model: str) -> int:
     """extractions.csv: one row per notice (the latest record for this model
-    and extraction version). Written with every column as text so a
-    spreadsheet can't mangle IDs."""
+    and extraction version)."""
     import pandas as pd
     recs = [r for r in _latest_by_notice(_load_jsonl(out / "extractions.jsonl")).values()
             if r["model"] == model and r["extract_version"] == extract.EXTRACT_VERSION]
