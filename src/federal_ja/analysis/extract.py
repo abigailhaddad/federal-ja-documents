@@ -491,6 +491,28 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     return f, dropped
 
 
+def shape_errors(raw: dict) -> list[str]:
+    """Shape problems in a model answer. Strict tool use should prevent
+    them, but a tool offered with tool_choice "auto" has returned, e.g., a
+    list field as a JSON string; such an answer is treated as a failed call."""
+    out = []
+    for k in ("authorities", "other_firms_named", "additional_vendors"):
+        v = raw.get(k)
+        if v is not None and not isinstance(v, list):
+            out.append(f"{k} is {type(v).__name__}")
+    for a in raw.get("authorities") or []:
+        if not isinstance(a, dict):
+            out.append(f"authorities item is {type(a).__name__}")
+            break
+    for k in ("other_firms_named", "additional_vendors"):
+        if isinstance(raw.get(k), list) and any(not isinstance(x, (str, type(None))) for x in raw[k]):
+            out.append(f"{k} item is not a string")
+    v = raw.get("estimated_value_usd")
+    if v is not None and not isinstance(v, (int, float)):
+        out.append(f"estimated_value_usd is {type(v).__name__}")
+    return out
+
+
 def _n_dropped_factual(dropped: list[dict]) -> int:
     return sum(1 for d in dropped if d["field"] not in ("other_firms_named", "additional_vendors"))
 
@@ -531,6 +553,9 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         raw, u = call_fn(prompt, schema=SCHEMA, tool_name=TOOL_NAME, model=model, max_tokens=16000, **kw)
         if not isinstance(raw, dict):
             raise llm.ModelError(f"model returned {type(raw).__name__}, not an object")
+        bad = shape_errors(raw)
+        if bad:
+            raise llm.ModelError(f"model answer does not match the schema: {bad}")
         usage["calls"] += 1
         usage["input_tokens"] += int(u.get("input_tokens") or 0)
         usage["output_tokens"] += int(u.get("output_tokens") or 0)

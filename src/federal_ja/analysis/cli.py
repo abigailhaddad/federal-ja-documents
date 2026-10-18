@@ -295,11 +295,11 @@ def cmd_extract(a) -> int:
             return
         try:
             rec = extract.extract_document(doc, model=a.model, retries=a.retries, effort=a.effort)
-        except llm.ModelError as exc:
+        except Exception as exc:   # ModelError, or any bug on one document: record it, keep going
             with lock:
                 failed += 1
                 with open(fail_p, "a") as f:
-                    f.write(json.dumps({"notice_id": doc.notice_id, "model": a.model, "error": str(exc)[:500],
+                    f.write(json.dumps({"notice_id": doc.notice_id, "model": a.model, "error": f"{type(exc).__name__}: {exc}"[:500],
                                         "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
                 print(f"{doc.notice_id}: {exc}", file=sys.stderr)
             return

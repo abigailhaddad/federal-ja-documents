@@ -267,3 +267,10 @@ def test_garbled_text_layer_flag():
     assert extract.garbled_text_layer(d)
     clean = data.build_documents(*tables())[NID]
     assert not extract.garbled_text_layer(clean)
+
+
+def test_malformed_answer_is_a_model_error(doc):
+    with pytest.raises(llm.ModelError):
+        extract.extract_document(doc, call_fn=fake(answer(authorities='[{"cited": "FAR 6.302-1"}]')))
+    with pytest.raises(llm.ModelError):
+        extract.extract_document(doc, call_fn=fake(answer(authorities=["FAR 6.302-1"])))
