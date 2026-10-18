@@ -86,7 +86,7 @@ def fake(*answers):
 @pytest.mark.parametrize("text,value", [
     ("is $1,250,000.00 including", 1_250_000), ("about $1.2M total", 1_200_000),
     ("$ 3.5 million", 3_500_000), ("2.4 million dollars", 2_400_000), ("USD 50,000", 50_000),
-    ("$750K", 750_000), ("$12,345", 12_345),
+    ("$750K", 750_000), ("$12,345", 12_345), ("Estimated Value | 1,950,000", 1_950_000),
 ])
 def test_amounts_in(text, value):
     assert extract.value_in_quote(value, text)
@@ -94,11 +94,15 @@ def test_amounts_in(text, value):
 
 def test_amount_not_in_quote():
     assert not extract.value_in_quote(1_000_000, "the value is $100,000")
+    assert not extract.value_in_quote(400_000, "The estimated value of this action is $400,00.00.")
+    assert not extract.value_in_quote(2026, "FY 2026 funds")
 
 
 @pytest.mark.parametrize("text", [
     "Date: 2026.02.12 09:15", "Date: 02/12/2026", "Date: 2/12/26", "February 12, 2026",
     "12 Feb 2026", "12-FEB-2026", "12FEB2026", "2026-02-12",
+    "Date: _02/12/2026___", "2/ 12/2026 Name", "_____2/ 12/ 2026______", "2026 Feb 12", "Oate: 2026 .02.12 13:~",
+    "12 February, 2026____ SIGNATURE DATE",
 ])
 def test_dates_in(text):
     assert date(2026, 2, 12) in extract.dates_in(text)
@@ -244,3 +248,12 @@ def test_cli_extract(tmp_path, monkeypatch):
     assert rows.notice_id.tolist() == [NID]
     assert rows.vendor[0] == "Acme Widget Corporation" and rows.estimated_value_usd[0] == "1250000.0"
     assert "https://sam.gov/opp/" in rows.sam_link[0]
+
+
+def test_reverify_reapplies_checks(doc):
+    rec = extract.extract_document(doc, call_fn=fake(answer()), retries=0)
+    rec["fields"]["signature_date"] = None          # as an older check version might have left it
+    rec["checks_version"] = "old"
+    again = extract.reverify(rec, doc)
+    assert again["checks_version"] == extract.CHECKS_VERSION and again["raw"] == rec["raw"]
+    assert again["fields"]["signature_date"] == "2026-02-12" and again["usage"] == rec["usage"]

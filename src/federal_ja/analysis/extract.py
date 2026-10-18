@@ -39,6 +39,10 @@ from . import llm
 from .text import Document, display_quote, locate_quote, normalize
 
 EXTRACT_VERSION = "2026-10-17.extract2"
+# The deterministic checks (quote search, value-in-quote parsers, tier
+# guard) have their own version: they can be re-applied to stored model
+# answers without new model calls (``extract --reverify``).
+CHECKS_VERSION = "2026-10-18.checks2"
 TOOL_NAME = "record_ja_fields"
 
 # ~100K tokens. Haiku 5.5's price rises 5x above 100K prompt tokens and the
@@ -221,7 +225,9 @@ _MULT = {"thousand": 1e3, "k": 1e3, "million": 1e6, "mil": 1e6, "m": 1e6, "mm": 
 _AMOUNT = re.compile(
     r"\$\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(thousand|million|billion|mil|bn|mm|k|m|b)?\b"
     r"|\b([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+\.[0-9]+|[0-9]+)\s*(thousand|million|billion)\b"
-    r"|\bUSD\s*([0-9][0-9,]*(?:\.[0-9]+)?)",
+    r"|\bUSD\s*([0-9][0-9,]*(?:\.[0-9]+)?)"
+    # a bare comma-grouped figure ("Estimated Value | 1,950,000"), as tables write it
+    r"|(?<![0-9.,$])([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]{2})?)(?![0-9,])",
     re.I)
 
 
@@ -230,8 +236,12 @@ def amounts_in(text: str) -> list[float]:
     "2.4 million", "USD 50,000". OCR'd spaces inside numbers are not repaired."""
     out = []
     for m in _AMOUNT.finditer(normalize(text)):
-        num, mult = (m.group(1), m.group(2)) if m.group(1) else (
-            (m.group(3), m.group(4)) if m.group(3) else (m.group(5), None))
+        if m.group(1):
+            num, mult = m.group(1), m.group(2)
+        elif m.group(3):
+            num, mult = m.group(3), m.group(4)
+        else:
+            num, mult = m.group(5) or m.group(6), None
         try:
             v = float(num.replace(",", ""))
         except ValueError:
@@ -284,13 +294,20 @@ _D_PATTERNS = [
     (re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(20\d\d)\b"), "Mdy"),
     (re.compile(r"\b(\d{1,2})\s*-?\s*([A-Za-z]{3,9})\.?\s*-?,?\s*(20\d\d|\d\d)\b"), "dMy"),
     (re.compile(r"\b(20\d\d)(\d\d)(\d\d)\b"), "ymd"),
+    (re.compile(r"\b(20\d\d)\s+([A-Za-z]{3,9})\.?\s+(\d{1,2})\b"), "yMd"),
 ]
 
 
+_FILL = re.compile(r"_+")
+_DIGIT_SEP = re.compile(r"(?<=\d)\s*([./-])\s*(?=\d)")
+
+
 def dates_in(text: str) -> set[date]:
-    """Calendar dates written in text, in the formats signature blocks use."""
+    """Calendar dates written in text, in the formats signature blocks use.
+    Fill-in underscores ("_09/18/2026___") and stray spaces around date
+    separators ("9/ 18/2026", "2026 .05.29") are removed first."""
     out: set[date] = set()
-    t = normalize(text)
+    t = _DIGIT_SEP.sub(r"\1", _FILL.sub(" ", normalize(text)))
     for rx, kind in _D_PATTERNS:
         for m in rx.finditer(t):
             a, b, c = m.groups()
@@ -301,6 +318,8 @@ def dates_in(text: str) -> set[date]:
                     mo, d, y = int(a), int(b), int(c)
                 elif kind == "Mdy":
                     mo, d, y = _MONTHS.get(a[:3].lower()), int(b), int(c)
+                elif kind == "yMd":
+                    y, mo, d = int(a), _MONTHS.get(b[:3].lower()), int(c)
                 else:
                     d, mo, y = int(a), _MONTHS.get(b[:3].lower()), int(c)
                 if mo is None:
@@ -515,6 +534,7 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         "model": model,
         "extract_version": EXTRACT_VERSION,
         "effort": effort,
+        "checks_version": CHECKS_VERSION,
         "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "attempt_kept": used,
         "attachments": len(doc.attachments()),
@@ -530,6 +550,14 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         "raw": raw,
         "usage": usage,
     }
+
+
+def reverify(rec: dict, doc: Document) -> dict:
+    """Re-apply the current checks to a stored record's model answer (no
+    model call). Returns the updated record."""
+    fields, dropped = verify(rec["raw"], doc)
+    return {**rec, "fields": fields, "dropped": dropped, "checks_version": CHECKS_VERSION,
+            "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments())}
 
 
 # ---------------------------------------------------------------------------
@@ -614,5 +642,6 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "chars_total": rec["chars_total"],
         "model": rec["model"],
         "extract_version": rec["extract_version"],
+        "checks_version": rec.get("checks_version"),
         "dataset_revision": rec.get("dataset_revision"),
     }

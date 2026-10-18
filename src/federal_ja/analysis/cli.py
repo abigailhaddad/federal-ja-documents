@@ -89,6 +89,10 @@ def build_parser() -> argparse.ArgumentParser:
     x.add_argument("--workers", type=int, default=1, help="notices extracted in parallel (default 1)")
     x.add_argument("--csv-only", action="store_true",
                    help="make no model calls; rebuild extractions.csv from extractions.jsonl")
+    x.add_argument("--reverify", action="store_true",
+                   help="make no model calls; re-apply the current quote/value checks to the stored model "
+                        "answers in extractions.jsonl (rewritten in place, previous copy kept as .bak), "
+                        "then rebuild extractions.csv")
     return ap
 
 
@@ -239,7 +243,18 @@ def cmd_extract(a) -> int:
 
     a.out.mkdir(parents=True, exist_ok=True)
     ext_p, fail_p, skipped_p = a.out / "extractions.jsonl", a.out / "failures.jsonl", a.out / "skipped.jsonl"
-    if a.csv_only:
+    if a.reverify:
+        recs = _load_jsonl(ext_p)
+        tmp = ext_p.with_suffix(".jsonl.tmp")
+        with open(tmp, "w") as f:
+            for r in recs:
+                if r["notice_id"] in docs:
+                    r = extract.reverify(r, docs[r["notice_id"]])
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        ext_p.replace(ext_p.with_suffix(".jsonl.bak"))
+        tmp.replace(ext_p)
+        print(json.dumps({"reverified": len(recs)}), file=sys.stderr)
+    if a.csv_only or a.reverify:
         n = write_extract_csv(a.out, meta, a.model)
         print(json.dumps({"csv_rows": n}), file=sys.stderr)
         return 0
