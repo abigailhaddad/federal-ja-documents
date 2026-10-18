@@ -204,7 +204,22 @@ Each factual field has a `*_quote` column with the verbatim text it came from.
 | `agency_delay_cause` | the agency's own planning, reviews, approvals or staffing delayed competing it |
 | `sources_rejected` | other firms responded but were found not capable |
 
-The model name and every prompt are in [prompts.yaml](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.yaml); themes are only asked about passages that pass a [keyword screen](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/patterns.py).
+**How it works.**
+
+* **Extraction:** the model reads each notice's documents in full (including
+  the transcriptions of scanned pages) and returns the fields above, each with
+  the verbatim sentence it came from. Code then checks that every quote is in
+  the document and that the value appears in its quote; anything that fails is
+  removed and listed in `values_dropped_by_checks`. An approval ceiling
+  ("not exceeding $15 million") is never reported as the value.
+* **Themes:** a [keyword screen](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/patterns.py) finds candidate passages
+  (e.g. "shutdown", "staff losses", "delayed", "responded to the sources
+  sought"). Documents with no hit are not sent to the model for that theme.
+  The model sees only the passages around the hits and answers a yes/no
+  question with a quote; this runs twice, and a tag is kept only if its quote
+  is found in the document.
+
+The model name and every prompt are in [prompts.yaml](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.yaml).
 
 To rebuild them (needs `ANTHROPIC_API_KEY`):
 
