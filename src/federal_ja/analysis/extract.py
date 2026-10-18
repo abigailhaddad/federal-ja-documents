@@ -38,7 +38,8 @@ from datetime import date, datetime, timezone
 from . import llm
 from .text import Document, display_quote, locate_quote, normalize
 
-EXTRACT_VERSION = "2026-10-17.extract2"
+EXTRACT_VERSION = "2026-10-17.extract2"  # prompt; see TRUNCATION_VERSION for long-document layout
+TRUNCATION_VERSION = "2026-10-18.trunc2"
 # The deterministic checks (quote search, value-in-quote parsers, tier
 # guard) have their own version: they can be re-applied to stored model
 # answers without new model calls (``extract --reverify``).
@@ -179,17 +180,32 @@ DOCUMENT
 # Document text for the model
 # ---------------------------------------------------------------------------
 
+_JA_NAME = re.compile(r"justif|j\s*&\s*a|\bja\b|_ja\b|\bja_|sole.?source|single.?source|\blsj\b|jofoc|jotfoc|\befo\b|"
+                      r"exception|limited.?source|brand.?name", re.I)
+
+
 def model_text(doc: Document, max_chars: int | None = None) -> tuple[str, bool]:
-    """The tagger's layout (one '=== ATTACHMENT' header per attachment), cut
-    at a page boundary if longer than max_chars (default MAX_EXTRACT_CHARS).
-    Returns (text, truncated)."""
+    """The tagger's layout (one '=== ATTACHMENT' header per attachment).
+    Returns (text, truncated).
+
+    When the whole notice is longer than max_chars (default
+    MAX_EXTRACT_CHARS), attachments are reordered before cutting: those whose
+    filename looks like a justification first, then the rest from shortest
+    to longest, and the text is cut at a page boundary. (In the first full
+    run one notice's J&A came after a 400-page technical manual and was cut
+    off entirely.) The layout of documents under the limit is unchanged."""
     max_chars = MAX_EXTRACT_CHARS if max_chars is None else max_chars
     full = doc.model_text()
     if len(full) <= max_chars:
         return full, False
+    atts = doc.attachments()
+    order = sorted(range(len(atts)), key=lambda i: (
+        0 if _JA_NAME.search(atts[i][0] or "") else 1,
+        sum(len(p.text) for p in atts[i][1]), i))
     parts: list[str] = []
     used = 0
-    for fn, pages in doc.attachments():
+    for i in order:
+        fn, pages = atts[i]
         header = f"=== ATTACHMENT: {fn} ===\n"
         if used + len(header) > max_chars:
             break
@@ -598,6 +614,7 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         "chars_total": full_len,
         "chars_sent": len(text),
         "truncated": truncated,
+        "truncation_version": TRUNCATION_VERSION if truncated else None,
         "redaction_marker_in_text": "[REDACTED" in doc.verification_text(),
         "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments()),
         "garbled_text_layer": garbled_text_layer(doc),

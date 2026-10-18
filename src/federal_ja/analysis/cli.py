@@ -91,8 +91,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="make no model calls; rebuild extractions.csv from extractions.jsonl")
     x.add_argument("--reverify", action="store_true",
                    help="make no model calls; re-apply the current quote/value checks to the stored model "
-                        "answers in extractions.jsonl (rewritten in place, previous copy kept as .bak), "
-                        "then rebuild extractions.csv")
+                        "answers in extractions.jsonl, keeping the latest record per notice (rewritten in "
+                        "place, previous copy kept as .bak), then rebuild extractions.csv")
     return ap
 
 
@@ -244,7 +244,8 @@ def cmd_extract(a) -> int:
     a.out.mkdir(parents=True, exist_ok=True)
     ext_p, fail_p, skipped_p = a.out / "extractions.jsonl", a.out / "failures.jsonl", a.out / "skipped.jsonl"
     if a.reverify:
-        recs = _load_jsonl(ext_p)
+        # one record per notice: the latest (earlier attempts stay in the .bak copy)
+        recs = list(_latest_by_notice(_load_jsonl(ext_p)).values())
         tmp = ext_p.with_suffix(".jsonl.tmp")
         with open(tmp, "w") as f:
             for r in recs:
@@ -260,7 +261,9 @@ def cmd_extract(a) -> int:
         return 0
     done = {r["notice_id"] for r in _load_jsonl(ext_p)
             if r["model"] == a.model and r["extract_version"] == extract.EXTRACT_VERSION
-            and r.get("effort") == a.effort}
+            and r.get("effort") == a.effort
+            # a cut document is redone when the cutting rule changes
+            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)}
     skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
     todo, skipped = [], {}
     for nid in notices.notice_id.tolist():

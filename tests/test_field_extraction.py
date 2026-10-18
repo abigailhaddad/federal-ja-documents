@@ -283,3 +283,19 @@ def test_malformed_answer_is_a_model_error(doc):
         extract.extract_document(doc, call_fn=fake(answer(authorities='[{"cited": "FAR 6.302-1"}]')))
     with pytest.raises(llm.ModelError):
         extract.extract_document(doc, call_fn=fake(answer(authorities=["FAR 6.302-1"])))
+
+
+def test_truncation_puts_the_justification_first():
+    atts = [
+        {"notice_id": NID, "resource_id": "m", "attachment_order": 1, "filename": "technical_manual.pdf",
+         "download_status": "ok", "file_kind": "pdf", "text": None},
+        {"notice_id": NID, "resource_id": "j", "attachment_order": 2, "filename": "SOLE SOURCE-Signed_Redacted.pdf",
+         "download_status": "ok", "file_kind": "pdf", "text": None}]
+    pages = [{"notice_id": NID, "resource_id": "m", "page_number": i, "text": "manual " + "x" * 990,
+              "text_source": "native"} for i in range(1, 11)]
+    pages.append({"notice_id": NID, "resource_id": "j", "page_number": 1, "text": PAGE1, "text_source": "native"})
+    d = data.build_documents(*tables(pages=pages, atts=atts))[NID]
+    text, cut = extract.model_text(d, max_chars=3000)
+    assert cut and text.startswith("=== ATTACHMENT: SOLE SOURCE-Signed_Redacted.pdf") and "Acme Widget" in text
+    whole, cut2 = extract.model_text(d, max_chars=10**6)
+    assert not cut2 and whole.startswith("=== ATTACHMENT: technical_manual.pdf")   # unchanged under the limit
