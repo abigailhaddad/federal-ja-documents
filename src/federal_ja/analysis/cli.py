@@ -18,10 +18,11 @@ import json
 import os
 import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from . import data, llm, prompts, tagger
+from . import data, extract, llm, prompts, tagger
 
 EXPERIMENTAL_BANNER = (
     "EXPERIMENTAL. Tags are possible issues for a person to check against the document, never findings. "
@@ -65,7 +66,41 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--workers", type=int, default=1,
                    help="documents reviewed in parallel (default 1). The spend cap is checked as "
                         "each document finishes, so it can overshoot by up to one document per worker.")
+    x = sub.add_parser("extract", help="EXPERIMENTAL: extract fields (authority, value, vendor, dates...) "
+                                       "from every J&A with a downloaded document",
+                       description=EXTRACT_BANNER)
+    x.add_argument("--limit", type=int, default=None, help="extract at most N notices (newest first)")
+    x.add_argument("--notice-id", action="append", default=None, help="only these notices (repeatable)")
+    x.add_argument("--notice-file", type=Path, default=None, help="file of notice ids, one per line")
+    x.add_argument("--since", default=None, help="only notices posted on or after YYYY-MM-DD")
+    x.add_argument("--out", required=True, type=Path, help="output directory")
+    x.add_argument("--data-dir", type=Path, default=Path("work/hf_tables"),
+                   help="where the dataset tables are cached (default work/hf_tables)")
+    x.add_argument("--revision", default=None, help="dataset commit to use (default: latest)")
+    x.add_argument("--model", default=os.environ.get("JA_MODEL", llm.DEFAULT_MODEL),
+                   help=f"model (default {llm.DEFAULT_MODEL})")
+    x.add_argument("--retries", type=int, default=1,
+                   help="re-ask up to N times when a value fails the quote checks (default 1)")
+    x.add_argument("--effort", default=None, choices=["low", "medium", "high"],
+                   help="send this effort level and let the model think before answering (default: none, "
+                        "a forced tool call)")
+    x.add_argument("--max-usd", type=float, default=5.0, help="stop once this much has been spent (default 5)")
+    x.add_argument("--dry-run", action="store_true", help="count notices in scope; make no model calls")
+    x.add_argument("--workers", type=int, default=1, help="notices extracted in parallel (default 1)")
+    x.add_argument("--csv-only", action="store_true",
+                   help="make no model calls; rebuild extractions.csv from extractions.jsonl")
+    x.add_argument("--reverify", action="store_true",
+                   help="make no model calls; re-apply the current quote/value checks to the stored model "
+                        "answers in extractions.jsonl, keeping the latest record per notice (rewritten in "
+                        "place, previous copy kept as .bak), then rebuild extractions.csv")
     return ap
+
+
+EXTRACT_BANNER = (
+    "EXPERIMENTAL. Fields are read from each document by a language model. Every factual value carries a "
+    "verbatim quote that was found in the document text, and values whose quote or value check failed are "
+    "nulled and listed in values_dropped_by_checks. Summaries are the model's own words."
+)
 
 
 def _load_jsonl(p: Path) -> list[dict]:
@@ -163,10 +198,145 @@ def cmd_tag(a) -> int:
     return 1 if failed else 0
 
 
+def _latest_by_notice(rows: list[dict]) -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    for r in rows:
+        out[r["notice_id"]] = r
+    return out
+
+
+def write_extract_csv(out: Path, docs_meta: dict[str, dict], model: str) -> int:
+    """extractions.csv: one row per notice (the latest record for this model
+    and extraction version)."""
+    import pandas as pd
+    recs = [r for r in _latest_by_notice(_load_jsonl(out / "extractions.jsonl")).values()
+            if r["model"] == model and r["extract_version"] == extract.EXTRACT_VERSION]
+    rows = [extract.flat_row(r, docs_meta.get(r["notice_id"], {})) for r in recs]
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df = df.sort_values(["posted_date", "notice_id"], ascending=[False, True])
+    df.to_csv(out / "extractions.csv", index=False)
+    return len(df)
+
+
+def cmd_extract(a) -> int:
+    print(EXTRACT_BANNER, file=sys.stderr)
+    if a.model not in llm.PRICES_PER_M:
+        raise SystemExit(f"{a.model}: no price on file, so the spend cap can't work")
+    rev = data.download_tables(a.data_dir, revision=a.revision)
+    notices, attachments, pages = data.load_tables(a.data_dir)
+    # Scope: notices with at least one downloaded attachment. Notices with
+    # none have no document to read and are not part of the output at all.
+    with_doc = set(attachments.loc[attachments.download_status == "ok", "notice_id"])
+    notices = notices[notices.notice_id.isin(with_doc)]
+    want = set(a.notice_id or [])
+    if a.notice_file:
+        want |= {ln.strip() for ln in a.notice_file.read_text().splitlines() if ln.strip()}
+    if want:
+        notices = notices[notices.notice_id.isin(want)]
+    if a.since:
+        notices = notices[notices.posted_date.fillna("") >= a.since]
+    notices = notices.sort_values(["posted_date", "notice_id"], ascending=[False, True])
+    docs = data.build_documents(notices, attachments, pages, notices.notice_id.tolist())
+    meta = {nid: {**d.meta} for nid, d in docs.items()}
+
+    a.out.mkdir(parents=True, exist_ok=True)
+    ext_p, fail_p, skipped_p = a.out / "extractions.jsonl", a.out / "failures.jsonl", a.out / "skipped.jsonl"
+    if a.reverify:
+        # one record per notice: the latest (earlier attempts stay in the .bak copy)
+        recs = list(_latest_by_notice(_load_jsonl(ext_p)).values())
+        tmp = ext_p.with_suffix(".jsonl.tmp")
+        with open(tmp, "w") as f:
+            for r in recs:
+                if r["notice_id"] in docs:
+                    r = extract.reverify(r, docs[r["notice_id"]])
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        ext_p.replace(ext_p.with_suffix(".jsonl.bak"))
+        tmp.replace(ext_p)
+        print(json.dumps({"reverified": len(recs)}), file=sys.stderr)
+    if a.csv_only or a.reverify:
+        n = write_extract_csv(a.out, meta, a.model)
+        print(json.dumps({"csv_rows": n}), file=sys.stderr)
+        return 0
+    done = {r["notice_id"] for r in _load_jsonl(ext_p)
+            if r["model"] == a.model and r["extract_version"] == extract.EXTRACT_VERSION
+            and r.get("effort") == a.effort
+            # a cut document is redone when the cutting rule changes
+            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)}
+    skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
+    todo, skipped = [], {}
+    for nid in notices.notice_id.tolist():
+        doc = docs[nid]
+        if not any(p.text.strip() for p in doc.pages) or len(doc.model_text()) < extract_min_chars():
+            skipped[nid] = "no_text" if not doc.pages else "no_usable_text"
+            continue
+        if nid not in done:
+            todo.append(doc)
+    if a.limit is not None:
+        todo = todo[:a.limit]
+    summary = {"experimental": True, "dataset_revision": rev.get("sha"), "model": a.model,
+               "extract_version": extract.EXTRACT_VERSION, "in_scope": len(notices),
+               "already_done": len(done & set(notices.notice_id)),
+               "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
+               "to_extract": len(todo)}
+    print(json.dumps(summary), file=sys.stderr)
+    with open(skipped_p, "a") as f:
+        for nid, why in skipped.items():
+            if nid not in skipped_ids:
+                f.write(json.dumps({"notice_id": nid, "reason": why, "dataset_revision": rev.get("sha")}) + "\n")
+    if a.dry_run:
+        return 0
+
+    spent, failed, n_done = 0.0, 0, 0
+    lock = threading.Lock()
+    stop = threading.Event()
+
+    def one(doc):
+        nonlocal spent, failed, n_done
+        if stop.is_set():
+            return
+        try:
+            rec = extract.extract_document(doc, model=a.model, retries=a.retries, effort=a.effort)
+        except Exception as exc:   # ModelError, or any bug on one document: record it, keep going
+            with lock:
+                failed += 1
+                with open(fail_p, "a") as f:
+                    f.write(json.dumps({"notice_id": doc.notice_id, "model": a.model, "error": f"{type(exc).__name__}: {exc}"[:500],
+                                        "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
+                print(f"{doc.notice_id}: {exc}", file=sys.stderr)
+            return
+        rec["dataset_revision"] = rev.get("sha")
+        with lock:
+            spent += rec["usage"]["cost_usd"] or 0
+            n_done += 1
+            with open(ext_p, "a") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            if n_done % 100 == 0:
+                print(json.dumps({"done": n_done, "of": len(todo), "spent_usd": round(spent, 4),
+                                  "failed": failed}), file=sys.stderr, flush=True)
+            if spent >= a.max_usd and not stop.is_set():
+                stop.set()
+                print(f"spend cap ${a.max_usd} reached; stopping", file=sys.stderr)
+
+    with ThreadPoolExecutor(max_workers=max(1, a.workers)) as ex:
+        list(ex.map(one, todo))
+    n = write_extract_csv(a.out, meta, a.model)
+    print(json.dumps({"spent_usd": round(spent, 4), "extracted": n_done, "failed": failed,
+                      "csv_rows": n}), file=sys.stderr)
+    return 1 if failed else 0
+
+
+def extract_min_chars() -> int:
+    from .text import MIN_DOC_CHARS
+    return MIN_DOC_CHARS
+
+
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
     if a.cmd == "tag":
         return cmd_tag(a)
+    if a.cmd == "extract":
+        return cmd_extract(a)
     return 2
 
 

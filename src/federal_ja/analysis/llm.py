@@ -28,11 +28,24 @@ from typing import Any
 DEFAULT_MODEL = "claude-haiku-5-5"
 VALIDATED_MODELS = frozenset({"claude-haiku-5-5"})
 
-# USD per 1M tokens (input, output), list prices. Anthropic: prompts up to
-# 100K tokens (documents here are capped at 60,000 characters).
+# USD per 1M tokens (input, output), list prices. Haiku 5.5's price applies
+# to prompts up to 100K tokens; a longer prompt is billed at LONG_PRICES_PER_M
+# for the whole request. (Tagging caps documents at 60,000 characters, well
+# under that; field extraction sends longer documents.)
 PRICES_PER_M: dict[str, tuple[float, float]] = {
     "claude-haiku-5-5": (0.10, 0.50),
+    "claude-sonnet-5-5": (2.00, 10.00),
 }
+LONG_PROMPT_TOKENS = 100_000
+LONG_PRICES_PER_M: dict[str, tuple[float, float]] = {
+    "claude-haiku-5-5": (0.50, 2.50),
+}
+
+# Models that reject a forced tool_choice ({"type": "tool"}) with a 400. For
+# these the tool is offered with tool_choice "auto" (still strict), the
+# prompt already names the tool, and a reply without the tool call is a
+# ModelError.
+NO_FORCED_TOOL_CHOICE = frozenset({"claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"})
 
 
 class ModelError(RuntimeError):
@@ -46,6 +59,8 @@ def provider_for(model: str) -> str:
 
 def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float | None:
     pr = PRICES_PER_M.get(model)
+    if pr and input_tokens > LONG_PROMPT_TOKENS and model in LONG_PRICES_PER_M:
+        pr = LONG_PRICES_PER_M[model]
     return round(input_tokens / 1e6 * pr[0] + output_tokens / 1e6 * pr[1], 6) if pr else None
 
 
@@ -60,15 +75,21 @@ def _parse_json(raw: str) -> Any:
 
 
 def call(prompt: str, *, schema: dict, tool_name: str, model: str = DEFAULT_MODEL,
-         timeout: int = 300, max_attempts: int = 5) -> tuple[dict, dict]:
+         timeout: int = 300, max_attempts: int = 5, max_tokens: int = 8192,
+         effort: str | None = None) -> tuple[dict, dict]:
+    """effort (Anthropic only): when set, sent as output_config.effort and the
+    tool is offered with tool_choice "auto" so the model may think first (a
+    forced tool call leaves no room for thinking)."""
     if provider_for(model) == "anthropic":
         return _call_anthropic(prompt, schema=schema, tool_name=tool_name, model=model,
-                               timeout=timeout, max_attempts=max_attempts)
+                               timeout=timeout, max_attempts=max_attempts, max_tokens=max_tokens,
+                               effort=effort)
     return _call_openai(prompt, schema=schema, tool_name=tool_name, model=model,
                         timeout=timeout, max_attempts=max_attempts)
 
 
-def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts):
+def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts, max_tokens=8192,
+                    effort=None):
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         raise ModelError("ANTHROPIC_API_KEY not set")
@@ -81,11 +102,13 @@ def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts):
     for attempt in range(max_attempts):
         try:
             resp = client.messages.create(
-                model=model, max_tokens=8192,
+                model=model, max_tokens=max_tokens,
                 messages=[{"role": "user", "content": prompt}],
                 tools=[{"name": tool_name, "description": "Record the result of reviewing this document.",
                         "input_schema": schema, "strict": True}],
-                tool_choice={"type": "tool", "name": tool_name},
+                tool_choice=({"type": "auto"} if model in NO_FORCED_TOOL_CHOICE or effort
+                             else {"type": "tool", "name": tool_name}),
+                **({"output_config": {"effort": effort}} if effort else {}),
             )
         except (anthropic.RateLimitError, anthropic.APIConnectionError, anthropic.InternalServerError) as exc:
             last = str(exc)[:200]

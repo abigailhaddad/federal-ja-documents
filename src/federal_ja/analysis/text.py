@@ -57,17 +57,22 @@ def normalize(s: str | None) -> str:
     return _WRAP_HYPHEN.sub("-", s)
 
 
-def quote_ok(quote: str | None, normalized_doc: str) -> bool:
-    """True only for a quote of at least MIN_QUOTE_WORDS words that is a
+def quote_ok(quote: str | None, normalized_doc: str, *, min_words: int = MIN_QUOTE_WORDS,
+             ignore_case: bool = False) -> bool:
+    """True only for a quote of at least ``min_words`` words that is a
     substring of the normalised document. Any ellipsis means the quote was
     stitched from separate passages, which the prompts forbid, so it fails
-    even when the pieces exist."""
+    even when the pieces exist. ``ignore_case`` (used only by field
+    extraction, where models sometimes re-case an ALL-CAPS heading) also
+    accepts a case-insensitive match."""
     if not quote or _ELLIPSIS.search(quote):
         return False
     q = normalize(quote)
-    if len(q.split()) < MIN_QUOTE_WORDS:
+    if len(q.split()) < min_words:
         return False
-    return q in normalized_doc
+    if q in normalized_doc:
+        return True
+    return ignore_case and q.casefold() in normalized_doc.casefold()
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +142,7 @@ class Document:
 @dataclass
 class QuoteMatch:
     verified: bool
-    match: str | None                   # "exact" | "normalized" | None
+    match: str | None                   # "exact" | "normalized" | "case_insensitive" | None
     pages: list[dict]                   # [{resource_id, page_number, text_source}]
 
     @property
@@ -147,33 +152,41 @@ class QuoteMatch:
         return any(p["text_source"] == "transcription" for p in self.pages)
 
 
-def locate_quote(quote: str | None, doc: Document, normalized_doc: str | None = None) -> QuoteMatch:
+def locate_quote(quote: str | None, doc: Document, normalized_doc: str | None = None, *,
+                 min_words: int = MIN_QUOTE_WORDS, ignore_case: bool = False) -> QuoteMatch:
     """Verify a quote against the document and find the page(s) it is on.
     A quote that runs across a page break is located on the shortest run of
     consecutive pages that contains it."""
     nd = normalized_doc if normalized_doc is not None else doc.normalized()
-    if not quote_ok(quote, nd):
+    if not quote_ok(quote, nd, min_words=min_words, ignore_case=ignore_case):
         return QuoteMatch(False, None, [])
     raw = _WS.sub(" ", quote).strip()
     exact = raw in _WS.sub(" ", doc.verification_text())
     q = normalize(quote)
-    texts = [normalize(p.text) for p in doc.pages]
+    case_only = q not in nd
+    fold = (lambda s: s.casefold()) if case_only else (lambda s: s)
+    q = fold(q)
+    texts = [fold(normalize(p.text)) for p in doc.pages]
     found: list[int] = [i for i, t in enumerate(texts) if q in t]
     if found:
         idx = [found[0]]
     else:
         idx = []
         n = len(doc.pages)
-        for span in range(2, n + 1):
+        # A quote is at most a few dozen words, so it can't span more than a
+        # handful of pages (unless they are near-empty); the cap keeps this
+        # fast on 300-page documents.
+        for span in range(2, min(n, 6) + 1):
             for i in range(0, n - span + 1):
-                if q in normalize("\n\n".join(p.text for p in doc.pages[i:i + span])):
+                if q in fold(normalize("\n\n".join(p.text for p in doc.pages[i:i + span]))):
                     idx = list(range(i, i + span))
                     break
             if idx:
                 break
     pages = [{"resource_id": doc.pages[i].resource_id, "page_number": doc.pages[i].page_number,
               "text_source": doc.pages[i].text_source} for i in idx]
-    return QuoteMatch(True, "exact" if exact else "normalized", pages)
+    match = "exact" if exact else ("case_insensitive" if case_only else "normalized")
+    return QuoteMatch(True, match, pages)
 
 
 def clean_quote(quote: str) -> str:

@@ -14,9 +14,10 @@ without full and open competition. Agencies post them on SAM.gov as
 ```
 src/federal_ja/
   collect/     builds the dataset from SAM.gov and publishes it (this README)
-  analysis/    EXPERIMENTAL issue tagging on the published dataset (below)
+  analysis/    EXPERIMENTAL issue tagging and field extraction on the published dataset (below)
 tests/         tests (collection, and the analysis package on synthetic fixtures)
 docs/analysis_validation.md   how the analysis categories were validated
+docs/field_extraction.md      how field extraction works and how it was checked
 .github/workflows/daily.yml   daily collection job
 ```
 
@@ -225,6 +226,53 @@ What the statuses mean:
 - **Recall:** recall counts only positives the answer key found.
 - **Who judged:** the answer key was judged by Claude Opus 5.5 instances, not by a person.
 - **Redaction warning:** a quote can come from text that sits under a black redaction box in an improperly redacted PDF. Check the page image before reusing a quote.
+
+## Experimental: field extraction (`federal_ja.analysis extract`)
+
+**This is experimental.** The `extract` command reads each notice's documents
+with a language model, Claude Haiku 5.5 with `--effort high`. It returns one
+record per notice with these fields:
+
+- whether it is a J&A
+- the authority cited, and a plain-language category for it
+- a summary of the reason for not competing
+- the estimated value, and what the value covers
+- the proposed vendor
+- the period of performance
+- the latest signature date
+- market research, and other firms named
+- redaction
+- notes
+
+```sh
+uv run python -m federal_ja.analysis extract --out work/extract --effort high --workers 8 --max-usd 40
+uv run python -m federal_ja.analysis extract --out work/extract --reverify   # re-apply checks, no model calls
+```
+
+Every factual value carries a verbatim quote. The code, not the model,
+decides whether to keep a value:
+
+- The quote must be found in the page text.
+- The value must appear in its own quote.
+- A standard approval threshold quoted in approval or range language is never
+  reported as the value.
+
+A value that fails is nulled and listed with the reason in
+`values_dropped_by_checks`. Long documents are cut at a page boundary, with
+J&A-named attachments first, and the record says so.
+
+Output files:
+
+- `extractions.jsonl`: one line per notice, including page provenance and
+  whether each quote is on a machine-transcribed page.
+- `extractions.csv`: one flat row per notice.
+- `failures.jsonl`: notices whose model call failed (retried on the next
+  run).
+- `skipped.jsonl`: notices with no usable text.
+
+The method, the model comparison, the hand-check results and the known
+failure modes are in
+[docs/field_extraction.md](docs/field_extraction.md).
 
 ## License
 
