@@ -1,7 +1,6 @@
-# THROWAWAY: second pass of the prompt-caching A/B. Repeats the OLD request
-# shape (main) on the same 10 documents at the same dataset revision as the
-# first pass, to measure run-to-run variation with no code change. Remove
-# before merging.
+# THROWAWAY: third pass of the prompt-caching A/B. Repeats the NEW request
+# shape (this branch) on the same 10 documents at the same dataset revision,
+# to see whether differences from the old shape repeat. Remove before merging.
 name: Prompt caching A/B (throwaway)
 
 on:
@@ -20,21 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
           path: old
       - uses: astral-sh/setup-uv@v6
       - run: cd old && uv sync --frozen
-      - name: Extract again, old request shape (main)
+      - name: Extract again, new request shape (this branch)
         run: |
           printf '%s\n' d8049cd7f2ef45db98da50c308ff5eb2 94e76739f32244b995ea1c22e3a23f11 \
             64a6dad4e05c4a59ac68d2769c4fc4f5 e1913df33f3c4cb8afa6439efc68d04a 1ce069cf99554bbea8fcf6f834d23c83 \
             e85df9c2ce7d4c209816f5d5dcab1157 25e5b931ab38497d8b7e7840e581029e 44b6734e6772449e81b3a796792dfe13 \
             0f3d6f15d6fa4850835c285d3191aa73 9891cd6428dc4d26b2fd78f06e1f04c8 > ids_extract.txt
           cd old && uv run python -m federal_ja.analysis extract --notice-file ../ids_extract.txt \
-            --out ../out/old_extract_2 --data-dir ../hf --revision "$REV" \
+            --out ../out/new_extract_2 --data-dir ../hf --revision "$REV" \
             --workers 1 --retries 0 --max-usd 0.05
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cache-ab-baseline
+          name: cache-ab-new2
           path: out/
