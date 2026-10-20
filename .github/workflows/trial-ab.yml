@@ -15,14 +15,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {label: trialA, ref: ab60fc9df348b26ff1953da4507a78e3ce782d6b}
-          - {label: trialB, ref: ab60fc9df348b26ff1953da4507a78e3ce782d6b}
+          - {label: trialA, ref: d7cd06cb4cc08882a6a482995d2f487cd72bdc47}
+          - {label: trialB, ref: d7cd06cb4cc08882a6a482995d2f487cd72bdc47}
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
       REV: 8b7d8208fef60cf911934e167b33515b8ebbaffb
       LABEL: ${{ matrix.label }}
-      MAX_USD: "0.15"
+      MAX_USD: "0.20"
     steps:
       - uses: actions/checkout@v4
         with:
