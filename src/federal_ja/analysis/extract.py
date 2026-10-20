@@ -120,6 +120,10 @@ MR_METHODS = [
     "internet_search", "procurement_history", "other",
 ]
 
+POLICY_CITED_FOR = ["reason_for_action", "regulatory_numbering_or_procedure", "other"]
+URGENCY_TRIGGERS = ["congressional_or_oversight_deadline", "bid_protest", "contractor_default_or_termination",
+                    "emergency_or_disaster", "agency_planning_delay", "other"]
+
 # The roles of signature and approval blocks: the narrower scope
 # ``people_signature_block`` in the flat row.
 SIGNATURE_ROLES = frozenset({"signer_or_approver", "contracting_officer", "competition_advocate",
@@ -137,7 +141,11 @@ SCHEMA = {
                  "market_research_quote", "other_firms_named", "redacted", "redaction_quote", "notes",
                  "covers_multiple_actions", "additional_vendors", "need_by", "stated_pop_limit",
                  "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
-                 "redaction_significant", "redaction_significant_quote", "people"],
+                 "redaction_significant", "redaction_significant_quote",
+                 # TRIAL (extract4trial): kept only if the trial passes validation
+                 "bridge_or_extension", "bridge_or_extension_quote", "prior_extension_count", "contract_types",
+                 "is_letter_contract", "letter_contract_quote", "funding_sources", "policy_citations",
+                 "urgency_trigger", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -188,6 +196,29 @@ SCHEMA = {
                            "quote": {"type": "string"}}}},
         "redaction_significant": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "redaction_significant_quote": {"type": "string"},
+        # TRIAL fields (extract4trial), same no-union layout
+        "bridge_or_extension": {"type": "string", "enum": ["yes", "no", "unclear"]},
+        "bridge_or_extension_quote": {"type": "string"},
+        "prior_extension_count": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["count", "quote"],
+            "properties": {"count": {"type": "integer"}, "quote": {"type": "string"}}}},
+        "contract_types": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["stated", "quote"],
+            "properties": {"stated": {"type": "string"}, "quote": {"type": "string"}}}},
+        "is_letter_contract": {"type": "string", "enum": ["yes", "no"]},
+        "letter_contract_quote": {"type": "string"},
+        "funding_sources": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["name", "quote"],
+            "properties": {"name": {"type": "string"}, "quote": {"type": "string"}}}},
+        "policy_citations": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["citation", "cited_for", "quote"],
+            "properties": {"citation": {"type": "string"},
+                           "cited_for": {"type": "string", "enum": POLICY_CITED_FOR},
+                           "quote": {"type": "string"}}}},
+        "urgency_trigger": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["trigger", "quote"],
+            "properties": {"trigger": {"type": "string", "enum": URGENCY_TRIGGERS},
+                           "quote": {"type": "string"}}}},
         "people": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
             "required": ["name", "name_quote", "title", "organization", "role_in_document",
@@ -666,6 +697,8 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
 
     _verify_extract3_fields(raw, doc, nd, vt, f, dropped)
 
+    _verify_trial_fields(raw, doc, nd, f, dropped)
+
     people, pdrop = verify_people(raw.get("people"), doc, nd, vt)
     f["people"] = people
     dropped.extend(pdrop)
@@ -774,13 +807,85 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
                 dropped.append({"field": "redaction_significant", "value": rs, "quote": None, "reason": "no quote"})
 
 
+_LETTER = re.compile(r"letter\s+contract|undefinitized|\bUCAs?\b", re.I)
+_COUNT_WORD = re.compile(r"\d|\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|"
+                         r"one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
+                         r"once|twice|several|multiple)\b", re.I)
+
+
+def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: list[dict]) -> None:
+    """TRIAL (extract4trial): bridge_or_extension, prior_extension_count,
+    contract_types, is_letter_contract, funding_sources, policy_citations,
+    urgency_trigger."""
+    def ok_quote(field, value, quote):
+        m = _check_quote(quote, doc, nd)
+        if not m.verified:
+            dropped.append({"field": field, "value": value, "quote": quote,
+                            "reason": "quote not found in document" if quote else "no quote"})
+        return m.verified
+
+    def flag(field, value, quote, yes_ok=lambda q: True, why=""):
+        """A yes/no/unclear flag: "yes" needs a verified quote that passes yes_ok."""
+        q = _blank(quote)
+        if value != "yes":
+            return value, None
+        if ok_quote(field, value, q) and yes_ok(q):
+            return "yes", display_quote(q)
+        if q and _check_quote(q, doc, nd).verified:
+            dropped.append({"field": field, "value": value, "quote": q, "reason": why})
+        return None, None
+
+    f["bridge_or_extension"], f["bridge_or_extension_quote"] = flag(
+        "bridge_or_extension", raw.get("bridge_or_extension"), raw.get("bridge_or_extension_quote"))
+    f["is_letter_contract"], f["letter_contract_quote"] = flag(
+        "is_letter_contract", raw.get("is_letter_contract"), raw.get("letter_contract_quote"),
+        lambda q: bool(_LETTER.search(normalize(q))), "quote does not say letter contract or undefinitized")
+
+    pc = _first(raw.get("prior_extension_count"))
+    n, q = pc.get("count"), _blank(pc.get("quote"))
+    f["prior_extension_count"] = f["prior_extension_count_quote"] = None
+    if isinstance(n, int) and n >= 0 and ok_quote("prior_extension_count", n, q):
+        if _COUNT_WORD.search(normalize(q)):
+            f["prior_extension_count"], f["prior_extension_count_quote"] = n, display_quote(q)
+        else:
+            dropped.append({"field": "prior_extension_count", "value": n, "quote": q, "reason": "no count in its quote"})
+
+    def items(field, key, extra=None):
+        out, seen = [], set()
+        for x in raw.get(field) or []:
+            if not isinstance(x, dict):
+                continue
+            v, q = _blank(x.get(key)), _blank(x.get("quote"))
+            if not v or _squash(v) in seen:
+                continue
+            if not ok_quote(field, v, q):
+                continue
+            if not name_in(v, q):
+                dropped.append({"field": field, "value": v, "quote": q, "reason": f"{key} not in its quote"})
+                continue
+            seen.add(_squash(v))
+            out.append({key: v, "quote": display_quote(q), **({k: x.get(k) for k in extra} if extra else {})})
+        return out
+
+    f["contract_types"] = items("contract_types", "stated")
+    f["funding_sources"] = items("funding_sources", "name")
+    f["policy_citations"] = [c for c in items("policy_citations", "citation", ["cited_for"])
+                             if c["cited_for"] in POLICY_CITED_FOR]
+    ut = _first(raw.get("urgency_trigger"))
+    t, q = ut.get("trigger"), _blank(ut.get("quote"))
+    f["urgency_trigger"] = f["urgency_trigger_quote"] = None
+    if t in URGENCY_TRIGGERS and ok_quote("urgency_trigger", t, q):
+        f["urgency_trigger"], f["urgency_trigger_quote"] = t, display_quote(q)
+
+
 def shape_errors(raw: dict) -> list[str]:
     """Shape problems in a model answer. Strict tool use should prevent
     them, but a tool offered with tool_choice "auto" has returned, e.g., a
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
     for k in ("authorities", "other_firms_named", "additional_vendors", "people", "need_by",
-              "stated_pop_limit", "covered_piids", "market_research_methods"):
+              "stated_pop_limit", "covered_piids", "market_research_methods", "prior_extension_count",
+              "contract_types", "funding_sources", "policy_citations", "urgency_trigger"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")
@@ -805,7 +910,10 @@ def shape_errors(raw: dict) -> list[str]:
 _NOT_RETRIED = ("other_firms_named", "additional_vendors", "people", "people.title", "people.organization",
                 # the extract3 fields, for the same reason
                 "need_by_date", "stated_pop_limit_days", "covered_piids", "incumbent_piid",
-                "market_research_methods", "redaction_significant")
+                "market_research_methods", "redaction_significant",
+                # TRIAL fields
+                "bridge_or_extension", "prior_extension_count", "contract_types", "is_letter_contract",
+                "funding_sources", "policy_citations", "urgency_trigger")
 
 
 def _n_dropped_factual(dropped: list[dict]) -> int:
@@ -992,6 +1100,18 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "market_research_methods": "; ".join(m["method"] for m in f.get("market_research_methods") or []) or None,
         "redaction_significant": f.get("redaction_significant"),
         "redaction_significant_quote": f.get("redaction_significant_quote"),
+        # TRIAL columns (extract4trial)
+        "bridge_or_extension": f.get("bridge_or_extension"),
+        "bridge_or_extension_quote": f.get("bridge_or_extension_quote"),
+        "prior_extension_count": f.get("prior_extension_count"),
+        "prior_extension_count_quote": f.get("prior_extension_count_quote"),
+        "contract_types": "; ".join(c["stated"] for c in f.get("contract_types") or []) or None,
+        "is_letter_contract": f.get("is_letter_contract"),
+        "letter_contract_quote": f.get("letter_contract_quote"),
+        "funding_sources": "; ".join(c["name"] for c in f.get("funding_sources") or []) or None,
+        "policy_citations": "; ".join(f"{c['citation']} [{c['cited_for']}]" for c in f.get("policy_citations") or []) or None,
+        "urgency_trigger": f.get("urgency_trigger"),
+        "urgency_trigger_quote": f.get("urgency_trigger_quote"),
         "people_named": "; ".join(_person_label(p) for p in people if not p["redacted"]) or None,
         "people_signature_block": "; ".join(_person_label(p) for p in people
                                             if p["role_in_document"] in SIGNATURE_ROLES) or None,
