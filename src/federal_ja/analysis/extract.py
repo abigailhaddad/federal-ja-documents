@@ -120,10 +120,6 @@ MR_METHODS = [
     "internet_search", "procurement_history", "other",
 ]
 
-POLICY_CITED_FOR = ["reason_for_action", "regulatory_numbering_or_procedure", "other"]
-URGENCY_TRIGGERS = ["congressional_or_oversight_deadline", "bid_protest", "contractor_default_or_termination",
-                    "emergency_or_disaster", "agency_planning_delay", "other"]
-
 # The roles of signature and approval blocks: the narrower scope
 # ``people_signature_block`` in the flat row.
 SIGNATURE_ROLES = frozenset({"signer_or_approver", "contracting_officer", "competition_advocate",
@@ -141,8 +137,7 @@ SCHEMA = {
                  "market_research_quote", "other_firms_named", "redacted", "redaction_quote", "notes",
                  "covers_multiple_actions", "additional_vendors", "need_by", "stated_pop_limit",
                  "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
-                 "redaction_significant", "redaction_significant_quote",
-                 "people"],
+                 "redaction_significant", "redaction_significant_quote", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -212,20 +207,6 @@ SCHEMA = {
 
 PROMPT = CONFIG["extraction"]["prompt"]  # text in prompts.yaml
 
-# TRIAL (extract4trial): the five trial fields come from a second call with
-# its own small schema. The main schema is at the compiled-grammar size limit
-# for strict tool use: adding even one small list to it was rejected
-# ("The compiled grammar is too large", 400, 2026-10-20).
-FACTS_TOOL = "record_trial_facts"
-FACTS_SCHEMA = {
-    "type": "object", "additionalProperties": False, "required": ["facts"],
-    "properties": {"facts": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False, "required": ["kind", "value", "detail", "quote"],
-        "properties": {"kind": {"type": "string"}, "value": {"type": "string"},
-                       "detail": {"type": "string"}, "quote": {"type": "string"}}}}},
-}
-FACTS_PROMPT = CONFIG["extraction"].get("facts_prompt")
-
 # Prompt caching: the instructions (everything before the per-notice section)
 # are identical on every call and are sent as a cached block; the split falls
 # at the start of the "NOTICE METADATA" heading, so the two parts joined are
@@ -234,10 +215,6 @@ FACTS_PROMPT = CONFIG["extraction"].get("facts_prompt")
 _SPLIT = PROMPT.rfind("NOTICE METADATA", 0, PROMPT.find("<<METADATA>>"))
 assert _SPLIT > 0 and "<<" not in PROMPT[:_SPLIT], "extraction prompt layout changed; fix the cache split"
 PROMPT_CACHED, PROMPT_PER_DOC = PROMPT[:_SPLIT], PROMPT[_SPLIT:]
-if FACTS_PROMPT:
-    _FSPLIT = FACTS_PROMPT.rfind("NOTICE METADATA", 0, FACTS_PROMPT.find("<<METADATA>>"))
-    assert _FSPLIT > 0 and "<<" not in FACTS_PROMPT[:_FSPLIT], "facts prompt layout changed; fix the cache split"
-    FACTS_CACHED, FACTS_PER_DOC = FACTS_PROMPT[:_FSPLIT], FACTS_PROMPT[_FSPLIT:]
 
 
 # ---------------------------------------------------------------------------
@@ -290,10 +267,6 @@ def _metadata(doc: Document) -> str:
     m = doc.meta
     return "\n".join(f"{k}: {m.get(k)}" for k in ("title", "agency", "sub_tier", "office", "posted_date")
                      if m.get(k))
-
-
-def build_facts_prompt(doc: Document, text: str) -> tuple[str, str]:
-    return FACTS_CACHED, FACTS_PER_DOC.replace("<<METADATA>>", _metadata(doc)).replace("<<DOCUMENT>>", text)
 
 
 def build_prompt(doc: Document, text: str) -> tuple[str, str]:
@@ -693,8 +666,6 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
 
     _verify_extract3_fields(raw, doc, nd, vt, f, dropped)
 
-    _verify_trial_fields(raw, doc, nd, f, dropped)
-
     people, pdrop = verify_people(raw.get("people"), doc, nd, vt)
     f["people"] = people
     dropped.extend(pdrop)
@@ -803,100 +774,13 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
                 dropped.append({"field": "redaction_significant", "value": rs, "quote": None, "reason": "no quote"})
 
 
-_LETTER = re.compile(r"letter\s+contract|undefinitized|\bUCAs?\b", re.I)
-_COUNT_WORD = re.compile(r"\d|\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|"
-                         r"one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
-                         r"once|twice|several|multiple)\b", re.I)
-
-
-def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: list[dict]) -> None:
-    """TRIAL (extract4trial): the ``facts`` list gives bridge_or_extension,
-    prior_extension_count, contract_types, is_letter_contract,
-    funding_sources, policy_citations and urgency_trigger."""
-    facts = [x for x in raw.get("facts") or [] if isinstance(x, dict)]
-    by: dict[str, list[dict]] = {}
-    for x in facts:
-        by.setdefault((_blank(x.get("kind")) or "").lower(), []).append(x)
-
-    def ok_quote(field, value, quote):
-        m = _check_quote(quote, doc, nd)
-        if not m.verified:
-            dropped.append({"field": field, "value": value, "quote": quote,
-                            "reason": "quote not found in document" if quote else "no quote"})
-        return m.verified
-
-    def flag(field, kind, allowed, yes_ok=lambda q: True, why=""):
-        """A yes/no(/unclear) fact: "yes" needs a verified quote that passes yes_ok."""
-        x = (by.get(kind) or [{}])[0]
-        v, q = (_blank(x.get("value")) or "").lower(), _blank(x.get("quote"))
-        if v not in allowed:
-            return None, None
-        if v != "yes":
-            return v, None
-        if ok_quote(field, v, q):
-            if yes_ok(q):
-                return "yes", display_quote(q)
-            dropped.append({"field": field, "value": v, "quote": q, "reason": why})
-        return None, None
-
-    f["bridge_or_extension"], f["bridge_or_extension_quote"] = flag("bridge_or_extension", "bridge",
-                                                                     ("yes", "no", "unclear"))
-    f["is_letter_contract"], f["letter_contract_quote"] = flag(
-        "is_letter_contract", "letter_contract", ("yes", "no"),
-        lambda q: bool(_LETTER.search(normalize(q))), "quote does not say letter contract or undefinitized")
-
-    f["prior_extension_count"] = f["prior_extension_count_quote"] = None
-    x = (by.get("prior_extension_count") or [{}])[0]
-    v, q = _blank(x.get("value")), _blank(x.get("quote"))
-    if v is not None:
-        try:
-            n = int(v)
-        except ValueError:
-            n = None
-            dropped.append({"field": "prior_extension_count", "value": v, "quote": q, "reason": "not a whole number"})
-        if n is not None and n >= 0 and ok_quote("prior_extension_count", n, q):
-            if _COUNT_WORD.search(normalize(q)):
-                f["prior_extension_count"], f["prior_extension_count_quote"] = n, display_quote(q)
-            else:
-                dropped.append({"field": "prior_extension_count", "value": n, "quote": q,
-                                "reason": "no count in its quote"})
-
-    def items(field, kind, key, detail=None):
-        out, seen = [], set()
-        for x in by.get(kind) or []:
-            v, q = _blank(x.get("value")), _blank(x.get("quote"))
-            if not v or _squash(v) in seen:
-                continue
-            if not ok_quote(field, v, q):
-                continue
-            if not name_in(v, q):
-                dropped.append({"field": field, "value": v, "quote": q, "reason": f"{key} not in its quote"})
-                continue
-            seen.add(_squash(v))
-            item = {key: v, "quote": display_quote(q)}
-            if detail:
-                item[detail] = (_blank(x.get("detail")) or "").lower()
-            out.append(item)
-        return out
-
-    f["contract_types"] = items("contract_types", "contract_type", "stated")
-    f["funding_sources"] = items("funding_sources", "funding_source", "name")
-    f["policy_citations"] = [dict(c, cited_for=c["cited_for"] if c["cited_for"] in POLICY_CITED_FOR else "other")
-                             for c in items("policy_citations", "policy_citation", "citation", "cited_for")]
-    x = (by.get("urgency_trigger") or [{}])[0]
-    t, q = (_blank(x.get("value")) or "").lower(), _blank(x.get("quote"))
-    f["urgency_trigger"] = f["urgency_trigger_quote"] = None
-    if t in URGENCY_TRIGGERS and ok_quote("urgency_trigger", t, q):
-        f["urgency_trigger"], f["urgency_trigger_quote"] = t, display_quote(q)
-
-
 def shape_errors(raw: dict) -> list[str]:
     """Shape problems in a model answer. Strict tool use should prevent
     them, but a tool offered with tool_choice "auto" has returned, e.g., a
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
     for k in ("authorities", "other_firms_named", "additional_vendors", "people", "need_by",
-              "stated_pop_limit", "covered_piids", "market_research_methods", "facts"):
+              "stated_pop_limit", "covered_piids", "market_research_methods"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")
@@ -921,10 +805,7 @@ def shape_errors(raw: dict) -> list[str]:
 _NOT_RETRIED = ("other_firms_named", "additional_vendors", "people", "people.title", "people.organization",
                 # the extract3 fields, for the same reason
                 "need_by_date", "stated_pop_limit_days", "covered_piids", "incumbent_piid",
-                "market_research_methods", "redaction_significant",
-                # TRIAL fields
-                "bridge_or_extension", "prior_extension_count", "contract_types", "is_letter_contract",
-                "funding_sources", "policy_citations", "urgency_trigger")
+                "market_research_methods", "redaction_significant")
 
 
 def _n_dropped_factual(dropped: list[dict]) -> int:
@@ -983,19 +864,6 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         if not _n_dropped_factual(dropped):
             break
     raw, fields, dropped, used = best
-    if FACTS_PROMPT:
-        kw = {"effort": effort} if effort else {}
-        fraw, u = call_fn(build_facts_prompt(doc, text), schema=FACTS_SCHEMA, tool_name=FACTS_TOOL, model=model,
-                          max_tokens=16000, **kw)
-        if not isinstance(fraw, dict) or not isinstance(fraw.get("facts"), list):
-            raise llm.ModelError("facts call: answer does not match the schema")
-        raw = {**raw, "facts": fraw["facts"]}
-        fields, dropped = verify(raw, doc)
-        # the facts call's tokens are kept apart; its cost is in cost_usd (so the spend cap counts it)
-        usage["facts"] = {k: int(u.get(k) or 0) for k in ("input_tokens", "output_tokens",
-                                                           "cache_creation_input_tokens", "cache_read_input_tokens")}
-        usage["facts"]["cost_usd"] = round(float(u.get("cost_usd") or 0), 6)
-        usage["cost_usd"] += float(u.get("cost_usd") or 0)
     usage["cost_usd"] = round(usage["cost_usd"], 6)
     full_len = len(doc.model_text())
     return {
@@ -1124,18 +992,6 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "market_research_methods": "; ".join(m["method"] for m in f.get("market_research_methods") or []) or None,
         "redaction_significant": f.get("redaction_significant"),
         "redaction_significant_quote": f.get("redaction_significant_quote"),
-        # TRIAL columns (extract4trial)
-        "bridge_or_extension": f.get("bridge_or_extension"),
-        "bridge_or_extension_quote": f.get("bridge_or_extension_quote"),
-        "prior_extension_count": f.get("prior_extension_count"),
-        "prior_extension_count_quote": f.get("prior_extension_count_quote"),
-        "contract_types": "; ".join(c["stated"] for c in f.get("contract_types") or []) or None,
-        "is_letter_contract": f.get("is_letter_contract"),
-        "letter_contract_quote": f.get("letter_contract_quote"),
-        "funding_sources": "; ".join(c["name"] for c in f.get("funding_sources") or []) or None,
-        "policy_citations": "; ".join(f"{c['citation']} [{c['cited_for']}]" for c in f.get("policy_citations") or []) or None,
-        "urgency_trigger": f.get("urgency_trigger"),
-        "urgency_trigger_quote": f.get("urgency_trigger_quote"),
         "people_named": "; ".join(_person_label(p) for p in people if not p["redacted"]) or None,
         "people_signature_block": "; ".join(_person_label(p) for p in people
                                             if p["role_in_document"] in SIGNATURE_ROLES) or None,
