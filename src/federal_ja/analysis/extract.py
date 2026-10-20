@@ -141,6 +141,15 @@ SCHEMA = {
 
 PROMPT = CONFIG["extraction"]["prompt"]  # text in prompts.yaml
 
+# Prompt caching: the instructions (everything before the per-notice section)
+# are identical on every call and are sent as a cached block; the split falls
+# at the start of the "NOTICE METADATA" heading, so the two parts joined are
+# byte-for-byte the prompt in prompts.yaml. The placeholders must all come
+# after the split, or the cached part would differ by document.
+_SPLIT = PROMPT.rfind("NOTICE METADATA", 0, PROMPT.find("<<METADATA>>"))
+assert _SPLIT > 0 and "<<" not in PROMPT[:_SPLIT], "extraction prompt layout changed; fix the cache split"
+PROMPT_CACHED, PROMPT_PER_DOC = PROMPT[:_SPLIT], PROMPT[_SPLIT:]
+
 
 # ---------------------------------------------------------------------------
 # Document text for the model
@@ -194,8 +203,10 @@ def _metadata(doc: Document) -> str:
                      if m.get(k))
 
 
-def build_prompt(doc: Document, text: str) -> str:
-    return PROMPT.replace("<<METADATA>>", _metadata(doc)).replace("<<DOCUMENT>>", text)
+def build_prompt(doc: Document, text: str) -> tuple[str, str]:
+    """(cached instructions, per-notice part); llm.prompt_text joins them into
+    the whole prompt."""
+    return PROMPT_CACHED, PROMPT_PER_DOC.replace("<<METADATA>>", _metadata(doc)).replace("<<DOCUMENT>>", text)
 
 
 # ---------------------------------------------------------------------------
@@ -543,7 +554,8 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
     call_fn = call_fn or llm.call
     text, truncated = model_text(doc)
     prompt = build_prompt(doc, text)
-    usage = {"input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "calls": 0}
+    usage = {"input_tokens": 0, "output_tokens": 0, "cache_creation_input_tokens": 0,
+             "cache_read_input_tokens": 0, "cost_usd": 0.0, "calls": 0}
     best = None
     for attempt in range(1 + max(0, retries)):
         kw = {"effort": effort} if effort else {}
@@ -556,6 +568,8 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         usage["calls"] += 1
         usage["input_tokens"] += int(u.get("input_tokens") or 0)
         usage["output_tokens"] += int(u.get("output_tokens") or 0)
+        usage["cache_creation_input_tokens"] += int(u.get("cache_creation_input_tokens") or 0)
+        usage["cache_read_input_tokens"] += int(u.get("cache_read_input_tokens") or 0)
         usage["cost_usd"] += float(u.get("cost_usd") or 0)
         fields, dropped = verify(raw, doc)
         if best is None or _n_dropped_factual(dropped) < _n_dropped_factual(best[2]):

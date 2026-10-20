@@ -81,7 +81,7 @@ def shipped() -> list[str]:
 CallFn = Callable[..., tuple[dict, dict]]
 
 
-def _call(call_fn: CallFn, prompt: str, schema: dict, tool: str, model: str, pass_no: int):
+def _call(call_fn: CallFn, prompt: llm.Prompt, schema: dict, tool: str, model: str, pass_no: int):
     return call_fn(prompt, schema=schema, tool_name=tool, model=model, pass_no=pass_no)
 
 
@@ -135,7 +135,7 @@ def tag_document(doc: Document, categories: list[str], *, model: str = llm.DEFAU
             raise ValueError(f"unknown or unshipped category {c!r}")
     nd = doc.normalized()
     pass_nos = list(range(first_pass, first_pass + passes))
-    jobs: list[tuple[str, str, dict, str, int]] = []   # (category, prompt, schema, tool, pass)
+    jobs: list[tuple[str, llm.Prompt, dict, str, int]] = []   # (category, prompt, schema, tool, pass)
     candidates: dict[str, int] = {}
     vt = doc.verification_text()
     for c in categories:
@@ -152,12 +152,15 @@ def tag_document(doc: Document, categories: list[str], *, model: str = llm.DEFAU
         results = list(ex.map(lambda j: _call(call_fn, j[1], j[2], j[3], model, j[4]), jobs))
 
     per_pass: dict[str, dict[int, list[dict]]] = {c: {p: [] for p in pass_nos} for c in categories}
-    usage = {"input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "calls": len(jobs)}
+    usage = {"input_tokens": 0, "output_tokens": 0, "cache_creation_input_tokens": 0,
+             "cache_read_input_tokens": 0, "cost_usd": 0.0, "calls": len(jobs)}
     for (cat, _pr, _s, _t, p), (parsed, u) in zip(jobs, results):
         if not isinstance(parsed, dict):
             raise llm.ModelError(f"model returned {type(parsed).__name__}, not an object")
         usage["input_tokens"] += int(u.get("input_tokens") or 0)
         usage["output_tokens"] += int(u.get("output_tokens") or 0)
+        usage["cache_creation_input_tokens"] += int(u.get("cache_creation_input_tokens") or 0)
+        usage["cache_read_input_tokens"] += int(u.get("cache_read_input_tokens") or 0)
         usage["cost_usd"] += float(u.get("cost_usd") or 0)
         items = [{**parsed, "category": cat}] if parsed.get("answer") else []
         for it in items:

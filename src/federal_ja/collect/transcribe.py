@@ -65,13 +65,20 @@ def page_prompt(pages: list[int], total_pages: int) -> str:
     )
 
 
-def cost_usd(input_tokens: int, output_tokens: int) -> float:
-    """Cost of ONE request at claude-haiku-5-5 list prices (tier by prompt size)."""
+def cost_usd(input_tokens: int, output_tokens: int, *,
+             cache_creation_tokens: int = 0, cache_read_tokens: int = 0) -> float:
+    """Cost of ONE request at claude-haiku-5-5 list prices (tier by prompt size).
+    input_tokens includes any cache write/read tokens, which are priced at
+    1.25x / 0.1x the input price. (Transcription requests set no cache
+    breakpoint, so both are 0 in practice; this keeps the price right if the
+    API ever reports them.)"""
     if input_tokens > config.PRICE_TIER_THRESHOLD:
         pin, pout = config.PRICE_INPUT_PER_M_LONG, config.PRICE_OUTPUT_PER_M_LONG
     else:
         pin, pout = config.PRICE_INPUT_PER_M, config.PRICE_OUTPUT_PER_M
-    return input_tokens / 1e6 * pin + output_tokens / 1e6 * pout
+    inp = (input_tokens - cache_creation_tokens - cache_read_tokens
+           + 1.25 * cache_creation_tokens + 0.10 * cache_read_tokens)
+    return inp / 1e6 * pin + output_tokens / 1e6 * pout
 
 
 class BudgetExceeded(Exception):
@@ -206,9 +213,10 @@ class Transcriber:
 
     def _account(self, msg, res: TranscriptionResult) -> None:
         u = msg.usage
-        inp = (u.input_tokens or 0) + (getattr(u, "cache_creation_input_tokens", 0) or 0) \
-            + (getattr(u, "cache_read_input_tokens", 0) or 0)
-        c = cost_usd(inp, u.output_tokens or 0)
+        write = getattr(u, "cache_creation_input_tokens", 0) or 0
+        read = getattr(u, "cache_read_input_tokens", 0) or 0
+        inp = (u.input_tokens or 0) + write + read
+        c = cost_usd(inp, u.output_tokens or 0, cache_creation_tokens=write, cache_read_tokens=read)
         res.input_tokens += inp
         res.output_tokens += u.output_tokens or 0
         res.cost_usd += c

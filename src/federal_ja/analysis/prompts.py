@@ -60,10 +60,17 @@ def metadata_line(meta: dict) -> str:
             f"posted_date={meta.get('posted_date')}\n")
 
 
-def confirm_prompt(category: str, meta: dict, excerpts: list[str]) -> str:
-    return (CONFIRM_TEMPLATES[category]
-            .replace(METADATA_TOKEN, metadata_line(meta))
-            .replace(EXCERPTS_TOKEN, "\n\n[...]\n\n".join(excerpts)))
+def confirm_prompt(category: str, meta: dict, excerpts: list[str]) -> tuple[str, str]:
+    """(cached instructions, per-document part). The split falls at the
+    metadata placeholder, which comes after all the instructions, so the
+    instructions are identical for every document and the two parts joined
+    are byte-for-byte the frozen template filled in."""
+    t = CONFIRM_TEMPLATES[category]
+    i = t.index(METADATA_TOKEN)
+    if EXCERPTS_TOKEN in t[:i]:
+        raise ValueError(f"{category}: excerpts placeholder before the metadata; fix the cache split")
+    return t[:i], (t[i:].replace(METADATA_TOKEN, metadata_line(meta))
+                   .replace(EXCERPTS_TOKEN, "\n\n[...]\n\n".join(excerpts)))
 
 
 def confirm_schema(category: str) -> dict:
