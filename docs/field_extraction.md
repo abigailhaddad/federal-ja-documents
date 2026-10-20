@@ -513,19 +513,235 @@ ticked.
   them have usable text, about $0.70.
 - **Every later prompt-version bump** starts another backfill.
 
-## Trial: five more fields in a second call (prompt `2026-10-20.extract4`)
+## One call with a facts list (prompt `2026-10-20.extract5`)
 
-**Status: trial.** The trial is one commit, so dropping it means reverting that commit. Without it, the prompt version is `extract3`. The main call's prompt is byte-for-byte the `extract3` prompt.
+**Status: validated on a sample; not yet run on the dataset.** extract5 asks
+everything in **one call per notice**: the extract3 fields plus six of the
+seven fields tried in the extract4 trial (`policy_citations` was dropped).
+The trial asked them in a second call; its design and results are kept
+below as the comparison.
 
-### Why a second call
+### Why one generic list
 
-The extract3 strict schema is at the size limit for a compiled grammar. Three layouts that added these fields to the main call were all rejected with a 400 ("The compiled grammar is too large"):
+The extract3 strict schema is at the size limit for a compiled grammar.
+Three layouts that added the trial fields to it were all rejected with a 400
+("The compiled grammar is too large", 2026-10-20):
 
 1. a property per field, with enums;
 2. the same without enums;
-3. a single generic list.
+3. one extra generic list.
 
-The five fields therefore come from a **second call**. It has its own short prompt and a schema with one list. Each entry has `kind`, `value`, `detail` and `quote`, and the code checks the kinds and codes. **Any future field will need the same treatment.**
+extract5 makes room instead. Five extract3 fields were already small
+optional items, each paired with a quote: `need_by`, `stated_pop_limit`,
+`incumbent_piid` (+ quote), `market_research_methods` and
+`redaction_significant` (+ quote). They leave the schema. In their place is
+**one `facts` list** of `{kind, value, quote}` entries, all plain strings
+with no enums. It carries those five fields and the six trial fields.
+
+- **Accepted** on the first try: strict tool use, every other property
+  unchanged, enums kept in the rest of the schema. A 400 is not billed, so
+  this was checked on one notice before the runs.
+- **The code checks the list.** It checks the kinds, the codes (method,
+  trigger, yes/no/unclear) and the numbers, as the trial's second call did.
+  The trial's `detail` slot is gone: only `policy_citations` used it.
+- **Same output.** The flat fields and table columns keep their extract3 and
+  extract4 names and shapes, minus `policy_citations`.
+- **Still near the limit.** The schema is probably still close to the size
+  limit. A new field should go into the list as a new kind, not into the
+  schema.
+
+### Kinds
+
+| Kind | Flat field | How many |
+|---|---|---|
+| `need_by` | `need_by_date` | at most one |
+| `stated_pop_limit` | `stated_pop_limit_days` (value: days as digits) | at most one |
+| `incumbent_piid` | `incumbent_piid` | at most one |
+| `market_research_method` | `market_research_methods` (value: one of the extract3 codes) | one per method |
+| `redaction_significant` | `redaction_significant` | always exactly one |
+| `bridge` | `bridge_or_extension` | always exactly one |
+| `prior_extension_count` | `prior_extension_count` | at most one |
+| `letter_contract` | `is_letter_contract` | always exactly one |
+| `contract_type` | `contract_types` | at most three |
+| `funding_source` | `funding_sources` | any |
+| `urgency_trigger` | `urgency_trigger` | at most one, only when urgency is cited |
+
+The instructions for each kind use the extract3 and trial wording. They now
+sit in the main prompt's cached part.
+
+### Checks (`checks_version` `2026-10-20.checks5`)
+
+Each field keeps the check it had in extract3 or in the trial. For example,
+the date must be in its quote, and "yes" needs a verified quote.
+
+**New: nothing from the list is lost silently.** Each of these is dropped
+and listed in `values_dropped_by_checks`:
+
+- an unknown kind;
+- an unknown method or trigger code (extract3 skipped these silently);
+- a value that is not yes, no or unclear;
+- a number that does not parse;
+- a second entry for a single-valued kind (the first is kept).
+
+**Same results as before.** As an offline check, the stored extract3 and
+extract4 validation answers (114 records) were converted to the list shape
+and checked with the new code. They gave the same fields as the stored
+`checks4` fields on all 2,070 cells compared.
+
+**Not converted.** `extract --reverify` reads the facts from `raw.facts`. An
+extract3 answer re-verified with checks5 would lose the five moved fields.
+No extract3 answer is published, so no converter is kept.
+
+### Validation (2026-10-20)
+
+- **Notices.** The 18 trial notices and the 40 extract3 notices share 8, so
+  the runs covered 50 notices.
+- **Settings.** The shipped settings: `claude-haiku-5-5`, effort high,
+  retries 1.
+- **Data.** Dataset `8b7d8208fef6`.
+- **Runs.** Two runs, A and B, made by a GitHub Actions workflow that was
+  removed afterwards.
+- **Failures.**
+  - The glyph-encoded notice `b5c3c23b` fails in every run. It failed in both.
+  - **Run A also failed on the VA CCN notice `085682f1`, at the 16,000-token
+    output limit.** This notice uses about 13,000-14,300 output tokens in
+    every run (extract3, two-call and one-call), mostly thinking. It is near
+    the limit with any of the prompts, and the one-call answer is a little
+    longer. Raising `max_tokens` would likely fix it; that was not tested.
+- **Files.** Runs, failures and scorers are in
+  [`analysis/validation/one_call_extract5/`](../analysis/validation/one_call_extract5/).
+  - `score_trial_fields.py` is the trial's strict scorer, without
+    `policy_citations`.
+  - `score_extract3_fields.py` is the extract3 scorer with only its paths
+    changed. Run on the extract3 runs, it gives exactly that folder's scores.
+- **Answer keys.** The existing keys, unchanged. **No person judged them.**
+
+**Trial fields, 18 trial notices.** One-call run A scored 17, without VA
+CCN. Each cell gives the accuracy, then the precision and recall of "yes" or
+of a value. For lists, the precision and recall are per item.
+
+| Field | One call A | One call B | Two calls A | Two calls B |
+|---|---|---|---|---|
+| `bridge_or_extension` | 17/17; 10/10, 8/8 | 18/18; 10/10, 9/9 | 17/18; 11/12, 9/9 | 18/18; 10/10, 9/9 |
+| `prior_extension_count` | 17/17; 3/3, 3/3 | 18/18; 3/3, 3/3 | 18/18; 3/3, 3/3 | 18/18; 3/3, 3/3 |
+| `is_letter_contract` | 17/17; 4/4, 4/4 | 18/18; 4/4, 4/4 | 17/18; 4/4, 4/4 | 18/18; 4/4, 4/4 |
+| `urgency_trigger` | 16/17; 4/4, 3/4 | 18/18; 6/6, 5/5 | 17/18; 8/9, 5/5 | 17/18; 8/9, 5/5 |
+| `contract_types` | 12/12, 12/17 | 11/12, 11/18 | 14/14, 14/18 | 13/14, 13/18 |
+| `funding_sources` | 5/5, 5/6 | 5/5, 5/6 | 6/7, 6/6 | 6/6, 6/6 |
+
+- **Better: no urgency false positives.** Each two-call run gave one
+  non-urgency notice an urgency trigger. Neither one-call run did.
+  - Run A's urgency miss is `15b08347`: trigger "other", the loss of 26
+    government positions. Run B found it.
+- **Worse: a known case's funding source.** On the ICE Camp East Montana
+  notice `53d80bf1`, both one-call runs missed "(e) Type of funding: One Big
+  Beautiful Bill Act". Both two-call runs found it.
+  - The model gave no `funding_source` entry at all, so this is not a drop
+    by a check.
+  - On the other ICE notice, `8febc2f3`, both runs found OBBBA.
+- **Slightly worse: contract types.** The one-call runs list 1-2 fewer
+  types.
+  - They never listed "task order" on the two repeat-bridge notices. Each
+    two-call run found it on one of them.
+  - Run B missed "delivery order" on `eb71d389`.
+  - The two-call runs' misses are missed here too: "cost reimbursable (CR)"
+    and "Indefinite Quantity Contract (IQC)".
+- **The known cases, where extracted, are all right:**
+  - letter contract on all four;
+  - DCSA Working Capital Funds;
+  - the House Oversight deadline on DCSA;
+  - contractor termination on ICE.
+
+**Extract3 fields, 39 of the 40 extract3 notices.** Strict scoring against
+the extract3 key. Each cell is precision then recall, unless marked:
+
+| Field | One call A | One call B | extract3 A | extract3 B |
+|---|---|---|---|---|
+| People, named | 72/73, 72/74 | 72/73, 72/74 | 71/73, 71/74 | 71/74, 71/74 |
+| Signature-block roles | 49/50, 49/51 | 49/50, 49/51 | 49/50, 49/51 | 49/52, 49/51 |
+| Redacted blocks recorded (key: 56) | 49 | 49 | 49 | 48 |
+| `need_by_date` | 5/5, 5/6 | 4/4, 4/6 | 4/4, 4/6 | 3/3, 3/6 |
+| `stated_pop_limit_days` | 2/3, 2/2 | 3/3, 3/3 | 2/2, 2/2 | 2/2, 2/2 |
+| `incumbent_piid` | 13/13, 13/13 | 13/13, 13/13 | 12/12, 12/13 | 13/13, 13/13 |
+| `covered_piids` (per number) | 12/12, 12/12 | 12/12, 12/12 | 11/11, 11/12 | 12/12, 12/12 |
+| `market_research_methods` (per method) | 48/54 = 89%, 48/59 = 81% | 46/51 = 90%, 46/59 = 78% | 51/66 = 77%, 51/59 = 86% | 53/63 = 84%, 53/59 = 90% |
+| `redaction_significant` (accuracy) | 37/39 | 36/39 | 38/39 | 37/39 |
+
+For `stated_pop_limit_days` the denominators differ between runs. On one
+notice the key's answer is null, but it also accepts a value.
+
+- **People.**
+  - **Better:** neither one-call run made the "Carlos Sosa Garcia SOSA" or
+    "Dan Contracting Officer" name-form errors.
+  - **Worse:** both one-call runs lost the competition advocate Johnny Brown
+    on `8a169006`. The model's quote added a space that is not in the text
+    ("...1183807672 Work Func tion"), so the check dropped it.
+  - Neither run invented a name.
+- **Market research: fewer methods.** Precision is up 6-12 points and
+  recall is down 5-12 points.
+  - The one-call runs miss 11 and 13 methods, against 8 and 6. Most of the
+    new misses are `other`.
+  - They add 6 and 5 extra methods, against 15 and 10.
+  - The codes were already "a screen, not a count", and they still are.
+- **`stated_pop_limit_days`.** Run A's false positive is on `d7207bb1`: "an
+  Option to extend for up to 6 months in accordance with FAR 52.217-8". That
+  is an option clause, not a stated cap.
+- **`redaction_significant`.**
+  - Run B's extra disagreement is `3378022f`. The model said "yes" with a
+    quote that was not found, so the field became "unclear".
+  - `2590b4fe` is the known key error.
+- **Core fields unchanged.** The check covered ten value fields: `is_ja`,
+  `doc_kind`, value, value basis, value redacted, vendor, signature date,
+  period, redacted and multiple actions.
+  - One-call runs against extract3 runs: 363-368 of 390 cells agree.
+  - extract3 A against B: 371/390. One-call A against B: 365/390.
+  - Authority lists match on 26-30 of 39 notices, against 28/39 between the
+    extract3 runs.
+- **Invented kinds.** Run A gave 4 entries, and run B 8, of kinds that are
+  not in the list, such as "quantity", "original_ceiling" and
+  "ordering_period_expiration". All were dropped and listed.
+- **Quote check.** Every kept quote was found in the page text.
+  - A second code path searched the attachments table's whole-attachment
+    text, comparing letters and digits only. It covered all 728 kept quotes
+    of the list fields and of people, from both runs, and found all 728.
+- **Not checked.**
+  - The extract3 fields on the 10 trial-only notices: there is no key for
+    them.
+  - Page images: none were looked at this round.
+
+These are small samples: 3 to 9 positives per trial field, and 2 to 13 for
+most extract3 fields. A difference of one or two items is within the
+run-to-run variation seen above.
+
+### Cost
+
+Per notice, at list prices, on the same notices:
+
+| Notices | One call A / B | extract3 A / B (or baseline) | Two calls A / B |
+|---|---|---|---|
+| 24 random | $0.00425 / $0.00460 | $0.00381 / $0.00430 | n/a |
+| 39 random + edge | $0.00451 / $0.00467 | $0.00406 / $0.00434 | n/a |
+| 17 trial (without VA CCN) | $0.00493 / $0.00544 | $0.00446 (baseline) | $0.00670 / $0.00719 |
+
+- **One call costs 7-12% more than extract3 alone** on the random notices,
+  and 10-22% more on the trial notices.
+  - The answer is longer: about 7,400-7,800 output tokens per random
+    notice, against 6,500-7,300.
+- **The two-call design cost 50-60% more** than extract3 alone.
+- **Full re-extraction (projected, not run).** The 10,033 in-scope notices
+  would cost about **$43-46** at the random-sample rate. Two calls would be
+  $57-65, and extract3 alone $38-46. Failed calls come on top.
+- **Spend for this validation: $0.47 recorded.**
+  - The compile check on one notice: $0.004.
+  - Run A: $0.226. Run B: $0.241. Both include their retries.
+  - **Not recorded:** the three calls that hit the output limit, which
+    return no usage to the code. Estimated at about $0.01 each, so about
+    $0.50 in all.
+
+## The extract4 trial: five more fields in a second call (superseded by extract5)
+
+This section is kept for the comparison above. The trial's files are in
+[`analysis/validation/trial_fields_extract4/`](../analysis/validation/trial_fields_extract4/).
 
 ### Fields (each quote-checked like the others)
 
@@ -534,7 +750,7 @@ The five fields therefore come from a **second call**. It has its own short prom
 - **`contract_types`**: as stated; each must be in its quote.
 - **`is_letter_contract`** (yes/no): "yes" needs a quote saying "letter contract", "undefinitized" or "UCA".
 - **`funding_sources`**: the named appropriation or fund; the name must be in its quote.
-- **`policy_citations`**: each with `cited_for`, one of `reason_for_action`, `regulatory_numbering_or_procedure` or `other`.
+- **`policy_citations`** (trial only; dropped in extract5): each with `cited_for`, one of `reason_for_action`, `regulatory_numbering_or_procedure` or `other`.
 - **`urgency_trigger`**: only when urgency is cited. It is one of six codes.
 
 ### Trial sample (18 notices)

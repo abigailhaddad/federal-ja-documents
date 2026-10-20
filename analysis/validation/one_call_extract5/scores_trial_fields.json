@@ -1,0 +1,386 @@
+{
+ "one_call_A": {
+  "n_scored": 17,
+  "not_extracted": [
+   [
+    "085682f1",
+    "known_extension"
+   ]
+  ],
+  "bridge_or_extension": {
+   "accuracy": "17/17",
+   "precision": "10/10",
+   "recall": "8/8",
+   "errors": []
+  },
+  "prior_extension_count": {
+   "accuracy": "17/17",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "17/17",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": []
+  },
+  "urgency_trigger": {
+   "accuracy": "16/17",
+   "precision": "4/4",
+   "recall": "3/4",
+   "errors": [
+    [
+     "15b08347",
+     "random",
+     "other",
+     null,
+     null
+    ]
+   ]
+  },
+  "contract_types": {
+   "precision": "12/12",
+   "recall": "12/17",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "cost-plus-fixed-fee"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "firm-fixed-price"
+     ]
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "5/5",
+   "recall": "5/6",
+   "diffs (key, ours)": [
+    [
+     "53d80bf1",
+     "known_letter_contract_obbba_eo14275",
+     [
+      "One Big Beautiful Bill Act"
+     ],
+     []
+    ]
+   ]
+  },
+  "cost_usd_total": 0.0838
+ },
+ "one_call_B": {
+  "n_scored": 18,
+  "not_extracted": [],
+  "bridge_or_extension": {
+   "accuracy": "18/18",
+   "precision": "10/10",
+   "recall": "9/9",
+   "errors": []
+  },
+  "prior_extension_count": {
+   "accuracy": "18/18",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "18/18",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": []
+  },
+  "urgency_trigger": {
+   "accuracy": "18/18",
+   "precision": "6/6",
+   "recall": "5/5",
+   "errors": []
+  },
+  "contract_types": {
+   "precision": "11/12",
+   "recall": "11/18",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "CPFF"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "firm-fixed-price"
+     ]
+    ],
+    [
+     "eb71d389",
+     "random",
+     [
+      "delivery order"
+     ],
+     []
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "5/5",
+   "recall": "5/6",
+   "diffs (key, ours)": [
+    [
+     "53d80bf1",
+     "known_letter_contract_obbba_eo14275",
+     [
+      "One Big Beautiful Bill Act"
+     ],
+     []
+    ]
+   ]
+  },
+  "cost_usd_total": 0.1003
+ },
+ "two_call_A": {
+  "n_scored": 18,
+  "not_extracted": [],
+  "bridge_or_extension": {
+   "accuracy": "17/18",
+   "precision": "11/12",
+   "recall": "9/9",
+   "errors": [
+    [
+     "53d80bf1",
+     "known_letter_contract_obbba_eo14275",
+     "no",
+     [
+      "unclear"
+     ],
+     "yes"
+    ]
+   ]
+  },
+  "prior_extension_count": {
+   "accuracy": "18/18",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "17/18",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": [
+    [
+     "8a169006",
+     "random",
+     "no",
+     null,
+     null
+    ]
+   ]
+  },
+  "urgency_trigger": {
+   "accuracy": "17/18",
+   "precision": "8/9",
+   "recall": "5/5",
+   "errors": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     null,
+     null,
+     "agency_planning_delay"
+    ]
+   ]
+  },
+  "contract_types": {
+   "precision": "14/14",
+   "recall": "14/18",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "cost-plus-fixed-fee",
+      "task order"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "firm-fixed-price"
+     ]
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "6/7",
+   "recall": "6/6",
+   "diffs (key, ours)": [
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [],
+     [
+      "fiscal year 2023 procurement funds"
+     ]
+    ]
+   ]
+  },
+  "cost_usd_total": 0.1238
+ },
+ "two_call_B": {
+  "n_scored": 18,
+  "not_extracted": [],
+  "bridge_or_extension": {
+   "accuracy": "18/18",
+   "precision": "10/10",
+   "recall": "9/9",
+   "errors": []
+  },
+  "prior_extension_count": {
+   "accuracy": "18/18",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "18/18",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": []
+  },
+  "urgency_trigger": {
+   "accuracy": "17/18",
+   "precision": "8/9",
+   "recall": "5/5",
+   "errors": [
+    [
+     "f2ddf895",
+     "bridge",
+     null,
+     null,
+     "agency_planning_delay"
+    ]
+   ]
+  },
+  "contract_types": {
+   "precision": "13/14",
+   "recall": "13/18",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "CPFF"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee",
+      "task order"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "FFP"
+     ]
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "6/6",
+   "recall": "6/6",
+   "diffs (key, ours)": []
+  },
+  "cost_usd_total": 0.1314
+ }
+}
