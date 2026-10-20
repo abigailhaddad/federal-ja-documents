@@ -143,9 +143,8 @@ SCHEMA = {
                  "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
                  "redaction_significant", "redaction_significant_quote",
                  # TRIAL (extract4trial): kept only if the trial passes validation
-                 "bridge_or_extension", "bridge_or_extension_quote", "prior_extension_count", "contract_types",
-                 "is_letter_contract", "letter_contract_quote", "funding_sources", "policy_citations",
-                 "urgency_trigger", "people"],
+                 "bridge", "letter_contract", "contract_types", "funding_sources", "policy_citations",
+                 "urgency", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -196,29 +195,28 @@ SCHEMA = {
                            "quote": {"type": "string"}}}},
         "redaction_significant": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "redaction_significant_quote": {"type": "string"},
-        # TRIAL fields (extract4trial), same no-union layout
-        "bridge_or_extension": {"type": "string", "enum": ["yes", "no", "unclear"]},
-        "bridge_or_extension_quote": {"type": "string"},
-        "prior_extension_count": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["count", "quote"],
-            "properties": {"count": {"type": "integer"}, "quote": {"type": "string"}}}},
+        # TRIAL fields (extract4trial). A first layout with enums and an
+        # array per optional value was rejected ("compiled grammar is too
+        # large", 400): codes here are plain strings checked in code, and
+        # each single value is one object.
+        "bridge": {"type": "object", "additionalProperties": False,
+                   "required": ["answer", "quote", "prior_count", "prior_count_quote"],
+                   "properties": {"answer": {"type": "string"}, "quote": {"type": "string"},
+                                  "prior_count": {"type": "integer"}, "prior_count_quote": {"type": "string"}}},
+        "letter_contract": {"type": "object", "additionalProperties": False, "required": ["answer", "quote"],
+                            "properties": {"answer": {"type": "string"}, "quote": {"type": "string"}}},
         "contract_types": {"type": "array", "items": {
             "type": "object", "additionalProperties": False, "required": ["stated", "quote"],
             "properties": {"stated": {"type": "string"}, "quote": {"type": "string"}}}},
-        "is_letter_contract": {"type": "string", "enum": ["yes", "no"]},
-        "letter_contract_quote": {"type": "string"},
         "funding_sources": {"type": "array", "items": {
             "type": "object", "additionalProperties": False, "required": ["name", "quote"],
             "properties": {"name": {"type": "string"}, "quote": {"type": "string"}}}},
         "policy_citations": {"type": "array", "items": {
             "type": "object", "additionalProperties": False, "required": ["citation", "cited_for", "quote"],
-            "properties": {"citation": {"type": "string"},
-                           "cited_for": {"type": "string", "enum": POLICY_CITED_FOR},
+            "properties": {"citation": {"type": "string"}, "cited_for": {"type": "string"},
                            "quote": {"type": "string"}}}},
-        "urgency_trigger": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["trigger", "quote"],
-            "properties": {"trigger": {"type": "string", "enum": URGENCY_TRIGGERS},
-                           "quote": {"type": "string"}}}},
+        "urgency": {"type": "object", "additionalProperties": False, "required": ["trigger", "quote"],
+                    "properties": {"trigger": {"type": "string"}, "quote": {"type": "string"}}},
         "people": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
             "required": ["name", "name_quote", "title", "organization", "role_in_document",
@@ -835,14 +833,16 @@ def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: li
             dropped.append({"field": field, "value": value, "quote": q, "reason": why})
         return None, None
 
+    br = raw.get("bridge") if isinstance(raw.get("bridge"), dict) else {}
+    lc = raw.get("letter_contract") if isinstance(raw.get("letter_contract"), dict) else {}
+    ans = lambda d, ok: (_blank(d.get("answer")) or "").lower() if (_blank(d.get("answer")) or "").lower() in ok else None
     f["bridge_or_extension"], f["bridge_or_extension_quote"] = flag(
-        "bridge_or_extension", raw.get("bridge_or_extension"), raw.get("bridge_or_extension_quote"))
+        "bridge_or_extension", ans(br, ("yes", "no", "unclear")), br.get("quote"))
     f["is_letter_contract"], f["letter_contract_quote"] = flag(
-        "is_letter_contract", raw.get("is_letter_contract"), raw.get("letter_contract_quote"),
+        "is_letter_contract", ans(lc, ("yes", "no")), lc.get("quote"),
         lambda q: bool(_LETTER.search(normalize(q))), "quote does not say letter contract or undefinitized")
 
-    pc = _first(raw.get("prior_extension_count"))
-    n, q = pc.get("count"), _blank(pc.get("quote"))
+    n, q = br.get("prior_count"), _blank(br.get("prior_count_quote"))   # -1 = not stated
     f["prior_extension_count"] = f["prior_extension_count_quote"] = None
     if isinstance(n, int) and n >= 0 and ok_quote("prior_extension_count", n, q):
         if _COUNT_WORD.search(normalize(q)):
@@ -871,8 +871,8 @@ def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: li
     f["funding_sources"] = items("funding_sources", "name")
     f["policy_citations"] = [c for c in items("policy_citations", "citation", ["cited_for"])
                              if c["cited_for"] in POLICY_CITED_FOR]
-    ut = _first(raw.get("urgency_trigger"))
-    t, q = ut.get("trigger"), _blank(ut.get("quote"))
+    ut = raw.get("urgency") if isinstance(raw.get("urgency"), dict) else {}
+    t, q = _blank(ut.get("trigger")), _blank(ut.get("quote"))
     f["urgency_trigger"] = f["urgency_trigger_quote"] = None
     if t in URGENCY_TRIGGERS and ok_quote("urgency_trigger", t, q):
         f["urgency_trigger"], f["urgency_trigger_quote"] = t, display_quote(q)
@@ -884,8 +884,8 @@ def shape_errors(raw: dict) -> list[str]:
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
     for k in ("authorities", "other_firms_named", "additional_vendors", "people", "need_by",
-              "stated_pop_limit", "covered_piids", "market_research_methods", "prior_extension_count",
-              "contract_types", "funding_sources", "policy_citations", "urgency_trigger"):
+              "stated_pop_limit", "covered_piids", "market_research_methods",
+              "contract_types", "funding_sources", "policy_citations"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")
