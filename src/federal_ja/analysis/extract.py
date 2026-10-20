@@ -142,8 +142,7 @@ SCHEMA = {
                  "covers_multiple_actions", "additional_vendors", "need_by", "stated_pop_limit",
                  "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
                  "redaction_significant", "redaction_significant_quote",
-                 # TRIAL (extract4trial): kept only if the trial passes validation
-                 "facts", "people"],
+                 "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -194,14 +193,6 @@ SCHEMA = {
                            "quote": {"type": "string"}}}},
         "redaction_significant": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "redaction_significant_quote": {"type": "string"},
-        # TRIAL fields (extract4trial), as one generic list of facts. Two
-        # layouts with a property per field (with enums, then without) were
-        # rejected: "The compiled grammar is too large" (400). Kinds and codes
-        # are plain strings checked in code.
-        "facts": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["kind", "value", "detail", "quote"],
-            "properties": {"kind": {"type": "string"}, "value": {"type": "string"},
-                           "detail": {"type": "string"}, "quote": {"type": "string"}}}},
         "people": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
             "required": ["name", "name_quote", "title", "organization", "role_in_document",
@@ -221,6 +212,20 @@ SCHEMA = {
 
 PROMPT = CONFIG["extraction"]["prompt"]  # text in prompts.yaml
 
+# TRIAL (extract4trial): the five trial fields come from a second call with
+# its own small schema. The main schema is at the compiled-grammar size limit
+# for strict tool use: adding even one small list to it was rejected
+# ("The compiled grammar is too large", 400, 2026-10-20).
+FACTS_TOOL = "record_trial_facts"
+FACTS_SCHEMA = {
+    "type": "object", "additionalProperties": False, "required": ["facts"],
+    "properties": {"facts": {"type": "array", "items": {
+        "type": "object", "additionalProperties": False, "required": ["kind", "value", "detail", "quote"],
+        "properties": {"kind": {"type": "string"}, "value": {"type": "string"},
+                       "detail": {"type": "string"}, "quote": {"type": "string"}}}}},
+}
+FACTS_PROMPT = CONFIG["extraction"].get("facts_prompt")
+
 # Prompt caching: the instructions (everything before the per-notice section)
 # are identical on every call and are sent as a cached block; the split falls
 # at the start of the "NOTICE METADATA" heading, so the two parts joined are
@@ -229,6 +234,10 @@ PROMPT = CONFIG["extraction"]["prompt"]  # text in prompts.yaml
 _SPLIT = PROMPT.rfind("NOTICE METADATA", 0, PROMPT.find("<<METADATA>>"))
 assert _SPLIT > 0 and "<<" not in PROMPT[:_SPLIT], "extraction prompt layout changed; fix the cache split"
 PROMPT_CACHED, PROMPT_PER_DOC = PROMPT[:_SPLIT], PROMPT[_SPLIT:]
+if FACTS_PROMPT:
+    _FSPLIT = FACTS_PROMPT.rfind("NOTICE METADATA", 0, FACTS_PROMPT.find("<<METADATA>>"))
+    assert _FSPLIT > 0 and "<<" not in FACTS_PROMPT[:_FSPLIT], "facts prompt layout changed; fix the cache split"
+    FACTS_CACHED, FACTS_PER_DOC = FACTS_PROMPT[:_FSPLIT], FACTS_PROMPT[_FSPLIT:]
 
 
 # ---------------------------------------------------------------------------
@@ -281,6 +290,10 @@ def _metadata(doc: Document) -> str:
     m = doc.meta
     return "\n".join(f"{k}: {m.get(k)}" for k in ("title", "agency", "sub_tier", "office", "posted_date")
                      if m.get(k))
+
+
+def build_facts_prompt(doc: Document, text: str) -> tuple[str, str]:
+    return FACTS_CACHED, FACTS_PER_DOC.replace("<<METADATA>>", _metadata(doc)).replace("<<DOCUMENT>>", text)
 
 
 def build_prompt(doc: Document, text: str) -> tuple[str, str]:
@@ -970,6 +983,19 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
         if not _n_dropped_factual(dropped):
             break
     raw, fields, dropped, used = best
+    if FACTS_PROMPT:
+        kw = {"effort": effort} if effort else {}
+        fraw, u = call_fn(build_facts_prompt(doc, text), schema=FACTS_SCHEMA, tool_name=FACTS_TOOL, model=model,
+                          max_tokens=16000, **kw)
+        if not isinstance(fraw, dict) or not isinstance(fraw.get("facts"), list):
+            raise llm.ModelError("facts call: answer does not match the schema")
+        raw = {**raw, "facts": fraw["facts"]}
+        fields, dropped = verify(raw, doc)
+        # the facts call's tokens are kept apart; its cost is in cost_usd (so the spend cap counts it)
+        usage["facts"] = {k: int(u.get(k) or 0) for k in ("input_tokens", "output_tokens",
+                                                           "cache_creation_input_tokens", "cache_read_input_tokens")}
+        usage["facts"]["cost_usd"] = round(float(u.get("cost_usd") or 0), 6)
+        usage["cost_usd"] += float(u.get("cost_usd") or 0)
     usage["cost_usd"] = round(usage["cost_usd"], 6)
     full_len = len(doc.model_text())
     return {
