@@ -114,6 +114,12 @@ PEOPLE_ROLES = [
     "vendor_employee",
     "other",
 ]
+MR_METHODS = [
+    "sources_sought", "rfi", "notice_of_intent", "industry_day", "sam_search",
+    "gsa_elibrary_or_advantage", "sba_dsbs", "other_database_search", "vendor_contact",
+    "internet_search", "procurement_history", "other",
+]
+
 # The roles of signature and approval blocks: the narrower scope
 # ``people_signature_block`` in the flat row.
 SIGNATURE_ROLES = frozenset({"signer_or_approver", "contracting_officer", "competition_advocate",
@@ -129,7 +135,9 @@ SCHEMA = {
                  "value_redacted", "vendor", "vendor_quote", "period_of_performance",
                  "period_quote", "signature_date", "signature_quote", "market_research_summary",
                  "market_research_quote", "other_firms_named", "redacted", "redaction_quote", "notes",
-                 "covers_multiple_actions", "additional_vendors", "people"],
+                 "covers_multiple_actions", "additional_vendors", "need_by", "stated_pop_limit",
+                 "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
+                 "redaction_significant", "redaction_significant_quote", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -160,6 +168,26 @@ SCHEMA = {
         "notes": _Q,
         "covers_multiple_actions": {"type": "boolean"},
         "additional_vendors": {"type": "array", "items": {"type": "string"}},
+        # The fields added with extract3 use no string|null unions (strict
+        # tool use allows at most 16 union-typed parameters and the fields
+        # above use 15): an optional value is a list of at most one entry,
+        # or "" for none.
+        "need_by": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["date", "quote"],
+            "properties": {"date": {"type": "string", "description": "YYYY-MM-DD"},
+                           "quote": {"type": "string"}}}},
+        "stated_pop_limit": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["days", "quote"],
+            "properties": {"days": {"type": "integer"}, "quote": {"type": "string"}}}},
+        "covered_piids": {"type": "array", "items": {"type": "string"}},
+        "incumbent_piid": {"type": "string"},
+        "incumbent_piid_quote": {"type": "string"},
+        "market_research_methods": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["method", "quote"],
+            "properties": {"method": {"type": "string", "enum": MR_METHODS},
+                           "quote": {"type": "string"}}}},
+        "redaction_significant": {"type": "string", "enum": ["yes", "no", "unclear"]},
+        "redaction_significant_quote": {"type": "string"},
         "people": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
             "required": ["name", "name_quote", "title", "organization", "role_in_document",
@@ -376,6 +404,32 @@ def dates_in(text: str) -> set[date]:
             except (ValueError, TypeError):
                 continue
     return out
+
+
+_NUM_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen "
+    "sixteen seventeen eighteen nineteen twenty".split())}
+_NUM_WORDS.update({"thirty": 30, "forty-five": 45, "sixty": 60, "ninety": 90, "twenty-four": 24,
+                   "thirty-six": 36, "one hundred twenty": 120, "one hundred eighty": 180})
+_UNIT_DAYS = {"day": (1,), "week": (7,), "month": (30, 30.44, 31), "year": (365, 366)}
+_DURATION = re.compile(
+    r"(?<![\d.])(\d+(?:\.\d+)?|" + "|".join(sorted((re.escape(w) for w in _NUM_WORDS), key=len, reverse=True))
+    + r")\s*(?:\(\s*\d+\s*\)\s*)?-?\s*(?:calendar\s+)?(day|week|month|year)s?\b", re.I)
+
+
+def durations_in(text: str) -> list[float]:
+    """Durations written in text, in days ("six (6) months" -> 180, 182.6
+    and 186; "one year" -> 365, 366; "90 days" -> 90)."""
+    out: list[float] = []
+    for m in _DURATION.finditer(normalize(text)):
+        n = m.group(1).lower()
+        num = float(n) if n[0].isdigit() else _NUM_WORDS[n]
+        out.extend(num * f for f in _UNIT_DAYS[m.group(2).lower()])
+    return out
+
+
+def days_in_quote(days: int, quote: str) -> bool:
+    return any(abs(d - days) <= max(2.0, 0.03 * d) for d in durations_in(quote))
 
 
 _SECTION = re.compile(r"\d+(?:\.\d+)+(?:-\d+)?|\b\d{3,5}\b|8\s*\(\s*a\s*\)")
@@ -610,10 +664,100 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     f["redaction_quote_info"] = _qinfo(m) if m.verified else None
     f["notes"] = (raw.get("notes") or "").strip() or None
 
+    _verify_extract3_fields(raw, doc, nd, vt, f, dropped)
+
     people, pdrop = verify_people(raw.get("people"), doc, nd, vt)
     f["people"] = people
     dropped.extend(pdrop)
     return f, dropped
+
+
+def _first(v):
+    return v[0] if isinstance(v, list) and v and isinstance(v[0], dict) else {}
+
+
+def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict, dropped: list[dict]) -> None:
+    """need_by, stated_pop_limit, covered_piids, incumbent_piid,
+    market_research_methods, redaction_significant (prompt extract3)."""
+    def check(field, value, quote, ok, why):
+        if value in (None, "", []):
+            return None
+        m = _check_quote(quote, doc, nd)
+        if not m.verified:
+            dropped.append({"field": field, "value": value, "quote": quote or None,
+                            "reason": "quote not found in document" if quote else "no quote"})
+            return None
+        if not ok:
+            dropped.append({"field": field, "value": value, "quote": quote, "reason": why})
+            return None
+        return _qinfo(m)
+
+    nb = _first(raw.get("need_by"))
+    d, q = (nb.get("date") or "").strip() or None, nb.get("quote")
+    dd = None
+    if d:
+        try:
+            dd = date.fromisoformat(d)
+        except ValueError:
+            dropped.append({"field": "need_by_date", "value": d, "quote": q, "reason": "not a YYYY-MM-DD date"})
+            d = None
+    info = check("need_by_date", d, q, dd is not None and dd in dates_in(q or ""), "date not in its quote")
+    f["need_by_date"] = d if info else None
+    f["need_by_quote"] = display_quote(q) if info else None
+    f["need_by_quote_info"] = info
+
+    pl = _first(raw.get("stated_pop_limit"))
+    days, q = pl.get("days"), pl.get("quote")
+    if days is not None and (not isinstance(days, int) or days <= 0):
+        dropped.append({"field": "stated_pop_limit_days", "value": days, "quote": q, "reason": "not a positive whole number"})
+        days = None
+    info = check("stated_pop_limit_days", days, q, days is not None and days_in_quote(days, q or ""),
+                 "duration not in its quote")
+    f["stated_pop_limit_days"] = days if info else None
+    f["stated_pop_limit_quote"] = display_quote(q) if info else None
+    f["stated_pop_limit_quote_info"] = info
+
+    piids, seen = [], set()
+    for x in raw.get("covered_piids") or []:
+        x = (x or "").strip()
+        if not x or _squash(x) in seen:
+            continue
+        if len(_squash(x)) >= 4 and name_in(x, vt):
+            piids.append(x)
+            seen.add(_squash(x))
+        else:
+            dropped.append({"field": "covered_piids", "value": x, "quote": None,
+                            "reason": "contract number not found in document"})
+    f["covered_piids"] = piids
+
+    ip, q = (raw.get("incumbent_piid") or "").strip() or None, raw.get("incumbent_piid_quote")
+    info = check("incumbent_piid", ip, q, name_in(ip or "", q or ""), "contract number not in its quote")
+    f["incumbent_piid"] = ip if info else None
+    f["incumbent_piid_quote"] = display_quote(q) if info else None
+    f["incumbent_piid_quote_info"] = info
+
+    methods, seen_m = [], set()
+    for x in raw.get("market_research_methods") or []:
+        if not isinstance(x, dict) or x.get("method") not in MR_METHODS or x["method"] in seen_m:
+            continue
+        info = check("market_research_methods", x["method"], x.get("quote"), True, "")
+        if info:
+            methods.append({"method": x["method"], "quote": display_quote(x["quote"]), **info})
+            seen_m.add(x["method"])
+    f["market_research_methods"] = methods
+
+    rs, q = raw.get("redaction_significant"), raw.get("redaction_significant_quote")
+    f["redaction_significant"] = rs if rs in ("yes", "no", "unclear") else None
+    f["redaction_significant_quote"] = f["redaction_significant_quote_info"] = None
+    if rs == "yes":
+        info = check("redaction_significant", rs, q, True, "")
+        if info:
+            f["redaction_significant_quote"] = display_quote(q)
+            f["redaction_significant_quote_info"] = info
+        else:
+            f["redaction_significant"] = "unclear"   # "yes" needs a verified quote; the drop says why
+            if not q:
+                dropped.append({"field": "redaction_significant", "value": rs, "quote": None, "reason": "no quote"})
 
 
 def shape_errors(raw: dict) -> list[str]:
@@ -621,7 +765,8 @@ def shape_errors(raw: dict) -> list[str]:
     them, but a tool offered with tool_choice "auto" has returned, e.g., a
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
-    for k in ("authorities", "other_firms_named", "additional_vendors", "people"):
+    for k in ("authorities", "other_firms_named", "additional_vendors", "people", "need_by",
+              "stated_pop_limit", "covered_piids", "market_research_methods"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")
@@ -643,7 +788,10 @@ def shape_errors(raw: dict) -> list[str]:
 # People are left out of the retry rule, like the name lists: a dropped
 # person must not trigger a second call that could change the other fields
 # (and double the cost).
-_NOT_RETRIED = ("other_firms_named", "additional_vendors", "people", "people.title", "people.organization")
+_NOT_RETRIED = ("other_firms_named", "additional_vendors", "people", "people.title", "people.organization",
+                # the extract3 fields, for the same reason
+                "need_by_date", "stated_pop_limit_days", "covered_piids", "incumbent_piid",
+                "market_research_methods", "redaction_significant")
 
 
 def _n_dropped_factual(dropped: list[dict]) -> int:
@@ -820,6 +968,16 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "redaction_evidence": _redaction_evidence(rec),
         "redaction_quote": f["redaction_quote"],
         "notes_model_written": f["notes"],
+        "need_by_date": f.get("need_by_date"),
+        "need_by_quote": f.get("need_by_quote"),
+        "stated_pop_limit_days": f.get("stated_pop_limit_days"),
+        "stated_pop_limit_quote": f.get("stated_pop_limit_quote"),
+        "covered_piids": "; ".join(f.get("covered_piids") or []) or None,
+        "incumbent_piid": f.get("incumbent_piid"),
+        "incumbent_piid_quote": f.get("incumbent_piid_quote"),
+        "market_research_methods": "; ".join(m["method"] for m in f.get("market_research_methods") or []) or None,
+        "redaction_significant": f.get("redaction_significant"),
+        "redaction_significant_quote": f.get("redaction_significant_quote"),
         "people_named": "; ".join(_person_label(p) for p in people if not p["redacted"]) or None,
         "people_signature_block": "; ".join(_person_label(p) for p in people
                                             if p["role_in_document"] in SIGNATURE_ROLES) or None,

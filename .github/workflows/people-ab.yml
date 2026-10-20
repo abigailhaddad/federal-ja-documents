@@ -14,13 +14,13 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        label: [testA, testB]
+        label: [finalA, finalB]
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
       REV: 8b7d8208fef60cf911934e167b33515b8ebbaffb
       LABEL: ${{ matrix.label }}
-      MAX_USD: "0.30"
+      MAX_USD: "0.40"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
