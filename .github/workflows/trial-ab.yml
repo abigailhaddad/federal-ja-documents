@@ -12,11 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
         include:
           - {label: base, ref: 717caf67c797c159b7c00064308c6e57f5964c16}
-          - {label: trialA, ref: bef760e8b9b722eb4a50a1dd72e1cd353431b38d}
-          - {label: trialB, ref: bef760e8b9b722eb4a50a1dd72e1cd353431b38d}
+          - {label: trialA, ref: a7eaadf81f6fa9c14f129e10df310a4be52d7fb5}
+          - {label: trialB, ref: a7eaadf81f6fa9c14f129e10df310a4be52d7fb5}
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
