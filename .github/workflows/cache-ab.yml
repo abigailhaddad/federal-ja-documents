@@ -14,6 +14,7 @@ jobs:
     timeout-minutes: 60
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -101,7 +102,9 @@ jobs:
           print("total usd (list prices, from usage):", round(total, 5))
           new = load("../out/new_extract/extractions.jsonl")
           reads = sum(r["usage"]["cache_read_input_tokens"] for r in new[1:])
-          if len(new) > 1 and not reads:
+          if len(new) < 2:
+              raise SystemExit(f"only {len(new)} new-shape extraction records; nothing to check")
+          if not reads:
               raise SystemExit("cache_read_input_tokens is 0 on every call after the first: the cache never hit")
           EOF
       - uses: actions/upload-artifact@v4
