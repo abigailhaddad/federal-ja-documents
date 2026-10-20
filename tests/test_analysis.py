@@ -129,6 +129,7 @@ def fake_call(responses):
     calls = []
 
     def call(prompt, *, schema, tool_name, model, pass_no):
+        prompt = llm.prompt_text(prompt)
         calls.append((tool_name, pass_no, prompt))
         for key, resp in responses.items():
             if key in prompt:
@@ -181,6 +182,25 @@ def test_tag_document_rows(doc, shipped_all):
     assert by_cat["sources_rejected"]["n_firms"] == 2
     assert by_cat["sources_rejected"]["quote_pages"][0]["page_number"] is None   # docx
     json.dumps(rows)
+
+
+def test_tag_document_sends_cached_parts_and_sums_cache_usage(doc, shipped_all):
+    seen = []
+
+    def call(prompt, *, schema, tool_name, model, pass_no):
+        seen.append(prompt)
+        return ({"answer": False, "quote": None, "quote2": None, "explanation": "", "n_firms": None},
+                {"input_tokens": 1000, "output_tokens": 10, "cache_creation_input_tokens": 600 if pass_no == 1 else 0,
+                 "cache_read_input_tokens": 0 if pass_no == 1 else 600, "cost_usd": 0.0001})
+    review = tagger.tag_document(doc, ["workforce_cause", "agency_delay_cause", "sources_rejected"], call_fn=call)
+    assert len(seen) == 6
+    for p in seen:      # (instructions, per-document part); the first is one of the frozen templates' heads
+        assert isinstance(p, tuple) and len(p) == 2
+        assert any(t.startswith(p[0]) and t[len(p[0]):].startswith(prompts.METADATA_TOKEN)
+                   for t in prompts.CONFIRM_TEMPLATES.values())
+    assert review["usage"]["cache_creation_input_tokens"] == 3 * 600
+    assert review["usage"]["cache_read_input_tokens"] == 3 * 600
+    assert review["usage"]["input_tokens"] == 6000
 
 
 def test_model_error_propagates(doc, shipped_all):
