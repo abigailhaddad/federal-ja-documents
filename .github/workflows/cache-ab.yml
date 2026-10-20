@@ -1,0 +1,115 @@
+# THROWAWAY: one-off A/B of the prompt-caching change (old request shape on
+# main vs the new two-block shape on this branch) on a few real documents.
+# Remove before merging.
+name: Prompt caching A/B (throwaway)
+
+on:
+  push:
+    branches: [prompt-caching]
+    paths: [.github/workflows/cache-ab.yml]
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: new
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: old
+      - uses: astral-sh/setup-uv@v6
+      - run: cd new && uv sync --frozen && cd ../old && uv sync --frozen
+      - name: Pick documents (fixed seed, one dataset revision)
+        run: |
+          cd new && uv run python - <<'EOF'
+          import json, random
+          from pathlib import Path
+          from federal_ja.analysis import data, patterns, tagger
+          from federal_ja.analysis.text import MIN_DOC_CHARS
+          d = Path("../hf")
+          rev = data.download_tables(d)
+          notices, att, pages = data.load_tables(d)
+          ok = set(att.loc[att.download_status == "ok", "notice_id"])
+          notices = notices[notices.notice_id.isin(ok)]
+          docs = data.build_documents(notices, att, pages, notices.notice_id.tolist())
+          rng = random.Random(20261020)
+          # extraction: in scope, and 4K-30K characters of text to keep the spend small
+          ext = sorted(n for n, x in docs.items() if 4000 <= len(x.model_text()) <= 30000
+                       and any(p.text.strip() for p in x.pages) and len(x.model_text()) >= MIN_DOC_CHARS)
+          pick = rng.sample(ext, 10)
+          # tagging: 3 documents with keyword hits for each shipped category
+          tag = []
+          for c in tagger.shipped():
+              hit = sorted(n for n, x in docs.items() if not x.skip_reason()
+                           and len(x.model_text()) <= 60000 and patterns.find_hits(x.verification_text(), c)
+                           and n not in tag)
+              tag += rng.sample(hit, 3)
+          Path("../ids_extract.txt").write_text("\n".join(pick) + "\n")
+          Path("../ids_tag.txt").write_text("\n".join(tag) + "\n")
+          Path("../rev.txt").write_text(rev["sha"])
+          print(json.dumps({"revision": rev, "extract_pool": len(ext), "extract": pick, "tag": tag}, indent=1))
+          EOF
+      - name: Extract, old request shape (main)
+        run: |
+          cd old && uv run python -m federal_ja.analysis extract --notice-file ../ids_extract.txt \
+            --out ../out/old_extract --data-dir ../hf --revision "$(cat ../rev.txt)" \
+            --workers 1 --retries 0 --max-usd 0.06 || echo "some failed"
+      - name: Extract, new request shape (this branch)
+        run: |
+          cd new && uv run python -m federal_ja.analysis extract --notice-file ../ids_extract.txt \
+            --out ../out/new_extract --data-dir ../hf --revision "$(cat ../rev.txt)" \
+            --workers 1 --retries 0 --max-usd 0.06 || echo "some failed"
+      - name: Tag, old and new
+        run: |
+          args=(); while read -r n; do args+=(--notice-id "$n"); done < ids_tag.txt
+          (cd old && uv run python -m federal_ja.analysis tag "${args[@]}" --out ../out/old_tag --data-dir ../hf \
+            --revision "$(cat ../rev.txt)" --workers 1 --max-usd 0.02) || echo "some failed"
+          (cd new && uv run python -m federal_ja.analysis tag "${args[@]}" --out ../out/new_tag --data-dir ../hf \
+            --revision "$(cat ../rev.txt)" --workers 1 --max-usd 0.02) || echo "some failed"
+      - name: Cache tokens per call (fail if the new run never reads the cache)
+        run: |
+          cd new && uv run python - <<'EOF'
+          import json
+          from pathlib import Path
+          def load(p):
+              p = Path(p)
+              return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
+          total = 0.0
+          for name in ("old_extract", "new_extract"):
+              recs = load(f"../out/{name}/extractions.jsonl")
+              print(name)
+              for r in recs:
+                  u = r["usage"]
+                  total += u["cost_usd"]
+                  print(f"  {r['run_at']} {r['notice_id']} calls={u['calls']} in={u['input_tokens']} "
+                        f"write={u.get('cache_creation_input_tokens')} read={u.get('cache_read_input_tokens')} "
+                        f"out={u['output_tokens']} usd={u['cost_usd']}")
+          for name in ("old_tag", "new_tag"):
+              recs = load(f"../out/{name}/reviews.jsonl")
+              print(name)
+              for r in recs:
+                  u = r["usage"]
+                  total += u["cost_usd"]
+                  print(f"  {r['run_at']} {r['notice_id']} calls={u['calls']} in={u['input_tokens']} "
+                        f"write={u.get('cache_creation_input_tokens')} read={u.get('cache_read_input_tokens')} "
+                        f"out={u['output_tokens']} usd={u['cost_usd']}")
+          print("total usd (list prices, from usage):", round(total, 5))
+          new = load("../out/new_extract/extractions.jsonl")
+          reads = sum(r["usage"]["cache_read_input_tokens"] for r in new[1:])
+          if len(new) > 1 and not reads:
+              raise SystemExit("cache_read_input_tokens is 0 on every call after the first: the cache never hit")
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cache-ab
+          path: |
+            out/
+            ids_extract.txt
+            ids_tag.txt
+            rev.txt
