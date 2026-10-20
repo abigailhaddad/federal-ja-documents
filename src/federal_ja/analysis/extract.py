@@ -143,8 +143,7 @@ SCHEMA = {
                  "covered_piids", "incumbent_piid", "incumbent_piid_quote", "market_research_methods",
                  "redaction_significant", "redaction_significant_quote",
                  # TRIAL (extract4trial): kept only if the trial passes validation
-                 "bridge", "letter_contract", "contract_types", "funding_sources", "policy_citations",
-                 "urgency", "people"],
+                 "facts", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -195,28 +194,14 @@ SCHEMA = {
                            "quote": {"type": "string"}}}},
         "redaction_significant": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "redaction_significant_quote": {"type": "string"},
-        # TRIAL fields (extract4trial). A first layout with enums and an
-        # array per optional value was rejected ("compiled grammar is too
-        # large", 400): codes here are plain strings checked in code, and
-        # each single value is one object.
-        "bridge": {"type": "object", "additionalProperties": False,
-                   "required": ["answer", "quote", "prior_count", "prior_count_quote"],
-                   "properties": {"answer": {"type": "string"}, "quote": {"type": "string"},
-                                  "prior_count": {"type": "integer"}, "prior_count_quote": {"type": "string"}}},
-        "letter_contract": {"type": "object", "additionalProperties": False, "required": ["answer", "quote"],
-                            "properties": {"answer": {"type": "string"}, "quote": {"type": "string"}}},
-        "contract_types": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["stated", "quote"],
-            "properties": {"stated": {"type": "string"}, "quote": {"type": "string"}}}},
-        "funding_sources": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["name", "quote"],
-            "properties": {"name": {"type": "string"}, "quote": {"type": "string"}}}},
-        "policy_citations": {"type": "array", "items": {
-            "type": "object", "additionalProperties": False, "required": ["citation", "cited_for", "quote"],
-            "properties": {"citation": {"type": "string"}, "cited_for": {"type": "string"},
-                           "quote": {"type": "string"}}}},
-        "urgency": {"type": "object", "additionalProperties": False, "required": ["trigger", "quote"],
-                    "properties": {"trigger": {"type": "string"}, "quote": {"type": "string"}}},
+        # TRIAL fields (extract4trial), as one generic list of facts. Two
+        # layouts with a property per field (with enums, then without) were
+        # rejected: "The compiled grammar is too large" (400). Kinds and codes
+        # are plain strings checked in code.
+        "facts": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["kind", "value", "detail", "quote"],
+            "properties": {"kind": {"type": "string"}, "value": {"type": "string"},
+                           "detail": {"type": "string"}, "quote": {"type": "string"}}}},
         "people": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
             "required": ["name", "name_quote", "title", "organization", "role_in_document",
@@ -812,9 +797,14 @@ _COUNT_WORD = re.compile(r"\d|\b(first|second|third|fourth|fifth|sixth|seventh|e
 
 
 def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: list[dict]) -> None:
-    """TRIAL (extract4trial): bridge_or_extension, prior_extension_count,
-    contract_types, is_letter_contract, funding_sources, policy_citations,
-    urgency_trigger."""
+    """TRIAL (extract4trial): the ``facts`` list gives bridge_or_extension,
+    prior_extension_count, contract_types, is_letter_contract,
+    funding_sources, policy_citations and urgency_trigger."""
+    facts = [x for x in raw.get("facts") or [] if isinstance(x, dict)]
+    by: dict[str, list[dict]] = {}
+    for x in facts:
+        by.setdefault((_blank(x.get("kind")) or "").lower(), []).append(x)
+
     def ok_quote(field, value, quote):
         m = _check_quote(quote, doc, nd)
         if not m.verified:
@@ -822,40 +812,46 @@ def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: li
                             "reason": "quote not found in document" if quote else "no quote"})
         return m.verified
 
-    def flag(field, value, quote, yes_ok=lambda q: True, why=""):
-        """A yes/no/unclear flag: "yes" needs a verified quote that passes yes_ok."""
-        q = _blank(quote)
-        if value != "yes":
-            return value, None
-        if ok_quote(field, value, q) and yes_ok(q):
-            return "yes", display_quote(q)
-        if q and _check_quote(q, doc, nd).verified:
-            dropped.append({"field": field, "value": value, "quote": q, "reason": why})
+    def flag(field, kind, allowed, yes_ok=lambda q: True, why=""):
+        """A yes/no(/unclear) fact: "yes" needs a verified quote that passes yes_ok."""
+        x = (by.get(kind) or [{}])[0]
+        v, q = (_blank(x.get("value")) or "").lower(), _blank(x.get("quote"))
+        if v not in allowed:
+            return None, None
+        if v != "yes":
+            return v, None
+        if ok_quote(field, v, q):
+            if yes_ok(q):
+                return "yes", display_quote(q)
+            dropped.append({"field": field, "value": v, "quote": q, "reason": why})
         return None, None
 
-    br = raw.get("bridge") if isinstance(raw.get("bridge"), dict) else {}
-    lc = raw.get("letter_contract") if isinstance(raw.get("letter_contract"), dict) else {}
-    ans = lambda d, ok: (_blank(d.get("answer")) or "").lower() if (_blank(d.get("answer")) or "").lower() in ok else None
-    f["bridge_or_extension"], f["bridge_or_extension_quote"] = flag(
-        "bridge_or_extension", ans(br, ("yes", "no", "unclear")), br.get("quote"))
+    f["bridge_or_extension"], f["bridge_or_extension_quote"] = flag("bridge_or_extension", "bridge",
+                                                                     ("yes", "no", "unclear"))
     f["is_letter_contract"], f["letter_contract_quote"] = flag(
-        "is_letter_contract", ans(lc, ("yes", "no")), lc.get("quote"),
+        "is_letter_contract", "letter_contract", ("yes", "no"),
         lambda q: bool(_LETTER.search(normalize(q))), "quote does not say letter contract or undefinitized")
 
-    n, q = br.get("prior_count"), _blank(br.get("prior_count_quote"))   # -1 = not stated
     f["prior_extension_count"] = f["prior_extension_count_quote"] = None
-    if isinstance(n, int) and n >= 0 and ok_quote("prior_extension_count", n, q):
-        if _COUNT_WORD.search(normalize(q)):
-            f["prior_extension_count"], f["prior_extension_count_quote"] = n, display_quote(q)
-        else:
-            dropped.append({"field": "prior_extension_count", "value": n, "quote": q, "reason": "no count in its quote"})
+    x = (by.get("prior_extension_count") or [{}])[0]
+    v, q = _blank(x.get("value")), _blank(x.get("quote"))
+    if v is not None:
+        try:
+            n = int(v)
+        except ValueError:
+            n = None
+            dropped.append({"field": "prior_extension_count", "value": v, "quote": q, "reason": "not a whole number"})
+        if n is not None and n >= 0 and ok_quote("prior_extension_count", n, q):
+            if _COUNT_WORD.search(normalize(q)):
+                f["prior_extension_count"], f["prior_extension_count_quote"] = n, display_quote(q)
+            else:
+                dropped.append({"field": "prior_extension_count", "value": n, "quote": q,
+                                "reason": "no count in its quote"})
 
-    def items(field, key, extra=None):
+    def items(field, kind, key, detail=None):
         out, seen = [], set()
-        for x in raw.get(field) or []:
-            if not isinstance(x, dict):
-                continue
-            v, q = _blank(x.get(key)), _blank(x.get("quote"))
+        for x in by.get(kind) or []:
+            v, q = _blank(x.get("value")), _blank(x.get("quote"))
             if not v or _squash(v) in seen:
                 continue
             if not ok_quote(field, v, q):
@@ -864,15 +860,18 @@ def _verify_trial_fields(raw: dict, doc: Document, nd: str, f: dict, dropped: li
                 dropped.append({"field": field, "value": v, "quote": q, "reason": f"{key} not in its quote"})
                 continue
             seen.add(_squash(v))
-            out.append({key: v, "quote": display_quote(q), **({k: x.get(k) for k in extra} if extra else {})})
+            item = {key: v, "quote": display_quote(q)}
+            if detail:
+                item[detail] = (_blank(x.get("detail")) or "").lower()
+            out.append(item)
         return out
 
-    f["contract_types"] = items("contract_types", "stated")
-    f["funding_sources"] = items("funding_sources", "name")
-    f["policy_citations"] = [c for c in items("policy_citations", "citation", ["cited_for"])
-                             if c["cited_for"] in POLICY_CITED_FOR]
-    ut = raw.get("urgency") if isinstance(raw.get("urgency"), dict) else {}
-    t, q = _blank(ut.get("trigger")), _blank(ut.get("quote"))
+    f["contract_types"] = items("contract_types", "contract_type", "stated")
+    f["funding_sources"] = items("funding_sources", "funding_source", "name")
+    f["policy_citations"] = [dict(c, cited_for=c["cited_for"] if c["cited_for"] in POLICY_CITED_FOR else "other")
+                             for c in items("policy_citations", "policy_citation", "citation", "cited_for")]
+    x = (by.get("urgency_trigger") or [{}])[0]
+    t, q = (_blank(x.get("value")) or "").lower(), _blank(x.get("quote"))
     f["urgency_trigger"] = f["urgency_trigger_quote"] = None
     if t in URGENCY_TRIGGERS and ok_quote("urgency_trigger", t, q):
         f["urgency_trigger"], f["urgency_trigger_quote"] = t, display_quote(q)
@@ -884,8 +883,7 @@ def shape_errors(raw: dict) -> list[str]:
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
     for k in ("authorities", "other_firms_named", "additional_vendors", "people", "need_by",
-              "stated_pop_limit", "covered_piids", "market_research_methods",
-              "contract_types", "funding_sources", "policy_citations"):
+              "stated_pop_limit", "covered_piids", "market_research_methods", "facts"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")

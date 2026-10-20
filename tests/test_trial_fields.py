@@ -21,21 +21,26 @@ def doc():
         {"notice_id": NID, "resource_id": "r1", "page_number": 3, "text": PAGE, "text_source": "native"}]))[NID]
 
 
+def F(kind, value, quote="", detail=""):
+    return {"kind": kind, "value": value, "detail": detail, "quote": quote}
+
+
 def run(doc, **over):
     rec = extract.extract_document(doc, call_fn=fake(answer(**over)), retries=0)
     return rec["fields"], {d["field"]: d["reason"] for d in rec["dropped"]}
 
 
 def test_trial_fields_kept(doc):
-    f, dropped = run(doc, bridge={"answer": "yes", "quote": "This is the seventh bridge for these services.",
-                             "prior_count": 6, "prior_count_quote": "This is the seventh bridge for these services."},
-                     contract_types=[{"stated": "firm-fixed-price", "quote": "on a firm-fixed-price basis"}],
-                     letter_contract={"answer": "yes", "quote": "will issue a letter contract (undefinitized contract action)"},
-                     funding_sources=[{"name": "One Big Beautiful Bill Act", "quote": "funded with One Big Beautiful Bill Act funds"}],
-                     policy_citations=[{"citation": "EO 14275", "cited_for": "regulatory_numbering_or_procedure",
-                                        "quote": "Citations reflect the Revolutionary FAR Overhaul under EO 14275."}],
-                     urgency={"trigger": "congressional_or_oversight_deadline",
-                              "quote": "the House Committee on Oversight requires delivery by 1 June 2026"})
+    f, dropped = run(doc, facts=[
+        F("bridge", "yes", "This is the seventh bridge for these services."),
+        F("prior_extension_count", "6", "This is the seventh bridge for these services."),
+        F("contract_type", "firm-fixed-price", "on a firm-fixed-price basis"),
+        F("letter_contract", "yes", "will issue a letter contract (undefinitized contract action)"),
+        F("funding_source", "One Big Beautiful Bill Act", "funded with One Big Beautiful Bill Act funds"),
+        F("policy_citation", "EO 14275", "Citations reflect the Revolutionary FAR Overhaul under EO 14275.",
+          "regulatory_numbering_or_procedure"),
+        F("urgency_trigger", "congressional_or_oversight_deadline",
+          "the House Committee on Oversight requires delivery by 1 June 2026")])
     assert f["bridge_or_extension"] == "yes" and f["prior_extension_count"] == 6
     assert [c["stated"] for c in f["contract_types"]] == ["firm-fixed-price"]
     assert f["is_letter_contract"] == "yes" and f["funding_sources"][0]["name"] == "One Big Beautiful Bill Act"
@@ -44,17 +49,18 @@ def test_trial_fields_kept(doc):
     assert not [k for k in dropped if k in ("bridge_or_extension", "prior_extension_count", "contract_types",
                                             "is_letter_contract", "funding_sources", "policy_citations", "urgency_trigger")]
     row = extract.flat_row(extract.extract_document(doc, call_fn=fake(answer(
-        policy_citations=[{"citation": "EO 14275", "cited_for": "other", "quote": "under EO 14275."}])), retries=0), {})
+        facts=[F("policy_citation", "EO 14275", "under EO 14275.", "other")])), retries=0), {})
     assert row["policy_citations"] == "EO 14275 [other]"
 
 
 def test_trial_fields_dropped(doc):
-    f, dropped = run(doc, bridge={"answer": "yes", "quote": "a bridge that is not in the text", "prior_count": 2,
-                             "prior_count_quote": "on a firm-fixed-price basis"},
-                     contract_types=[{"stated": "cost-plus-fixed-fee", "quote": "on a firm-fixed-price basis"}],
-                     letter_contract={"answer": "yes", "quote": "on a firm-fixed-price basis"},
-                     funding_sources=[{"name": "Working Capital Fund", "quote": "Working Capital Fund"}],
-                     urgency={"trigger": "bid_protest", "quote": "a protest was filed"})
+    f, dropped = run(doc, facts=[
+        F("bridge", "yes", "a bridge that is not in the text"),
+        F("prior_extension_count", "2", "on a firm-fixed-price basis"),
+        F("contract_type", "cost-plus-fixed-fee", "on a firm-fixed-price basis"),
+        F("letter_contract", "yes", "on a firm-fixed-price basis"),
+        F("funding_source", "Working Capital Fund", "Working Capital Fund"),
+        F("urgency_trigger", "bid_protest", "a protest was filed")])
     assert f["bridge_or_extension"] is None and f["prior_extension_count"] is None
     assert f["contract_types"] == [] and f["is_letter_contract"] is None and f["funding_sources"] == []
     assert f["urgency_trigger"] is None
@@ -67,8 +73,6 @@ def test_trial_fields_dropped(doc):
 
 
 def test_trial_no_values(doc):
-    f, _ = run(doc, bridge={"answer": "no", "quote": '""', "prior_count": -1, "prior_count_quote": ""},
-               contract_types=[], letter_contract={"answer": "No", "quote": ""}, funding_sources=[],
-               policy_citations=[], urgency={"trigger": "", "quote": ""})
+    f, _ = run(doc, facts=[F("bridge", "no", '""'), F("letter_contract", "No")])
     assert (f["bridge_or_extension"], f["is_letter_contract"], f["prior_extension_count"], f["urgency_trigger"]) == \
         ("no", "no", None, None)
