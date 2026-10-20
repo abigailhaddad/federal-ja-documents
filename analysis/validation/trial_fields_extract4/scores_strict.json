@@ -1,0 +1,356 @@
+{
+ "A": {
+  "bridge_or_extension": {
+   "accuracy": "17/18",
+   "precision": "11/12",
+   "recall": "9/9",
+   "errors": [
+    [
+     "53d80bf1",
+     "known_letter_contract_obbba_eo14275",
+     "no",
+     [
+      "unclear"
+     ],
+     "yes"
+    ]
+   ]
+  },
+  "prior_extension_count": {
+   "accuracy": "18/18",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "17/18",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": [
+    [
+     "8a169006",
+     "random",
+     "no",
+     null,
+     null
+    ]
+   ]
+  },
+  "urgency_trigger": {
+   "accuracy": "17/18",
+   "precision": "8/9",
+   "recall": "5/5",
+   "errors": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     null,
+     null,
+     "agency_planning_delay"
+    ]
+   ]
+  },
+  "contract_types": {
+   "precision": "14/14",
+   "recall": "14/18",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "cost-plus-fixed-fee",
+      "task order"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "firm-fixed-price"
+     ]
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "6/7",
+   "recall": "6/6",
+   "diffs (key, ours)": [
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [],
+     [
+      "fiscal year 2023 procurement funds"
+     ]
+    ]
+   ]
+  },
+  "policy_citations": {
+   "precision": "5/5",
+   "recall": "5/12",
+   "diffs (key, ours)": [
+    [
+     "1db3f3a6",
+     "known_letter_contract_oversight_deadline_wcf",
+     [
+      "RFO"
+     ],
+     []
+    ],
+    [
+     "8febc2f3",
+     "known_letter_contract_obbba_eo14275",
+     [
+      "Executive Order 14275",
+      "Revolutionary FAR Overhaul (RFO)"
+     ],
+     [
+      "Executive Order 14275"
+     ]
+    ],
+    [
+     "085682f1",
+     "known_extension",
+     [
+      "Revolutionary Federal Acquisition Regulations (FAR) Overhaul (RFO)"
+     ],
+     []
+    ],
+    [
+     "aa9f3d3a",
+     "bridge",
+     [
+      "Revolutionary Federal Acquisition Regulation (FAR) Overhaul (Class Deviation)"
+     ],
+     []
+    ],
+    [
+     "15b08347",
+     "random",
+     [
+      "Deferred Resignation Program (DRP)",
+      "hiring freeze"
+     ],
+     [
+      "Deferred Resignation Program (DRP)"
+     ]
+    ],
+    [
+     "1b1c624c",
+     "random",
+     [
+      "Deferred Resignation Program (DRP)",
+      "USDA\u2019s reorganization effort",
+      "Homeland Security Presidential Directive 12 (HSPD-12)"
+     ],
+     [
+      "Homeland Security Presidential Directive 12 (HSPD-12)"
+     ]
+    ]
+   ]
+  },
+  "policy_cited_for_on_matched": {
+   "accuracy": "4/5",
+   "errors": [
+    [
+     "1b1c624c",
+     "Homeland Security Presidential Directive 12 (HSPD-12)",
+     "other",
+     "reason_for_action"
+    ]
+   ]
+  },
+  "cost": {
+   "trial_total": 0.1238,
+   "facts_call_total": 0.0341,
+   "main_call_total": 0.0898,
+   "base_extract3_total": 0.0833,
+   "facts_per_notice": 0.00189
+  }
+ },
+ "B": {
+  "bridge_or_extension": {
+   "accuracy": "18/18",
+   "precision": "10/10",
+   "recall": "9/9",
+   "errors": []
+  },
+  "prior_extension_count": {
+   "accuracy": "18/18",
+   "precision": "3/3",
+   "recall": "3/3",
+   "errors": []
+  },
+  "is_letter_contract": {
+   "accuracy": "18/18",
+   "precision": "4/4",
+   "recall": "4/4",
+   "errors": []
+  },
+  "urgency_trigger": {
+   "accuracy": "17/18",
+   "precision": "8/9",
+   "recall": "5/5",
+   "errors": [
+    [
+     "f2ddf895",
+     "bridge",
+     null,
+     null,
+     "agency_planning_delay"
+    ]
+   ]
+  },
+  "contract_types": {
+   "precision": "13/14",
+   "recall": "13/18",
+   "diffs (key, ours)": [
+    [
+     "b8242f6f",
+     "bridge_self_described_repeat",
+     [
+      "cost plus fixed fee",
+      "cost reimbursable (CR)",
+      "task order"
+     ],
+     [
+      "CPFF"
+     ]
+    ],
+    [
+     "5a257e10",
+     "bridge_self_described_repeat",
+     [
+      "task order",
+      "cost plus fixed fee",
+      "cost reimbursable (CR)"
+     ],
+     [
+      "cost-plus-fixed-fee",
+      "task order"
+     ]
+    ],
+    [
+     "6909e1e3",
+     "random",
+     [
+      "Firm Fixed-Price (FFP)",
+      "Indefinite Quantity Contract (IQC)"
+     ],
+     [
+      "FFP"
+     ]
+    ]
+   ]
+  },
+  "funding_source_named": {
+   "precision": "6/6",
+   "recall": "6/6",
+   "diffs (key, ours)": []
+  },
+  "policy_citations": {
+   "precision": "6/6",
+   "recall": "6/12",
+   "diffs (key, ours)": [
+    [
+     "1db3f3a6",
+     "known_letter_contract_oversight_deadline_wcf",
+     [
+      "RFO"
+     ],
+     []
+    ],
+    [
+     "8febc2f3",
+     "known_letter_contract_obbba_eo14275",
+     [
+      "Executive Order 14275",
+      "Revolutionary FAR Overhaul (RFO)"
+     ],
+     [
+      "Executive Order 14275"
+     ]
+    ],
+    [
+     "085682f1",
+     "known_extension",
+     [
+      "Revolutionary Federal Acquisition Regulations (FAR) Overhaul (RFO)"
+     ],
+     []
+    ],
+    [
+     "aa9f3d3a",
+     "bridge",
+     [
+      "Revolutionary Federal Acquisition Regulation (FAR) Overhaul (Class Deviation)"
+     ],
+     []
+    ],
+    [
+     "15b08347",
+     "random",
+     [
+      "Deferred Resignation Program (DRP)",
+      "hiring freeze"
+     ],
+     [
+      "Deferred Resignation Program (DRP)"
+     ]
+    ],
+    [
+     "1b1c624c",
+     "random",
+     [
+      "Deferred Resignation Program (DRP)",
+      "USDA\u2019s reorganization effort",
+      "Homeland Security Presidential Directive 12 (HSPD-12)"
+     ],
+     [
+      "Homeland Security Presidential Directive 12 (HSPD-12)",
+      "Deferred Resignation Program"
+     ]
+    ]
+   ]
+  },
+  "policy_cited_for_on_matched": {
+   "accuracy": "5/6",
+   "errors": [
+    [
+     "1b1c624c",
+     "Homeland Security Presidential Directive 12 (HSPD-12)",
+     "other",
+     "reason_for_action"
+    ]
+   ]
+  },
+  "cost": {
+   "trial_total": 0.1314,
+   "facts_call_total": 0.0333,
+   "main_call_total": 0.0981,
+   "base_extract3_total": 0.0833,
+   "facts_per_notice": 0.00185
+  }
+ }
+}

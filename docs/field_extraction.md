@@ -512,3 +512,79 @@ ticked.
   includes Special Notices, which have no extraction rows today: 163 of
   them have usable text, about $0.70.
 - **Every later prompt-version bump** starts another backfill.
+
+## Trial: five more fields in a second call (prompt `2026-10-20.extract4`)
+
+**Status: trial.** The trial is one commit, so dropping it means reverting that commit. Without it, the prompt version is `extract3`. The main call's prompt is byte-for-byte the `extract3` prompt.
+
+### Why a second call
+
+The extract3 strict schema is at the size limit for a compiled grammar. Three layouts that added these fields to the main call were all rejected with a 400 ("The compiled grammar is too large"):
+
+1. a property per field, with enums;
+2. the same without enums;
+3. a single generic list.
+
+The five fields therefore come from a **second call**. It has its own short prompt and a schema with one list. Each entry has `kind`, `value`, `detail` and `quote`, and the code checks the kinds and codes. **Any future field will need the same treatment.**
+
+### Fields (each quote-checked like the others)
+
+- **`bridge_or_extension`** (yes/no/unclear): "yes" needs a verified quote.
+- **`prior_extension_count`**: only when the document states the number ("fourth bridge" gives 3). The quote must contain a count.
+- **`contract_types`**: as stated; each must be in its quote.
+- **`is_letter_contract`** (yes/no): "yes" needs a quote saying "letter contract", "undefinitized" or "UCA".
+- **`funding_sources`**: the named appropriation or fund; the name must be in its quote.
+- **`policy_citations`**: each with `cited_for`, one of `reason_for_action`, `regulatory_numbering_or_procedure` or `other`.
+- **`urgency_trigger`**: only when urgency is cited. It is one of six codes.
+
+### Trial sample (18 notices)
+
+- **4 known cases:**
+  - DCSA/KPMG `1db3f3a6`;
+  - ICE Camp East Montana `53d80bf1` and `8febc2f3`;
+  - VA CCN `085682f1`.
+- **2 bridges that describe themselves as repeats:** a "fourth bridge" and a "third bridge".
+- **2 other bridges** and **2 urgency J&As**.
+- **8 notices** drawn at random, seeded, from the extract3 random set.
+
+The answer key was built blind by separate Claude instances; no person judged it. Data: dataset `8b7d8208fef6`. Files: [`analysis/validation/trial_fields_extract4/`](../analysis/validation/trial_fields_extract4/).
+
+### Results
+
+Strict scores (run A / run B):
+
+| Field | Accuracy | Precision | Recall | Call |
+|---|---|---|---|---|
+| `bridge_or_extension` | 17/18 / 18/18 | 11/12 / 10/10 ("yes") | 9/9 / 9/9 | **worth it** |
+| `prior_extension_count` | 18/18 / 18/18 | 3/3 / 3/3 | 3/3 / 3/3 | **worth it** (only 3 positives) |
+| `is_letter_contract` | 17/18 / 18/18 | 4/4 / 4/4 | 4/4 / 4/4 | **worth it** |
+| `contract_types` (per type) | | 14/14 / 13/14 | 14/18 / 13/18 | **worth it** |
+| `funding_sources` (per source) | | 6/7 / 6/6 | 6/6 / 6/6 | **worth it** (small n) |
+| `urgency_trigger` | 17/18 / 17/18 | 8/9 / 8/9 | 5/5 / 5/5 | **worth it, as a screen** |
+| `policy_citations` (per citation) | | 5/5 / 6/6 | 5/12 / 6/12 | **not worth it yet** |
+
+- **`bridge_or_extension`.** Run A's one disagreement is a judgement call: a new letter contract after the incumbent's contract was terminated.
+- **`is_letter_contract`.** Run A's one disagreement is a notice where the model left out the letter-contract answer, so the field is null.
+- **`contract_types`.** The misses are a "cost reimbursable (CR)" line item and an "Indefinite Quantity Contract (IQC)".
+- **`funding_sources`.** The one extra is a fund named for a different action in the same document.
+- **`urgency_trigger`.** Each run labels one non-urgency notice, a different notice each time.
+- **`policy_citations`.**
+  - **What works.** EO 14275 cited only for FAR renumbering was classed `regulatory_numbering_or_procedure` on both ICE notices, in both runs.
+  - **Most misses don't matter.** 7 of the 12 key entries are bare "RFO" or "Revolutionary FAR Overhaul" mentions, which the key builder itself thought arguable.
+  - **The misses that matter.** The citations the field exists for, the `reason_for_action` ones (the Deferred Resignation Program, a hiring freeze, a reorganisation), were found 1 of 4 times in run A and 2 of 4 in run B.
+  - **One `cited_for` error:** HSPD-12 was called a reason.
+- **The known cases.** On the four known cases both runs got these right:
+  - letter contract: all four;
+  - the funding source: OBBBA on both ICE notices, DCSA Working Capital Funds on the DCSA notice;
+  - EO 14275 as numbering-only: both ICE notices;
+  - the urgency trigger: the House Oversight deadline on DCSA, contractor termination on ICE, agency planning delay on VA CCN;
+  - the VA CCN extension.
+- **Quote check.** All kept quotes verified against the page text. A second code path against the attachment text matched 105 of 106; the one miss is "non-negotiable" split across a line break as "non-\nnegotiable", which that path does not rejoin.
+
+### Cost
+
+- **The second call** costs about **$0.0019 per notice**, about 45% on top of extract3's roughly $0.0042.
+- **A full re-extraction** with it would be about $57-65 instead of $38-46 for the 10,033 notices.
+- **Trial spend:** $0.34 (the extract3 baseline run $0.083, run A $0.124, run B $0.131). The 400s were not billed.
+
+These are 18 notices: the positives per field are 3 to 9 (12 for policy citations), so every figure here is a small-sample estimate.

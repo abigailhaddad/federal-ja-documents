@@ -74,9 +74,14 @@ def fake(*answers):
     calls = []
 
     def call(prompt, *, schema, tool_name, model, max_tokens, **kw):
+        if tool_name == extract.FACTS_TOOL:   # TRIAL second call: the facts the answer carries
+            call.facts_calls.append(prompt)
+            last = seq[min(len(calls) - 1, len(seq) - 1)] if calls else seq[0]
+            return {"facts": last.get("facts", [])}, {"input_tokens": 500, "output_tokens": 100, "cost_usd": 0.0001}
         calls.append(prompt)
         a = seq[min(len(calls) - 1, len(seq) - 1)]
         return a, {"input_tokens": 1000, "output_tokens": 200, "cost_usd": 0.0002}
+    call.facts_calls = []
     call.calls = calls
     return call
 

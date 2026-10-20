@@ -4,7 +4,7 @@
 # <<METADATA>>, <<DOCUMENT>> and <<EXCERPTS>> are filled in per document.
 model: claude-haiku-5-5
 extraction:
-  version: 2026-10-20.extract3
+  version: 2026-10-20.extract4
   effort: high
   prompt: |-
     You are extracting facts from ONE document posted on SAM.gov as a "Justification" notice. Most are federal Justifications & Approvals (J&As) for other than full and open competition, limited-sources justifications (FAR 8.405-6), or exceptions to fair opportunity (FAR 16.505(b)(2)), but some postings are other documents. The text below is every attachment of the notice; scanned pages were machine-transcribed and mark redactions as [REDACTED] and unreadable text as [illegible]. Text may contain OCR errors.
@@ -50,6 +50,31 @@ extraction:
       * role_in_document: competition_advocate (competition advocate or advocate for competition); legal_reviewer (counsel, or anyone signing a legal-sufficiency review); contracting_officer (a contracting officer or contracting-office staff such as a contract specialist or buyer, including a CO whose signature is also the approval); requiring_or_technical_official (program or project manager, COR, technical or requirements certifier, engineer, end user, chief of the requiring service); vendor_employee (an employee or representative of the vendor or of any other firm); signer_or_approver (an approving official or other signer whose role is none of the above, e.g. head of the contracting activity, senior procurement executive, a PEO approving); other (anyone else). If more than one fits, use the first in this order.
       * description: one sentence in your words saying how the document describes this person and what they do in it (e.g. "Signs the contracting officer's certification.", "The vendor's point of contact for the quote.").
     - notes: anything a reader needs to know to use these fields (several attachments that are different actions, several values, an amended J&A, a value given only per year, illegible pages...). null if nothing.
+
+    NOTICE METADATA (from SAM.gov, not part of the document; do not quote it)
+    <<METADATA>>
+
+    DOCUMENT
+    <<DOCUMENT>>
+  # TRIAL (extract4): five more fields, asked in a SECOND call. The main
+  # call's strict schema is at the size limit for a compiled grammar: adding
+  # even one small list to it was rejected (400, 2026-10-20).
+  facts_prompt: |-
+    You are extracting facts from ONE document posted on SAM.gov as a "Justification" notice (most are federal Justifications & Approvals for other than full and open competition, limited-sources justifications, or exceptions to fair opportunity). The text below is every attachment of the notice; scanned pages were machine-transcribed and mark redactions as [REDACTED]. Text may contain OCR errors.
+
+    Call the tool record_trial_facts exactly once. Never guess, never use outside knowledge.
+
+    QUOTES. Every quote must be copied character-for-character from the document text: one contiguous passage of about 5-40 words that CONTAINS the value. Copy OCR errors exactly. You may collapse line breaks to single spaces. Never use "..." and never join separate passages. Never quote the "=== ATTACHMENT" headers or the notice metadata block.
+
+    FIELDS
+    - facts: a list of {kind, value, detail, quote} entries (detail is "" unless stated below; quote "" only where allowed):
+      * kind "bridge", always exactly one: value "yes" if THIS action is a bridge contract, a short-term extension of an existing contract or order (including an extension under FAR 52.217-8 or a sole-source extension of services), or a stop-gap until a competitive follow-on; "no" if it is not (a new requirement, the long-term follow-on itself, a brand-name buy...); "unclear" if you cannot tell. quote: for "yes", a passage showing it; otherwise "".
+      * kind "prior_extension_count", at most one, ONLY if the document states how many earlier bridges or extensions there were for this requirement: value = the number as digits ("this is the seventh bridge" gives "6", "a second bridge" gives "1", "two previous extensions" gives "2"); quote = the passage stating it. Do not count them yourself from a history table.
+      * kind "letter_contract", always exactly one: value "yes" if the action is a letter contract, an undefinitized contract action (UCA) or is otherwise stated to be undefinitized; else "no". quote: for "yes", the passage that says so; otherwise "".
+      * kind "contract_type", at most three: value = a contract type of THIS action exactly as written ("firm-fixed-price", "FFP", "time-and-materials", "labor-hour", "cost-plus-fixed-fee", "IDIQ", "BPA call", "task order", "delivery order", "purchase order"); quote = a passage containing it.
+      * kind "funding_source": value = a specific appropriation, act or fund the document names as the funding source for this action, exactly as written ("One Big Beautiful Bill Act", "DCSA Working Capital Funds", "FY26 O&M, Army"); quote = a passage containing it. Not generic statements that funds are available.
+      * kind "policy_citation": value = an executive order, named administration initiative, DOGE or similar policy the document cites, as written ("EO 14275", "Executive Order 14222", "DOGE"); detail = why it is cited: reason_for_action (given as a reason for, or a driver of, this action or its timing), regulatory_numbering_or_procedure (cited only because of FAR renumbering, the Revolutionary FAR Overhaul, e.g. an EO 14275 footnote saying citations follow the RFO, or another procedural point), or other (background, mentioned in passing); quote = a passage containing it. FAR, DFARS and statute citations are not policy citations.
+      * kind "urgency_trigger", at most one, ONLY when the document cites urgency (unusual and compelling urgency, FAR 6.302-2 / RFO 6.103-2, a 16.505(b)(2) urgency exception, or another urgency justification): value = the trigger it states, one of congressional_or_oversight_deadline, bid_protest, contractor_default_or_termination, emergency_or_disaster, agency_planning_delay, other; quote = the passage stating it.
 
     NOTICE METADATA (from SAM.gov, not part of the document; do not quote it)
     <<METADATA>>
