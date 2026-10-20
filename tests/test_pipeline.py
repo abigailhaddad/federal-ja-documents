@@ -388,3 +388,23 @@ def test_declined_files_are_not_retried_by_default(tmp_path):
     _pdf_row(s, tmp_path, "3", blank_pdf(1), "c.pdf")["transcription_error"] = "RemoteProtocolError: x"
     assert [x["resource_id"] for x in pipeline.transcription_candidates(s)] == ["3"]
     assert len(pipeline.transcription_candidates(s, retry_declined=True)) == 3
+
+
+def test_store_fills_collection_reason_for_older_tables(tmp_path):
+    # Tables written before collection_reason existed: derived on load from
+    # the row's own type and title, and written back on save.
+    import pandas as pd
+    s = Store(str(tmp_path))
+    s.notices["a"] = notice("a")
+    s.exclusions.append({"notice_id": "z", "source_file": "a.csv", "reason": "unparseable_posted_date",
+                         "posted_date": "x", "type": "Justification", "title": ""})
+    s.save()
+    for name in ("notices", "exclusions"):
+        p = tmp_path / "data" / f"{name}.parquet"
+        df = pd.read_parquet(p)
+        df.drop(columns=["collection_reason"]).to_parquet(p, index=False)
+    s2 = Store(str(tmp_path)).load()
+    assert s2.notices["a"]["collection_reason"] == "justification_type"
+    assert s2.exclusions[0]["collection_reason"] == "justification_type"
+    s2.save()
+    assert pd.read_parquet(tmp_path / "data" / "notices.parquet").collection_reason.tolist() == ["justification_type"]

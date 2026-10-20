@@ -7,7 +7,8 @@ metadata, as the Hugging Face dataset
 
 A J&A is the document an agency must publish when it awards a contract
 without full and open competition. Agencies post them on SAM.gov as
-"Justification" notices, usually with a PDF attached.
+"Justification" notices, usually with a PDF attached, and sometimes as
+Special Notices.
 
 ## Repository layout
 
@@ -30,7 +31,7 @@ Everything comes from SAM.gov; no API key is needed.
 
 | What | Where |
 |---|---|
-| Which J&As exist + metadata | Daily active-notices CSV `ContractOpportunitiesFullCSV.csv` and yearly archive CSVs `FY<YYYY>_archived_opportunities.csv` (refreshed weekly) from `s3.amazonaws.com/falextracts/Contract Opportunities/` |
+| Which J&As (and J&A candidates) exist + metadata | Daily active-notices CSV `ContractOpportunitiesFullCSV.csv` and yearly archive CSVs `FY<YYYY>_archived_opportunities.csv` (refreshed weekly) from `s3.amazonaws.com/falextracts/Contract Opportunities/` |
 | Attachment list per notice | `https://sam.gov/api/prod/opps/v3/opportunities/<noticeId>/resources` |
 | File download | `https://sam.gov/api/prod/opps/v3/opportunities/resources/files/<resourceId>/download?api_key=null&token=` (redirects to a signed S3 URL) |
 
@@ -40,18 +41,45 @@ at most 3 requests/second to sam.gov (`JA_SAM_RPS`), retries with exponential
 backoff on 429/5xx/connection errors (honouring `Retry-After`), and a
 User-Agent that names this project.
 
-A CSV row is a J&A when `Type` starts with `Justification` (both
-`Justification` and `Justification and Approval (J&A)` occur). The CSVs are
-read as latin-1 with the csv field-size limit raised.
+The CSVs are read as latin-1 with the csv field-size limit raised.
 
 ## What gets collected
 
+* **Which rows:** a CSV row is collected for one of two reasons, kept in the
+  `collection_reason` column of `notices` (and `exclusions`); `type` stays
+  as SAM gave it.
+  * `justification_type`: `Type` starts with `Justification` (both
+    `Justification` and `Justification and Approval (J&A)` occur).
+  * `special_notice_title_match`: `Type` is exactly `Special Notice` and the
+    `Title` (title only, not the description) matches, case-insensitively,
+    anywhere in the title:
+
+    ```
+    justification|j\s*&\s*a\b|sole.source|single.source|limited.source|far\s*6\.302|fair opportunity|only one responsible source|unusual and compelling urgency
+    ```
+
+    (`JA_TITLE_PATTERN` in `collect/sources.py`.) Agencies sometimes post a
+    real J&A as a Special Notice, e.g. a "Notice of Intent to Sole Source"
+    with the justification attached, which the Type rule alone misses. These
+    rows are **candidates**: some may be notices of intent with no J&A
+    attached, and a few are unrelated (e.g. "Fair Opportunity" industry
+    updates). The analysis `is_ja` label says whether a notice's documents
+    actually are a J&A. In the active CSV of 2026-10-19 plus the FY2025-FY2027
+    archives of 2026-10-18, 9,024 Special Notices posted on or after
+    2025-01-20 match, next to 10,594 Justification notices.
+
+  Scan statistics (`collection_state.json` run history) count the two paths
+  separately: per file `ja_rows` / `ja_types` (Justification only) and
+  `special_notice_rows` / `special_notice_title_matches`; overall
+  `rows_by_reason`, `unique_ids_by_reason`, `in_scope_by_reason` and
+  `before_start_by_reason`. `ja_rows_total` and `unique_ja_ids` keep their
+  Justification-only meaning.
 * **Scope:** notices with `PostedDate` on or after **2025-01-20**
   (`--start-date` or `JA_START_DATE`).
 * **Dedup:** if a NoticeId appears in several CSVs, the row with the latest
   `PostedDate` is kept (ties: active file, then newest archive). The kept row's
   file is `source_file`; all files are in `source_files`.
-* **No silent drops:** a J&A row that can't be used (no NoticeId, unparseable
+* **No silent drops:** a collected row that can't be used (no NoticeId, unparseable
   date) goes to `data/exclusions.parquet` with a reason. A notice whose
   attachment list can't be fetched stays in `notices` with
   `resources_status = "error: ..."`. Every attachment SAM lists gets a row,
@@ -75,12 +103,12 @@ read as latin-1 with the csv field-size limit raised.
 ## Dataset layout (Hugging Face)
 
 ```
-data/notices.parquet          one row per J&A notice, plus usaspending_* columns (vendor, amounts)
+data/notices.parquet          one row per notice (collection_reason says why), plus usaspending_* columns (vendor, amounts)
 data/attachments.parquet      one row per attachment, with whole-document text
 data/pages.parquet            one row per PDF page / image attachment: page_number,
                               text_layer_chars, text, text_source (native|transcription|none),
                               transcription model; join on notice_id + resource_id (+ sha256)
-data/exclusions.parquet       CSV J&A rows not in notices, with reason
+data/exclusions.parquet       collected CSV rows not in notices, with reason
 data/collection_state.json    source ETags, run history
 analysis/                     EXPERIMENTAL, AI-generated snapshot tables (see below); not rebuilt daily
 files/<notice_id>/<resource_id>_<safe filename>   original files

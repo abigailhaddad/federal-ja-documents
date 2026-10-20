@@ -75,3 +75,23 @@ def test_publish_tables_delete_stale_keeps_analysis(tmp_path, monkeypatch):
     assert out["deleted_stale"] == ["old/snapshot.parquet"]
     deleted = [op.path_in_repo for op in commits[-1]]
     assert deleted == ["old/snapshot.parquet"]
+
+
+def test_card_documents_special_notice_gate(tmp_path):
+    from federal_ja.collect.sources import JA_TITLE_PATTERN
+    s = Store(str(tmp_path))
+    s.notices["a"] = {"notice_id": "a", "type": "Justification", "collection_reason": "justification_type",
+                      "posted_date": "2025-03-01"}
+    s.notices["b"] = {"notice_id": "b", "type": "Special Notice",
+                      "collection_reason": "special_notice_title_match", "posted_date": "2025-03-02"}
+    card = render_card(s, "2025-01-20", "2026-10-18T00:00:00")
+    assert JA_TITLE_PATTERN.pattern in card            # the exact gate, not a paraphrase
+    assert "`special_notice_title_match`" in card and "**candidates**" in card
+    assert "{'justification_type': 1, 'special_notice_title_match': 1}" in card
+
+
+def test_readme_shows_the_same_gate():
+    from pathlib import Path
+    from federal_ja.collect.sources import JA_TITLE_PATTERN
+    readme = (Path(__file__).resolve().parents[1] / "README.md").read_text()
+    assert JA_TITLE_PATTERN.pattern in readme

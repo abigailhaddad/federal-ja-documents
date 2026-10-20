@@ -16,6 +16,7 @@ def summarize(store: Store) -> dict:
     return {
         "notices": len(store.notices),
         "notices_by_type": dict(Counter(x.get("type") for x in n)),
+        "notices_by_collection_reason": dict(Counter(x.get("collection_reason") for x in n)),
         "notices_by_resources_status": dict(Counter(
             (x.get("resources_status") or "pending").split(":")[0] for x in n)),
         "notices_by_source_file": dict(Counter(x.get("source_file") for x in n)),
@@ -45,7 +46,8 @@ def summarize(store: Store) -> dict:
 
 
 def reconcile(store: Store, in_scope_ids: set[str]) -> dict:
-    """Every in-scope J&A NoticeId from the CSVs must be a notice or an exclusion."""
+    """Every in-scope collected NoticeId from the CSVs (either collection_reason)
+    must be a notice or an exclusion."""
     excluded = {e["notice_id"] for e in store.exclusions}
     missing = sorted(in_scope_ids - set(store.notices) - excluded)
     extra = sorted(set(store.notices) - in_scope_ids)
