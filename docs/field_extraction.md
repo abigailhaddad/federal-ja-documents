@@ -221,3 +221,245 @@ be wrong about 10% of the time (the 95% upper bound for 0 of 32).
 - **Summaries and notes are the model's own words.** `summary`,
   `market_research_summary` and `notes` are not quotes. Check them against
   the quote columns.
+
+## People and six more fields (prompt `2026-10-20.extract3`)
+
+**Status: validated on a sample; not yet run on the dataset.** The published
+`analysis/extractions.parquet` is still the `extract2` run described above.
+This prompt version adds seven fields to the same single call. The new
+instructions sit in the cached part of the prompt, before the per-notice
+section.
+
+### Fields
+
+- **`people`**: one entry per person the document names, in any attachment
+  (signers, approvers, certifiers, reviewers, digital-signature stamps,
+  "Prepared by" lines, points of contact, vendor or other-firm staff, anyone
+  else named), plus one entry per signature, certification, approval or
+  review block whose name is visibly redacted. Each entry has:
+  - `name`, exactly as written, and `name_quote`, a passage containing it;
+  - `title` and `organization`, as printed;
+  - `role_in_document`, one of `signer_or_approver`, `contracting_officer`
+    (including contract specialists and buyers), `competition_advocate`,
+    `requiring_or_technical_official`, `legal_reviewer`, `vendor_employee`,
+    `other`;
+  - `description`, one model-written sentence;
+  - `redacted`, true when the name is withheld (`[REDACTED]`, "(b)(6)", the
+    word "redacted"); the name is then null.
+  - **Not entries:** a blank, unsigned block (a title with an empty name
+    line); a redacted point of contact outside a signature block; a name that
+    is only part of a place or organisation name, or only inside an email
+    address.
+  - **Digital-signature stamps** are kept as written. The typed name is used
+    when there is one. When the stamp is the only form,
+    `"Digitally signed by SMITH.JOHN.A.1234567890"` gives the name
+    `SMITH.JOHN.A.1234567890`, number included and not reordered;
+    `name_is_signature_stamp` is then true. A visible name whose stamp
+    number or phone number is redacted is a named entry, not a redacted one.
+  - **Names broken across lines** are joined with one space (or with
+    nothing, without the hyphen, when one word was split).
+- **`need_by_date`**: a hard deadline the document states the requirement
+  must be met by, with its quote. Not a period-of-performance start date
+  given only as the start, a signature date or a response due date.
+- **`stated_pop_limit_days`**: a cap on this action's period of
+  performance stated as a limit ("not to exceed six months" gives 180), with
+  its quote.
+- **`covered_piids`**: contract, order or modification numbers the
+  document says this action awards, modifies, extends or is placed under,
+  as written.
+- **`incumbent_piid`**: the current or predecessor contract number, with
+  its quote.
+- **`market_research_methods`**: the methods the document says were used,
+  each with a quote. The codes are `sources_sought`, `rfi`,
+  `notice_of_intent`, `industry_day`, `sam_search`,
+  `gsa_elibrary_or_advantage`, `sba_dsbs`, `other_database_search`,
+  `vendor_contact`, `internet_search`, `procurement_history` and `other`.
+- **`redaction_significant`** (`yes` / `no` / `unclear`): whether the
+  redactions remove substantive content (value, prices, rationale, vendor,
+  market-research results) rather than only names, signatures and contact
+  details. It is the model's judgement. `yes` needs a verified quote;
+  without one the field becomes `unclear`. The existing
+  `redaction_detected` is unchanged.
+
+### Checks (`checks_version` `2026-10-20.checks4`)
+
+- **Named people.** A named person is kept only if `name_quote` is found in
+  the document and the name is in that quote. The comparison uses letters
+  and digits only, so line breaks and a stamp's dots still match. **A name
+  that is not in the document can't be kept.**
+- **Redacted people.** A redacted entry must have a null name and a quote
+  that shows a redaction marker. An entry that gives a name and also says it
+  is redacted is dropped.
+- **Titles and organisations** that are not in the document are cleared.
+  A second entry with the same name is dropped.
+- **Need-by date.** The date must parse out of its quote.
+- **Period-of-performance cap.** The duration must be in its quote:
+  months count as 30, 30.44 or 31 days, and years as 365 or 366, with 3%
+  or 2 days of tolerance.
+- **Contract numbers.** An incumbent number must be in its quote. A covered
+  number must be in the document.
+- **Market-research methods.** Each method's quote must verify. Nothing
+  checks that the quote shows that particular method.
+- **Placeholders.** The model sometimes writes an empty value as a literal
+  `""` or `null`. These are treated as empty, which happened on 41 of 78
+  `incumbent_piid` answers in the validation runs.
+- **No retries.** None of the new fields triggers the retry, so they can't
+  change the other fields or double the cost. Every drop is listed in
+  `values_dropped_by_checks`.
+- **New columns.** `people_named`, `people_signature_block`,
+  `people_redacted_blocks`, `people_json`, `need_by_date`, `need_by_quote`,
+  `stated_pop_limit_days`, `stated_pop_limit_quote`, `covered_piids`,
+  `incumbent_piid`, `incumbent_piid_quote`, `market_research_methods`,
+  `redaction_significant`, `redaction_significant_quote`.
+
+### Validation (2026-10-20)
+
+- **Data:** the Hugging Face dataset at commit `8b7d8208fef6` (last modified
+  2026-10-20 12:26 UTC).
+- **Samples.**
+  - **Random:** 24 notices drawn at random, seeded, from the 10,033 in-scope
+    notices with usable text. The earlier pilot and hand-check notices were
+    excluded.
+  - **Edge cases:** 16 notices chosen on purpose:
+    - signature blocks redacted with "(b)(6)" or `[REDACTED]`, including
+      one mixed with named signers;
+    - a redacted `NAME:` field;
+    - unsigned blocks with a printed title and a blank name;
+    - names and stamps broken across lines;
+    - vendor staff named as points of contact;
+    - several people sharing a title;
+    - digital-signature stamps;
+    - a Special Notice.
+- **Answer key.** Built blind by separate Claude instances. Each read the
+  full text against a written guide, without seeing any model output. Two
+  sets of instances did it: one for people, one for the six fields. **No
+  person judged the key.** I decided every disagreement against the
+  document text.
+- **Runs.** Two independent runs (A and B) of the shipped settings:
+  `claude-haiku-5-5`, effort high, retries 1.
+  - 39 of the 40 notices were extracted in each run.
+  - **One failure, in every run:** a notice with a glyph-encoded text layer
+    hit the output limit. It failed at 16,000 output tokens in four runs and
+    at 32,000 in one more. The `extract2` prompt had extracted it.
+- **Files.** The answer key, both runs, the proof file
+  `handcheck_proof.csv` and `image_check.csv` are in
+  [`analysis/validation/field_extraction_extract3/`](../analysis/validation/field_extraction_extract3/).
+  - The proof file has one row per value: our value, our quote and its
+    page, the key's value and passage, and the verdict.
+  - `score.py` there recomputes the strict scores below.
+
+People, named entries. A prediction counts as correct only if its name
+matches one of the forms the key lists, character for character after
+collapsing whitespace ("name exact"). Wilson 95% intervals:
+
+| Scope | Set | Precision, run A | Recall, run A | Precision, run B | Recall, run B |
+|---|---|---|---|---|---|
+| Every named person | random (24) | 41/43 = 95% (85-99%) | 41/44 = 93% (82-98%) | 41/44 = 93% (82-98%) | 41/44 = 93% (82-98%) |
+| Every named person | random + edge (39) | 71/73 = 97% (91-99%) | 71/74 = 96% (89-99%) | 71/74 = 96% (89-99%) | 71/74 = 96% (89-99%) |
+| Signature-block roles only | random (24) | 30/31 = 97% (84-99%) | 30/32 = 94% (80-98%) | 30/32 = 94% (80-98%) | 30/32 = 94% (80-98%) |
+| Signature-block roles only | random + edge (39) | 49/50 = 98% (90-100%) | 49/51 = 96% (87-99%) | 49/52 = 94% (84-98%) | 49/51 = 96% (87-99%) |
+
+- **Signature-block scope** keeps the roles `signer_or_approver`,
+  `contracting_officer`, `competition_advocate` and `legal_reviewer`. It is
+  applied to the key's roles and to the model's roles separately.
+- **Every miss and extra, run A.**
+  - "Carlos Sosa Garcia SOSA" against the key's "Carlos Sosa Garcia". The
+    page image shows "SOSA" printed on the next line, so this is the right
+    person in a different name form.
+  - "Wargo, Alicia" was reordered by the model to "Alicia Wargo". The
+    check dropped it because that is not how the name is written.
+  - "Thomas Dimarcantonio" against the text's "ThomasDimarcantonio". This
+    is the only loose-only match.
+- **Run B** also wrote one name with its title attached ("Dan Contracting
+  Officer").
+- **Role accuracy** on matched people: 71/72 in run A and 70/72 in run B.
+  The differences are judgement calls, such as a contractor employee who
+  signs the technical certification.
+- **Redacted blocks.**
+  - **Invented names: 0.** In both runs no entry gave a name for a redacted
+    block, and no kept name was absent from the document.
+  - **Titled blocks.** The key has 49 redacted blocks with a visible title.
+    Run A recorded all 49 and run B recorded 47. Run B's two misses are
+    page-6 certifications that may repeat page-1 blocks.
+  - **Untitled blocks.** Six blocks have no visible title, such as four
+    fully blacked-out coordination rows, checked on the page image. Neither
+    run recorded those, apart from one in run B.
+  - **One key error.** The key had a redacted banner "POC" entry, which the
+    guide excludes.
+- **Quote check.** Every kept quote was found in the page text: 122/122
+  people entries in each run, and every quote of the new fields.
+  - A second code path re-checked all 462 kept quotes from both runs
+    against the whole-attachment text column instead of the page table.
+    All passed.
+  - Before the checks, run A had 123 people entries; 1 was dropped (the
+    reordered name).
+- **Page images.** 10 people entries were checked against images of the
+  original PDF pages: 5 redacted blocks and 5 named people, a seeded
+  sample. All 10 match. Each redacted name is blacked out on the image, and
+  each title is printed as transcribed.
+
+The six fields, strict scoring against the key (run A / run B):
+
+| Field | Precision | Recall | Notes |
+|---|---|---|---|
+| `need_by_date` | 4/4 / 3/3 | 4/6 / 3/6 | Misses: two deadlines worded as "must be awarded before the current contract expires" and a bridged contract's expiry. Too few positives to rely on. |
+| `stated_pop_limit_days` | 2/2 / 2/2 | 2/2 / 2/2 | Only 2 positives in 40 notices. Not measurable. |
+| `incumbent_piid` | 12/12 / 13/13 | 12/13 / 13/13 | Run A's miss: a paraphrased quote, dropped by the check. |
+| `covered_piids` (per number) | 11/11 / 12/12 | 11/12 / 12/12 | |
+| `market_research_methods` (per method) | 51/66 = 77% / 53/63 = 84% | 51/59 = 86% / 53/59 = 90% | |
+| `redaction_significant` | accuracy 38/39 / 37/39 | | Run A's one disagreement is a key error: "$xx" is a template placeholder, not a redaction. |
+
+- **What the market-research disagreements are.** Of run A's 15 extra
+  methods:
+  - 6 are clear model errors: price data or past performance coded as
+    market research, or research for the follow-on and not this action.
+  - 1 is a key error.
+  - The other 8 are boundary cases: a combined "Sources Sought / RFI"
+    notice, or SAM.gov coded as `sam_search` against
+    `other_database_search`.
+- **Stability.** On the ten existing value fields, run A and run B agree on
+  361/390 cells. Each new run agrees with the published `extract2` record on
+  345-347/380.
+  - Most differences are `period_of_performance` wording and the list of
+    authorities.
+  - As in the prompt-caching A/B, this is within run-to-run variation.
+
+These are samples. With 39 notices, a field with 0 errors could still be
+wrong about 9% of the time (the 95% upper bound for 0 of 39).
+
+### Cost
+
+- **Validation.** The runs cost $0.627 at list prices, recomputed from the
+  raw token counts. That covers one 7-notice prompt-development run, one
+  two-run pass of an earlier draft on the 40 notices, and the two final
+  runs.
+- **Not costed:** the calls that hit the output limit (five, about $0.05)
+  and a first attempt rejected with a 400, which is not billed.
+- **Per notice.** About $0.0038-0.0043 on random notices. That is 1.25-1.41
+  times the `extract2` cost on the same notices, mostly from the longer
+  answer.
+- **Full re-extraction (projected, not run):** the 10,033 in-scope notices
+  with usable text (9,870 Justifications and 163 Special Notices) would cost
+  about **$38-46**, or $3.8-4.6 per 1,000 notices. Failed calls come on top.
+- **New notices only:** 277 in-scope notices have no extraction row today
+  (114 Justifications and 163 Special Notices), about $1.10-1.30. About 31
+  notices a day were posted over the last 30 days, about $0.13 a day.
+
+### Known failure modes (new fields)
+
+- **Untitled redaction blocks.** A redacted block with no visible title,
+  such as a fully blacked-out coordination row, is usually not recorded.
+- **Black-box redactions in typed PDFs** leave no text, so those people
+  are simply absent. This is the same limit as `redaction_detected`.
+- **Name forms.**
+  - A stray second line can be attached to a name ("Carlos Sosa Garcia
+    SOSA").
+  - A title can be glued onto a name ("Dan Contracting Officer").
+  - A reordered "Last, First" name is dropped by the check, not kept.
+- **Garbled text layers.** One glyph-encoded notice made every extract3 call
+  hit the output limit, at both 16,000 and 32,000 tokens. Such a notice
+  stays in `failures.jsonl`.
+- **`market_research_methods`** follows category boundaries that are
+  fuzzy. Treat the codes as a screen, not a count.
+- **Too rare to validate.** `need_by_date` and `stated_pop_limit_days` have
+  2-6 positives in the sample.

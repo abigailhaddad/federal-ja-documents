@@ -1,0 +1,644 @@
+{
+ "A": {
+  "run": "A",
+  "docs": 39,
+  "all/random": {
+   "named_precision_exact": "41/43 = 95% (85-99%)",
+   "named_recall_exact": "41/44 = 93% (82-98%)",
+   "named_precision_loose": "42/43 = 98% (88-100%)",
+   "named_recall_loose": "42/44 = 95% (85-99%)",
+   "role_accuracy": "41/42 = 98% (88-100%)",
+   "redacted_blocks_key": 31,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": 1,
+   "fn": 2
+  },
+  "all/edge": {
+   "named_precision_exact": "30/30 = 100% (89-100%)",
+   "named_recall_exact": "30/30 = 100% (89-100%)",
+   "named_precision_loose": "30/30 = 100% (89-100%)",
+   "named_recall_loose": "30/30 = 100% (89-100%)",
+   "role_accuracy": "30/30 = 100% (89-100%)",
+   "redacted_blocks_key": 25,
+   "redacted_blocks_pred": 21,
+   "redacted_count_matched": 21,
+   "fp": 0,
+   "fn": 0
+  },
+  "all/both": {
+   "named_precision_exact": "71/73 = 97% (91-99%)",
+   "named_recall_exact": "71/74 = 96% (89-99%)",
+   "named_precision_loose": "72/73 = 99% (93-100%)",
+   "named_recall_loose": "72/74 = 97% (91-99%)",
+   "role_accuracy": "71/72 = 99% (93-100%)",
+   "redacted_blocks_key": 56,
+   "redacted_blocks_pred": 49,
+   "redacted_count_matched": 49,
+   "fp": [
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Carlos Sosa Garcia SOSA",
+     "requiring_or_technical_official"
+    ]
+   ],
+   "fn": [
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Carlos Sosa Garcia",
+     "requiring_or_technical_official"
+    ],
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Alicia Wargo",
+     "contracting_officer"
+    ]
+   ]
+  },
+  "signature/random": {
+   "named_precision_exact": "30/31 = 97% (84-99%)",
+   "named_recall_exact": "30/32 = 94% (80-98%)",
+   "named_precision_loose": "31/31 = 100% (89-100%)",
+   "named_recall_loose": "31/32 = 97% (84-99%)",
+   "role_accuracy": "31/31 = 100% (89-100%)",
+   "redacted_blocks_key": 17,
+   "redacted_blocks_pred": 17,
+   "redacted_count_matched": 17,
+   "fp": 0,
+   "fn": 1
+  },
+  "signature/edge": {
+   "named_precision_exact": "19/19 = 100% (83-100%)",
+   "named_recall_exact": "19/19 = 100% (83-100%)",
+   "named_precision_loose": "19/19 = 100% (83-100%)",
+   "named_recall_loose": "19/19 = 100% (83-100%)",
+   "role_accuracy": "19/19 = 100% (83-100%)",
+   "redacted_blocks_key": 11,
+   "redacted_blocks_pred": 11,
+   "redacted_count_matched": 11,
+   "fp": 0,
+   "fn": 0
+  },
+  "signature/both": {
+   "named_precision_exact": "49/50 = 98% (90-100%)",
+   "named_recall_exact": "49/51 = 96% (87-99%)",
+   "named_precision_loose": "50/50 = 100% (93-100%)",
+   "named_recall_loose": "50/51 = 98% (90-100%)",
+   "role_accuracy": "50/50 = 100% (93-100%)",
+   "redacted_blocks_key": 28,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": [],
+   "fn": [
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Alicia Wargo",
+     "contracting_officer"
+    ]
+   ]
+  },
+  "raw_people_entries": 123,
+  "kept_people_entries": 122,
+  "drop_reasons": {
+   "name not in its quote": 1
+  },
+  "raw_named_entries_marked_redacted_or_not_spelled_as_in_document": [
+   [
+    "1996aeb1946e433faa4f3e0eaec71a6b",
+    "Alicia Wargo",
+    false
+   ]
+  ],
+  "kept_named_entries_with_redaction_marker_in_name": 0,
+  "need_by_date": {
+   "counts": {
+    "null_ok": 33,
+    "missed": 2,
+    "correct": 4
+   },
+   "precision": "4/4 = 100% (51-100%)",
+   "recall": "4/6 = 67% (30-90%)",
+   "errors": [
+    [
+     "d7207bb1b58346dc88493972f641561b",
+     "missed",
+     "2026-03-31",
+     null
+    ],
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "missed",
+     "2026-03-29",
+     null
+    ]
+   ]
+  },
+  "stated_pop_limit_days": {
+   "counts": {
+    "null_ok": 37,
+    "correct": 2
+   },
+   "precision": "2/2 = 100% (34-100%)",
+   "recall": "2/2 = 100% (34-100%)",
+   "errors": []
+  },
+  "incumbent_piid": {
+   "counts": {
+    "correct": 12,
+    "null_ok": 26,
+    "missed": 1
+   },
+   "precision": "12/12 = 100% (76-100%)",
+   "recall": "12/13 = 92% (67-99%)",
+   "errors": [
+    [
+     "a6bbb244cd0444f0a8ac2a7bb8004c34",
+     "missed",
+     "N00039-23-C-0002",
+     null
+    ]
+   ]
+  },
+  "covered_piids": {
+   "precision": "11/11 = 100% (74-100%)",
+   "recall": "11/12 = 92% (65-99%)",
+   "diffs (missed, extra)": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     [
+      "hq003420f0598"
+     ],
+     []
+    ]
+   ]
+  },
+  "market_research_methods": {
+   "precision": "51/66 = 77% (66-86%)",
+   "recall": "51/59 = 86% (75-93%)",
+   "diffs (missed, extra)": [
+    [
+     "c3461563b2b94dbca9f7535aecf6a325",
+     [],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "8637832a9e7d4c9fb46a3e6a408e774c",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "597e23efdbae4858881db82e3e9f1b39",
+     [
+      "notice_of_intent"
+     ],
+     []
+    ],
+    [
+     "d0de7be558744304be25dec192da2914",
+     [
+      "other"
+     ],
+     [
+      "rfi"
+     ]
+    ],
+    [
+     "3e75fdad44b148dea75054643b0c6bec",
+     [],
+     [
+      "vendor_contact"
+     ]
+    ],
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     [
+      "rfi"
+     ],
+     []
+    ],
+    [
+     "560de14923164ce29abf08ac67dc943f",
+     [
+      "sources_sought"
+     ],
+     [
+      "notice_of_intent"
+     ]
+    ],
+    [
+     "6909e1e3c9a74255b6eaaa93da7b2769",
+     [],
+     [
+      "notice_of_intent"
+     ]
+    ],
+    [
+     "5e6b435738b24553b480e192ec14aa86",
+     [
+      "other"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "15b08347f2fa4283ac78eb1a86e40299",
+     [],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "424e6eab35514bce9c8b50bd37c1e65a",
+     [
+      "notice_of_intent"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "a6bbb244cd0444f0a8ac2a7bb8004c34",
+     [],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "3378022faa794bcca0a6812e8447f288",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "de17f747dddb478b89c31008575a3a32",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "b729c725159c4f138864b4ac6cbc1017",
+     [],
+     [
+      "vendor_contact"
+     ]
+    ],
+    [
+     "0e11c796caf54986b8b05c4417c3bfca",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "b5bf292615a6456a8cb6e88c1fcaff82",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "9157a4ea266f4e96a3f99e19a822fe32",
+     [
+      "other_database_search"
+     ],
+     [
+      "sam_search"
+     ]
+    ]
+   ]
+  },
+  "market_research_methods_rfi=sources_sought": {
+   "precision": "50/64 = 78% (67-86%)",
+   "recall": "50/57 = 88% (77-94%)"
+  },
+  "redaction_significant": {
+   "accuracy": "38/39 = 97% (87-100%)",
+   "confusion (key, pred)": {
+    "no->no": 9,
+    "yes->yes": 26,
+    "unclear->unclear": 2,
+    "yes->no": 1,
+    "unclear->yes": 1
+   },
+   "errors": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "yes",
+     null,
+     "no"
+    ]
+   ]
+  }
+ },
+ "B": {
+  "run": "B",
+  "docs": 39,
+  "all/random": {
+   "named_precision_exact": "41/44 = 93% (82-98%)",
+   "named_recall_exact": "41/44 = 93% (82-98%)",
+   "named_precision_loose": "42/44 = 95% (85-99%)",
+   "named_recall_loose": "42/44 = 95% (85-99%)",
+   "role_accuracy": "41/42 = 98% (88-100%)",
+   "redacted_blocks_key": 31,
+   "redacted_blocks_pred": 26,
+   "redacted_count_matched": 26,
+   "fp": 2,
+   "fn": 2
+  },
+  "all/edge": {
+   "named_precision_exact": "30/30 = 100% (89-100%)",
+   "named_recall_exact": "30/30 = 100% (89-100%)",
+   "named_precision_loose": "30/30 = 100% (89-100%)",
+   "named_recall_loose": "30/30 = 100% (89-100%)",
+   "role_accuracy": "29/30 = 97% (83-99%)",
+   "redacted_blocks_key": 25,
+   "redacted_blocks_pred": 22,
+   "redacted_count_matched": 21,
+   "fp": 0,
+   "fn": 0
+  },
+  "all/both": {
+   "named_precision_exact": "71/74 = 96% (89-99%)",
+   "named_recall_exact": "71/74 = 96% (89-99%)",
+   "named_precision_loose": "72/74 = 97% (91-99%)",
+   "named_recall_loose": "72/74 = 97% (91-99%)",
+   "role_accuracy": "70/72 = 97% (90-99%)",
+   "redacted_blocks_key": 56,
+   "redacted_blocks_pred": 48,
+   "redacted_count_matched": 47,
+   "fp": [
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Carlos Sosa Garcia SOSA",
+     "requiring_or_technical_official"
+    ],
+    [
+     "560de14923164ce29abf08ac67dc943f",
+     "Dan Contracting Officer",
+     "contracting_officer"
+    ]
+   ],
+   "fn": [
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     "Carlos Sosa Garcia",
+     "requiring_or_technical_official"
+    ],
+    [
+     "560de14923164ce29abf08ac67dc943f",
+     "Dan",
+     "contracting_officer"
+    ]
+   ]
+  },
+  "signature/random": {
+   "named_precision_exact": "30/32 = 94% (80-98%)",
+   "named_recall_exact": "30/32 = 94% (80-98%)",
+   "named_precision_loose": "31/32 = 97% (84-99%)",
+   "named_recall_loose": "31/32 = 97% (84-99%)",
+   "role_accuracy": "31/31 = 100% (89-100%)",
+   "redacted_blocks_key": 17,
+   "redacted_blocks_pred": 17,
+   "redacted_count_matched": 17,
+   "fp": 1,
+   "fn": 1
+  },
+  "signature/edge": {
+   "named_precision_exact": "19/20 = 95% (76-99%)",
+   "named_recall_exact": "19/19 = 100% (83-100%)",
+   "named_precision_loose": "19/20 = 95% (76-99%)",
+   "named_recall_loose": "19/19 = 100% (83-100%)",
+   "role_accuracy": "19/19 = 100% (83-100%)",
+   "redacted_blocks_key": 11,
+   "redacted_blocks_pred": 11,
+   "redacted_count_matched": 11,
+   "fp": 1,
+   "fn": 0
+  },
+  "signature/both": {
+   "named_precision_exact": "49/52 = 94% (84-98%)",
+   "named_recall_exact": "49/51 = 96% (87-99%)",
+   "named_precision_loose": "50/52 = 96% (87-99%)",
+   "named_recall_loose": "50/51 = 98% (90-100%)",
+   "role_accuracy": "50/50 = 100% (93-100%)",
+   "redacted_blocks_key": 28,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": [
+    [
+     "560de14923164ce29abf08ac67dc943f",
+     "Dan Contracting Officer",
+     "contracting_officer"
+    ],
+    [
+     "29df37c3e284494e955226b5d42538c2",
+     "Philip T. McCall",
+     "signer_or_approver"
+    ]
+   ],
+   "fn": [
+    [
+     "560de14923164ce29abf08ac67dc943f",
+     "Dan",
+     "contracting_officer"
+    ]
+   ]
+  },
+  "raw_people_entries": 122,
+  "kept_people_entries": 122,
+  "drop_reasons": {},
+  "raw_named_entries_marked_redacted_or_not_spelled_as_in_document": [],
+  "kept_named_entries_with_redaction_marker_in_name": 0,
+  "need_by_date": {
+   "counts": {
+    "null_ok": 33,
+    "missed": 3,
+    "correct": 3
+   },
+   "precision": "3/3 = 100% (44-100%)",
+   "recall": "3/6 = 50% (19-81%)",
+   "errors": [
+    [
+     "d7207bb1b58346dc88493972f641561b",
+     "missed",
+     "2026-03-31",
+     null
+    ],
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "missed",
+     "2026-03-29",
+     null
+    ],
+    [
+     "5a005eaf1dec49f7aa264ceb2100c4a9",
+     "missed",
+     "2026-05-31",
+     null
+    ]
+   ]
+  },
+  "stated_pop_limit_days": {
+   "counts": {
+    "null_ok": 37,
+    "correct": 2
+   },
+   "precision": "2/2 = 100% (34-100%)",
+   "recall": "2/2 = 100% (34-100%)",
+   "errors": []
+  },
+  "incumbent_piid": {
+   "counts": {
+    "correct": 13,
+    "null_ok": 26
+   },
+   "precision": "13/13 = 100% (77-100%)",
+   "recall": "13/13 = 100% (77-100%)",
+   "errors": []
+  },
+  "covered_piids": {
+   "precision": "12/12 = 100% (76-100%)",
+   "recall": "12/12 = 100% (76-100%)",
+   "diffs (missed, extra)": []
+  },
+  "market_research_methods": {
+   "precision": "53/63 = 84% (73-91%)",
+   "recall": "53/59 = 90% (80-95%)",
+   "diffs (missed, extra)": [
+    [
+     "c3461563b2b94dbca9f7535aecf6a325",
+     [],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "8637832a9e7d4c9fb46a3e6a408e774c",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "597e23efdbae4858881db82e3e9f1b39",
+     [
+      "procurement_history"
+     ],
+     []
+    ],
+    [
+     "d0de7be558744304be25dec192da2914",
+     [],
+     [
+      "rfi"
+     ]
+    ],
+    [
+     "0d6e901e95b249bf930c73593fd16475",
+     [
+      "other"
+     ],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "5e6b435738b24553b480e192ec14aa86",
+     [
+      "other"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "15b08347f2fa4283ac78eb1a86e40299",
+     [
+      "vendor_contact"
+     ],
+     []
+    ],
+    [
+     "424e6eab35514bce9c8b50bd37c1e65a",
+     [
+      "notice_of_intent"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "a6bbb244cd0444f0a8ac2a7bb8004c34",
+     [],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "de17f747dddb478b89c31008575a3a32",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "b729c725159c4f138864b4ac6cbc1017",
+     [],
+     [
+      "vendor_contact"
+     ]
+    ],
+    [
+     "0e11c796caf54986b8b05c4417c3bfca",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "b5bf292615a6456a8cb6e88c1fcaff82",
+     [],
+     [
+      "other"
+     ]
+    ]
+   ]
+  },
+  "market_research_methods_rfi=sources_sought": {
+   "precision": "51/60 = 85% (74-92%)",
+   "recall": "51/57 = 89% (79-95%)"
+  },
+  "redaction_significant": {
+   "accuracy": "37/39 = 95% (83-99%)",
+   "confusion (key, pred)": {
+    "no->no": 9,
+    "yes->yes": 25,
+    "unclear->unclear": 2,
+    "yes->no": 1,
+    "unclear->yes": 1,
+    "yes->unclear": 1
+   },
+   "errors": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "yes",
+     null,
+     "no"
+    ],
+    [
+     "ee787559fc674911bb7c08938124ce09",
+     "yes",
+     null,
+     "unclear"
+    ]
+   ]
+  }
+ }
+}
