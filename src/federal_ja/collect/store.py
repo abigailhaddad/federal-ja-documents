@@ -1,9 +1,9 @@
 """Local working copy of the dataset: tables plus stored files.
 
 Layout (mirrors the Hugging Face repo):
-  data/notices.parquet        one row per J&A notice
+  data/notices.parquet        one row per collected notice (collection_reason says why)
   data/attachments.parquet    one row per (notice_id, resource_id)
-  data/exclusions.parquet     J&A rows/ids from the CSVs that are not notices
+  data/exclusions.parquet     collected rows/ids from the CSVs that are not notices
   data/collection_state.json  source ETags, layout version, run history
   files/<notice_id>/<resource_id>_<safe filename>
 """
@@ -23,7 +23,7 @@ LAYOUT_VERSION = "federal-ja-documents/v1"
 NOTICE_COLUMNS = [
     "notice_id", "sam_link", "title", "solicitation_number", "agency", "cgac",
     "sub_tier", "fpds_code", "office", "aac_code", "posted_date", "type",
-    "base_type", "archive_type", "archive_date", "naics_code",
+    "collection_reason", "base_type", "archive_type", "archive_date", "naics_code",
     "classification_code", "active", "award_number", "award_date",
     "award_amount", "awardee", "description", "csv_link", "source_file",
     "source_files", "row_fingerprint", "first_seen_at", "resources_status",
@@ -55,7 +55,8 @@ PAGE_COLUMNS = [
     "transcribed_at",
 ]
 
-EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title", "reason"]
+EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title",
+                     "collection_reason", "reason"]
 
 _SURR = re.compile("[\ud800-\udfff]")
 
@@ -108,6 +109,7 @@ class Store:
         p = self.path("data", "notices.parquet")
         if os.path.exists(p):
             for rec in _read_records(p):
+                _fill_collection_reason(rec)
                 self.notices[rec["notice_id"]] = rec
         p = self.path("data", "attachments.parquet")
         if os.path.exists(p):
@@ -116,6 +118,8 @@ class Store:
         p = self.path("data", "exclusions.parquet")
         if os.path.exists(p):
             self.exclusions = _read_records(p)
+            for rec in self.exclusions:
+                _fill_collection_reason(rec)
         p = self.path("data", "pages.parquet")
         if os.path.exists(p):
             for rec in _read_records(p):
@@ -146,6 +150,15 @@ class Store:
 
     def attachments_for(self, notice_id: str) -> list[dict]:
         return [a for (n, _r), a in self.attachments.items() if n == notice_id]
+
+
+def _fill_collection_reason(rec: dict) -> None:
+    """Tables written before collection_reason existed hold only
+    Justification-type rows; derive the reason from the row's own type and
+    title (the same rule as the scan) rather than assuming it."""
+    if not rec.get("collection_reason"):
+        from .sources import collection_reason
+        rec["collection_reason"] = collection_reason(rec.get("type"), rec.get("title"))
 
 
 def _clean(v):

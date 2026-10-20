@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from . import config
 from .report import summarize
+from .sources import JA_TITLE_PATTERN
 from .store import Store
 
 CARD_TEMPLATE = """---
@@ -37,7 +38,9 @@ configs:
 Justification & Approval documents (and similar justifications for other than
 full and open competition) that federal agencies posted to
 [SAM.gov](https://sam.gov) Contract Opportunities, with the original files,
-extracted text, and notice metadata.
+extracted text, and notice metadata. Most notices were posted as
+"Justification" notices; some are Special Notices whose title suggests a
+justification (`collection_reason`, see [Sources](#sources)).
 
 Code and issue tracker: {project_url}
 
@@ -52,10 +55,10 @@ Code and issue tracker: {project_url}
 
 | Path | What |
 |---|---|
-| `data/notices.parquet` | one row per J&A notice ({n_notices:,} rows): agency, sub-tier, office, dates, award number, and the matching USAspending award (`usaspending_*` columns, below) |
+| `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
 | `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
-| `data/exclusions.parquet` | J&A rows found in the source CSVs that are not in `notices` and why ({n_exclusions:,} rows) |
+| `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
 | `analysis/` | **experimental, AI-generated** tables (field extraction and theme tags), a static snapshot; see [Experimental: AI-generated tables](#experimental-ai-generated-tables) |
@@ -68,6 +71,7 @@ made when the tables are published; `notices` is the source.
 
 ### Coverage at build time
 
+* Notices by `collection_reason`: {by_reason}
 * Notices by type: {by_type}
 * Attachment-list status: {by_res}
 * Attachments by download status: {by_dl}
@@ -88,12 +92,34 @@ made when the tables are published; `notices` is the source.
    * yearly archives of inactive notices,
      `FY<YYYY>_archived_opportunities.csv`, refreshed weekly.
 
-   A row is a J&A if its `Type` starts with "Justification". Two spellings
-   occur: `Justification` and `Justification and Approval (J&A)`; the value
-   is kept in `type`. When a notice appears in more than one file, the row
-   with the latest `PostedDate` is kept (ties go to the active file, then the
-   newest archive); `source_file` is the file the kept row came from and
-   `source_files` lists every file the notice was seen in.
+   A row is collected for one of two reasons, recorded in `collection_reason`:
+
+   * `justification_type`: its `Type` starts with "Justification". Two
+     spellings occur: `Justification` and `Justification and Approval (J&A)`.
+   * `special_notice_title_match`: its `Type` is exactly `Special Notice` and
+     its `Title` (the title only, not the description) matches this regular
+     expression, ignoring case, anywhere in the title:
+
+     ```
+     {title_pattern}
+     ```
+
+     Agencies sometimes post a J&A as a Special Notice, for example a
+     "Notice of Intent to Sole Source" with the justification attached. These
+     rows are **candidates**: the title only says the notice may carry a
+     justification. Some may be notices of intent with no J&A attached, and a
+     few are unrelated (e.g. "Fair Opportunity" industry updates). The
+     experimental `is_ja` field in `analysis/extractions.parquet` says
+     whether a notice's documents actually are a J&A, for the notices that
+     snapshot covers (it is not rebuilt daily, so Special Notices collected
+     after it have no `is_ja` yet).
+
+   `type` is kept as SAM gives it. When a notice appears in more than one
+   file, the row with the latest `PostedDate` is kept (ties go to the active
+   file, then the newest archive), whichever rule picked it;
+   `collection_reason` follows the kept row. `source_file` is the file the
+   kept row came from and `source_files` lists every file the notice was
+   seen in.
 2. **Attachment lists** come from the sam.gov endpoint the SAM.gov website
    uses to list a notice's files,
    `https://sam.gov/api/prod/opps/v3/opportunities/<notice_id>/resources`.
@@ -139,8 +165,10 @@ pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
   notice ({n_multi_notices:,} notices).
 * A J&A that was posted and removed between two daily snapshots, and never
   reached an archive file, is not in the source CSVs and cannot be here.
-* SAM's `Type` is set by the posting office. J&As posted under another type
-  (for example as a Special Notice or Award Notice) are not included.
+* SAM's `Type` is set by the posting office. J&As posted as a Special Notice
+  are included only when the title matches the pattern above; J&As posted
+  under any other type (for example as an Award Notice or Presolicitation),
+  or as a Special Notice with a title that does not match, are not included.
 * The CSV metadata is SAM's as of the build date; notices edited later are
   re-checked when their CSV row changes.
 
@@ -323,6 +351,7 @@ def render_card(store: Store, start_date: str, built_at: str,
         n_pages=sum(len(v) for v in store.pages.values()),
         n_files=s["attachments_by_download_status"].get("ok", 0),
         gb=s["downloaded_bytes"] / 1e9, by_type=s["notices_by_type"],
+        by_reason=s["notices_by_collection_reason"], title_pattern=JA_TITLE_PATTERN.pattern,
         by_res=s["notices_by_resources_status"], by_dl=s["attachments_by_download_status"],
         by_kind=s["downloaded_by_file_kind"], by_text=s["text_source"],
         n_scanned=s["pdfs_needing_transcription"], n_pdfs=s["pdfs"],

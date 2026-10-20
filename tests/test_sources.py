@@ -2,8 +2,11 @@ import csv
 import datetime as dt
 import io
 
+import pytest
+
 from federal_ja.collect.sources import (
-    collect_ja_notices, is_ja_type, parse_posted_date, row_fingerprint,
+    collect_ja_notices, collection_reason, is_ja_type, parse_posted_date, row_fingerprint,
+    title_looks_like_ja,
 )
 
 HEADER = ["NoticeId", "Title", "Sol#", "Department/Ind.Agency", "Sub-Tier", "Office",
@@ -141,3 +144,114 @@ def test_open_csv_url_keeps_session_alive(monkeypatch):
     gc.collect()
     assert ref() is not None          # held by the stream
     assert "Justification" in fh.read()
+
+
+# Titles copied from Special Notices in SAM's active CSV (2026-10-19), plus
+# spacing / punctuation variants of the same keywords.
+GATE_YES = [
+    "Notice of Intent to Sole Source: Operations, Maintenance, and Defense of Army Communications",
+    "NOTICE OF INTENT TO SOLE SOURCE TO SONALYST",
+    "Notice of Intent to Award Sole-Source Contract",
+    "6640--Sole Source Post-Award Notice Individually Ventilated Cage Systems",
+    "Notice of Intent to Single Source MH-139A Battery Maintenance Service",
+    "Post Award Redacted J&A DIA APC Warranty",
+    "USACE Basis of Design J & A for Interior Finishes - Notice of Intent",
+    "Class j&a for controllers",
+    "Redacted Limited Sources Justification for PRISM Hosting, Operations, and Maintenance Services",
+    "Posting Limited- Sources Justification (LSJ) for Forescout Products",
+    "R--Justification for Sexual Assault Hotline",
+    "Award under FAR 6.302-1, only one responsible source",
+    "Bridge contract - FAR6.302-2 Unusual and Compelling Urgency",
+    "Exception to Fair Opportunity - Task Order 12",
+]
+GATE_NO = [
+    "Notice of Intent DNA Synthesizer",
+    "Notice of Intent to Award - Strategic Defense Industrial Base (SDIB) Software-as-a-Service",
+    "Brand Name - Capital IQ Software",
+    "NOTICE OF INTENT TO AWARD A NON-COMPETITIVE CONTRACT Operational Lease of Flexible Endoscopy",
+    "Industry Day: J&As and You",       # "J&As": no word boundary after the A
+    "Solesource requirement",          # no separator between the words
+    "Hochiki - Fire Alarm Panel Brand name Class JA W912PL25S0007",
+    "",
+]
+
+
+@pytest.mark.parametrize("title", GATE_YES)
+def test_title_gate_matches(title):
+    assert title_looks_like_ja(title)
+    assert collection_reason("Special Notice", title) == "special_notice_title_match"
+
+
+@pytest.mark.parametrize("title", GATE_NO)
+def test_title_gate_rejects(title):
+    assert not title_looks_like_ja(title)
+    assert collection_reason("Special Notice", title) is None
+
+
+def test_collection_reason_needs_special_notice_type():
+    t = "Notice of Intent to Sole Source"
+    assert collection_reason(" Special Notice ", t) == "special_notice_title_match"
+    assert collection_reason("Presolicitation", t) is None
+    assert collection_reason("Award Notice", t) is None
+    assert collection_reason("Special Notices", t) is None
+    assert collection_reason(None, t) is None
+    # a Justification is collected whatever its title says
+    assert collection_reason("Justification", "Anything") == "justification_type"
+    assert collection_reason("Justification", t) == "justification_type"
+
+
+def test_special_notices_collected_and_counted_separately():
+    res = collect_ja_notices([("active.csv", make_csv([
+        row("j", "2025-03-01 10:00:00"),
+        row("s1", "2025-03-01 10:00:00", "Special Notice", Title="NOTICE OF INTENT TO SOLE SOURCE"),
+        row("s2", "2025-03-01 10:00:00", "Special Notice", Title="Industry Day"),
+        # description mentions a J&A but the title does not: not collected
+        row("s3", "2025-03-01 10:00:00", "Special Notice", Title="Industry Day",
+            Description="The sole source justification is attached."),
+        row("s4", "2024-12-01 10:00:00", "Special Notice", Title="J & A posting"),   # before start
+        row("p", "2025-03-01 10:00:00", "Presolicitation", Title="Sole-Source requirement"),
+    ]))], START)
+    assert set(res.notices) == {"j", "s1"}
+    assert res.notices["j"]["collection_reason"] == "justification_type"
+    assert res.notices["s1"]["collection_reason"] == "special_notice_title_match"
+    assert res.notices["s1"]["type"] == "Special Notice"          # type kept as SAM gives it
+    st = res.stats
+    f = st.files[0]
+    assert (f.rows, f.ja_rows, f.special_notice_rows, f.special_notice_title_matches) == (6, 1, 4, 2)
+    assert f.ja_types == {"Justification": 1}
+    assert st.ja_rows_total == 1 and st.unique_ja_ids == 1
+    assert st.rows_by_reason == {"justification_type": 1, "special_notice_title_match": 2}
+    assert st.unique_ids_by_reason == {"justification_type": 1, "special_notice_title_match": 2}
+    assert st.unique_ids_total == 3
+    assert st.in_scope == 2
+    assert st.in_scope_by_reason == {"justification_type": 1, "special_notice_title_match": 1}
+    assert st.before_start_by_reason == {"justification_type": 0, "special_notice_title_match": 1}
+    assert st.type_counts_in_scope == {"Justification": 1, "Special Notice": 1}
+    d = st.as_dict()
+    assert d["files"][0]["special_notice_title_matches"] == 2
+    assert d["in_scope_by_reason"]["special_notice_title_match"] == 1
+    assert sum(d["in_scope_by_reason"].values()) == d["in_scope"]
+    assert sum(d["unique_ids_by_reason"].values()) == d["unique_ids_total"]
+
+
+def test_dedup_across_paths_kept_row_sets_reason():
+    # The same NoticeId as a Special Notice in an archive and, later, as a
+    # Justification in the active file: one notice, reason from the kept row.
+    active = make_csv([row("x", "2025-06-01 00:00:00", "Justification")])
+    arch = make_csv([row("x", "2025-05-01 00:00:00", "Special Notice", Title="Intent to sole source")])
+    res = collect_ja_notices([("active.csv", active), ("FY2025.csv", arch)], START)
+    assert res.notices["x"]["collection_reason"] == "justification_type"
+    assert res.notices["x"]["source_files"] == ["active.csv", "FY2025.csv"]
+    assert res.stats.duplicate_rows == 1
+    assert res.stats.unique_ids_by_reason == {"justification_type": 1, "special_notice_title_match": 0}
+
+
+def test_special_notice_exclusions_carry_reason():
+    res = collect_ja_notices([("active.csv", make_csv([
+        row("", "2025-03-01 00:00:00", "Special Notice", Title="Sole Source notice"),
+        row("z", "not a date", "Special Notice", Title="Sole Source notice"),
+    ]))], START)
+    assert sorted((e["reason"], e["collection_reason"]) for e in res.exclusions) == [
+        ("missing_notice_id", "special_notice_title_match"),
+        ("unparseable_posted_date", "special_notice_title_match"),
+    ]

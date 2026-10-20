@@ -97,3 +97,12 @@ def test_workbook_ids_stay_text(tmp_path):
     assert row["Award number"] == "0012AB" and row["Vendor UEI"] == "0ABC"   # leading zeros kept
     assert ws.freeze_panes == "C2"
     assert ws.cell(2, hdr.index("Document") + 1).hyperlink is not None
+
+
+def test_notice_type_column_with_and_without_type():
+    t = tables()
+    df, _, _ = ss.build_frames(t)                       # older snapshots have no `type` column
+    assert df["SAM.gov notice type"].isna().all()
+    t["notices"]["type"] = ["Justification", "Special Notice", "Justification", "Justification", "Justification"]
+    df, _, _ = ss.build_frames(t)
+    assert df.set_index("Notice ID")["SAM.gov notice type"].to_dict() == {"a": "Justification", "b": "Special Notice"}
