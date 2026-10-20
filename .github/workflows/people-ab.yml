@@ -16,7 +16,7 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
       REV: 8b7d8208fef60cf911934e167b33515b8ebbaffb
-      LABEL: dev1
+      LABEL: dev2
       MAX_USD: "0.10"
     steps:
       - uses: actions/checkout@v4

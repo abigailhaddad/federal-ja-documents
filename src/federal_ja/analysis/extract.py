@@ -166,8 +166,11 @@ SCHEMA = {
                          "description", "redacted"],
             "properties": {"name": _Q,
                            "name_quote": {"type": "string"},
-                           "title": _Q,
-                           "organization": _Q,
+                           # plain strings ("" = none printed), not string|null:
+                           # strict tool use allows at most 16 union-typed
+                           # parameters in a schema, and the other fields use 15.
+                           "title": {"type": "string"},
+                           "organization": {"type": "string"},
                            "role_in_document": {"type": "string", "enum": PEOPLE_ROLES},
                            "description": {"type": "string"},
                            "redacted": {"type": "boolean"}}}},
