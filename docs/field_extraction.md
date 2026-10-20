@@ -463,3 +463,52 @@ wrong about 9% of the time (the 95% upper bound for 0 of 39).
   fuzzy. Treat the codes as a screen, not a count.
 - **Too rare to validate.** `need_by_date` and `stated_pop_limit_days` have
   2-6 positives in the sample.
+
+## Daily incremental extraction (`.github/workflows/extract-daily.yml`)
+
+**Off until enabled.** The automatic run starts only after a successful
+daily collection run, and only when the repository variable
+`EXTRACT_DAILY_ENABLED` is `"true"`. GitHub fires `workflow_run` triggers
+only for the workflow file on the default branch, so nothing runs before
+this file is merged.
+
+A manual run (`workflow_dispatch`) publishes only when "publish" is
+ticked.
+
+### What a run does
+
+1. **Seed.** `extract --seed-from-hf` fills a work directory from the
+   published `analysis/extractions.parquet`. Each row's `record_json` is the
+   full stored record.
+2. **Extract.** The run extracts every in-scope notice that has no row
+   matching the current model, `extract_version` and effort. The newest
+   posted go first. It stops at `--max-usd`, which defaults to $2.
+   - A notice whose model call fails is retried on the next run.
+3. **Build and publish.** `extract-table --publish` rebuilds the table:
+   - one row per notice;
+   - the latest record, whatever its prompt version (each row says its
+     `extract_version` and `dataset_revision`);
+   - the skipped notices.
+
+   It then uploads that one file and nothing else.
+   - **Shrink guard.** A table with fewer rows than the published one is
+     refused, so a failed seed can't replace it.
+
+### Checked locally, at dataset revision `8b7d8208fef6`
+
+- **Round trip.** Seeding from the published table and rebuilding it
+  reproduced all 9,766 published rows exactly, on every one of the
+  table's columns. It added the 14 new columns and 3 notices newly skipped
+  for having no text.
+- **Dry run.** A dry run with prompt `extract3` would extract all 10,033
+  in-scope notices with usable text: none has an `extract3` row yet.
+
+### Cost
+
+- **Backfill after enabling.** The first runs re-extract the whole table at
+  about $2 a day. That is about 20 days and about $40 in all.
+- **After the backfill.** Only new notices are extracted: about 31 a day
+  were posted in the 30 days to 2026-10-19, about $0.13 a day. That count
+  includes Special Notices, which have no extraction rows today: 163 of
+  them have usable text, about $0.70.
+- **Every later prompt-version bump** starts another backfill.

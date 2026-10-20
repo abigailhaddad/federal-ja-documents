@@ -1,0 +1,84 @@
+name: Daily experimental field extraction
+
+# Runs after each successful daily collection run and extracts fields only
+# for notices that have no row at the current prompt version
+# (extract_version in prompts.yaml), under a spend cap, then publishes the
+# updated analysis/extractions.parquet. Rows from an older prompt version are
+# re-extracted the same way, oldest-posted last, a cap's worth per run.
+#
+# The automatic run is OFF until the repository variable
+# EXTRACT_DAILY_ENABLED is set to "true" (Settings -> Secrets and variables
+# -> Actions -> Variables). workflow_run triggers only fire for the workflow
+# file on the default branch, so nothing here runs before this file is
+# merged. A manual run (workflow_dispatch) publishes only if "publish" is
+# ticked.
+#
+# Before enabling: the dataset card (collect/card.py) and README still say
+# the analysis/ tables are a snapshot "not refreshed daily" and list the
+# extract2 columns; update them in the same change. The first runs after a
+# prompt-version bump re-extract the whole table, a cap's worth per run
+# (about $40 in all for extract3, see docs/field_extraction.md).
+on:
+  workflow_run:
+    workflows: ["Daily J&A collection"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      max_usd:
+        description: "Extraction spend cap for this run (USD)"
+        default: "2"
+      publish:
+        description: "Publish analysis/extractions.parquet to Hugging Face"
+        type: boolean
+        default: false
+
+concurrency:
+  group: analysis-extraction
+  cancel-in-progress: false
+
+jobs:
+  extract:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (vars.EXTRACT_DAILY_ENABLED == 'true' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest -q
+      - name: Extract (notices without a current-version row only)
+        shell: bash
+        run: |
+          # exit 1 means some notices' model calls failed: they are retried on
+          # the next run and the rest are still published. Anything else stops.
+          set +e
+          uv run python -m federal_ja.analysis extract --seed-from-hf --out work/extract \
+            --max-usd "${{ inputs.max_usd || '2' }}" --workers 4 2> >(tee extract.log >&2)
+          rc=$?
+          set -e
+          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+      - name: Build table (and publish)
+        shell: bash
+        run: |
+          PUBLISH_FLAG=""
+          if [ "${{ github.event_name }}" = "workflow_run" ] || [ "${{ inputs.publish }}" = "true" ]; then
+            PUBLISH_FLAG="--publish"
+          fi
+          uv run python -m federal_ja.analysis extract-table --out work/extract \
+            --table work/extractions.parquet $PUBLISH_FLAG 2> >(tee table.log >&2)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: extraction-run
+          path: |
+            extract.log
+            table.log
+            work/extract/failures.jsonl
+          if-no-files-found: ignore
