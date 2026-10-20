@@ -25,6 +25,15 @@ The summary and the market-research summary are the model's own words
 (labelled as summaries). Firms named in market research are kept only if the
 name appears in the document text.
 
+``people`` lists the people the document names (signers, approvers, points of
+contact, vendor staff...), one entry each, plus signature blocks whose name is
+visibly redacted. A named entry is kept only if its quote is found in the
+document and the name is in its quote, so a name can't be invented. A redacted
+entry must have a null name and a quote that shows a redaction marker; an entry
+that gives a name while saying it is redacted is dropped. Titles and
+organisations are kept only if they appear in the document text. See
+``verify_people``.
+
 Long documents are sent whole up to MAX_EXTRACT_CHARS; beyond that the text is
 cut at an attachment or page boundary and the record says so (``truncated``,
 ``chars_sent``, ``chars_total``). Nothing is cut silently.
@@ -32,6 +41,7 @@ cut at an attachment or page boundary and the record says so (``truncated``,
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date, datetime, timezone
 
@@ -44,7 +54,7 @@ TRUNCATION_VERSION = "2026-10-18.trunc2"
 # The deterministic checks (quote search, value-in-quote parsers, tier
 # guard) have their own version: they can be re-applied to stored model
 # answers without new model calls (``extract --reverify``).
-CHECKS_VERSION = "2026-10-18.checks3"
+CHECKS_VERSION = "2026-10-20.checks4"   # checks4: people
 TOOL_NAME = "record_ja_fields"
 
 # ~100K tokens. Haiku 5.5's price rises 5x above 100K prompt tokens and the
@@ -95,6 +105,20 @@ VALUE_BASIS = [
     "other",
 ]
 
+PEOPLE_ROLES = [
+    "signer_or_approver",
+    "contracting_officer",
+    "competition_advocate",
+    "requiring_or_technical_official",
+    "legal_reviewer",
+    "vendor_employee",
+    "other",
+]
+# The roles of signature and approval blocks: the narrower scope
+# ``people_signature_block`` in the flat row.
+SIGNATURE_ROLES = frozenset({"signer_or_approver", "contracting_officer", "competition_advocate",
+                             "legal_reviewer"})
+
 _Q = {"type": ["string", "null"]}
 
 SCHEMA = {
@@ -105,7 +129,7 @@ SCHEMA = {
                  "value_redacted", "vendor", "vendor_quote", "period_of_performance",
                  "period_quote", "signature_date", "signature_quote", "market_research_summary",
                  "market_research_quote", "other_firms_named", "redacted", "redaction_quote", "notes",
-                 "covers_multiple_actions", "additional_vendors"],
+                 "covers_multiple_actions", "additional_vendors", "people"],
     "properties": {
         "is_ja": {"type": "string", "enum": ["yes", "no", "unclear"]},
         "doc_kind": {"type": "string", "enum": DOC_KINDS},
@@ -136,6 +160,17 @@ SCHEMA = {
         "notes": _Q,
         "covers_multiple_actions": {"type": "boolean"},
         "additional_vendors": {"type": "array", "items": {"type": "string"}},
+        "people": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False,
+            "required": ["name", "name_quote", "title", "organization", "role_in_document",
+                         "description", "redacted"],
+            "properties": {"name": _Q,
+                           "name_quote": {"type": "string"},
+                           "title": _Q,
+                           "organization": _Q,
+                           "role_in_document": {"type": "string", "enum": PEOPLE_ROLES},
+                           "description": {"type": "string"},
+                           "redacted": {"type": "boolean"}}}},
     },
 }
 
@@ -366,6 +401,81 @@ def _qinfo(m) -> dict:
     return {"quote_match": m.match, "quote_pages": m.pages, "quote_on_transcribed_page": m.transcribed}
 
 
+# A name visibly withheld: the transcription's [REDACTED] marker, a FOIA
+# exemption for personal privacy or law-enforcement records ((b)(6),
+# (b)(7)(C), (b)(3)), or the word itself. "(b)(4)" (trade secrets) is left out:
+# it is not used for names, and FAR 6.302-1(b)(4) is a citation.
+REDACTION_MARK = re.compile(r"\[\s*REDACTED|\(\s*b\s*\)\s*\(\s*[367]\s*\)|\bredact(ed|ion)\b|\bwithheld\b", re.I)
+# A digital-signature stamp's name form, "LAST.FIRST.M.1234567890" (DoD CAC
+# certificates). It is kept as written; the flag says it is a stamp form.
+_STAMP_FORM = re.compile(r"^[A-Z][A-Z'-]*(\.[A-Z][A-Z'-]*)+\.?(\d{6,})?$")
+
+
+def verify_people(raw_people, doc: Document, nd: str, vt: str) -> tuple[list[dict], list[dict]]:
+    """Check the model's ``people`` entries. Returns (kept, dropped).
+
+    A named entry is kept only if its name_quote is found in the document
+    and the name is visible in that quote (letters and digits compared, so a
+    name broken across a line, or a stamp's dots, still match). A redacted
+    entry must have no name and a quote showing a redaction marker. The
+    title and organisation are cleared (and recorded as dropped) if they do
+    not appear in the document. A second entry with the same name as an
+    earlier one is dropped as a duplicate."""
+    kept: list[dict] = []
+    dropped: list[dict] = []
+    seen: set[str] = set()
+    for p in raw_people or []:
+        name = (p.get("name") or "").strip() or None
+        quote = p.get("name_quote")
+        redacted = bool(p.get("redacted"))
+
+        def drop(reason, value=None):
+            dropped.append({"field": "people", "value": value if value is not None else (name or p.get("title")),
+                            "quote": quote, "reason": reason})
+
+        m = _check_quote(quote, doc, nd)
+        if not m.verified:
+            drop("quote not found in document" if quote else "no quote")
+            continue
+        if redacted:
+            if name:
+                drop("name given for an entry marked redacted")
+                continue
+            if not REDACTION_MARK.search(normalize(quote or "")):
+                drop("redacted entry's quote shows no redaction marker")
+                continue
+        else:
+            if not name:
+                drop("no name, and not marked redacted")
+                continue
+            if REDACTION_MARK.search(name):
+                drop("name is a redaction marker")
+                continue
+            if not name_in(name, quote or ""):
+                drop("name not in its quote")
+                continue
+            key = _squash(name)
+            if key in seen:
+                drop("duplicate of an earlier entry")
+                continue
+            seen.add(key)
+        entry = {"name": name, "name_quote": display_quote(quote), "redacted": redacted,
+                 "name_is_signature_stamp": bool(name and _STAMP_FORM.match(name))}
+        for k in ("title", "organization"):
+            v = (p.get(k) or "").strip() or None
+            if v and not name_in(v, vt):
+                dropped.append({"field": f"people.{k}", "value": v, "quote": None,
+                                "reason": f"{k} not found in document"})
+                v = None
+            entry[k] = v
+        role = p.get("role_in_document")
+        entry["role_in_document"] = role if role in PEOPLE_ROLES else "other"
+        entry["description"] = (p.get("description") or "").strip() or None
+        entry["name_quote_info"] = _qinfo(m)
+        kept.append(entry)
+    return kept, dropped
+
+
 def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     """Apply the quote and value-in-quote checks to one model answer.
     Returns (fields, dropped)."""
@@ -496,6 +606,10 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     f["redaction_quote"] = display_quote(raw.get("redaction_quote")) if m.verified else None
     f["redaction_quote_info"] = _qinfo(m) if m.verified else None
     f["notes"] = (raw.get("notes") or "").strip() or None
+
+    people, pdrop = verify_people(raw.get("people"), doc, nd, vt)
+    f["people"] = people
+    dropped.extend(pdrop)
     return f, dropped
 
 
@@ -504,7 +618,7 @@ def shape_errors(raw: dict) -> list[str]:
     them, but a tool offered with tool_choice "auto" has returned, e.g., a
     list field as a JSON string; such an answer is treated as a failed call."""
     out = []
-    for k in ("authorities", "other_firms_named", "additional_vendors"):
+    for k in ("authorities", "other_firms_named", "additional_vendors", "people"):
         v = raw.get(k)
         if v is not None and not isinstance(v, list):
             out.append(f"{k} is {type(v).__name__}")
@@ -512,6 +626,8 @@ def shape_errors(raw: dict) -> list[str]:
         if not isinstance(a, dict):
             out.append(f"authorities item is {type(a).__name__}")
             break
+    if isinstance(raw.get("people"), list) and any(not isinstance(x, dict) for x in raw["people"]):
+        out.append("people item is not an object")
     for k in ("other_firms_named", "additional_vendors"):
         if isinstance(raw.get(k), list) and any(not isinstance(x, (str, type(None))) for x in raw[k]):
             out.append(f"{k} item is not a string")
@@ -521,8 +637,14 @@ def shape_errors(raw: dict) -> list[str]:
     return out
 
 
+# People are left out of the retry rule, like the name lists: a dropped
+# person must not trigger a second call that could change the other fields
+# (and double the cost).
+_NOT_RETRIED = ("other_firms_named", "additional_vendors", "people", "people.title", "people.organization")
+
+
 def _n_dropped_factual(dropped: list[dict]) -> int:
-    return sum(1 for d in dropped if d["field"] not in ("other_firms_named", "additional_vendors"))
+    return sum(1 for d in dropped if d["field"] not in _NOT_RETRIED)
 
 
 _REDACTED_NAME = re.compile(r"redact", re.I)
@@ -638,6 +760,8 @@ def _redaction_evidence(rec: dict) -> str | None:
         ev.append("model says redacted (no verified quote)")
     if rec["fields"].get("value_redacted"):
         ev.append("value redacted or blank")
+    if any(p.get("redacted") for p in rec["fields"].get("people") or []):
+        ev.append("a person's name redacted (quote verified)")
     return "; ".join(ev) or None
 
 
@@ -648,9 +772,16 @@ def _redaction_detected(rec: dict) -> str:
     return "yes" if _redaction_evidence(rec) else "not detected"
 
 
+def _person_label(p: dict) -> str:
+    who = p["name"] if p["name"] else "[name redacted]"
+    extra = ", ".join(x for x in (p.get("title"), p.get("organization")) if x)
+    return f"{who} ({extra})" if extra else who
+
+
 def flat_row(rec: dict, meta: dict) -> dict:
     f = rec["fields"]
     a = f["authorities"]
+    people = f.get("people") or []
     return {
         "notice_id": rec["notice_id"],
         "sam_link": meta.get("sam_link") or f"https://sam.gov/opp/{rec['notice_id']}/view",
@@ -686,6 +817,14 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "redaction_evidence": _redaction_evidence(rec),
         "redaction_quote": f["redaction_quote"],
         "notes_model_written": f["notes"],
+        "people_named": "; ".join(_person_label(p) for p in people if not p["redacted"]) or None,
+        "people_signature_block": "; ".join(_person_label(p) for p in people
+                                            if p["role_in_document"] in SIGNATURE_ROLES) or None,
+        "people_redacted_blocks": sum(1 for p in people if p["redacted"]),
+        "people_json": json.dumps([{k: p.get(k) for k in ("name", "title", "organization", "role_in_document",
+                                                          "redacted", "name_is_signature_stamp", "name_quote",
+                                                          "description")}
+                                   for p in people], ensure_ascii=False) if people else None,
         "values_dropped_by_checks": "; ".join(f"{d['field']}={d['value']!r} ({d['reason']})"
                                               for d in rec["dropped"]) or None,
         "attachments": rec["attachments"],

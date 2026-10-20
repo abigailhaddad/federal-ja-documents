@@ -1,0 +1,39 @@
+# THROWAWAY: validation runs for the people field. Runs field extraction
+# (this branch) on a fixed list of notices at a pinned dataset revision and
+# uploads the output. Remove before merging.
+name: People field validation (throwaway)
+
+on:
+  push:
+    branches: [analysis-people-field]
+    paths: [.github/workflows/people-ab.yml]
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      REV: 8b7d8208fef60cf911934e167b33515b8ebbaffb
+      LABEL: dev1
+      MAX_USD: "0.10"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Extract
+        run: |
+          printf '%s\n' 54ac828d50c94976adcde7dbd868b2fb 5a5247b70df6447bac4b9bc944c7bfd7 \
+            3ebf8c5a5d704eaf91b82dba0adbc71a 29f8bb5e9dab4158808c7ecb88e0e462 80bab8db40d344cb8f0f506a35c9bf19 \
+            9656bf25b7bf45a6a9b0c46d7bfb59de 40c9b47cc68e4183a246417df3b6409c > ids.txt
+          uv run python -m federal_ja.analysis extract --notice-file ids.txt \
+            --out "out/$LABEL" --data-dir hf --revision "$REV" \
+            --workers 4 --max-usd "$MAX_USD" 2> >(tee "out_$LABEL.log" >&2)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: people-${{ env.LABEL }}
+          path: |
+            out/
+            out_*.log
