@@ -482,7 +482,7 @@ def verify_people(raw_people, doc: Document, nd: str, vt: str) -> tuple[list[dic
     dropped: list[dict] = []
     seen: set[str] = set()
     for p in raw_people or []:
-        name = (p.get("name") or "").strip() or None
+        name = _blank(p.get("name"))
         quote = p.get("name_quote")
         redacted = bool(p.get("redacted"))
 
@@ -519,7 +519,7 @@ def verify_people(raw_people, doc: Document, nd: str, vt: str) -> tuple[list[dic
         entry = {"name": name, "name_quote": display_quote(quote), "redacted": redacted,
                  "name_is_signature_stamp": bool(name and _STAMP_FORM.match(name))}
         for k in ("title", "organization"):
-            v = (p.get(k) or "").strip() or None
+            v = _blank(p.get(k))
             if v and not name_in(v, vt):
                 dropped.append({"field": f"people.{k}", "value": v, "quote": None,
                                 "reason": f"{k} not found in document"})
@@ -672,6 +672,20 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     return f, dropped
 
 
+# The model sometimes writes the empty string the prompt asks for as a
+# literal pair of quote marks ('""'), or as "null"/"none"/"N/A". Seen on 41 of
+# 78 incumbent_piid answers in the 2026-10-20 validation runs.
+_PLACEHOLDER = frozenset({'""', "''", "null", "none", "n/a", "na", "not stated", "not applicable"})
+
+
+def _blank(v) -> str | None:
+    """A string value, or None for empty, whitespace or a placeholder."""
+    if not isinstance(v, str):
+        return None
+    v = v.strip()
+    return None if not v or v.casefold() in _PLACEHOLDER else v
+
+
 def _first(v):
     return v[0] if isinstance(v, list) and v and isinstance(v[0], dict) else {}
 
@@ -693,7 +707,7 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
         return _qinfo(m)
 
     nb = _first(raw.get("need_by"))
-    d, q = (nb.get("date") or "").strip() or None, nb.get("quote")
+    d, q = _blank(nb.get("date")), _blank(nb.get("quote"))
     dd = None
     if d:
         try:
@@ -707,7 +721,7 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
     f["need_by_quote_info"] = info
 
     pl = _first(raw.get("stated_pop_limit"))
-    days, q = pl.get("days"), pl.get("quote")
+    days, q = pl.get("days"), _blank(pl.get("quote"))
     if days is not None and (not isinstance(days, int) or days <= 0):
         dropped.append({"field": "stated_pop_limit_days", "value": days, "quote": q, "reason": "not a positive whole number"})
         days = None
@@ -719,7 +733,7 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
 
     piids, seen = [], set()
     for x in raw.get("covered_piids") or []:
-        x = (x or "").strip()
+        x = _blank(x)
         if not x or _squash(x) in seen:
             continue
         if len(_squash(x)) >= 4 and name_in(x, vt):
@@ -730,7 +744,7 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
                             "reason": "contract number not found in document"})
     f["covered_piids"] = piids
 
-    ip, q = (raw.get("incumbent_piid") or "").strip() or None, raw.get("incumbent_piid_quote")
+    ip, q = _blank(raw.get("incumbent_piid")), _blank(raw.get("incumbent_piid_quote"))
     info = check("incumbent_piid", ip, q, name_in(ip or "", q or ""), "contract number not in its quote")
     f["incumbent_piid"] = ip if info else None
     f["incumbent_piid_quote"] = display_quote(q) if info else None
@@ -746,7 +760,7 @@ def _verify_extract3_fields(raw: dict, doc: Document, nd: str, vt: str, f: dict,
             seen_m.add(x["method"])
     f["market_research_methods"] = methods
 
-    rs, q = raw.get("redaction_significant"), raw.get("redaction_significant_quote")
+    rs, q = raw.get("redaction_significant"), _blank(raw.get("redaction_significant_quote"))
     f["redaction_significant"] = rs if rs in ("yes", "no", "unclear") else None
     f["redaction_significant_quote"] = f["redaction_significant_quote_info"] = None
     if rs == "yes":

@@ -248,3 +248,15 @@ def test_new_instructions_are_in_the_cached_part():
     for k in ("- people:", "- need_by:", "- stated_pop_limit:", "- covered_piids:", "- incumbent_piid:",
               "- market_research_methods:", "- redaction_significant:"):
         assert k in extract.PROMPT_CACHED and k not in extract.PROMPT_PER_DOC
+
+
+def test_placeholder_empty_strings_are_empty(doc):
+    """'""' (a literal pair of quote marks) and similar placeholders mean
+    "none", not a value whose quote failed."""
+    f, dropped = run(doc, incumbent_piid='""', incumbent_piid_quote='""', covered_piids=['""', "null"],
+                     redaction_significant="no", redaction_significant_quote='""',
+                     people=[person(name="Sandra Selzer", name_quote="Sandra Selzer, CEO", title='""',
+                                    organization="N/A")])
+    assert f["incumbent_piid"] is None and f["covered_piids"] == []
+    assert f["people"][0]["title"] is None and f["people"][0]["organization"] is None
+    assert not [d for d in dropped if d["field"] in ("incumbent_piid", "covered_piids") or d["field"].startswith("people")]
