@@ -1,6 +1,8 @@
-"""TRIAL fields (prompt extract4): bridge_or_extension,
-prior_extension_count, contract_types, is_letter_contract, funding_sources,
-policy_citations, urgency_trigger. Synthetic fixtures; no network."""
+"""The fields first tried in the extract4 trial, asked in the main call's
+facts list since extract5: bridge_or_extension, prior_extension_count,
+contract_types, is_letter_contract, funding_sources, urgency_trigger
+(policy_citations was dropped after the trial). Synthetic fixtures; no
+network."""
 
 import pytest
 
@@ -21,8 +23,8 @@ def doc():
         {"notice_id": NID, "resource_id": "r1", "page_number": 3, "text": PAGE, "text_source": "native"}]))[NID]
 
 
-def F(kind, value, quote="", detail=""):
-    return {"kind": kind, "value": value, "detail": detail, "quote": quote}
+def F(kind, value, quote=""):
+    return {"kind": kind, "value": value, "quote": quote}
 
 
 def run(doc, **over):
@@ -37,20 +39,16 @@ def test_trial_fields_kept(doc):
         F("contract_type", "firm-fixed-price", "on a firm-fixed-price basis"),
         F("letter_contract", "yes", "will issue a letter contract (undefinitized contract action)"),
         F("funding_source", "One Big Beautiful Bill Act", "funded with One Big Beautiful Bill Act funds"),
-        F("policy_citation", "EO 14275", "Citations reflect the Revolutionary FAR Overhaul under EO 14275.",
-          "regulatory_numbering_or_procedure"),
         F("urgency_trigger", "congressional_or_oversight_deadline",
           "the House Committee on Oversight requires delivery by 1 June 2026")])
     assert f["bridge_or_extension"] == "yes" and f["prior_extension_count"] == 6
     assert [c["stated"] for c in f["contract_types"]] == ["firm-fixed-price"]
     assert f["is_letter_contract"] == "yes" and f["funding_sources"][0]["name"] == "One Big Beautiful Bill Act"
-    assert f["policy_citations"][0]["cited_for"] == "regulatory_numbering_or_procedure"
     assert f["urgency_trigger"] == "congressional_or_oversight_deadline"
-    assert not [k for k in dropped if k in ("bridge_or_extension", "prior_extension_count", "contract_types",
-                                            "is_letter_contract", "funding_sources", "policy_citations", "urgency_trigger")]
+    assert not dropped
     row = extract.flat_row(extract.extract_document(doc, call_fn=fake(answer(
-        facts=[F("policy_citation", "EO 14275", "under EO 14275.", "other")])), retries=0), {})
-    assert row["policy_citations"] == "EO 14275 [other]"
+        facts=[F("contract_type", "firm-fixed-price", "on a firm-fixed-price basis")])), retries=0), {})
+    assert row["contract_types"] == "firm-fixed-price" and "policy_citations" not in row
 
 
 def test_trial_fields_dropped(doc):

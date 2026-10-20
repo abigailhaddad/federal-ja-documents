@@ -1,6 +1,7 @@
 """Tests for the extract3 fields: people, need_by, stated_pop_limit,
 covered_piids, incumbent_piid, market_research_methods,
-redaction_significant. Synthetic fixtures only: no real documents, no
+redaction_significant (since extract5 all but people and covered_piids come
+from the facts list). Synthetic fixtures only: no real documents, no
 network."""
 
 import json
@@ -42,6 +43,10 @@ def person(**kw):
             "description": "", "redacted": False}
     base.update(kw)
     return base
+
+
+def F(kind, value, quote=""):
+    return {"kind": kind, "value": value, "quote": quote}
 
 
 def run(doc, **over):
@@ -172,17 +177,14 @@ def test_days_not_in_quote():
 
 
 def test_extract3_fields_kept(doc):
-    f, dropped = run(doc,
-                     need_by=[{"date": "2026-09-30", "quote": "services must be in place by 30 September 2026"}],
-                     stated_pop_limit=[{"days": 180, "quote": "The period of performance shall not exceed six (6) months."}],
-                     covered_piids=["W912DY-21-C-0042", "P00012", "W912DY-21-C-0042"],
-                     incumbent_piid="W912DY-21-C-0042",
-                     incumbent_piid_quote="This bridge extends contract W912DY-21-C-0042",
-                     market_research_methods=[
-                         {"method": "sources_sought", "quote": "a sources sought notice was posted on SAM.gov"},
-                         {"method": "sba_dsbs", "quote": "a search of the Dynamic Small Business Search was performed"},
-                         {"method": "sources_sought", "quote": "a sources sought notice was posted"}],
-                     redaction_significant="yes", redaction_significant_quote="The estimated value is [REDACTED].")
+    f, dropped = run(doc, covered_piids=["W912DY-21-C-0042", "P00012", "W912DY-21-C-0042"], facts=[
+        F("need_by", "2026-09-30", "services must be in place by 30 September 2026"),
+        F("stated_pop_limit", "180", "The period of performance shall not exceed six (6) months."),
+        F("incumbent_piid", "W912DY-21-C-0042", "This bridge extends contract W912DY-21-C-0042"),
+        F("market_research_method", "sources_sought", "a sources sought notice was posted on SAM.gov"),
+        F("market_research_method", "SBA_DSBS", "a search of the Dynamic Small Business Search was performed"),
+        F("market_research_method", "sources_sought", "a sources sought notice was posted"),
+        F("Redaction_Significant", "yes", "The estimated value is [REDACTED].")])
     assert f["need_by_date"] == "2026-09-30" and f["stated_pop_limit_days"] == 180
     assert f["covered_piids"] == ["W912DY-21-C-0042", "P00012"]
     assert f["incumbent_piid"] == "W912DY-21-C-0042"
@@ -195,13 +197,12 @@ def test_extract3_fields_kept(doc):
 
 
 def test_extract3_fields_dropped(doc):
-    f, dropped = run(doc,
-                     need_by=[{"date": "2026-10-30", "quote": "services must be in place by 30 September 2026"}],
-                     stated_pop_limit=[{"days": 365, "quote": "The period of performance shall not exceed six (6) months."}],
-                     covered_piids=["W912DY-99-C-9999"],
-                     incumbent_piid="W912DY-21-C-0043", incumbent_piid_quote="This bridge extends contract W912DY-21-C-0042",
-                     market_research_methods=[{"method": "industry_day", "quote": "an industry day was held"}],
-                     redaction_significant="yes", redaction_significant_quote="")
+    f, dropped = run(doc, covered_piids=["W912DY-99-C-9999"], facts=[
+        F("need_by", "2026-10-30", "services must be in place by 30 September 2026"),
+        F("stated_pop_limit", "365", "The period of performance shall not exceed six (6) months."),
+        F("incumbent_piid", "W912DY-21-C-0043", "This bridge extends contract W912DY-21-C-0042"),
+        F("market_research_method", "industry_day", "an industry day was held"),
+        F("redaction_significant", "yes", "")])
     assert f["need_by_date"] is None and f["stated_pop_limit_days"] is None
     assert f["covered_piids"] == [] and f["incumbent_piid"] is None and f["market_research_methods"] == []
     assert f["redaction_significant"] == "unclear"
@@ -214,9 +215,7 @@ def test_extract3_fields_dropped(doc):
 
 
 def test_extract3_empty_values(doc):
-    f, dropped = run(doc, need_by=[], stated_pop_limit=[], covered_piids=[], incumbent_piid="",
-                     incumbent_piid_quote="", market_research_methods=[], redaction_significant="no",
-                     redaction_significant_quote="")
+    f, dropped = run(doc, covered_piids=[], facts=[F("redaction_significant", "no"), F("incumbent_piid", "")])
     assert (f["need_by_date"], f["stated_pop_limit_days"], f["covered_piids"], f["incumbent_piid"],
             f["market_research_methods"], f["redaction_significant"]) == (None, None, [], None, [], "no")
     assert dropped == []
@@ -245,16 +244,44 @@ def test_schema_union_budget():
 
 
 def test_new_instructions_are_in_the_cached_part():
-    for k in ("- people:", "- need_by:", "- stated_pop_limit:", "- covered_piids:", "- incumbent_piid:",
-              "- market_research_methods:", "- redaction_significant:"):
+    for k in ("- people:", "- covered_piids:", "- facts:", *(f'* kind "{x}"' for x in extract.FACT_KINDS)):
         assert k in extract.PROMPT_CACHED and k not in extract.PROMPT_PER_DOC
+
+
+def test_fact_kinds_and_codes_are_checked_in_code(doc):
+    """The schema leaves kind and value as plain strings (no enums, to keep
+    the compiled grammar small): an unknown kind or code, a number that does
+    not parse, or a second entry for a single-valued kind is dropped and
+    listed, never kept or silently lost."""
+    f, dropped = run(doc, facts=[
+        F("deadline", "2026-09-30", "services must be in place by 30 September 2026"),
+        F("market_research_method", "carrier_pigeon", "a sources sought notice was posted on SAM.gov"),
+        F("stated_pop_limit", "six months", "The period of performance shall not exceed six (6) months."),
+        F("redaction_significant", "maybe", "The estimated value is [REDACTED]."),
+        F("incumbent_piid", "W912DY-21-C-0042", "This bridge extends contract W912DY-21-C-0042"),
+        F("incumbent_piid", "P00012", "under modification P00012")])
+    assert f["need_by_date"] is None and f["market_research_methods"] == [] and f["stated_pop_limit_days"] is None
+    assert f["redaction_significant"] is None and f["incumbent_piid"] == "W912DY-21-C-0042"
+    reasons = sorted((d["field"], d["reason"]) for d in dropped)
+    assert reasons == [("facts", "unknown fact kind"),
+                       ("incumbent_piid", "a second entry for a single-valued fact; the first is kept"),
+                       ("market_research_methods", "not a known method code"),
+                       ("redaction_significant", "not yes, no or unclear"),
+                       ("stated_pop_limit_days", "not a positive whole number")]
+
+
+def test_one_call_per_notice(doc):
+    """extract5 asks everything in one call (the extract4 trial made two)."""
+    call = fake(answer())
+    rec = extract.extract_document(doc, call_fn=call, retries=0)
+    assert len(call.calls) == 1 and rec["usage"]["calls"] == 1 and "facts" not in rec["usage"]
 
 
 def test_placeholder_empty_strings_are_empty(doc):
     """'""' (a literal pair of quote marks) and similar placeholders mean
     "none", not a value whose quote failed."""
-    f, dropped = run(doc, incumbent_piid='""', incumbent_piid_quote='""', covered_piids=['""', "null"],
-                     redaction_significant="no", redaction_significant_quote='""',
+    f, dropped = run(doc, covered_piids=['""', "null"],
+                     facts=[F("incumbent_piid", '""', '""'), F("redaction_significant", "no", '""')],
                      people=[person(name="Sandra Selzer", name_quote="Sandra Selzer, CEO", title='""',
                                     organization="N/A")])
     assert f["incumbent_piid"] is None and f["covered_piids"] == []
