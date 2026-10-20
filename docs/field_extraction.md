@@ -570,7 +570,7 @@ Strict scores (run A / run B):
 - **`urgency_trigger`.** Each run labels one non-urgency notice, a different notice each time.
 - **`policy_citations`.**
   - **What works.** EO 14275 cited only for FAR renumbering was classed `regulatory_numbering_or_procedure` on both ICE notices, in both runs.
-  - **Most misses don't matter.** 7 of the 12 key entries are bare "RFO" or "Revolutionary FAR Overhaul" mentions, which the key builder itself thought arguable.
+  - **Most misses don't matter.** Of run A's 7 misses, 4 are bare "RFO" or "Revolutionary FAR Overhaul" mentions, which the key builder itself thought arguable.
   - **The misses that matter.** The citations the field exists for, the `reason_for_action` ones (the Deferred Resignation Program, a hiring freeze, a reorganisation), were found 1 of 4 times in run A and 2 of 4 in run B.
   - **One `cited_for` error:** HSPD-12 was called a reason.
 - **The known cases.** On the four known cases both runs got these right:
@@ -584,7 +584,7 @@ Strict scores (run A / run B):
 ### Cost
 
 - **The second call** costs about **$0.0019 per notice**, about 45% on top of extract3's roughly $0.0042.
-- **A full re-extraction** with it would be about $57-65 instead of $38-46 for the 10,033 notices.
+- **A full re-extraction** with it would be about $57-65 instead of $38-46 for the 10,033 notices. The daily job's first backfill would grow by the same amount.
 - **Trial spend:** $0.34 (the extract3 baseline run $0.083, run A $0.124, run B $0.131). The 400s were not billed.
 
 These are 18 notices: the positives per field are 3 to 9 (12 for policy citations), so every figure here is a small-sample estimate.
