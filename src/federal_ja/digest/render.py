@@ -12,6 +12,9 @@ ET = ZoneInfo("America/New_York")
 PREFIX = "WOAH! J&As"
 DATASET_URL = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents"
 PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
+# The public web archive + RSS feed of sent digests (site.py, Cloudflare Pages;
+# 2026-10-21).
+SITE_URL = "https://woah-jas.abigailhaddad.com"
 MAX_DOC_LINKS = 3
 
 
@@ -47,7 +50,8 @@ def footer(n_reviewed: int, window: dict) -> str:
         + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
         + ").\n\n"
         "AI-picked and AI-written (Claude). Quotes are checked word for word against the documents, "
-        f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md)."
+        f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md).\n\n"
+        f"Archive & RSS: [{SITE_URL}]({SITE_URL})"
     )
 
 
@@ -89,12 +93,20 @@ def _ext_value(e: dict) -> str | None:
     return "value redacted" if e.get("value_redacted") is True else None
 
 
-def all_notices(cands: list[Candidate], picks: list[dict], gists: dict | None = None) -> str:
-    """'All new notices (N)': every candidate, one line each. Vendor, value
-    and authority only from the extraction's quote-checked fields (left out
-    when the notice has no extraction row or the field is empty); picks first
-    (marked with a star, in pick order), then by value (largest first, unknown
-    last), then agency and title."""
+def _sam_link(c: Candidate) -> str:
+    return c.meta.get("sam_link") or f"https://sam.gov/opp/{c.notice_id}/view"
+
+
+def notice_rows(cands: list[Candidate], picks: list[dict], gists: dict | None = None) -> list[dict]:
+    """The 'All new notices' list as data, in display order: every
+    candidate. Vendor, value and authority only from the extraction's
+    quote-checked fields (None when the notice has no extraction row or the
+    field is empty); picks first (in pick order), then by value (largest
+    first, unknown last), then agency and title.
+
+    One function for the email (``all_notices``) and the web archive
+    (archive.py stores these rows; site.py renders them), so the two can't
+    drift apart (2026-10-21)."""
     rank = {p["notice_id"]: p["rank"] for p in picks}
 
     def key(c):
@@ -102,21 +114,60 @@ def all_notices(cands: list[Candidate], picks: list[dict], gists: dict | None = 
         v = v if isinstance(v, (int, float)) and v == v else None
         return (rank.get(c.notice_id, 99), v is None, -(v or 0), short_org(c.meta).lower(),
                 (c.meta.get("title") or "").lower())
-    lines = [f"## All new notices ({len(cands)})\n"]
+    out = []
     for c in sorted(cands, key=key):
         e = c.extraction or {}
-        link = c.meta.get("sam_link") or f"https://sam.gov/opp/{c.notice_id}/view"
-        bits = [short_org(c.meta), _trim(c.meta.get("title") or "(no title)", TITLE_CHARS), e.get("vendor"),
-                _ext_value(e), e.get("authority_cited")]
-        star = "\u2605 " if c.notice_id in rank else ""
-        gist = _md_escape_line((gists or {}).get(c.notice_id) or "")
+        out.append({"notice_id": c.notice_id, "pick_rank": rank.get(c.notice_id),
+                    "org": short_org(c.meta), "title": c.meta.get("title") or "",
+                    "vendor": e.get("vendor") or None, "value": _ext_value(e),
+                    "authority": e.get("authority_cited") or None, "sam_link": _sam_link(c),
+                    "gist": ((gists or {}).get(c.notice_id) or "").strip() or None})
+    return out
+
+
+def all_notices(cands: list[Candidate], picks: list[dict], gists: dict | None = None) -> str:
+    """'All new notices (N)': every candidate, one line each (``notice_rows``),
+    picks marked with a star."""
+    lines = [f"## All new notices ({len(cands)})\n"]
+    for r in notice_rows(cands, picks, gists):
+        bits = [r["org"], _trim(r["title"] or "(no title)", TITLE_CHARS), r["vendor"], r["value"], r["authority"]]
+        star = "\u2605 " if r["pick_rank"] else ""
+        gist = _md_escape_line(r["gist"] or "")
         lines.append(f"- {star}" + " \u00b7 ".join(_md_escape_line(str(b)) for b in bits if b)
-                     + f" \u00b7 [SAM.gov]({link})" + (f"  \n  {gist}" if gist else ""))
+                     + f" \u00b7 [SAM.gov]({r['sam_link']})" + (f"  \n  {gist}" if gist else ""))
     lines.append("")
-    lines.append("*Vendor, value and authority are shown only where the AI extraction found them with a "
-                 "quote checked against the document; blank means not extracted yet or not stated, not none. "
-                 "The one-line summaries are AI-written from each notice's text and are not quote-checked.*")
+    lines.append(NOTICES_NOTE)
     return "\n".join(lines) + "\n"
+
+
+FIELDS_NOTE = ("Vendor, value and authority are shown only where the AI extraction found them with a "
+               "quote checked against the document; blank means not extracted yet or not stated, not none.")
+GISTS_NOTE = "The one-line summaries are AI-written from each notice's text and are not quote-checked."
+NOTICES_NOTE = f"*{FIELDS_NOTE} {GISTS_NOTE}*"
+
+
+def pick_view(p: dict, c: Candidate) -> dict:
+    """One verified pick (verify.verify_picks) as display data: what the
+    email shows for it and what the web archive stores (same reason as
+    notice_rows)."""
+    m = c.meta
+    org = m.get("sub_tier") or m.get("agency") or ""
+    if m.get("sub_tier") and m.get("agency") and m["agency"] != m["sub_tier"]:
+        org = f"{m['sub_tier']} ({m['agency']})"
+    # the documents the quotes came from first, then the rest in order
+    qrids = [pg["resource_id"] for q in p["quotes"] for pg in q.get("pages") or []]
+    docs = sorted(c.links, key=lambda d: (0 if d["resource_id"] in qrids else 1))
+    return {"rank": p["rank"], "notice_id": c.notice_id, "headline": p["headline"], "why": p["why"],
+            "org": org, "vendor": p.get("vendor"), "value": p.get("value"), "authority": p.get("authority"),
+            "posted_date": str(m.get("posted_date") or "")[:10], "award_number": m.get("award_number"),
+            "title": m.get("title") or "", "sam_link": _sam_link(c),
+            "quotes": [{"text": q["text"], "where": q["where"], "added_by_code": bool(q.get("added_by_code"))}
+                       for q in p["quotes"]],
+            "documents": [{"filename": d["filename"], "url": d["url"]} for d in docs[:MAX_DOC_LINKS]],
+            "more_documents": max(0, len(docs) - MAX_DOC_LINKS)}
+
+
+FIGURE_SOURCE_NOTE = " (source of the figure above, quoted by the checks)"
 
 
 def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window: dict,
@@ -127,31 +178,23 @@ def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window
                 f"reviewed).\n" + listing + "\n" + footer(n_reviewed, window) + "\n")
     out = []
     for p in picks:
-        c = cands[p["notice_id"]]
-        m = c.meta
-        org = m.get("sub_tier") or m.get("agency") or ""
-        if m.get("sub_tier") and m.get("agency") and m["agency"] != m["sub_tier"]:
-            org = f"{m['sub_tier']} ({m['agency']})"
-        line = " · ".join(x for x in (org, p.get("vendor"), p.get("value"), p.get("authority")) if x)
-        out.append(f"## {p['rank']}. {_md_escape_line(p['headline'])}\n")
+        v = pick_view(p, cands[p["notice_id"]])
+        line = " · ".join(x for x in (v["org"], v["vendor"], v["value"], v["authority"]) if x)
+        out.append(f"## {v['rank']}. {_md_escape_line(v['headline'])}\n")
         out.append(f"**{_md_escape_line(line)}**  ")
-        bits = [f"Posted {str(m.get('posted_date') or '')[:10]}"]
-        if m.get("award_number"):
-            bits.append(f"award {m['award_number']}")
-        bits.append(f"“{_md_escape_line(m.get('title') or '')}”")
+        bits = [f"Posted {v['posted_date']}"]
+        if v["award_number"]:
+            bits.append(f"award {v['award_number']}")
+        bits.append(f"“{_md_escape_line(v['title'])}”")
         out.append("*" + ", ".join(bits) + "*\n")
-        out.append(p["why"] + "\n")
-        for q in p["quotes"]:
-            src = " (source of the figure above, quoted by the checks)" if q.get("added_by_code") else ""
+        out.append(v["why"] + "\n")
+        for q in v["quotes"]:
+            src = FIGURE_SOURCE_NOTE if q["added_by_code"] else ""
             out.append(f"> “{_md_escape_line(q['text'])}”  \n> — {q['where']}{src}\n")
-        links = [f"[SAM.gov notice]({m.get('sam_link') or f'https://sam.gov/opp/{c.notice_id}/view'})"]
-        docs = c.links
-        # the documents the quotes came from first, then the rest in order
-        qrids = [pg["resource_id"] for q in p["quotes"] for pg in q["pages"]]
-        docs = sorted(docs, key=lambda d: (0 if d["resource_id"] in qrids else 1))
-        for d in docs[:MAX_DOC_LINKS]:
+        links = [f"[SAM.gov notice]({v['sam_link']})"]
+        for d in v["documents"]:
             links.append(f"[{_md_escape_line(d['filename'])}]({d['url']})")
-        if len(docs) > MAX_DOC_LINKS:
-            links.append(f"+{len(docs) - MAX_DOC_LINKS} more on SAM.gov")
+        if v["more_documents"]:
+            links.append(f"+{v['more_documents']} more on SAM.gov")
         out.append(" · ".join(links) + "\n")
     return "\n".join(out) + listing + "\n" + footer(n_reviewed, window) + "\n"

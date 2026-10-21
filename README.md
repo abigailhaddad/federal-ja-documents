@@ -20,7 +20,7 @@ src/federal_ja/
 tests/         tests (collection, and the analysis package on synthetic fixtures)
 docs/analysis_validation.md   how the analysis categories were validated
 docs/field_extraction.md      how field extraction works and how it was checked
-docs/digest.md                the daily "Whoa J&As" email digest
+docs/digest.md                the daily "WOAH! J&As" email digest, its web archive and RSS feed
 .github/workflows/daily.yml   daily collection job
 ```
 
@@ -362,6 +362,7 @@ collection) and sends only when the repository variable `DIGEST_ENABLED` is
 `true`. What is "new" is tracked with a watermark in
 `analysis/digest_state.json`, saved only after a successful send. Rubric,
 checks, cost, triggers and how to turn it on: [docs/digest.md](docs/digest.md).
+Web archive and RSS feed of every sent issue: https://woah-jas.abigailhaddad.com
 
 ## License
 

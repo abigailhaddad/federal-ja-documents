@@ -1,0 +1,80 @@
+name: Deploy digest web archive
+
+# Builds the public web archive + RSS feed of sent "WOAH! J&As" digests and
+# publishes it to Cloudflare Pages (project: woah-jas,
+# https://woah-jas.abigailhaddad.com). Added 2026-10-21; see docs/digest.md.
+#
+# Runs:
+# * from digest.yml (workflow_call), after a digest was SENT and its archive
+#   entry saved (only then; dry runs, drafts and failed sends never deploy);
+# * by hand (workflow_dispatch) to rebuild the site from the archive, e.g.
+#   after a site.py change or a `digest-archive-add`.
+#
+# What goes live is site/dist/, written from scratch by
+# `python -m federal_ja.analysis digest-site` from the dataset's
+# analysis/digest_archive/*.json. It is an ALLOW-LIST: the builder wipes dist/
+# and writes only the pages, feed and stylesheet; nothing from the repo is
+# copied in. Two sibling sites in this Cloudflare account once served their
+# whole repo root (scripts, CI config, CLAUDE.md) because they deployed a
+# directory with a deny-list of exclusions. Do not "simplify" this into
+# deploying the repo or any directory that also holds source.
+#
+# tests/test_site_dist.py runs on the built tree before the deploy and is the
+# gate: it fails on any file type other than html/css/xml/txt/svg/ico, any
+# .py/.parquet/.json/.env/.DS_Store/dotfile, any tests/ src/ __pycache__ etc.
+# directory, files over Cloudflare's 25 MiB limit or more than 20,000 files,
+# dangling local links, and <script> or external assets. If it fails, nothing
+# is uploaded.
+#
+# Secrets: CLOUDFLARE_API_TOKEN (Account > Cloudflare Pages > Edit) and
+# CLOUDFLARE_ACCOUNT_ID. Until the owner adds the token, the build and the
+# gate still run and the deploy step is skipped with a notice, so the digest
+# keeps working. The archive is read anonymously (the dataset is public).
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # never two uploads to the same Pages project at once; a queued deploy
+    # waits (it has the newer archive) instead of cancelling the running one
+    concurrency:
+      group: cloudflare-pages-woah-jas
+      cancel-in-progress: false
+    env:
+      HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+
+      - name: Build site/dist (allow-list) from the archive
+        run: uv run python -m federal_ja.analysis digest-site --out site/dist
+
+      # Scans the tree that will be uploaded, not what the builder meant to build.
+      - name: Verify nothing forbidden is in site/dist
+        run: SITE_DIST=site/dist uv run pytest -q tests/test_site_dist.py
+
+      - name: Show what will be deployed
+        run: |
+          find site/dist -type f | sort
+          du -sh site/dist
+
+      - name: No Cloudflare token yet
+        if: env.HAS_CF_TOKEN != 'true'
+        run: echo "::notice::CLOUDFLARE_API_TOKEN is not set; built and checked the site but did not deploy it (see docs/digest.md)."
+
+      - name: Deploy to Cloudflare Pages
+        if: env.HAS_CF_TOKEN == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.42.0"
+          command: pages deploy site/dist --project-name=woah-jas --branch=main
