@@ -25,6 +25,22 @@ from . import archive as ar, buttondown, model, render, state as st, verify
 from .candidates import DatasetReader, build_candidates, select_candidates
 
 
+def scheduled_publish_date(now: datetime, send_at: str) -> str | None:
+    """ISO UTC time for a Buttondown scheduled send at ``send_at`` (HH:MM US
+    Eastern) on ``now``'s Eastern date, or None to send at once ('now', or
+    that time has already passed)."""
+    if not send_at or send_at == "now":
+        return None
+    from zoneinfo import ZoneInfo
+    et = ZoneInfo("America/New_York")
+    h, m = (int(x) for x in send_at.split(":"))
+    local = now.astimezone(et)
+    target = local.replace(hour=h, minute=m, second=0, microsecond=0)
+    if local >= target - timedelta(minutes=2):
+        return None
+    return target.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def add_arguments(p: argparse.ArgumentParser) -> None:
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--dry-run", action="store_true", help="write digest.md + picks.json; no send, no state update")
@@ -40,6 +56,9 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
                    help="with no saved state, cover notices first seen in the last N hours (default 36)")
     p.add_argument("--zero-picks", choices=["send", "skip"], default="send",
                    help="when nothing is picked: send the one-line 'nothing WOAH-worthy' email (default) or skip")
+    p.add_argument("--send-at", default="07:00",
+                   help="deliver at this US Eastern time (HH:MM) via a Buttondown scheduled send when the run "
+                        "finishes earlier that day; later runs send at once. 'now' always sends at once (default 07:00)")
     p.add_argument("--buttondown-status", choices=["about_to_send", "draft"], default="about_to_send",
                    help="about_to_send sends now (default); draft only saves a Buttondown draft (state unchanged)")
     p.add_argument("--state-file", type=Path, default=None,
@@ -207,7 +226,11 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
             "to_watermark": new_wm.isoformat() if new_wm else None, "dataset_revision": rev,
             "notices_reviewed": len(cands), "picks": [p["notice_id"] for p in picks],
             "digest_version": model.VERSION}
-    result = send_fn(subject, body, metadata=meta, status=a.buttondown_status)
+    sched = scheduled_publish_date(now, a.send_at)
+    kw = {"publish_date": sched} if sched else {}
+    if sched:
+        print(json.dumps({"scheduled_for": sched}), file=sys.stderr)
+    result = send_fn(subject, body, metadata=meta, status=a.buttondown_status, **kw)
     report["buttondown"] = result
     print(json.dumps({"buttondown": result}), file=sys.stderr)
     if a.buttondown_status != "about_to_send":

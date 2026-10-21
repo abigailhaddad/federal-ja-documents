@@ -441,3 +441,34 @@ def test_all_notices_shows_gist_under_each_line():
     lb = out.splitlines().index(next(l for l in out.splitlines() if "Spare parts" in l))
     assert not out.splitlines()[lb + 1].strip().startswith("Bridge")
     assert "not quote-checked" in out
+
+
+def test_scheduled_publish_date_7am_eastern():
+    from datetime import datetime, timezone
+    from federal_ja.digest.run import scheduled_publish_date
+    early = datetime(2026, 10, 22, 7, 0, tzinfo=timezone.utc)      # 03:00 EDT
+    assert scheduled_publish_date(early, "07:00") == "2026-10-22T11:00:00Z"
+    late = datetime(2026, 10, 22, 22, 30, tzinfo=timezone.utc)     # 18:30 EDT: send at once
+    assert scheduled_publish_date(late, "07:00") is None
+    assert scheduled_publish_date(early, "now") is None
+    winter = datetime(2026, 12, 2, 7, 30, tzinfo=timezone.utc)     # 02:30 EST
+    assert scheduled_publish_date(winter, "07:00") == "2026-12-02T12:00:00Z"
+
+
+def test_send_email_schedules_when_publish_date_given(monkeypatch):
+    from federal_ja.digest import buttondown
+    sent = {}
+
+    class R:
+        status_code = 201
+        def json(self):
+            return {"id": "em_1", "status": "scheduled"}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        sent.update(json)
+        return R()
+
+    monkeypatch.setattr(buttondown.requests, "post", fake_post)
+    monkeypatch.setattr(buttondown, "_headers", lambda live=False: {})
+    buttondown.send_email("s", "b", metadata={}, publish_date="2026-10-22T11:00:00Z")
+    assert sent["status"] == "scheduled" and sent["publish_date"] == "2026-10-22T11:00:00Z"
