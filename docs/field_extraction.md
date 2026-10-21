@@ -513,9 +513,225 @@ ticked.
   them have usable text, about $0.70.
 - **Every later prompt-version bump** starts another backfill.
 
-## One call with a facts list (prompt `2026-10-20.extract5`)
+## One call, three fixes (prompt `2026-10-21.extract6`)
 
-**Status: validated on a sample; not yet run on the dataset.** extract5 asks
+**Status: validated on a sample; not yet run on the dataset.** extract6 is
+extract5 (next section) with three changes. Everything else is unchanged:
+the strict schema, the `facts` list, the code checks (`checks_version`
+stays `2026-10-20.checks5`), the `dropped` list and the cache split.
+
+### Changes
+
+1. **Only the listed kinds.** The `facts` instruction now names the eleven
+   allowed kinds and says that an entry of any other kind is thrown away
+   (and that such a fact belongs in `notes`). The extract5 runs had
+   invented 4 and 8 entries ("quantity", "original_ceiling", ...).
+2. **Funding lines.** `funding_source` now points at funding lines and
+   sections ("(e) Type of funding:", "Funding:", "Funding Source:",
+   "Appropriation:", "Type of funds:") and at "... funds will be used"
+   sentences. It says to check every attachment: when one version says TBD
+   and another names the source, report the named one. "TBD" and a
+   fiscal-year type alone ("Multi-year appropriations") are not sources.
+   - Why: on the ICE Camp East Montana notice `53d80bf1`, one attachment
+     says "(e) Type of funding: One Big Beautiful Bill Act" and another
+     says "(e) Type of funding: To-Be-Determined (TBD)". Both extract5 runs
+     gave no funding entry.
+3. **Output cap 16,000 -> 32,000 tokens**, with a 600 s request timeout.
+   - Haiku 5.5 allows up to 128,000 output tokens. The SDK refuses a
+     non-streaming call that may take over 10 minutes only when the client
+     keeps its default timeout; `llm.call` sets its own, so no streaming is
+     needed.
+   - **Cost:** only calls that need the room use it. Output is $0.50 per
+     million tokens, so a call that runs to the cap costs about $0.017.
+   - **Why the VA CCN notice is long:** its stored answers (all prompt
+     versions) are about 5,900-7,200 characters, of which people are about
+     2,000-2,350. Even at 3 characters a token the answer is under 2,400 of
+     its 12,600-14,300 output tokens. **The rest, roughly 80-88% depending
+     on characters per token, is thinking.** Dropping or shortening the
+     people or quote fields would not bring it far from the cap. Nothing
+     else was changed for it.
+   - **Side effect:** the glyph-encoded notice `b5c3c23b` still fails at
+     32,000, as in extract3. Each failed attempt now costs about $0.017
+     instead of about $0.009, and the daily job retries failed notices on
+     every run.
+
+The prompt's cached part grew from 7,406 to 7,705 tokens.
+
+### Validation (2026-10-21)
+
+- **Same setup as extract5:** the same 50 notices (18 trial + 40 extract3,
+  8 shared), dataset `8b7d8208fef6`, `claude-haiku-5-5`, effort high,
+  retries 1.
+- **Runs:** two, A and B, made by a GitHub Actions workflow that was
+  removed afterwards.
+- **Failures:** only `b5c3c23b` (glyph-encoded) in each run. 49 of 50 were
+  extracted in both.
+- **Files:** in
+  [`analysis/validation/one_call_extract6/`](../analysis/validation/one_call_extract6/).
+  - `score_trial_fields.py` and `score_extract3_fields.py` are the extract5
+    scorers. The trial scorer now also scores the extract5 runs. Run on
+    the extract5 runs, the extract3 scorer gives exactly the extract5
+    folder's scores.
+  - `compare.py` gives the checks below: invented kinds, the known cases,
+    cost and core-field agreement.
+  - `quote_check.py` is the second quote check.
+- **Answer keys:** the existing keys, unchanged. **No person judged them.**
+
+**The three issues.**
+
+| Issue | extract6 A / B | extract5 A / B | Two calls A / B |
+|---|---|---|---|
+| Entries of invented kinds (dropped) | 0 / 0 | 4 / 8 | n/a (no list) |
+| ICE `53d80bf1` funding: One Big Beautiful Bill Act | found / found | missed / missed | found / found |
+| VA CCN `085682f1` completes | yes, 13,332 tokens / yes, 12,584 | failed at 16,000 / yes, 13,764 | yes / yes |
+
+- **ICE.** Both runs quote "(e) Type of funding: One Big Beautiful Bill
+  Act". Neither gave a TBD entry. The other ICE notice, `8febc2f3`, is
+  still right in all four one-call runs.
+- **VA CCN.** Both runs finished, and both under the old 16,000 cap. So
+  this round shows the headroom, not that the higher cap was needed. All
+  six trial fields on it match the key in both runs.
+
+**Trial fields, 18 trial notices** (extract5 run A: 17, without VA CCN).
+Each cell gives the accuracy, then the precision and recall of "yes" or of
+a value. For lists, the precision and recall are per item.
+
+| Field | extract6 A | extract6 B | extract5 A | extract5 B | Two calls A | Two calls B |
+|---|---|---|---|---|---|---|
+| `bridge_or_extension` | 18/18; 10/10, 9/9 | 18/18; 11/11, 9/9 | 17/17; 10/10, 8/8 | 18/18; 10/10, 9/9 | 17/18; 11/12, 9/9 | 18/18; 10/10, 9/9 |
+| `prior_extension_count` | 17/18; 2/2, 2/3 | 18/18; 3/3, 3/3 | 17/17; 3/3, 3/3 | 18/18; 3/3, 3/3 | 18/18; 3/3, 3/3 | 18/18; 3/3, 3/3 |
+| `is_letter_contract` | 18/18; 4/4, 4/4 | 18/18; 4/4, 4/4 | 17/17; 4/4, 4/4 | 18/18; 4/4, 4/4 | 17/18; 4/4, 4/4 | 18/18; 4/4, 4/4 |
+| `urgency_trigger` | 18/18; 6/6, 5/5 | 17/18; 5/5, 4/5 | 16/17; 4/4, 3/4 | 18/18; 6/6, 5/5 | 17/18; 8/9, 5/5 | 17/18; 8/9, 5/5 |
+| `contract_types` | 11/12, 11/18 | 11/11, 11/18 | 12/12, 12/17 | 11/12, 11/18 | 14/14, 14/18 | 13/14, 13/18 |
+| `funding_sources` | 6/6, 6/6 | 6/6, 6/6 | 5/5, 5/6 | 5/5, 5/6 | 6/7, 6/6 | 6/6, 6/6 |
+
+- **Funding sources: fixed on this sample.** 6/6 in both runs, with no
+  extra item on the 18 trial notices.
+  - **On the other 32 notices** there is no key. Two new values:
+    - Run A gave "Procurement" on `de17f747`, from a "Type of Funding"
+      table column. It is in the text, but it is only a broad category.
+    - Run B kept "RDT&E, OPN, FMS, O&MN, SCN" (five entries) on
+      `3378022f`, from a funding table; extract5 run B also had them. Run A
+      gave the same list as one entry, and the quote check dropped it (the
+      quote joined table cells).
+- **`prior_extension_count`.** Run A's miss is `5a257e10`, the "third
+  bridge". The model gave no entry; this is not a drop by a check. Run B
+  and both extract5 runs found it.
+- **`urgency_trigger`.** Run B's miss is `15b08347` (the loss of 26
+  government positions), the same notice extract5 run A missed. Still no
+  urgency false positives in any one-call run.
+- **`contract_types`: unchanged, still below two calls.** Recall is 11/18
+  in both runs, against 11-12 for extract5 and 13-14 for two calls.
+  - Still never "task order" on the two repeat bridges, and never "cost
+    reimbursable (CR)" or "Indefinite Quantity Contract (IQC)".
+  - **New miss:** "BPA call order" on `1b1c624c`, in both runs.
+  - Run B again missed "delivery order" on `eb71d389`.
+  - **Dropped by the check:** 3 entries per run, against 2 for extract5.
+    Five of the six are "IDIQ" where the text says "Indefinite
+    Delivery/Indefinite Quantity" or "Indefinite Quantity Contract (IQC)":
+    the model abbreviated, so the value is not in its quote. The sixth is
+    "time-and-materials" from a sentence listing types that "could" be
+    used.
+- **Known cases:** letter contract on all four; DCSA Working Capital
+  Funds; the House Oversight deadline on DCSA; contractor termination on
+  ICE. All right in both runs.
+
+**Extract3 fields, 39 of the 40 extract3 notices.** Strict scoring against
+the extract3 key. Each cell is precision then recall, unless marked:
+
+| Field | extract6 A | extract6 B | extract5 A | extract5 B | extract3 A | extract3 B |
+|---|---|---|---|---|---|---|
+| People, named | 72/74, 72/74 | 71/72, 71/74 | 72/73, 72/74 | 72/73, 72/74 | 71/73, 71/74 | 71/74, 71/74 |
+| Signature-block roles | 50/51, 50/51 | 49/49, 49/51 | 49/50, 49/51 | 49/50, 49/51 | 49/50, 49/51 | 49/52, 49/51 |
+| Redacted blocks recorded (key: 56) | 53 | 49 | 49 | 49 | 49 | 48 |
+| `need_by_date` | 6/6, 6/6 | 4/4, 4/6 | 5/5, 5/6 | 4/4, 4/6 | 4/4, 4/6 | 3/3, 3/6 |
+| `stated_pop_limit_days` | 3/3, 3/3 | 3/3, 3/3 | 2/3, 2/2 | 3/3, 3/3 | 2/2, 2/2 | 2/2, 2/2 |
+| `incumbent_piid` | 13/13, 13/13 | 12/12, 12/12 | 13/13, 13/13 | 13/13, 13/13 | 12/12, 12/13 | 13/13, 13/13 |
+| `covered_piids` (per number) | 12/12, 12/12 | 12/12, 12/12 | 12/12, 12/12 | 12/12, 12/12 | 11/11, 11/12 | 12/12, 12/12 |
+| `market_research_methods` (per method) | 46/54 = 85%, 46/59 = 78% | 45/51 = 88%, 45/59 = 76% | 48/54 = 89%, 48/59 = 81% | 46/51 = 90%, 46/59 = 78% | 51/66 = 77%, 51/59 = 86% | 53/63 = 84%, 53/59 = 90% |
+| `redaction_significant` (accuracy) | 37/39 | 36/39 | 37/39 | 36/39 | 38/39 | 37/39 |
+
+Denominators that differ between runs are notices where the key also
+accepts null.
+
+- **`stated_pop_limit_days`.** The `d7207bb1` false positive (an option to
+  extend under FAR 52.217-8) is gone in both runs. It was in only one of
+  the two extract5 runs, so this is not shown to be a fix.
+- **People.**
+  - Johnny Brown (`8a169006`), lost by both extract5 runs, is found in
+    both.
+  - "Carlos Sosa Garcia SOSA" is back in both runs (extract3 had it;
+    extract5 did not). The name-form errors come and go between runs.
+  - **Run B lost two people.** James Beeson, the competition advocate on
+    `1b1c624c`: the model's quote wrote "USDA, FS, PPS" where the text says
+    "USDA, Forest Service, PPS", so the check dropped it. Kimberly Travis
+    on `0e11c796`, whose name is in a signature stamp next to a redacted
+    "Name:" line: the model gave no entry.
+  - No invented names in either run.
+- **Market research: no better.** Recall is 76-78%, against 78-81% for
+  extract5 and 86-90% for extract3. The extract6 changes did not touch it.
+  Most misses are still `other`.
+- **Core fields.** The same ten value fields as before: `is_ja`,
+  `doc_kind`, value, value basis, value redacted, vendor, signature date,
+  period, redacted and multiple actions.
+  - extract6 against the extract3 runs: 369/390 (A) and 366/390 (B), against
+    363-368 for extract5.
+  - Run A against run B: 367/390. extract5: 365/390. extract3: 371/390.
+  - Authority lists were not re-compared this round.
+- **Quote check.** Every kept quote was found in the page text by the
+  extractor's check.
+  - **Second code path:** `quote_check.py` searched the attachments
+    table's whole-attachment text, comparing letters and digits only. It
+    covered the kept quotes of the facts kinds, the list fields and people:
+    376 in run A and 365 in run B. It found all but 2, both in run B.
+  - **The 2 misses** are one quote used for two redacted entries on
+    `f2ddf895`, a trial-only notice with no people key. The quote runs from
+    the end of page 2 into the header of page 3. The attachments text puts
+    a "--- page 3 ---" marker between them, so that path cannot match it.
+    Page 2 is only "[REDACTED] [REDACTED]", and the two entries have no
+    title. Whether they are signature blocks cannot be told from the text,
+    so they may be spurious. Run A and both extract5 runs gave no such
+    entries.
+- **Not checked.** Page images were not looked at. The extract3 fields on
+  the 10 trial-only notices have no key.
+
+These are small samples: 3 to 9 positives per trial field and 2 to 13 for
+most extract3 fields. A difference of one or two items is within the
+run-to-run variation seen across these runs.
+
+### Cost
+
+Per notice, at list prices, on the same notices:
+
+| Notices | extract6 A / B | extract5 A / B | extract3 A / B (or baseline) | Two calls A / B |
+|---|---|---|---|---|
+| 24 random | $0.00435 / $0.00437 | $0.00425 / $0.00460 | $0.00381 / $0.00430 | n/a |
+| 39 random + edge | $0.00453 / $0.00446 | $0.00451 / $0.00467 | $0.00406 / $0.00434 | n/a |
+| 17 trial (without VA CCN) | $0.00552 / $0.00565 | $0.00493 / $0.00544 | $0.00446 (baseline) | $0.00670 / $0.00719 |
+
+- **About the same as extract5** on the random notices: 7,554 and 7,639
+  output tokens per notice, against 7,396 and 7,792.
+- **Higher on the trial notices**, by 4-12%. Part of it is retries: run A
+  repeated `6909e1e3` and run B `f157c0a4`, after a dropped value. Part is
+  longer answers on some notices, for example 13,800-14,900 output tokens
+  on ICE `53d80bf1` against 11,900-12,400. On 17 notices this cannot be
+  told apart from run-to-run variation.
+- **Full re-extraction (projected, not run).** The 10,033 in-scope notices
+  would cost about **$44** ($43.6-43.8) at the random-sample rate. That
+  compares with $43-46 for extract5, $57-65 for two calls and $38-46 for
+  extract3 alone. Failed calls come on top.
+- **Spend for this validation: $0.48 recorded.**
+  - The compile check on one notice: $0.004.
+  - Run A: $0.240. Run B: $0.240. Both include their retries.
+  - **Not recorded:** the two calls on `b5c3c23b` that hit the output
+    limit, which return no usage to the code. At 32,000 output tokens and
+    about 10,000 input tokens that is about $0.017 each, so about $0.52 in
+    all.
+
+## One call with a facts list (prompt `2026-10-20.extract5`, superseded by extract6)
+
+**Status: validated on a sample; superseded by extract6 (above), which
+changes only its prompt wording and output cap.** extract5 asks
 everything in **one call per notice**: the extract3 fields plus six of the
 seven fields tried in the extract4 trial (`policy_citations` was dropped).
 The trial asked them in a second call; its design and results are kept
@@ -607,7 +823,8 @@ No extract3 answer is published, so no converter is kept.
     output limit.** This notice uses about 13,000-14,300 output tokens in
     every run (extract3, two-call and one-call), mostly thinking. It is near
     the limit with any of the prompts, and the one-call answer is a little
-    longer. Raising `max_tokens` would likely fix it; that was not tested.
+    longer. Raising `max_tokens` would likely fix it; that was not tested
+    here (extract6 raised it to 32,000).
 - **Files.** Runs, failures and scorers are in
   [`analysis/validation/one_call_extract5/`](../analysis/validation/one_call_extract5/).
   - `score_trial_fields.py` is the trial's strict scorer, without

@@ -1,0 +1,21 @@
+{
+ "run_A": {
+  "kept_quotes": 376,
+  "found": 376,
+  "not_found": []
+ },
+ "run_B": {
+  "kept_quotes": 365,
+  "found": 363,
+  "not_found": [
+   [
+    "f2ddf895",
+    "Control No: 2026-46 [REDACTED] [REDACTED] 2 Control No: 2026-46"
+   ],
+   [
+    "f2ddf895",
+    "Control No: 2026-46 [REDACTED] [REDACTED] 2 Control No: 2026-46"
+   ]
+  ]
+ }
+}

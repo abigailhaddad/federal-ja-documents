@@ -74,8 +74,9 @@ MAX_EXTRACT_CHARS = 380_000
 MIN_FIELD_QUOTE_WORDS = 2
 # Output cap per call (thinking + the tool answer). 16,000 until extract6: the
 # VA CCN notice 085682f1 used 13,000-14,300 output tokens with every prompt
-# (extract3, the two-call trial, extract5), about 88% of it thinking (its
-# stored answer is ~6,500 characters), and one extract5 run hit the cap.
+# (extract3, the two-call trial, extract5), roughly 80-88% of it thinking
+# (its stored answers are 5,900-7,200 characters), and one extract5 run hit
+# the cap.
 # Haiku 5.5 allows 128,000. Only calls that need the room use it, at $0.50 per
 # million output tokens (a full 32,000-token call costs $0.016). The SDK's
 # non-streaming guard does not apply because llm.call sets its own timeout;
