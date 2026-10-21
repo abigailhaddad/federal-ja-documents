@@ -3,10 +3,13 @@
 Steps: read the state (state.py) -> choose the window -> read the candidates
 at one dataset commit (candidates.py) -> screen if there are many, then rank
 (model.py) -> check every quote and figure (verify.py) -> render (render.py)
--> write ``digest.md`` and ``picks.json`` under --out -> with --send, send
-through Buttondown and only then save the new state.
+-> write ``digest.md``, ``picks.json`` and ``archive_entry.json`` under --out
+-> with --send, send through Buttondown and only then save the new state and
+the public archive entry (archive.py; the web archive + RSS feed are built
+from those entries).
 
---dry-run never sends, never writes the state and never calls Buttondown.
+--dry-run never sends, never writes the state or the archive and never calls
+Buttondown.
 """
 
 from __future__ import annotations
@@ -18,7 +21,7 @@ import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import buttondown, model, render, state as st, verify
+from . import archive as ar, buttondown, model, render, state as st, verify
 from .candidates import DatasetReader, build_candidates, select_candidates
 
 
@@ -41,6 +44,9 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
                    help="about_to_send sends now (default); draft only saves a Buttondown draft (state unchanged)")
     p.add_argument("--state-file", type=Path, default=None,
                    help="keep the state in this local JSON file instead of the dataset's analysis/digest_state.json")
+    p.add_argument("--archive-dir", type=Path, default=None,
+                   help="keep the sent-digest archive in this local directory instead of the dataset's "
+                        f"{ar.ARCHIVE_DIR}/ (default with --state-file: digest_archive/ next to it)")
     g = p.add_argument_group("backtests (replace the state window; not allowed with --send)")
     g.add_argument("--first-seen-from", default=None, help="first_seen_at after this ISO time")
     g.add_argument("--first-seen-to", default=None, help="first_seen_at at or before this ISO time")
@@ -87,7 +93,7 @@ def recover_from_buttondown(state: dict, store, recent_fn) -> dict:
     return new
 
 
-def run(a, *, store=None, reader_factory=DatasetReader, revision_fn=None, call_fn=None,
+def run(a, *, store=None, archive=None, reader_factory=DatasetReader, revision_fn=None, call_fn=None,
         send_fn=buttondown.send_email, recent_fn=buttondown.recent_digests, now: datetime | None = None) -> int:
     now = now or datetime.now(timezone.utc)
     manual = any([a.first_seen_from, a.first_seen_to, a.posted_from, a.posted_to])
@@ -96,12 +102,15 @@ def run(a, *, store=None, reader_factory=DatasetReader, revision_fn=None, call_f
     as_of = _iso(a.as_of) or now
     today_et = as_of.astimezone(render.ET).date().isoformat()
     store = store or (st.LocalState(a.state_file) if a.state_file else st.HFState())
+    if archive is None:
+        adir = a.archive_dir or (a.state_file.parent / "digest_archive" if a.state_file else None)
+        archive = ar.LocalArchive(adir) if adir else ar.HFArchive()
     a.out.mkdir(parents=True, exist_ok=True)
     report: dict = {"experimental": True, "digest_version": model.VERSION, "mode": "send" if a.send else "dry_run",
                     "run_at": now.isoformat(), "as_of": as_of.isoformat()}
     try:
-        return _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent_fn, now, as_of,
-                    today_et, manual)
+        return _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_fn, recent_fn, now,
+                    as_of, today_et, manual)
     except Exception as exc:
         report["error"] = f"{type(exc).__name__}: {exc}"
         report["traceback"] = traceback.format_exc()[-3000:]
@@ -110,8 +119,8 @@ def run(a, *, store=None, reader_factory=DatasetReader, revision_fn=None, call_f
         (a.out / "picks.json").write_text(json.dumps(report, indent=1, default=str, ensure_ascii=False))
 
 
-def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent_fn, now, as_of, today_et,
-         manual) -> int:
+def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_fn, recent_fn, now, as_of,
+         today_et, manual) -> int:
     if manual:
         state = st.empty_state()
         after, until = _iso(a.first_seen_from), _iso(a.first_seen_to)
@@ -179,6 +188,13 @@ def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent
     report["subject"], report["body"] = subject, body
     report["spent_usd"] = round(budget["spent"], 4)
     (a.out / "digest.md").write_text(f"# {subject}\n\n{body}")
+    entry = ar.make_entry(subject=subject, body=body, date_et=today_et, sent_at=None, email_id=None, email_url=None,
+                          dataset_revision=rev, digest_version=model.VERSION, notices_reviewed=len(cands),
+                          window=window, picks=[render.pick_view(p, by_id[p["notice_id"]]) for p in picks],
+                          notices=render.notice_rows(cands, picks, {k: v.get("gist") for k, v in scores.items()}))
+    # written on every run for previews; it reaches the public archive only
+    # after a successful send (below)
+    (a.out / "archive_entry.json").write_text(json.dumps(entry, indent=1, ensure_ascii=False))
     print(json.dumps({"subject": subject, "picks": len(picks), "dropped": len(dropped),
                       "spent_usd": report["spent_usd"]}), file=sys.stderr)
 
@@ -202,4 +218,18 @@ def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent
                                    "picks": [p["notice_id"] for p in picks],
                                    "to_watermark": meta["to_watermark"], "spent_usd": report["spent_usd"]})
     report["state_commit"] = store.save(new_state, f"digest state: sent {subject[:80]}")
+    # The public archive entry, after the state (2026-10-21): if this write
+    # fails, the state is already saved, so a rerun does not send again; the
+    # run fails loudly and archive_entry.json (in the workflow's artifact) can
+    # be uploaded with `digest-archive-add`.
+    entry.update(sent_at=now.astimezone(timezone.utc).isoformat(), buttondown_email_id=result.get("id"),
+                 buttondown_url=result.get("absolute_url"))
+    (a.out / "archive_entry.json").write_text(json.dumps(entry, indent=1, ensure_ascii=False))
+    try:
+        report["archive_file"] = archive.save(entry) or "already archived"
+    except Exception as exc:
+        report["archive_error"] = f"{type(exc).__name__}: {exc}"
+        raise
+    print(json.dumps({"archive": report["archive_file"]}), file=sys.stderr)
+    report["sent"] = True     # email, state and archive all saved: the workflow deploys the site only then
     return 0

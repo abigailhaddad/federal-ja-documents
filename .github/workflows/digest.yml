@@ -25,8 +25,17 @@ name: Daily J&A digest email
 # workflow_run and schedule triggers only fire for the workflow file on the
 # default branch.
 #
-# Secrets: ANTHROPIC_API_KEY, HF_TOKEN (writes the state file),
-# BUTTONDOWN_API_KEY. Variable: ANTHROPIC_WORKSPACE_ID (optional).
+# After a successful send (only then), the email is also saved to the
+# dataset's analysis/digest_archive/ (src/federal_ja/digest/archive.py), and the
+# "site" job rebuilds and deploys the public web archive + RSS feed
+# (deploy-site.yml, https://woah-jas.abigailhaddad.com; 2026-10-21). That job is
+# skipped for dry runs, drafts and failed sends, and its deploy step is skipped
+# with a notice while CLOUDFLARE_API_TOKEN is unset, so the email never depends
+# on Cloudflare.
+#
+# Secrets: ANTHROPIC_API_KEY, HF_TOKEN (writes the state file and the archive),
+# BUTTONDOWN_API_KEY; CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID (site deploy).
+# Variable: ANTHROPIC_WORKSPACE_ID (optional).
 on:
   workflow_run:
     workflows: ["Daily experimental field extraction", "Daily J&A collection"]
@@ -67,6 +76,8 @@ jobs:
        vars.EXTRACT_DAILY_ENABLED != 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      sent: ${{ steps.digest.outputs.sent }}
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -79,6 +90,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run pytest -q
       - name: Build (and send) the digest
+        id: digest
         shell: bash  # bash -eo pipefail
         run: |
           MODE="--dry-run"
@@ -96,6 +108,9 @@ jobs:
           echo "mode: $MODE ${WINDOW[*]}"
           uv run python -m federal_ja.analysis digest $MODE --out work/digest "${WINDOW[@]}" \
             --max-usd "${{ inputs.max_usd || '0.35' }}" 2> >(tee work_digest.log >&2)
+          # "sent" is set in picks.json only after the email, the state and the
+          # archive entry were all saved; the site job runs only then
+          echo "sent=$(jq -r '.sent // false' work/digest/picks.json)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -104,3 +119,10 @@ jobs:
             work/digest/
             work_digest.log
           if-no-files-found: ignore
+
+  # The web archive + RSS feed, rebuilt from the archive after each sent digest.
+  site:
+    needs: digest
+    if: needs.digest.outputs.sent == 'true'
+    uses: ./.github/workflows/deploy-site.yml
+    secrets: inherit

@@ -144,6 +144,62 @@ Everything dropped is listed with its reason in `picks.json`
   nothing instead). With no new notices at all and an email already sent
   that day, nothing is sent.
 
+## Web archive and RSS feed
+
+Every sent email is also published at **https://woah-jas.abigailhaddad.com**
+(Cloudflare Pages project `woah-jas`; added 2026-10-21): an index of all
+issues (newest first: date, subject, number of picks), one page per issue
+with the picks, their quotes and links and the "All new notices" list, an
+about page, and an RSS 2.0 feed of the last 30 issues with their full content
+(`/feed.xml`). Static HTML and one stylesheet, light and dark; no JavaScript,
+cookies, trackers or external fonts. Every email's footer links to it.
+
+* **Archive:** after a successful send (Buttondown accepted the email with
+  `about_to_send`), right after the state file, the run saves the email to
+  `analysis/digest_archive/YYYY-MM-DD.json` in the dataset (Eastern-time date;
+  a second email the same day is `YYYY-MM-DD-2.json`): subject, date,
+  `sent_at`, the Buttondown email id and URL, the dataset commit, the Markdown
+  body as sent, the picks (headline, why, agency/vendor/value/authority line,
+  quotes with their page, document links) and the "All new notices" rows. Dry
+  runs, drafts and failed sends write nothing there (every run writes the
+  entry it would archive to `archive_entry.json` under `--out`, for
+  previews). A file is never overwritten; a rerun that finds the same email id
+  for that day writes nothing; the upload is one commit made against the
+  commit the name was chosen at, so two writers cannot take the same name.
+  If the archive upload fails, the run fails (the state is already saved, so
+  nothing is re-sent) and `archive_entry.json` in the run's artifact can be
+  uploaded with
+  `uv run python -m federal_ja.analysis digest-archive-add archive_entry.json`.
+  A digest adopted from Buttondown by the recovery step (see above) is not
+  archived automatically.
+* **Site:** `uv run python -m federal_ja.analysis digest-site --out site/dist`
+  reads every archive entry and writes the site (`--archive-dir DIR` reads a
+  local directory instead, e.g. for a preview). Pages are rendered from the
+  stored structure, not by parsing the Markdown, and all text (headlines,
+  quotes, titles, summaries) is HTML-escaped; only http(s) links are kept.
+  The issue pages show what was sent; nothing is regenerated.
+* **Deploy:** `.github/workflows/deploy-site.yml` builds `site/dist` (an
+  allow-list: the builder wipes it and writes only the site's files), runs
+  `tests/test_site_dist.py` on the built tree (no file types other than
+  html/css/xml/txt/svg/ico, no source/data/dot files, Cloudflare's 25 MiB per
+  file and 20,000 files limits, no dangling links, no scripts or external
+  assets), then deploys with `cloudflare/wrangler-action`. `digest.yml` calls
+  it after every sent digest; it can also be run by hand (Actions, "Deploy
+  digest web archive") to rebuild from the archive. Without the
+  `CLOUDFLARE_API_TOKEN` secret it builds and checks the site, skips the
+  deploy with a notice, and the email is unaffected.
+* **Setup (once):** in the Cloudflare dashboard, My Profile, API Tokens,
+  Create Token: the "Edit Cloudflare Workers" template, or a custom token with
+  Account, Cloudflare Pages, Edit, limited to this account. Then
+  `gh secret set CLOUDFLARE_API_TOKEN -R abigailhaddad/federal-ja-documents`
+  and `gh secret set CLOUDFLARE_ACCOUNT_ID -R abigailhaddad/federal-ja-documents`.
+* The 2026-10-21 issue, sent before the archive existed (with the earlier
+  "Whoa J&As" subject prefix), was archived afterwards from that run's
+  `picks.json` (whose body is the one Buttondown holds) and the notices and
+  extractions at its dataset commit. Re-rendered, that reconstruction matches
+  the sent picks and notice list line for line; the only difference is a note
+  sentence about one-line summaries, added to the list after that email.
+
 ## When it runs
 
 `.github/workflows/digest.yml`:

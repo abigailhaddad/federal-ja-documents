@@ -115,6 +115,14 @@ def build_parser() -> argparse.ArgumentParser:
     d = sub.add_parser("digest", help="EXPERIMENTAL: the daily 'WOAH! J&As' email of the most remarkable new "
                                       "notices (see docs/digest.md)")
     digest_run.add_arguments(d)
+    from ..digest import site as digest_site
+    ds = sub.add_parser("digest-site", help="build the static web archive + RSS feed of sent digests "
+                                            "(https://woah-jas.abigailhaddad.com; see docs/digest.md)")
+    digest_site.add_arguments(ds)
+    da = sub.add_parser("digest-archive-add", help="upload one archive_entry.json (written by a sent digest) to "
+                                                   "the dataset's analysis/digest_archive/; never overwrites")
+    da.add_argument("entry", type=Path, help="archive_entry.json from a digest --send run's --out directory")
+    da.add_argument("--archive-dir", type=Path, default=None, help="a local archive directory instead")
     return ap
 
 
@@ -383,6 +391,17 @@ def main(argv=None) -> int:
     if a.cmd == "digest":
         from ..digest import run as digest_run
         return digest_run.run(a)
+    if a.cmd == "digest-site":
+        from ..digest import site as digest_site
+        return digest_site.run(a)
+    if a.cmd == "digest-archive-add":
+        from ..digest import archive as digest_archive
+        entry = json.loads(a.entry.read_text())
+        if not entry.get("sent_at") or not entry.get("buttondown_email_id"):
+            raise SystemExit("this entry has no sent_at / buttondown_email_id: only a SENT digest is archived")
+        store = digest_archive.LocalArchive(a.archive_dir) if a.archive_dir else digest_archive.HFArchive()
+        print(store.save(entry) or "already archived (same Buttondown email id for that day)")
+        return 0
     if a.cmd == "spreadsheet":
         print(json.dumps(spreadsheet.main(a.out, a.revision), default=str), file=sys.stderr)
         return 0

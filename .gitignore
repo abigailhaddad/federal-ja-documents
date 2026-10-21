@@ -5,3 +5,4 @@ __pycache__/
 .env
 work/
 *.egg-info/
+site/
