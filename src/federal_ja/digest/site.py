@@ -236,7 +236,11 @@ def feed_xml(items: list[tuple[str, dict]], now: datetime | None = None) -> str:
            f'<atom:link href="{SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>',
            f"<lastBuildDate>{format_datetime(built.astimezone(timezone.utc), usegmt=True)}</lastBuildDate>"]
     for name, en in newest:
-        url = f"{SITE_URL}/issues/{issue_slug(name)}.html"
+        # Cloudflare Pages serves /issues/X.html as a 308 to /issues/X (its
+        # "pretty URLs"); the feed uses the final URL so links and guids are
+        # canonical (checked on woah-jas.pages.dev, 2026-10-21). The pages'
+        # own links keep .html so a local preview works from disk.
+        url = f"{SITE_URL}/issues/{issue_slug(name)}"
         d = _dt(en.get("sent_at")) or datetime.fromisoformat(en["date"]).replace(tzinfo=timezone.utc)
         out += ["<item>", f"<title>{x(en.get('subject'))}</title>", f"<link>{url}</link>",
                 f'<guid isPermaLink="true">{url}</guid>',

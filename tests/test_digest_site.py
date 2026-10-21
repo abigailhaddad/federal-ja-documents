@@ -163,7 +163,7 @@ def test_rss_feed_is_valid_rss2_with_the_last_30_issues():
         assert (ch.findtext(tag) or "").strip(), tag
     its = ch.findall("item")
     assert len(its) == site.FEED_ITEMS
-    assert its[0].findtext("link") == f"{render.SITE_URL}/issues/2026-10-20-2.html"
+    assert its[0].findtext("link") == f"{render.SITE_URL}/issues/2026-10-20-2"
     assert its[0].findtext("title") == f"WOAH! J&As — 2026-10-20: {EVIL}"   # XML-escaped, round-trips
     for it in its:
         assert it.findtext("guid") == it.findtext("link") and it.findtext("link").startswith("https://")
@@ -172,7 +172,7 @@ def test_rss_feed_is_valid_rss2_with_the_last_30_issues():
     assert "<script>" not in its[0].findtext("description")
     assert "&lt;script&gt;" in its[0].findtext("description")
     assert parsedate_to_datetime(ch.findtext("lastBuildDate")) == datetime(2026, 10, 20, 22, 0, tzinfo=timezone.utc)
-    assert its[-1].findtext("link").endswith("2026-09-12.html")     # 30 newest: Sep 12 .. Oct 20 + the -2
+    assert its[-1].findtext("link").endswith("/issues/2026-09-12")     # 30 newest: Sep 12 .. Oct 20 + the -2
 
 
 def test_email_footer_links_the_archive():
