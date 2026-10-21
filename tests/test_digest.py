@@ -428,3 +428,16 @@ def test_excerpt_shares_the_budget_between_versions_of_the_justification():
     # with room left over, the other attachments follow
     text, _, _ = model.excerpt(c, 20000)
     assert text.index("NEW2") < text.index("[PWS.pdf")
+
+
+def test_all_notices_shows_gist_under_each_line():
+    a, b = candidate("a"), candidate("b")
+    a.meta.update(sub_tier="DEPT OF THE ARMY", title="Bridge for pharmacy services")
+    b.meta.update(sub_tier="DEPT OF THE NAVY", title="Spare parts")
+    out = render.all_notices([a, b], [], gists={"a": "Bridge while a protest of the follow-on is resolved.", "b": ""})
+    la = next(l for l in out.splitlines() if "Bridge for pharmacy" in l)
+    i = out.splitlines().index(la)
+    assert out.splitlines()[i + 1].strip() == "Bridge while a protest of the follow-on is resolved."
+    lb = out.splitlines().index(next(l for l in out.splitlines() if "Spare parts" in l))
+    assert not out.splitlines()[lb + 1].strip().startswith("Bridge")
+    assert "not quote-checked" in out

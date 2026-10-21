@@ -158,11 +158,11 @@ def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent
     budget = {"max_usd": a.max_usd, "spent": 0.0, "calls": []}
     report["budget"] = budget
     short = cands
+    scores = model.screen(cands, budget, call_fn) if cands else {}
     if len(cands) > a.shortlist:
-        scores = model.screen(cands, budget, call_fn)
         short = model.shortlist(cands, scores, a.shortlist)
-        report["screen"] = [{"notice_id": c.notice_id, "title": c.meta.get("title"), **scores[c.notice_id]}
-                            for c in sorted(cands, key=lambda c: -scores[c.notice_id]["score"])]
+    report["screen"] = [{"notice_id": c.notice_id, "title": c.meta.get("title"), **scores[c.notice_id]}
+                        for c in sorted(cands, key=lambda c: -scores[c.notice_id]["score"])]
     raw, sent = ({"picks": []}, []) if not short else model.rank(short, budget, call_fn)
     report["ranked"] = [c.notice_id for c in sent]
     report["model_answer"] = raw
@@ -174,7 +174,8 @@ def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent
               "left_out_old": sum(v for k, v in info["excluded"].items() if k.startswith("posted_more_than")),
               "max_age_days": a.max_age_days}
     subject = render.subject(picks, as_of)
-    body = render.body(picks, by_id, len(cands), window, all_cands=cands)
+    body = render.body(picks, by_id, len(cands), window, all_cands=cands,
+                       gists={k: v.get("gist") for k, v in scores.items()})
     report["subject"], report["body"] = subject, body
     report["spent_usd"] = round(budget["spent"], 4)
     (a.out / "digest.md").write_text(f"# {subject}\n\n{body}")

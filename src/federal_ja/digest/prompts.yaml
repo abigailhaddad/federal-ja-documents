@@ -18,7 +18,7 @@ screen:
     - 4-7: somewhat unusual (a sizeable bridge, a protest delay, an odd justification), but not a headline.
     - 0-3: routine: OEM spare parts, brand-name lab or medical equipment, software maintenance or license renewals, leases, utilities, training seats, subscriptions, small purchases, boilerplate sole-source notices with nothing surprising.
 
-    Call the tool record_scores exactly once, with one entry per candidate (use its notice_id exactly as given), a score, and a reason of at most 15 words. Do not skip any candidate.
+    Call the tool record_scores exactly once, with one entry per candidate (use its notice_id exactly as given), a score, a reason of at most 15 words, and a gist: one plain sentence of at most 20 words saying what is being bought and the reason the document gives for not competing it (e.g. "Bridge for TRICARE pharmacy services while a protest of the follow-on is resolved."). The gist must state only what the candidate's text says: no adjectives like "remarkable", no speculation, no dollar figures. Do not skip any candidate.
 
     CANDIDATES
 

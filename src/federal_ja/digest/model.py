@@ -45,9 +45,9 @@ _JA_NAME = re.compile(r"justif|j\s*&\s*a|\bja\b|_ja\b|\bja_|sole.?source|single.
 SCREEN_SCHEMA = {
     "type": "object", "additionalProperties": False, "required": ["scores"],
     "properties": {"scores": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False, "required": ["notice_id", "score", "reason"],
+        "type": "object", "additionalProperties": False, "required": ["notice_id", "score", "reason", "gist"],
         "properties": {"notice_id": {"type": "string"}, "score": {"type": "integer"},
-                       "reason": {"type": "string"}}}}}}
+                       "reason": {"type": "string"}, "gist": {"type": "string"}}}}}}
 
 RANK_SCHEMA = {
     "type": "object", "additionalProperties": False, "required": ["picks"],
@@ -189,8 +189,10 @@ def _call(stage: str, cards: list[str], schema: dict, tool: str, budget: dict, c
 
 
 def screen(cands: list[Candidate], budget: dict, call_fn=None, batch: int = SCREEN_BATCH) -> dict[str, dict]:
-    """{notice_id: {score, reason}} for every candidate (score -1 if the
-    model left one out)."""
+    """{notice_id: {score, reason, gist}} for every candidate (score -1 if
+    the model left one out). The gist is the one-line summary shown in the
+    email's "All new notices" list (2026-10-21), so this runs every day, not
+    only when there are more candidates than the shortlist."""
     call_fn = call_fn or llm.call
     out: dict[str, dict] = {}
     for i in range(0, len(cands), batch):
@@ -200,9 +202,10 @@ def screen(cands: list[Candidate], budget: dict, call_fn=None, batch: int = SCRE
         ids = {c.notice_id for c in chunk}
         for s in (raw or {}).get("scores") or []:
             if s.get("notice_id") in ids:
-                out[s["notice_id"]] = {"score": int(s.get("score") or 0), "reason": s.get("reason") or ""}
+                out[s["notice_id"]] = {"score": int(s.get("score") or 0), "reason": s.get("reason") or "",
+                                       "gist": (s.get("gist") or "").strip()}
         for c in chunk:
-            out.setdefault(c.notice_id, {"score": -1, "reason": "not scored by the model"})
+            out.setdefault(c.notice_id, {"score": -1, "reason": "not scored by the model", "gist": ""})
     return out
 
 

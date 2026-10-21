@@ -89,7 +89,7 @@ def _ext_value(e: dict) -> str | None:
     return "value redacted" if e.get("value_redacted") is True else None
 
 
-def all_notices(cands: list[Candidate], picks: list[dict]) -> str:
+def all_notices(cands: list[Candidate], picks: list[dict], gists: dict | None = None) -> str:
     """'All new notices (N)': every candidate, one line each. Vendor, value
     and authority only from the extraction's quote-checked fields (left out
     when the notice has no extraction row or the field is empty); picks first
@@ -109,17 +109,19 @@ def all_notices(cands: list[Candidate], picks: list[dict]) -> str:
         bits = [short_org(c.meta), _trim(c.meta.get("title") or "(no title)", TITLE_CHARS), e.get("vendor"),
                 _ext_value(e), e.get("authority_cited")]
         star = "\u2605 " if c.notice_id in rank else ""
+        gist = _md_escape_line((gists or {}).get(c.notice_id) or "")
         lines.append(f"- {star}" + " \u00b7 ".join(_md_escape_line(str(b)) for b in bits if b)
-                     + f" \u00b7 [SAM.gov]({link})")
+                     + f" \u00b7 [SAM.gov]({link})" + (f"  \n  {gist}" if gist else ""))
     lines.append("")
     lines.append("*Vendor, value and authority are shown only where the AI extraction found them with a "
-                 "quote checked against the document; blank means not extracted yet or not stated, not none.*")
+                 "quote checked against the document; blank means not extracted yet or not stated, not none. "
+                 "The one-line summaries are AI-written from each notice's text and are not quote-checked.*")
     return "\n".join(lines) + "\n"
 
 
 def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window: dict,
-         all_cands: list[Candidate] | None = None) -> str:
-    listing = ("\n" + all_notices(all_cands, picks)) if all_cands else ""
+         all_cands: list[Candidate] | None = None, gists: dict | None = None) -> str:
+    listing = ("\n" + all_notices(all_cands, picks, gists)) if all_cands else ""
     if not picks:
         return (f"Nothing WOAH-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
                 f"reviewed).\n" + listing + "\n" + footer(n_reviewed, window) + "\n")
