@@ -40,7 +40,7 @@ SCREEN_BATCH = 40
 CHARS_PER_TOKEN = 3.2      # conservative (fewer chars per token = higher estimate)
 
 _JA_NAME = re.compile(r"justif|j\s*&\s*a|\bja\b|_ja\b|\bja_|sole.?source|single.?source|\blsj\b|jofoc|"
-                      r"exception|limited.?source|brand.?name|\bnoi\b|intent", re.I)
+                      r"exception|limited.?source|brand.?name|\bnoi\b|intent|other.than.full|jotfoc|\bjefo\b|\bssj\b|\bloj\b|\bbnj\b", re.I)
 
 SCREEN_SCHEMA = {
     "type": "object", "additionalProperties": False, "required": ["scores"],
@@ -71,27 +71,52 @@ class CapError(RuntimeError):
 
 
 def excerpt(c: Candidate, max_chars: int) -> tuple[str, int, int]:
-    """(text with page markers, chars of document text included, chars total)."""
+    """(text with page markers, chars of document text included, chars total).
+
+    Attachments whose filename looks like a justification come first. When
+    there are several (often an original and an updated version), each gets
+    an equal share of a budget 1.5 times the usual, so the model sees the opening pages
+    (where the value and the reason usually are) of every version; what is
+    left then goes to the rest, in attachment order."""
     atts = [(fn, pages) for fn, pages in c.doc.attachments() if fn != DESCRIPTION_PAGE]
-    order = sorted(range(len(atts)), key=lambda i: (0 if _JA_NAME.search(atts[i][0] or "") else 1, i))
-    parts, used, total = [], 0, sum(len(p.text) for _, pages in atts for p in pages)
-    for i in order:
+    ja = [i for i in range(len(atts)) if _JA_NAME.search(atts[i][0] or "")]
+    rest = [i for i in range(len(atts)) if i not in ja]
+    if len(ja) > 1:
+        max_chars = int(max_chars * 1.5)   # several versions: a bit more room, shared between them
+    total = sum(len(p.text) for _, pages in atts for p in pages)
+    taken = {i: 0 for i in range(len(atts))}           # pages of attachment i already included
+    chunks: dict[int, list[str]] = {i: [] for i in range(len(atts))}
+    used = 0
+
+    def take(i: int, budget: int) -> int:
         fn, pages = atts[i]
-        for p in pages:
+        spent = 0
+        while taken[i] < len(pages):
+            p = pages[taken[i]]
             t = p.text.strip()
+            room = min(budget - spent, max_chars - used - spent)
+            if t and room <= 200:
+                break
+            taken[i] += 1
             if not t:
                 continue
-            room = max_chars - used
-            if room <= 200:
-                break
             marker = f"[{fn}, page {p.page_number}]" if p.page_number is not None else f"[{fn}]"
             if p.text_source == "transcription":
                 marker = marker[:-1] + ", machine-transcribed]"
-            chunk = t if len(t) <= room else t[:room].rsplit(" ", 1)[0] + " [...cut]"
-            parts.append(marker + "\n" + chunk)
-            used += min(len(t), room)
+            chunks[i].append(marker + "\n" + (t if len(t) <= room else t[:room].rsplit(" ", 1)[0] + " [...cut]"))
+            spent += min(len(t), room)
+            if len(t) > room:
+                break
+        return spent
+
+    if len(ja) > 1:
+        for i in ja:
+            used += take(i, max_chars // len(ja))
+    for i in ja + rest:
         if max_chars - used <= 200:
             break
+        used += take(i, max_chars - used)
+    parts = [x for i in ja + rest for x in chunks[i]]
     if total > used:
         parts.append(f"[document text cut: {used:,} of {total:,} characters shown]")
     return "\n\n".join(parts), used, total

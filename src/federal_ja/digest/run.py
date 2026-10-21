@@ -174,7 +174,7 @@ def _run(a, report, store, reader_factory, revision_fn, call_fn, send_fn, recent
               "left_out_old": sum(v for k, v in info["excluded"].items() if k.startswith("posted_more_than")),
               "max_age_days": a.max_age_days}
     subject = render.subject(picks, as_of)
-    body = render.body(picks, by_id, len(cands), window)
+    body = render.body(picks, by_id, len(cands), window, all_cands=cands)
     report["subject"], report["body"] = subject, body
     report["spent_usd"] = round(budget["spent"], 4)
     (a.out / "digest.md").write_text(f"# {subject}\n\n{body}")

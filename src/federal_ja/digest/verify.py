@@ -12,10 +12,13 @@
   what the model said.
 * DOLLAR FIGURES in the headline and the "why" must match an amount in one
   of the pick's verified quotes, or the extraction's quote-checked
-  ``estimated_value_usd``. A shortened figure passes when it is a rounding of
-  such an amount at the precision written: for $28,950,000,000, "$29
-  billion" and "$28.95 billion" pass, "$30 billion" and "$28.8 billion" do
-  not. Sums, conversions and other arithmetic never pass.
+  ``estimated_value_usd``: the same amount, or that amount rounded or
+  truncated at the precision written (for $1,229,179,038.02, "$1.2B",
+  "$1.23 billion" and "$1,229,179,038" pass; "$1.3B" and "$1.5B" do not).
+  Sums, conversions and other arithmetic never pass. When the model wrote a
+  figure but did not quote its source, the code looks for a sentence of the
+  document containing a matching amount (not approval-threshold language)
+  and adds it as a quote, so the figure is shown with its source.
 * OTHER NUMBERS (digits) in the headline and "why" must appear in the
   notice's text or metadata.
 * A "why" sentence that fails a check is removed; a headline that fails, or a
@@ -29,7 +32,7 @@ from __future__ import annotations
 
 import re
 
-from ..analysis.extract import amounts_in, name_in, value_in_quote
+from ..analysis.extract import amounts_in, looks_like_tier, name_in, value_in_quote
 from ..analysis.text import MIN_QUOTE_WORDS, Document, Page, clean_quote, display_quote, locate_quote, normalize
 from .candidates import DESCRIPTION_PAGE, Candidate
 
@@ -43,11 +46,13 @@ _PROSE_AMOUNT = re.compile(
     r"\$\s?(?P<n1>\d[\d,]*(?:\.\d+)?)(?:\s*(?P<m1>thousand|million|billion|trillion|mil|bn|mm|k|m|b|t)\b)?"
     r"|\b(?P<n2>\d[\d,]*(?:\.\d+)?)\s*(?P<m2>thousand|million|billion|trillion)\b", re.I)
 _NUMBER = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?![\w])")
+_SOURCE_SPLIT = re.compile(r"(?<=[.;])\s+(?=[A-Z(])")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(\[])")
 
 
 def prose_amounts(text: str) -> list[tuple[float, float, tuple[int, int]]]:
-    """(value, rounding tolerance, span) for each dollar figure in prose."""
+    """(value, unit of the last digit written, span) for each dollar figure in
+    prose: "$28.95 billion" -> (28.95e9, 0.01e9), "$1,234,567" -> (1234567, 1)."""
     out = []
     for m in _PROSE_AMOUNT.finditer(text or ""):
         num = m.group("n1") or m.group("n2")
@@ -60,13 +65,49 @@ def prose_amounts(text: str) -> list[tuple[float, float, tuple[int, int]]]:
             continue
         decimals = len(num.split(".")[1]) if "." in num else 0
         mult = _MULT.get(mult_s, 1.0)
-        tol = 0.5 * 10 ** (-decimals) * mult if mult_s else max(0.5 * 10 ** (-decimals), 1.0)
-        out.append((v * mult, tol, m.span()))
+        unit = 10 ** (-decimals) * mult if mult_s else max(10 ** (-decimals), 1.0)
+        out.append((v * mult, unit, m.span()))
     return out
 
 
-def amount_supported(value: float, tol: float, sources: list[float]) -> bool:
-    return any(abs(s - value) <= tol + 1e-6 or value_in_quote(value, f"${s:,.2f}") for s in sources)
+def amount_supported(value: float, unit: float, sources: list[float]) -> bool:
+    """A written figure matches a source amount when it is that amount
+    rounded OR truncated at the precision written ("$1.2B" and "$1.23B" for
+    $1,229,179,038; "$170M" and "$171M" for $170,829,743), or equal within
+    the extraction checks' tolerance. Never a sum or a conversion."""
+    return any(value - unit / 2 - 1e-6 <= s < value + unit or value_in_quote(value, f"${s:,.2f}")
+               for s in sources)
+
+
+def find_amount_passage(doc: Document, targets: list[tuple[float, float]]) -> str | None:
+    """A sentence of the notice's own text containing an amount that EVERY
+    written figure in ``targets`` ((value, unit) pairs) matches, skipping
+    approval-threshold language, cut to at most 30 words starting just before the
+    first matching amount when it is longer than 40. Used when the model wrote a figure without quoting where
+    it comes from: the code then quotes the document itself, so the figure is
+    shown with its source."""
+    for p in doc.pages:
+        for sent in _SOURCE_SPLIT.split(" ".join(p.text.split())):
+            amts = amounts_in(sent)
+            if not all(any(amount_supported(v, u, [a]) for a in amts) for v, u in targets):
+                continue
+            if any(looks_like_tier(a, sent) for a in amts if any(amount_supported(v, u, [a]) for v, u in targets)):
+                continue
+            words = sent.split()
+            if len(words) > 40:
+                v0, u0 = targets[0]
+                hit = lambda ws: any(amount_supported(v0, u0, [a]) for a in amounts_in(" ".join(ws)))  # noqa: E731
+                at = next((i for i in range(len(words)) if hit(words[i:i + 1])),
+                          next((i for i in range(len(words)) if hit(words[i:i + 2])), 0))
+                # a long "sentence" is usually a table: start just before the figure
+                lo = max(0, at - 4)
+                words = words[lo:lo + 30]
+                while words and set(words[0]) <= set("|"):
+                    words = words[1:]
+            q = " ".join(words)
+            if len(q.split()) >= MIN_QUOTE_WORDS:
+                return q
+    return None
 
 
 def _numbers_ok(text: str, spans: list[tuple[int, int]], haystack: str) -> list[str]:
@@ -183,6 +224,26 @@ def verify_picks(raw: dict, cands: dict[str, Candidate]) -> tuple[list[dict], li
             continue
         ext = c.extraction or {}
         sources = _amount_sources(quotes, ext)
+        # A figure the model wrote (headline, why, value) that no quote or
+        # extraction value backs: quote the document sentence it comes from,
+        # if there is one (all such figures from one sentence if possible,
+        # else one sentence per figure; two added quotes at most).
+        written = " ".join([p.get("headline") or "", p.get("why") or "", p.get("value") or ""])
+        missing = [(v, u) for v, u, _ in prose_amounts(written) if not amount_supported(v, u, sources)]
+        if missing:
+            groups = [missing] if len(missing) > 1 else []
+            groups += [[t] for t in missing]
+            added = 0
+            for g in groups:
+                if added >= 2 or all(amount_supported(v, u, sources) for v, u in g):
+                    continue
+                passage = find_amount_passage(c.doc, g)
+                m = locate_quote(passage, c.doc, nd, min_words=MIN_QUOTE_WORDS, ignore_case=True) if passage else None
+                if m and m.verified:
+                    quotes.append({"text": display_quote(clean_quote(passage)), "match": m.match, "pages": m.pages,
+                                   "where": _page_label(c, m.pages), "model_page": "", "added_by_code": True})
+                    sources = _amount_sources(quotes, ext)
+                    added += 1
         meta_text = " ".join(str(c.meta.get(k) or "") for k in ("title", "award_number", "solicitation_number",
                                                                 "posted_date", "agency", "sub_tier", "office"))
         haystack = normalize(c.doc.verification_text() + " " + meta_text)

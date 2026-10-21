@@ -91,7 +91,8 @@ def test_quote_checks_tolerate_formatting_and_drop_invented_quotes():
     q2 = [{"text": "The Government  lost all of its contracting\nstaff to the \"Deferred Resignation Program\"",
            "page": ""},
           {"text": "The agency fired everyone and hid the paperwork from Congress", "page": ""}]
-    picks, dropped = verify.verify_picks({"picks": [pick(quotes=q2, why="The agency lost all of its contracting staff.")]},
+    picks, dropped = verify.verify_picks({"picks": [pick(quotes=q2, value="",
+                                                         why="The agency lost all of its contracting staff.")]},
                                          {"n1": c})
     assert len(picks) == 1 and len(picks[0]["quotes"]) == 1
     assert picks[0]["quotes"][0]["where"] == "JA_Redacted.pdf, p. 1"
@@ -114,10 +115,22 @@ def test_dollar_figures_must_come_from_quotes_or_extraction():
     # rounding of a quoted amount passes
     picks, _ = verify.verify_picks({"picks": [pick(quotes=[staff_q, value_q])]}, {"n1": c})
     assert picks and "$29 billion" in picks[0]["why"]
-    # the same figure without a quote or extraction value to back it: the sentence goes
+    # the figure is unquoted but in the document: the code quotes its source sentence
     picks, dropped = verify.verify_picks({"picks": [pick(quotes=[staff_q])]}, {"n1": c})
-    assert picks and "$29 billion" not in picks[0]["why"]
+    assert "$29 billion" in picks[0]["why"]
+    added = picks[0]["quotes"][-1]
+    assert added["added_by_code"] and "$28,950,000,000" in added["text"]
+    # a figure that is nowhere in the document: the sentence goes
+    picks, dropped = verify.verify_picks({"picks": [pick(quotes=[staff_q], value="", why="The agency lost all of its "
+                                                         "contracting staff. The action is worth $31 billion.")]},
+                                         {"n1": c})
+    assert picks and "$31 billion" not in picks[0]["why"] and len(picks[0]["quotes"]) == 1
     assert any(d["what"] == "why_sentence" and "unsupported dollar figure" in d["reason"] for d in dropped)
+    # truncation passes like rounding; a figure off at the precision written does not
+    assert verify.amount_supported(1.2e9, 0.1e9, [1_229_179_038.02])
+    assert verify.amount_supported(170e6, 1e6, [170_829_743.0])
+    assert not verify.amount_supported(1.3e9, 0.1e9, [1_229_179_038.02])
+    assert not verify.amount_supported(28.8e9, 0.1e9, [28_950_000_000.0])
     # an extraction value backs it
     picks, _ = verify.verify_picks({"picks": [pick(quotes=[staff_q])]},
                                    {"n1": candidate(ext={"estimated_value_usd": 28_950_000_000.0,
@@ -356,3 +369,60 @@ def test_state_after_send_keeps_the_later_watermark():
     s = st.after_send({**st.empty_state(), "watermark_first_seen_at": "2026-10-21T11:00:00+00:00"},
                       new_watermark=None, sent_at=NOW, date_et="2026-10-21", run={})
     assert s["watermark_first_seen_at"] == "2026-10-21T11:00:00+00:00"
+
+
+# ── the "All new notices" list ─────────────────────────────────────────────
+
+def test_all_notices_list_every_candidate_with_checked_fields_only():
+    big = candidate("big", ext={"estimated_value_usd": 5_000_000.0, "vendor": "Acme Corp",
+                                "authority_cited": "FAR 6.302-1"})
+    small = candidate("small", ext={"estimated_value_usd": 10_000.0})
+    red = candidate("red", ext={"value_redacted": True})
+    none = candidate("none")                      # no extraction row: nothing guessed
+    star = candidate("star")
+    for c, sub, title in ((big, "DEPT OF THE ARMY", "Big buy"), (small, "VETERANS AFFAIRS, DEPARTMENT OF", "Small"),
+                          (red, "U.S. CUSTOMS AND BORDER PROTECTION", "Redacted one"), (none, "GENERAL SERVICES ADMINISTRATION", "x" * 200),
+                          (star, "DEPT OF THE NAVY", "The pick")):
+        c.meta.update(sub_tier=sub, title=title)
+    out = render.all_notices([none, small, red, big, star], [{"notice_id": "star", "rank": 1}])
+    lines = [ln for ln in out.splitlines() if ln.startswith("- ")]
+    assert out.startswith("## All new notices (5)")
+    assert len(lines) == 5
+    assert lines[0].startswith("- ★ Navy · The pick · [SAM.gov](https://sam.gov/opp/star/view)")
+    assert lines[1] == ("- Army · Big buy · Acme Corp · $5,000,000 · FAR 6.302-1 · "
+                        "[SAM.gov](https://sam.gov/opp/big/view)")
+    assert lines[2].startswith("- Veterans Affairs · Small · $10,000 ·")
+    # unknown values after known ones, then by agency
+    assert lines[3].startswith("- General Services Administration · xxx") and "…" in lines[3]
+    assert "$" not in lines[3] and "Optum" not in lines[3]
+    assert lines[4].startswith("- U.S. Customs and Border Protection · Redacted one · value redacted")
+
+
+def test_short_org_keeps_acronyms():
+    assert render.short_org({"sub_tier": "DEFENSE CONTRACT MANAGEMENT AGENCY (DCMA)"}) == \
+        "Defense Contract Management Agency (DCMA)"
+    assert render.short_org({"agency": "DEPT OF DEFENSE"}) == "Defense"
+
+
+def test_zero_picks_email_still_lists_all_notices():
+    c = candidate()
+    b = render.body([], {}, 1, {"from_label": "a", "to_label": "b"}, all_cands=[c])
+    assert b.startswith("Nothing whoa-worthy today (1 new notice reviewed).")
+    assert "## All new notices (1)" in b and "[SAM.gov](https://sam.gov/opp/n1/view)" in b
+    assert b.index("All new notices") < b.index("*What this is:*")
+
+
+def test_excerpt_shares_the_budget_between_versions_of_the_justification():
+    nid = "n8"
+    meta = notice(nid, "2026-10-21T11:00:00+00:00", "2026-10-20 10:00:00")
+    v1 = [Page("r1", "Other_Than_Full_and_Open_Competition.pdf", i, "native", f"OLD{i} " + "a " * 1500) for i in (1, 2)]
+    v2 = [Page("r2", "Other Than Full and Open Competition_10.19.26.pdf", i, "native", f"NEW{i} " + "b " * 1500)
+          for i in (1, 2)]
+    doc = Document(nid, dict(meta), [Page("r0", "PWS.pdf", 1, "native", "pws " * 100)] + v1 + v2)
+    c = build_candidates([meta], {nid: doc}, {}, {})[0]
+    text, used, total = model.excerpt(c, 7000)
+    assert "OLD1" in text and "NEW1" in text and used <= 10500
+    assert text.index("OLD1") < text.index("NEW1")
+    # with room left over, the other attachments follow
+    text, _, _ = model.excerpt(c, 20000)
+    assert text.index("NEW2") < text.index("[PWS.pdf")
