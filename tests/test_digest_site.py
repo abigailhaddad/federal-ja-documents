@@ -140,7 +140,7 @@ def test_index_newest_first_with_pick_counts(tmp_path):
     assert "Nothing WOAH-worthy today (3 new notices reviewed)" in zero
     assert 'href="2026-10-21.html">← Older' in zero
     about = (tmp_path / "dist" / "about.html").read_text()
-    assert "AI-picked and AI-written (Claude)" in about and "word for word" in about
+    assert "Chosen and written up by AI (Claude)" in about and "word for word" in about
     assert render.DATASET_URL in about and render.PROJECT_URL in about
 
 
