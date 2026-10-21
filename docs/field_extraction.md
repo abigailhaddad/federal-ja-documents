@@ -1021,3 +1021,8 @@ Strict scores (run A / run B):
 - **Trial spend:** $0.34 (the extract3 baseline run $0.083, run A $0.124, run B $0.131). The 400s were not billed.
 
 These are 18 notices: the positives per field are 3 to 9 (12 for policy citations), so every figure here is a small-sample estimate.
+
+### checks6 (2026-10-21): contract-type spellings
+
+`contract_types` entries now pass when the quote has another standard spelling of the same type: IDIQ for "Indefinite Delivery/Indefinite Quantity" or "Indefinite Quantity Contract (IQC)" (FAR 16.504 treats indefinite-quantity contracts as IDIQ), T&M, FFP, CPFF, cost-reimbursement, labor-hour. Other values still need the literal name in the quote. On the extract6 runs this keeps 3 entries per run that checks5 dropped (aa5a77a6, 6909e1e3, 597e23ef, ee787559). The scored recall is unchanged at 11/18: only 6909e1e3 is in the trial key, and the scorer matches text literally, so "IDIQ" doesn't match the key's "Indefinite Quantity Contract (IQC)". The remaining gap against two-call (14/18) is types the model never listed, e.g. "task order" on the repeat bridges. No model calls.
+

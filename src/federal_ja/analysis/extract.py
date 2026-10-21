@@ -64,7 +64,7 @@ TRUNCATION_VERSION = "2026-10-18.trunc2"
 # The deterministic checks (quote search, value-in-quote parsers, tier
 # guard) have their own version: they can be re-applied to stored model
 # answers without new model calls (``extract --reverify``).
-CHECKS_VERSION = "2026-10-20.checks5"   # checks4: people; checks5: the facts list (prompt extract5)
+CHECKS_VERSION = "2026-10-21.checks6"   # checks4: people; checks5: the facts list (prompt extract5); checks6: contract-type spellings
 TOOL_NAME = "record_ja_fields"
 
 # ~100K tokens. Haiku 5.5's price rises 5x above 100K prompt tokens and the
@@ -394,6 +394,39 @@ def _squash(s: str) -> str:
 def name_in(name: str, text: str) -> bool:
     n = _squash(name)
     return len(n) >= 2 and n in _squash(text)
+
+
+# Contract types the model writes in their standard short or long form while
+# the quote has the other one (2026-10-21, extract6 validation: 5 of the 6
+# contract_types the checks dropped were this -- "IDIQ" for "Indefinite
+# Delivery/Indefinite Quantity" or "Indefinite Quantity Contract (IQC)", and
+# "time-and-materials" for "Time-and-Material (T&M)"). A value in one of these
+# groups passes when its quote has any spelling of the same type; everything
+# else still needs the literal name in the quote. FAR 16.504 treats
+# indefinite-quantity contracts as the IDIQ type, so IQC counts as IDIQ.
+_CT_FORMS = [
+    ({"idiq", "indefinitedeliveryindefinitequantity", "indefinitequantity", "iqc", "indefinitequantitycontract", "idc",
+      "indefinitedeliverycontract"},
+     re.compile(r"\bidiq\b|\biqc\b|\bidc\b|indefinite[\s-]*deliver\w*|indefinite[\s-]*quantit", re.I)),
+    ({"tm", "timeandmaterials", "timeandmaterial"},
+     re.compile(r"time[\s-]*(?:and|&)[\s-]*materials?|\bt\s*&\s*m\b", re.I)),
+    ({"ffp", "firmfixedprice", "firmfixedpriced"},
+     re.compile(r"firm[\s-]*fixed[\s-]*price|\bffp\b", re.I)),
+    ({"cpff", "costplusfixedfee"},
+     re.compile(r"cost[\s-]*plus[\s-]*(?:a[\s-]*)?fixed[\s-]*fee|\bcpff\b", re.I)),
+    ({"cr", "costreimbursement", "costreimbursable", "costtype"},
+     re.compile(r"cost[\s-]*reimburs\w*|\bcost[\s-]*type\b", re.I)),
+    ({"lh", "laborhour", "laborhours"},
+     re.compile(r"labor[\s-]*hours?|\bl\s*-?\s*h\b", re.I)),
+]
+
+
+def contract_type_in(value: str, text: str) -> bool:
+    if name_in(value, text):
+        return True
+    v = _squash(value)
+    t = normalize(text)
+    return any(v in names and rx.search(t) for names, rx in _CT_FORMS)
 
 
 _MONTHS = {m: i for i, m in enumerate(
@@ -894,7 +927,8 @@ def _verify_facts(raw: dict, doc: Document, nd: str, f: dict, dropped: list[dict
             v, q = _blank(x.get("value")), _blank(x.get("quote"))
             if not v or _squash(v) in seen:
                 continue
-            if check(field, v, q, name_in(v, q or ""), f"{key} not in its quote"):
+            ok = contract_type_in(v, q or "") if kind == "contract_type" else name_in(v, q or "")
+            if check(field, v, q, ok, f"{key} not in its quote"):
                 seen.add(_squash(v))
                 out.append({key: v, "quote": display_quote(q)})
         return out
