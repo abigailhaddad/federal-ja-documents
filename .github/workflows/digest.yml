@@ -42,6 +42,11 @@ on:
       max_usd:
         description: "Spend cap for this run's model calls (USD)"
         default: "0.35"
+      first_seen_window:
+        # 2026-10-21: preview a change on a past day without touching the
+        # state. Dry runs only (the CLI refuses a backtest window with --send).
+        description: "Dry-run preview window, FROM,TO as ISO times (first_seen_at); blank = the normal window"
+        default: ""
 
 concurrency:
   group: digest
@@ -82,8 +87,14 @@ jobs:
           elif [ "${{ vars.DIGEST_ENABLED }}" = "true" ]; then
             MODE="--send"
           fi
-          echo "mode: $MODE"
-          uv run python -m federal_ja.analysis digest $MODE --out work/digest \
+          WINDOW=()
+          W="${{ inputs.first_seen_window }}"
+          if [ -n "$W" ]; then
+            if [ "$MODE" != "--dry-run" ]; then echo "a preview window needs a dry run"; exit 1; fi
+            WINDOW=(--first-seen-from "${W%%,*}" --first-seen-to "${W##*,}" --as-of "${W##*,}")
+          fi
+          echo "mode: $MODE ${WINDOW[*]}"
+          uv run python -m federal_ja.analysis digest $MODE --out work/digest "${WINDOW[@]}" \
             --max-usd "${{ inputs.max_usd || '0.35' }}" 2> >(tee work_digest.log >&2)
       - uses: actions/upload-artifact@v4
         if: always()
