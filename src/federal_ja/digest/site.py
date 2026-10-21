@@ -113,7 +113,7 @@ def page(title: str, body: str, *, root: str = "", description: str = "") -> str
 <main>
 {body}
 </main>
-<footer class="site"><p>AI-picked and AI-written (Claude). Quotes are checked word for word against the documents,
+<footer class="site"><p>Chosen and written up by AI (Claude). Quotes are checked word for word against the documents,
 but check the source before relying on anything. <a href="{root}about.html">About</a> ·
 <a href="{root}index.html">All issues</a> · <a href="{root}feed.xml">RSS</a></p></footer>
 </body>
@@ -195,7 +195,7 @@ def index_page(items: list[tuple[str, dict]]) -> str:
                     f'<a href="issues/{e(issue_slug(name))}.html">{e(entry.get("subject"))}</a> '
                     f'<span class="count">{n} pick{"s" if n != 1 else ""}</span></li>')
     lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No issues yet.</p>"
-    body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, picked and written up by AI. "
+    body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, chosen and written up by AI. "
             f'<a href="{SUBSCRIBE_URL}">Subscribe by email</a> · <a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{lst}')
     return page(TITLE, body)
 
@@ -206,7 +206,7 @@ def about_page() -> str:
 Each issue has the few most remarkable new J&amp;A notices the collector picked up since the previous one
 (at most five, sometimes none), each with verbatim quotes from the documents and links to SAM.gov,
 then every new notice it reviewed, one line each.</p>
-<p><strong>AI-picked and AI-written (Claude).</strong> Quotes are checked word for word against the documents,
+<p><strong>Chosen and written up by AI (Claude).</strong> Quotes are checked word for word against the documents,
 and dollar figures come from those quotes or from quote-checked extraction fields,
 but AI can still misread a document: check the source before relying on anything.</p>
 <p>This site shows the issues exactly as they were sent by email. Code, rules and checks:
@@ -232,7 +232,7 @@ def feed_xml(items: list[tuple[str, dict]], now: datetime | None = None) -> str:
     out = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">', "<channel>",
            f"<title>{x(TITLE)}</title>", f"<link>{SITE_URL}/</link>",
-           f"<description>{x(TAGLINE)}. AI-picked and AI-written (Claude); check the source.</description>",
+           f"<description>{x(TAGLINE)}. Chosen and written up by AI (Claude); check the source.</description>",
            "<language>en-us</language>",
            f'<atom:link href="{SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>',
            f"<lastBuildDate>{format_datetime(built.astimezone(timezone.utc), usegmt=True)}</lastBuildDate>"]
