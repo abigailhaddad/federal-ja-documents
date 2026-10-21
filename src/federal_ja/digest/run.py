@@ -36,7 +36,7 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("--initial-lookback-hours", type=float, default=36,
                    help="with no saved state, cover notices first seen in the last N hours (default 36)")
     p.add_argument("--zero-picks", choices=["send", "skip"], default="send",
-                   help="when nothing is picked: send the one-line 'nothing whoa-worthy' email (default) or skip")
+                   help="when nothing is picked: send the one-line 'nothing WOAH-worthy' email (default) or skip")
     p.add_argument("--buttondown-status", choices=["about_to_send", "draft"], default="about_to_send",
                    help="about_to_send sends now (default); draft only saves a Buttondown draft (state unchanged)")
     p.add_argument("--state-file", type=Path, default=None,

@@ -112,7 +112,7 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--revision", default=None,
                    help="dataset commit to read the AI tables from (default: latest)")
     from ..digest import run as digest_run
-    d = sub.add_parser("digest", help="EXPERIMENTAL: the daily 'Whoa J&As' email of the most remarkable new "
+    d = sub.add_parser("digest", help="EXPERIMENTAL: the daily 'WOAH! J&As' email of the most remarkable new "
                                       "notices (see docs/digest.md)")
     digest_run.add_arguments(d)
     return ap

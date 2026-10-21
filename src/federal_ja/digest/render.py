@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 from .candidates import Candidate
 
 ET = ZoneInfo("America/New_York")
-PREFIX = "Whoa J&As"
+PREFIX = "WOAH! J&As"
 DATASET_URL = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents"
 PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
 MAX_DOC_LINKS = 3
@@ -21,7 +21,7 @@ def day_label(d: datetime) -> str:
 
 
 def subject(picks: list[dict], when: datetime) -> str:
-    top = picks[0]["headline"].rstrip(".") if picks else "nothing whoa-worthy"
+    top = picks[0]["headline"].rstrip(".") if picks else "nothing WOAH-worthy"
     return f"{PREFIX} — {day_label(when)}: {top}"
 
 
@@ -38,20 +38,16 @@ def _fmt_et(iso: str | None) -> str:
 
 
 def footer(n_reviewed: int, window: dict) -> str:
+    old = window.get("left_out_old")
     return (
         "---\n\n"
-        f"*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) "
-        f"notices posted on SAM.gov, from the public [federal-ja-documents dataset]({DATASET_URL}). "
-        f"Today: {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} reviewed "
-        f"(first collected {window.get('from_label', '?')} to {window.get('to_label', '?')})"
-        + (f"; {window['left_out_old']} notice{'s' if window['left_out_old'] != 1 else ''} first collected then "
-           f"but posted more than {window.get('max_age_days')} days earlier were left out"
-           if window.get("left_out_old") else "")
-        + ".\n\n"
-        "*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked "
-        "word for word against the notice's document text, and dollar figures come from those quotes or "
-        "from quote-checked extraction fields. AI can still misread a document: check the source before "
-        f"relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md)."
+        f"*WOAH! J&As:* a daily pick of new federal sole-source justifications (J&As) from SAM.gov, via the "
+        f"[federal-ja-documents dataset]({DATASET_URL}). {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
+        f"reviewed today (first collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
+        + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
+        + ").\n\n"
+        "AI-picked and AI-written (Claude). Quotes are checked word for word against the documents, "
+        f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md)."
     )
 
 
@@ -125,7 +121,7 @@ def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window
          all_cands: list[Candidate] | None = None) -> str:
     listing = ("\n" + all_notices(all_cands, picks)) if all_cands else ""
     if not picks:
-        return (f"Nothing whoa-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
+        return (f"Nothing WOAH-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
                 f"reviewed).\n" + listing + "\n" + footer(n_reviewed, window) + "\n")
     out = []
     for p in picks:

@@ -1,4 +1,4 @@
-# The daily "Whoa J&As" email digest (experimental)
+# The daily "WOAH! J&As" email digest (experimental)
 
 Once a day, a short email with the few most remarkable J&A notices that the
 collector picked up since the previous email: at most five, often three to
@@ -6,7 +6,7 @@ five, sometimes none. Each pick has a headline, a line with the agency,
 vendor, value and authority, one to three sentences on why it is notable,
 one or two verbatim quotes from the document with their page, and links to
 the SAM.gov notice and the documents. After the picks (or after the one-line
-"nothing whoa-worthy" note), a compact "All new notices (N)" list has every
+"nothing WOAH-worthy" note), a compact "All new notices (N)" list has every
 notice the email covered, one line each: agency, title, and vendor, value and
 authority only where the extraction found them with a checked quote, with a
 link to SAM.gov; picks first, marked with a star, then by value.
@@ -139,7 +139,7 @@ Everything dropped is listed with its reason in `picks.json`
   metadata; if a send succeeded but saving the state failed, the next run
   finds that email in Buttondown and adopts its watermark instead of sending
   the same notices again.
-* **Zero picks:** the email is the one line "Nothing whoa-worthy today (N new
+* **Zero picks:** the email is the one line "Nothing WOAH-worthy today (N new
   notices reviewed)." so it is clear the job ran (`--zero-picks skip` sends
   nothing instead). With no new notices at all and an email already sent
   that day, nothing is sent.
