@@ -15,6 +15,7 @@ PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
 # The public web archive + RSS feed of sent digests (site.py, Cloudflare Pages;
 # 2026-10-21).
 SITE_URL = "https://woah-jas.abigailhaddad.com"
+SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
 MAX_DOC_LINKS = 3
 
 
@@ -51,7 +52,7 @@ def footer(n_reviewed: int, window: dict) -> str:
         + ").\n\n"
         "AI-picked and AI-written (Claude). Quotes are checked word for word against the documents, "
         f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md).\n\n"
-        f"Archive & RSS: [{SITE_URL}]({SITE_URL})"
+        f"Archive & RSS: [{SITE_URL}]({SITE_URL}) · Subscribe: [{SUBSCRIBE_URL}]({SUBSCRIBE_URL})"
     )
 
 

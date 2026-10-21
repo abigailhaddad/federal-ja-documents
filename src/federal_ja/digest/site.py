@@ -42,6 +42,7 @@ from . import archive as ar
 from .render import DATASET_URL, ET, FIELDS_NOTE, FIGURE_SOURCE_NOTE, GISTS_NOTE, PROJECT_URL, SITE_URL
 
 TITLE = "WOAH! J&As"
+SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
 TAGLINE = "A daily pick of new federal sole-source justifications (J&As) from SAM.gov"
 FEED_ITEMS = 30
 # the only files the builder writes (issue pages aside); test_site_dist.py checks the tree independently
@@ -107,7 +108,7 @@ def page(title: str, body: str, *, root: str = "", description: str = "") -> str
 </head>
 <body>
 <header class="site"><a class="brand" href="{root}index.html">{e(TITLE)}</a>
-<nav><a href="{root}index.html">All issues</a> <a href="{root}about.html">About</a> <a href="{root}feed.xml">RSS</a></nav>
+<nav><a href="{root}index.html">All issues</a> <a href="{root}about.html">About</a> <a href="{root}feed.xml">RSS</a> <a href="{SUBSCRIBE_URL}">Subscribe by email</a></nav>
 </header>
 <main>
 {body}
@@ -195,7 +196,7 @@ def index_page(items: list[tuple[str, dict]]) -> str:
                     f'<span class="count">{n} pick{"s" if n != 1 else ""}</span></li>')
     lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No issues yet.</p>"
     body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, picked and written up by AI. "
-            f'<a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{lst}')
+            f'<a href="{SUBSCRIBE_URL}">Subscribe by email</a> · <a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{lst}')
     return page(TITLE, body)
 
 
