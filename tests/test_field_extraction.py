@@ -299,3 +299,17 @@ def test_truncation_puts_the_justification_first():
     assert cut and text.startswith("=== ATTACHMENT: SOLE SOURCE-Signed_Redacted.pdf") and "Acme Widget" in text
     whole, cut2 = extract.model_text(d, max_chars=10**6)
     assert not cut2 and whole.startswith("=== ATTACHMENT: technical_manual.pdf")   # unchanged under the limit
+
+
+def test_contract_type_spellings_match_their_quote():
+    # 2026-10-21: the real extract6 drops this fixes (notices aa5a77a6, 6909e1e3, ee787559).
+    from federal_ja.analysis.extract import contract_type_in
+    assert contract_type_in("IDIQ", "a one-year Firm-Fixed Priced Indefinite Delivery/Indefinite Quantity bridge contract")
+    assert contract_type_in("IDIQ", "Firm Fixed-Price (FFP) Indefinite Quantity Contract (IQC); 3-Year Base Period")
+    assert contract_type_in("time-and-materials", "Cost - Reimbursement (CR), and Time-and-Material (T&M), or a hybrid")
+    assert contract_type_in("FFP", "a firm-fixed-price purchase order")
+    assert contract_type_in("firm-fixed-price", "contract type: FFP")
+    # still strict: a type the quote doesn't mention is dropped
+    assert not contract_type_in("IDIQ", "a firm-fixed-price purchase order")
+    assert not contract_type_in("time-and-materials", "Firm Fixed-Price (FFP)")
+    assert not contract_type_in("letter contract", "a firm-fixed-price purchase order")

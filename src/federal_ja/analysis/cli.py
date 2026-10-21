@@ -22,7 +22,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from . import data, extract, llm, prompts, spreadsheet, tagger
+from . import data, extract, llm, prompts, spreadsheet, table, tagger
 from .promptfile import CONFIG
 
 EXPERIMENTAL_BANNER = (
@@ -92,6 +92,20 @@ def build_parser() -> argparse.ArgumentParser:
                    help="make no model calls; re-apply the current quote/value checks to the stored model "
                         "answers in extractions.jsonl, keeping the latest record per notice (rewritten in "
                         "place, previous copy kept as .bak), then rebuild extractions.csv")
+    x.add_argument("--seed-from-hf", action="store_true",
+                   help="if --out has no extractions.jsonl, fill it (and skipped.jsonl) from the published "
+                        "analysis/extractions.parquet first, so only notices without a current-version row "
+                        "are extracted")
+    t2 = sub.add_parser("extract-table", help="EXPERIMENTAL: build analysis/extractions.parquet from an "
+                                              "extract --out directory (and optionally upload it)")
+    t2.add_argument("--out", required=True, type=Path, help="the extract --out directory")
+    t2.add_argument("--table", required=True, type=Path, help="parquet file to write")
+    t2.add_argument("--data-dir", type=Path, default=Path("work/hf_tables"),
+                    help="cache of the dataset tables (for titles, agencies, links)")
+    t2.add_argument("--revision", default=None, help="dataset commit to use (default: latest)")
+    t2.add_argument("--publish", action="store_true",
+                    help="upload the table to the dataset as analysis/extractions.parquet (needs HF_TOKEN); "
+                         "refused if it has fewer rows than the published table")
     w = sub.add_parser("spreadsheet", help="build a reader-friendly .xlsx from the published dataset "
                                            "(includes the EXPERIMENTAL AI columns)")
     w.add_argument("--out", required=True, type=Path, help="output .xlsx path")
@@ -244,6 +258,8 @@ def cmd_extract(a) -> int:
 
     a.out.mkdir(parents=True, exist_ok=True)
     ext_p, fail_p, skipped_p = a.out / "extractions.jsonl", a.out / "failures.jsonl", a.out / "skipped.jsonl"
+    if getattr(a, "seed_from_hf", False):
+        print(json.dumps(table.seed_from_hf(a.out)), file=sys.stderr)
     if a.reverify:
         # one record per notice: the latest (earlier attempts stay in the .bak copy)
         recs = list(_latest_by_notice(_load_jsonl(ext_p)).values())
@@ -328,6 +344,25 @@ def cmd_extract(a) -> int:
     return 1 if failed else 0
 
 
+def cmd_extract_table(a) -> int:
+    rev = data.download_tables(a.data_dir, revision=a.revision)
+    notices, _, _ = data.load_tables(a.data_dir)
+    meta = {n["notice_id"]: data._notice_meta(n) for n in notices.to_dict("records")}
+    df = table.build_table(a.out, meta)
+    a.table.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(a.table, index=False)
+    summary = {"rows": len(df), "dataset_revision": rev.get("sha"),
+               "by_status": df["status"].value_counts().to_dict() if len(df) else {},
+               "by_extract_version": df["extract_version"].fillna("none").value_counts().to_dict()
+               if len(df) and "extract_version" in df else {}}
+    if a.publish:
+        summary["commit"] = table.upload_table(
+            a.table, f"analysis/extractions.parquet: {len(df)} rows (dataset {str(rev.get('sha'))[:12]})",
+            new_rows=len(df))
+    print(json.dumps(summary, default=str), file=sys.stderr)
+    return 0
+
+
 def extract_min_chars() -> int:
     from .text import MIN_DOC_CHARS
     return MIN_DOC_CHARS
@@ -339,6 +374,8 @@ def main(argv=None) -> int:
         return cmd_tag(a)
     if a.cmd == "extract":
         return cmd_extract(a)
+    if a.cmd == "extract-table":
+        return cmd_extract_table(a)
     if a.cmd == "spreadsheet":
         print(json.dumps(spreadsheet.main(a.out, a.revision), default=str), file=sys.stderr)
         return 0

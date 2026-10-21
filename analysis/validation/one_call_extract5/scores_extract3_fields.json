@@ -1,0 +1,569 @@
+{
+ "A": {
+  "run": "A",
+  "docs": 48,
+  "all/random": {
+   "named_precision_exact": "42/43 = 98% (88-100%)",
+   "named_recall_exact": "42/44 = 95% (85-99%)",
+   "named_precision_loose": "43/43 = 100% (92-100%)",
+   "named_recall_loose": "43/44 = 98% (88-100%)",
+   "role_accuracy": "42/43 = 98% (88-100%)",
+   "redacted_blocks_key": 31,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": 0,
+   "fn": 1
+  },
+  "all/edge": {
+   "named_precision_exact": "30/30 = 100% (89-100%)",
+   "named_recall_exact": "30/30 = 100% (89-100%)",
+   "named_precision_loose": "30/30 = 100% (89-100%)",
+   "named_recall_loose": "30/30 = 100% (89-100%)",
+   "role_accuracy": "30/30 = 100% (89-100%)",
+   "redacted_blocks_key": 25,
+   "redacted_blocks_pred": 21,
+   "redacted_count_matched": 21,
+   "fp": 0,
+   "fn": 0
+  },
+  "all/both": {
+   "named_precision_exact": "72/73 = 99% (93-100%)",
+   "named_recall_exact": "72/74 = 97% (91-99%)",
+   "named_precision_loose": "73/73 = 100% (95-100%)",
+   "named_recall_loose": "73/74 = 99% (93-100%)",
+   "role_accuracy": "72/73 = 99% (93-100%)",
+   "redacted_blocks_key": 56,
+   "redacted_blocks_pred": 49,
+   "redacted_count_matched": 49,
+   "fp": [],
+   "fn": [
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     "Johnny Brown",
+     "competition_advocate"
+    ]
+   ]
+  },
+  "signature/random": {
+   "named_precision_exact": "30/31 = 97% (84-99%)",
+   "named_recall_exact": "30/32 = 94% (80-98%)",
+   "named_precision_loose": "31/31 = 100% (89-100%)",
+   "named_recall_loose": "31/32 = 97% (84-99%)",
+   "role_accuracy": "31/31 = 100% (89-100%)",
+   "redacted_blocks_key": 17,
+   "redacted_blocks_pred": 17,
+   "redacted_count_matched": 17,
+   "fp": 0,
+   "fn": 1
+  },
+  "signature/edge": {
+   "named_precision_exact": "19/19 = 100% (83-100%)",
+   "named_recall_exact": "19/19 = 100% (83-100%)",
+   "named_precision_loose": "19/19 = 100% (83-100%)",
+   "named_recall_loose": "19/19 = 100% (83-100%)",
+   "role_accuracy": "19/19 = 100% (83-100%)",
+   "redacted_blocks_key": 11,
+   "redacted_blocks_pred": 11,
+   "redacted_count_matched": 11,
+   "fp": 0,
+   "fn": 0
+  },
+  "signature/both": {
+   "named_precision_exact": "49/50 = 98% (90-100%)",
+   "named_recall_exact": "49/51 = 96% (87-99%)",
+   "named_precision_loose": "50/50 = 100% (93-100%)",
+   "named_recall_loose": "50/51 = 98% (90-100%)",
+   "role_accuracy": "50/50 = 100% (93-100%)",
+   "redacted_blocks_key": 28,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": [],
+   "fn": [
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     "Johnny Brown",
+     "competition_advocate"
+    ]
+   ]
+  },
+  "raw_people_entries": 151,
+  "kept_people_entries": 150,
+  "drop_reasons": {
+   "quote not found in document": 1
+  },
+  "raw_named_entries_marked_redacted_or_not_spelled_as_in_document": [],
+  "kept_named_entries_with_redaction_marker_in_name": 0,
+  "need_by_date": {
+   "counts": {
+    "null_ok": 33,
+    "correct": 5,
+    "missed": 1
+   },
+   "precision": "5/5 = 100% (57-100%)",
+   "recall": "5/6 = 83% (44-97%)",
+   "errors": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "missed",
+     "2026-03-29",
+     null
+    ]
+   ]
+  },
+  "stated_pop_limit_days": {
+   "counts": {
+    "null_ok": 36,
+    "false_positive": 1,
+    "correct": 2
+   },
+   "precision": "2/3 = 67% (21-94%)",
+   "recall": "2/2 = 100% (34-100%)",
+   "errors": [
+    [
+     "d7207bb1b58346dc88493972f641561b",
+     "fp",
+     null,
+     180
+    ]
+   ]
+  },
+  "incumbent_piid": {
+   "counts": {
+    "correct": 13,
+    "null_ok": 26
+   },
+   "precision": "13/13 = 100% (77-100%)",
+   "recall": "13/13 = 100% (77-100%)",
+   "errors": []
+  },
+  "covered_piids": {
+   "precision": "12/12 = 100% (76-100%)",
+   "recall": "12/12 = 100% (76-100%)",
+   "diffs (missed, extra)": []
+  },
+  "market_research_methods": {
+   "precision": "48/54 = 89% (78-95%)",
+   "recall": "48/59 = 81% (70-89%)",
+   "diffs (missed, extra)": [
+    [
+     "c3461563b2b94dbca9f7535aecf6a325",
+     [],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "8637832a9e7d4c9fb46a3e6a408e774c",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "597e23efdbae4858881db82e3e9f1b39",
+     [
+      "notice_of_intent"
+     ],
+     []
+    ],
+    [
+     "d0de7be558744304be25dec192da2914",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "3e75fdad44b148dea75054643b0c6bec",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "0d6e901e95b249bf930c73593fd16475",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     [
+      "other",
+      "rfi"
+     ],
+     []
+    ],
+    [
+     "5e6b435738b24553b480e192ec14aa86",
+     [
+      "other"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "15b08347f2fa4283ac78eb1a86e40299",
+     [],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "424e6eab35514bce9c8b50bd37c1e65a",
+     [
+      "notice_of_intent"
+     ],
+     []
+    ],
+    [
+     "a6bbb244cd0444f0a8ac2a7bb8004c34",
+     [],
+     [
+      "procurement_history"
+     ]
+    ],
+    [
+     "de17f747dddb478b89c31008575a3a32",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "b729c725159c4f138864b4ac6cbc1017",
+     [],
+     [
+      "vendor_contact"
+     ]
+    ],
+    [
+     "12ba9d4b0fcf455ab50a0d05db46c22a",
+     [
+      "rfi"
+     ],
+     []
+    ],
+    [
+     "9157a4ea266f4e96a3f99e19a822fe32",
+     [
+      "vendor_contact"
+     ],
+     []
+    ]
+   ]
+  },
+  "market_research_methods_rfi=sources_sought": {
+   "precision": "48/54 = 89% (78-95%)",
+   "recall": "48/57 = 84% (73-91%)"
+  },
+  "redaction_significant": {
+   "accuracy": "37/39 = 95% (83-99%)",
+   "confusion (key, pred)": {
+    "no->no": 9,
+    "yes->yes": 25,
+    "unclear->unclear": 2,
+    "yes->no": 1,
+    "unclear->yes": 1,
+    "yes->unclear": 1
+   },
+   "errors": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "yes",
+     null,
+     "no"
+    ],
+    [
+     "ee787559fc674911bb7c08938124ce09",
+     "yes",
+     null,
+     "unclear"
+    ]
+   ]
+  }
+ },
+ "B": {
+  "run": "B",
+  "docs": 49,
+  "all/random": {
+   "named_precision_exact": "42/43 = 98% (88-100%)",
+   "named_recall_exact": "42/44 = 95% (85-99%)",
+   "named_precision_loose": "43/43 = 100% (92-100%)",
+   "named_recall_loose": "43/44 = 98% (88-100%)",
+   "role_accuracy": "42/43 = 98% (88-100%)",
+   "redacted_blocks_key": 31,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": 0,
+   "fn": 1
+  },
+  "all/edge": {
+   "named_precision_exact": "30/30 = 100% (89-100%)",
+   "named_recall_exact": "30/30 = 100% (89-100%)",
+   "named_precision_loose": "30/30 = 100% (89-100%)",
+   "named_recall_loose": "30/30 = 100% (89-100%)",
+   "role_accuracy": "30/30 = 100% (89-100%)",
+   "redacted_blocks_key": 25,
+   "redacted_blocks_pred": 21,
+   "redacted_count_matched": 21,
+   "fp": 0,
+   "fn": 0
+  },
+  "all/both": {
+   "named_precision_exact": "72/73 = 99% (93-100%)",
+   "named_recall_exact": "72/74 = 97% (91-99%)",
+   "named_precision_loose": "73/73 = 100% (95-100%)",
+   "named_recall_loose": "73/74 = 99% (93-100%)",
+   "role_accuracy": "72/73 = 99% (93-100%)",
+   "redacted_blocks_key": 56,
+   "redacted_blocks_pred": 49,
+   "redacted_count_matched": 49,
+   "fp": [],
+   "fn": [
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     "Johnny Brown",
+     "competition_advocate"
+    ]
+   ]
+  },
+  "signature/random": {
+   "named_precision_exact": "30/31 = 97% (84-99%)",
+   "named_recall_exact": "30/32 = 94% (80-98%)",
+   "named_precision_loose": "31/31 = 100% (89-100%)",
+   "named_recall_loose": "31/32 = 97% (84-99%)",
+   "role_accuracy": "31/31 = 100% (89-100%)",
+   "redacted_blocks_key": 17,
+   "redacted_blocks_pred": 17,
+   "redacted_count_matched": 17,
+   "fp": 0,
+   "fn": 1
+  },
+  "signature/edge": {
+   "named_precision_exact": "19/19 = 100% (83-100%)",
+   "named_recall_exact": "19/19 = 100% (83-100%)",
+   "named_precision_loose": "19/19 = 100% (83-100%)",
+   "named_recall_loose": "19/19 = 100% (83-100%)",
+   "role_accuracy": "19/19 = 100% (83-100%)",
+   "redacted_blocks_key": 11,
+   "redacted_blocks_pred": 11,
+   "redacted_count_matched": 11,
+   "fp": 0,
+   "fn": 0
+  },
+  "signature/both": {
+   "named_precision_exact": "49/50 = 98% (90-100%)",
+   "named_recall_exact": "49/51 = 96% (87-99%)",
+   "named_precision_loose": "50/50 = 100% (93-100%)",
+   "named_recall_loose": "50/51 = 98% (90-100%)",
+   "role_accuracy": "50/50 = 100% (93-100%)",
+   "redacted_blocks_key": 28,
+   "redacted_blocks_pred": 28,
+   "redacted_count_matched": 28,
+   "fp": [],
+   "fn": [
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     "Johnny Brown",
+     "competition_advocate"
+    ]
+   ]
+  },
+  "raw_people_entries": 156,
+  "kept_people_entries": 154,
+  "drop_reasons": {
+   "quote not found in document": 2
+  },
+  "raw_named_entries_marked_redacted_or_not_spelled_as_in_document": [],
+  "kept_named_entries_with_redaction_marker_in_name": 0,
+  "need_by_date": {
+   "counts": {
+    "null_ok": 33,
+    "missed": 2,
+    "correct": 4
+   },
+   "precision": "4/4 = 100% (51-100%)",
+   "recall": "4/6 = 67% (30-90%)",
+   "errors": [
+    [
+     "d7207bb1b58346dc88493972f641561b",
+     "missed",
+     "2026-03-31",
+     null
+    ],
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "missed",
+     "2026-03-29",
+     null
+    ]
+   ]
+  },
+  "stated_pop_limit_days": {
+   "counts": {
+    "null_ok": 36,
+    "correct": 3
+   },
+   "precision": "3/3 = 100% (44-100%)",
+   "recall": "3/3 = 100% (44-100%)",
+   "errors": []
+  },
+  "incumbent_piid": {
+   "counts": {
+    "correct": 13,
+    "null_ok": 26
+   },
+   "precision": "13/13 = 100% (77-100%)",
+   "recall": "13/13 = 100% (77-100%)",
+   "errors": []
+  },
+  "covered_piids": {
+   "precision": "12/12 = 100% (76-100%)",
+   "recall": "12/12 = 100% (76-100%)",
+   "diffs (missed, extra)": []
+  },
+  "market_research_methods": {
+   "precision": "46/51 = 90% (79-96%)",
+   "recall": "46/59 = 78% (66-87%)",
+   "diffs (missed, extra)": [
+    [
+     "c3461563b2b94dbca9f7535aecf6a325",
+     [],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "8637832a9e7d4c9fb46a3e6a408e774c",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "597e23efdbae4858881db82e3e9f1b39",
+     [
+      "notice_of_intent",
+      "procurement_history"
+     ],
+     []
+    ],
+    [
+     "1996aeb1946e433faa4f3e0eaec71a6b",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "d0de7be558744304be25dec192da2914",
+     [
+      "other"
+     ],
+     [
+      "rfi"
+     ]
+    ],
+    [
+     "3e75fdad44b148dea75054643b0c6bec",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "0d6e901e95b249bf930c73593fd16475",
+     [
+      "other"
+     ],
+     []
+    ],
+    [
+     "8a1690068b01421d9c9271f6f9ef0fed",
+     [
+      "other",
+      "rfi"
+     ],
+     []
+    ],
+    [
+     "5e6b435738b24553b480e192ec14aa86",
+     [
+      "other"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "15b08347f2fa4283ac78eb1a86e40299",
+     [
+      "vendor_contact"
+     ],
+     []
+    ],
+    [
+     "424e6eab35514bce9c8b50bd37c1e65a",
+     [
+      "notice_of_intent"
+     ],
+     [
+      "other_database_search"
+     ]
+    ],
+    [
+     "de17f747dddb478b89c31008575a3a32",
+     [],
+     [
+      "other"
+     ]
+    ],
+    [
+     "12ba9d4b0fcf455ab50a0d05db46c22a",
+     [
+      "rfi"
+     ],
+     []
+    ]
+   ]
+  },
+  "market_research_methods_rfi=sources_sought": {
+   "precision": "46/50 = 92% (81-97%)",
+   "recall": "46/57 = 81% (69-89%)"
+  },
+  "redaction_significant": {
+   "accuracy": "36/39 = 92% (80-97%)",
+   "confusion (key, pred)": {
+    "no->no": 9,
+    "yes->yes": 24,
+    "unclear->unclear": 2,
+    "yes->no": 1,
+    "unclear->yes": 1,
+    "yes->unclear": 2
+   },
+   "errors": [
+    [
+     "2590b4fe004f47f8a9d9f64ec3922f05",
+     "yes",
+     null,
+     "no"
+    ],
+    [
+     "3378022faa794bcca0a6812e8447f288",
+     "yes",
+     null,
+     "unclear"
+    ],
+    [
+     "ee787559fc674911bb7c08938124ce09",
+     "yes",
+     null,
+     "unclear"
+    ]
+   ]
+  }
+ }
+}

@@ -61,7 +61,7 @@ Code and issue tracker: {project_url}
 | `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
-| `analysis/` | **experimental, AI-generated** tables (field extraction and theme tags), a static snapshot; see [Experimental: AI-generated tables](#experimental-ai-generated-tables) |
+| `analysis/` | **experimental, AI-generated** tables (field extraction, refreshed daily; theme tags, a one-off snapshot); see [Experimental: AI-generated tables](#experimental-ai-generated-tables) |
 
 `attachments` and `pages` repeat the main fields of their notice right after
 `notice_id`, so every table shows which J&A a row belongs to: `agency`,
@@ -110,9 +110,9 @@ made when the tables are published; `notices` is the source.
      justification. Some may be notices of intent with no J&A attached, and a
      few are unrelated (e.g. "Fair Opportunity" industry updates). The
      experimental `is_ja` field in `analysis/extractions.parquet` says
-     whether a notice's documents actually are a J&A, for the notices that
-     snapshot covers (it is not rebuilt daily, so Special Notices collected
-     after it have no `is_ja` yet).
+     whether a notice's documents actually are a J&A, once the daily
+     extraction has reached it (newly collected notices get it after a later
+     run, within that run's spend cap).
 
    `type` is kept as SAM gives it. When a notice appears in more than one
    file, the row with the latest `PostedDate` is kept (ties go to the active
@@ -259,17 +259,17 @@ use it for any purpose, including commercially, without asking.
 """
 
 
-# Static text: the analysis/ tables are a one-off snapshot, uploaded by hand,
-# and are NOT rebuilt by the daily job. Every figure here is copied from
+# Static text. analysis/extractions.parquet is refreshed by
+# .github/workflows/extract-daily.yml; the theme tables are a one-off
+# snapshot, uploaded by hand. Every figure here is copied from
 # docs/field_extraction.md and docs/analysis_validation.md; change them only
-# together with those documents and with a re-upload of analysis/.
+# together with those documents, a prompt-version bump or a theme re-upload.
 # Inserted with str.format as a value, so braces here are literal.
 EXPERIMENTAL_SECTION = """## Experimental: AI-generated tables
 
 The tables under `analysis/` were filled in by a language model (Claude Haiku
 5.5, `claude-haiku-5-5`). They are not 100% right: check anything you rely on
-against the document. Snapshot built 2026-10-18 from dataset revision
-`11a221ab5ae9583a95ae645883de75237a46d44d`; not refreshed daily.
+against the document.
 
 **Extracted from each J&A** (`analysis/extractions.parquet`, one row per notice with a document):
 
@@ -279,12 +279,44 @@ against the document. Snapshot built 2026-10-18 from dataset revision
 | `authority_cited`, `authority_plain` | the legal authority cited for not competing, and a plain-language category |
 | `summary_model_written` | why the agency is not competing it (the model's words) |
 | `estimated_value_usd`, `value_basis`, `value_redacted` | the value stated in the J&A, what it covers, and whether it is redacted |
-| `vendor`, `additional_vendors` | the proposed contractor(s) |
+| `vendor`, `additional_vendors`, `covers_multiple_actions` | the proposed contractor(s), and whether the J&A covers more than one action |
 | `period_of_performance`, `signature_date` | how long the work runs; the latest signature date |
 | `market_research_summary_model_written`, `other_firms_named` | the market research described, and other firms named |
-| `redaction_detected` | whether redactions were detected |
+| `market_research_methods` | the market-research methods the document says were used (codes such as `sources_sought`, `rfi`, `sam_search`, `vendor_contact`) |
+| `redaction_detected`, `redaction_evidence` | whether redactions were detected, and what showed it ("not detected" is not "no") |
+| `redaction_significant` | `yes` / `no` / `unclear`: the model's judgement whether the redactions remove substance (value, prices, rationale, vendor, market-research results) rather than only names and contact details |
+| `people_named`, `people_signature_block`, `people_redacted_blocks`, `people_json` | every person the document names (signers, approvers, reviewers, points of contact, vendor staff, anyone else); the subset in signature, approval and review blocks; the number of those blocks whose name is redacted; and the full list, each with name, title, organization, role, a one-sentence description (model-written), a redacted flag and the quote |
+| `need_by_date` | a hard deadline the document says the requirement must be met by |
+| `stated_pop_limit_days` | a stated cap on the period of performance, in days ("not to exceed six months" gives 180) |
+| `covered_piids`, `incumbent_piid` | contract, order or modification numbers this action awards, modifies, extends or is placed under; the current or predecessor contract |
+| `bridge_or_extension`, `prior_extension_count` | whether this bridges or extends an existing contract; how many earlier extensions the document states ("fourth bridge" gives 3) |
+| `contract_types`, `is_letter_contract` | the contract type(s) as stated; whether it is a letter contract or undefinitized action |
+| `funding_sources` | the named appropriation(s) or fund(s) |
+| `urgency_trigger` | only when urgency is cited, what caused it: `congressional_or_oversight_deadline`, `bid_protest`, `contractor_default_or_termination`, `emergency_or_disaster`, `agency_planning_delay` or `other` |
 
-Each factual field has a `*_quote` column with the verbatim text it came from.
+Each single-value field has a `*_quote` column with the verbatim text it came
+from (`value_quote_pages` and `signature_quote_pages` give the page). The list
+fields (`people`, `market_research_methods`, `contract_types`,
+`funding_sources`) keep a quote per item in `people_json` or `record_json`
+(the full stored record). Every row also says its `extract_version` (the
+prompt), `checks_version`, `model` and `dataset_revision`, and lists in
+`values_dropped_by_checks` anything the checks removed. Notices with no
+usable text have `status` `skipped` and a `skip_reason`.
+
+**Known weak spots** (validation numbers in [docs/field_extraction.md](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/field_extraction.md)):
+
+* `contract_types` misses about a third of the types a document states (11
+  of 18 found in the validation sample).
+* `market_research_methods` follows fuzzy category boundaries: treat it as a
+  screen, not a count.
+* `need_by_date` and `stated_pop_limit_days` had only 2-6 cases in the
+  validation sample, too few to measure how often they are right.
+* People: names are copied from the public documents as printed, so they can
+  carry layout errors (a title glued onto a name, a stray extra word) and
+  digital-signature stamps such as `SMITH.JOHN.A.1234567890`. A redacted name
+  is a null `name` in `people_json` and `[name redacted]` in
+  `people_signature_block`. Redaction blocks with no visible title, and
+  black-box redactions in typed PDFs, are usually missed.
 
 **Themes** (`analysis/theme_tags.parquet`: one row per tagged passage, with its quote and page; `analysis/theme_status.parquet`: each notice's status per theme):
 
@@ -308,6 +340,23 @@ Each factual field has a `*_quote` column with the verbatim text it came from.
   The model sees only the passages around the hits and answers a yes/no
   question with a quote; this runs twice, and a tag is kept only if its quote
   is found in the document.
+
+**How the tables are updated.**
+
+* **Extractions** (`analysis/extractions.parquet`) are refreshed after each
+  successful daily collection run: notices with no row at the current prompt
+  version are extracted, newest posted first, until that run's spend cap,
+  and the table is republished. Each row says its `extract_version` and the
+  dataset commit it was read from (`dataset_revision`). When the prompt
+  changes, older rows are re-extracted the same way, a cap's worth per run.
+  The current prompt is `2026-10-21.extract6`; until its backfill finishes
+  (expected within a few days of 2026-10-21), rows from the older
+  `2026-10-17.extract2` prompt, which have none of the newer fields, sit
+  next to `extract6` rows. Filter on `extract_version` to use one version.
+* **Themes** (`analysis/theme_tags.parquet`, `analysis/theme_status.parquet`)
+  are not refreshed: they are a one-off snapshot built 2026-10-18 from
+  dataset revision `11a221ab5ae9583a95ae645883de75237a46d44d`, and notices collected after it have no theme
+  status.
 
 The model name and every prompt are in [prompts.yaml](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.yaml).
 """

@@ -1,0 +1,323 @@
+{
+ "extract6_A": {
+  "extracted": 49,
+  "of": 50,
+  "not_in_sample": [],
+  "failures": [
+   [
+    "b5c3c23b",
+    "ModelError: incomplete response (max_tokens)"
+   ]
+  ],
+  "invented_kind_entries": 0,
+  "invented_kinds": [],
+  "dropped_by_reason": {
+   "contract_types: stated not in its quote": 3,
+   "funding_sources: quote not found in document": 1,
+   "incumbent_piid: quote not found in document": 1,
+   "market_research_methods: quote not found in document": 2
+  },
+  "ICE_53d80bf1_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "ICE_53d80bf1_raw_funding_facts": [
+   {
+    "kind": "funding_source",
+    "value": "One Big Beautiful Bill Act",
+    "quote": "(e) Type of funding: One Big Beautiful Bill Act"
+   }
+  ],
+  "ICE_8febc2f3_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "VA_CCN_085682f1": {
+   "output_tokens": 13332,
+   "calls": 1,
+   "cost_usd": 0.007623,
+   "people": 5,
+   "answer_chars": 6753
+  },
+  "d7207bb1_stated_pop_limit_days": null,
+  "cost_random24": {
+   "n": 24,
+   "usd_per_notice": 0.00435,
+   "output_tokens_per_notice": 7554,
+   "calls": 25
+  },
+  "cost_random_and_edge": {
+   "n": 39,
+   "usd_per_notice": 0.00453,
+   "output_tokens_per_notice": 7939,
+   "calls": 40
+  },
+  "cost_trial17_without_va_ccn": {
+   "n": 17,
+   "usd_per_notice": 0.00552,
+   "output_tokens_per_notice": 9413,
+   "calls": 18
+  },
+  "cost_all_extracted": {
+   "n": 49,
+   "usd_per_notice": 0.0049,
+   "output_tokens_per_notice": 8578,
+   "calls": 50
+  },
+  "projected_full_pass_10033_usd_at_random24_rate": 43.6,
+  "core_fields_agreement": {
+   "vs_extract3_A": "369/390",
+   "vs_extract3_B": "369/390"
+  },
+  "spent_usd_recorded": 0.2402
+ },
+ "extract6_B": {
+  "extracted": 49,
+  "of": 50,
+  "not_in_sample": [],
+  "failures": [
+   [
+    "b5c3c23b",
+    "ModelError: incomplete response (max_tokens)"
+   ]
+  ],
+  "invented_kind_entries": 0,
+  "invented_kinds": [],
+  "dropped_by_reason": {
+   "contract_types: stated not in its quote": 3,
+   "market_research_methods: quote not found in document": 2,
+   "people: quote not found in document": 2,
+   "redaction_significant: quote not found in document": 1
+  },
+  "ICE_53d80bf1_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "ICE_53d80bf1_raw_funding_facts": [
+   {
+    "kind": "funding_source",
+    "value": "One Big Beautiful Bill Act",
+    "quote": "(e) Type of funding: One Big Beautiful Bill Act"
+   }
+  ],
+  "ICE_8febc2f3_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "VA_CCN_085682f1": {
+   "output_tokens": 12584,
+   "calls": 1,
+   "cost_usd": 0.007249,
+   "people": 5,
+   "answer_chars": 6554
+  },
+  "d7207bb1_stated_pop_limit_days": null,
+  "cost_random24": {
+   "n": 24,
+   "usd_per_notice": 0.00437,
+   "output_tokens_per_notice": 7639,
+   "calls": 24
+  },
+  "cost_random_and_edge": {
+   "n": 39,
+   "usd_per_notice": 0.00446,
+   "output_tokens_per_notice": 7825,
+   "calls": 39
+  },
+  "cost_trial17_without_va_ccn": {
+   "n": 17,
+   "usd_per_notice": 0.00565,
+   "output_tokens_per_notice": 9648,
+   "calls": 18
+  },
+  "cost_all_extracted": {
+   "n": 49,
+   "usd_per_notice": 0.00491,
+   "output_tokens_per_notice": 8578,
+   "calls": 50
+  },
+  "projected_full_pass_10033_usd_at_random24_rate": 43.8,
+  "core_fields_agreement": {
+   "vs_extract3_A": "366/390",
+   "vs_extract3_B": "366/390"
+  },
+  "spent_usd_recorded": 0.2404
+ },
+ "extract5_A": {
+  "extracted": 48,
+  "of": 50,
+  "not_in_sample": [],
+  "failures": [
+   [
+    "085682f1",
+    "ModelError: incomplete response (max_tokens)"
+   ],
+   [
+    "b5c3c23b",
+    "ModelError: incomplete response (max_tokens)"
+   ]
+  ],
+  "invented_kind_entries": 4,
+  "invented_kinds": [
+   [
+    "8a169006",
+    "quantity"
+   ],
+   [
+    "f157c0a4",
+    "prior_ceiling"
+   ],
+   [
+    "f157c0a4",
+    "ordering_period_expired"
+   ],
+   [
+    "560de149",
+    "square_footage"
+   ]
+  ],
+  "dropped_by_reason": {
+   "contract_types: stated not in its quote": 2,
+   "facts: unknown fact kind": 4,
+   "incumbent_piid: quote not found in document": 1,
+   "market_research_methods: quote not found in document": 1,
+   "people: quote not found in document": 1,
+   "people.title: title not found in document": 3,
+   "redaction_significant: quote not found in document": 1
+  },
+  "ICE_53d80bf1_funding_sources": [],
+  "ICE_53d80bf1_raw_funding_facts": [],
+  "ICE_8febc2f3_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "VA_CCN_085682f1": "not extracted",
+  "d7207bb1_stated_pop_limit_days": 180,
+  "cost_random24": {
+   "n": 24,
+   "usd_per_notice": 0.00425,
+   "output_tokens_per_notice": 7396,
+   "calls": 24
+  },
+  "cost_random_and_edge": {
+   "n": 39,
+   "usd_per_notice": 0.00451,
+   "output_tokens_per_notice": 7912,
+   "calls": 40
+  },
+  "cost_trial17_without_va_ccn": {
+   "n": 17,
+   "usd_per_notice": 0.00493,
+   "output_tokens_per_notice": 8296,
+   "calls": 17
+  },
+  "cost_all_extracted": {
+   "n": 48,
+   "usd_per_notice": 0.00471,
+   "output_tokens_per_notice": 8208,
+   "calls": 49
+  },
+  "projected_full_pass_10033_usd_at_random24_rate": 42.6,
+  "core_fields_agreement": {
+   "vs_extract3_A": "363/390",
+   "vs_extract3_B": "363/390"
+  },
+  "spent_usd_recorded": 0.226
+ },
+ "extract5_B": {
+  "extracted": 49,
+  "of": 50,
+  "not_in_sample": [],
+  "failures": [
+   [
+    "b5c3c23b",
+    "ModelError: incomplete response (max_tokens)"
+   ]
+  ],
+  "invented_kind_entries": 8,
+  "invented_kinds": [
+   [
+    "0d6e901e",
+    "quantity"
+   ],
+   [
+    "f157c0a4",
+    "original_ceiling"
+   ],
+   [
+    "f157c0a4",
+    "new_ceiling"
+   ],
+   [
+    "f157c0a4",
+    "idiq_award_date"
+   ],
+   [
+    "f157c0a4",
+    "ordering_period_expiration"
+   ],
+   [
+    "f157c0a4",
+    "task_order_9_expiration"
+   ],
+   [
+    "f157c0a4",
+    "mechanism_approval_date"
+   ],
+   [
+    "1996aeb1",
+    "quantity"
+   ]
+  ],
+  "dropped_by_reason": {
+   "contract_types: stated not in its quote": 2,
+   "facts: unknown fact kind": 8,
+   "incumbent_piid: quote not found in document": 1,
+   "market_research_methods: quote not found in document": 2,
+   "need_by_date: quote not found in document": 1,
+   "people: quote not found in document": 2,
+   "redaction_significant: quote not found in document": 2,
+   "stated_pop_limit_days: duration not in its quote": 1
+  },
+  "ICE_53d80bf1_funding_sources": [],
+  "ICE_53d80bf1_raw_funding_facts": [],
+  "ICE_8febc2f3_funding_sources": [
+   "One Big Beautiful Bill Act"
+  ],
+  "VA_CCN_085682f1": {
+   "output_tokens": 13764,
+   "calls": 1,
+   "cost_usd": 0.007836,
+   "people": 5,
+   "answer_chars": 6519
+  },
+  "d7207bb1_stated_pop_limit_days": null,
+  "cost_random24": {
+   "n": 24,
+   "usd_per_notice": 0.0046,
+   "output_tokens_per_notice": 7792,
+   "calls": 26
+  },
+  "cost_random_and_edge": {
+   "n": 39,
+   "usd_per_notice": 0.00467,
+   "output_tokens_per_notice": 8034,
+   "calls": 42
+  },
+  "cost_trial17_without_va_ccn": {
+   "n": 17,
+   "usd_per_notice": 0.00544,
+   "output_tokens_per_notice": 8908,
+   "calls": 18
+  },
+  "cost_all_extracted": {
+   "n": 49,
+   "usd_per_notice": 0.00493,
+   "output_tokens_per_notice": 8479,
+   "calls": 52
+  },
+  "projected_full_pass_10033_usd_at_random24_rate": 46.2,
+  "core_fields_agreement": {
+   "vs_extract3_A": "368/390",
+   "vs_extract3_B": "367/390"
+  },
+  "spent_usd_recorded": 0.2414
+ },
+ "extract6_A_vs_B_core_fields": "367/390",
+ "extract5_A_vs_B_core_fields": "365/390"
+}

@@ -1,0 +1,2 @@
+{"notice_id": "085682f126fe48469dc67e2031a3f08a", "model": "claude-haiku-5-5", "error": "ModelError: incomplete response (max_tokens)", "at": "2026-10-20T22:29:35Z"}
+{"notice_id": "b5c3c23b4e65464dadfc362f9fc364da", "model": "claude-haiku-5-5", "error": "ModelError: incomplete response (max_tokens)", "at": "2026-10-20T22:33:09Z"}
