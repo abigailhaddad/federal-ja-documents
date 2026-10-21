@@ -1,0 +1,95 @@
+name: Daily J&A digest email
+
+# Builds the daily "Whoa J&As" email (python -m federal_ja.analysis digest,
+# docs/digest.md) and sends it through Buttondown.
+#
+# When it runs:
+# * after each "Daily experimental field extraction" run that the daily
+#   collection triggered (not after manual backfill runs), so the picks can use
+#   that day's extraction fields;
+# * after each "Daily J&A collection" run, but only while the extraction job is
+#   off (EXTRACT_DAILY_ENABLED != 'true'); otherwise the extraction run above
+#   follows and triggers this;
+# * a fallback schedule (22:30 UTC) for days when neither of the above fired.
+#   With no new notices it does nothing if a digest already went out that day
+#   (Eastern time); otherwise it sends the short "nothing whoa-worthy (0 new
+#   notices)" email, which says the collection did not bring anything new.
+# Every trigger uses the same saved watermark (analysis/digest_state.json in the
+# dataset), so a notice is covered once: a second run on the same day only sees
+# notices collected after the first one's email.
+#
+# Sending: automatic runs send only when the repository variable
+# DIGEST_ENABLED is 'true'; otherwise the workflow_run triggers build a dry run
+# and upload it as an artifact (the schedule does nothing). Manual runs
+# (workflow_dispatch) are dry runs unless dry_run is unticked.
+# workflow_run and schedule triggers only fire for the workflow file on the
+# default branch.
+#
+# Secrets: ANTHROPIC_API_KEY, HF_TOKEN (writes the state file),
+# BUTTONDOWN_API_KEY. Variable: ANTHROPIC_WORKSPACE_ID (optional).
+on:
+  workflow_run:
+    workflows: ["Daily experimental field extraction", "Daily J&A collection"]
+    types: [completed]
+  schedule:
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (build the digest and upload it; send nothing, save no state)"
+        type: boolean
+        default: true
+      max_usd:
+        description: "Spend cap for this run's model calls (USD)"
+        default: "0.35"
+
+concurrency:
+  group: digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'schedule' && vars.DIGEST_ENABLED == 'true') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.name == 'Daily experimental field extraction' &&
+       github.event.workflow_run.event == 'workflow_run' &&
+       (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.name == 'Daily J&A collection' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       vars.EXTRACT_DAILY_ENABLED != 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest -q
+      - name: Build (and send) the digest
+        shell: bash  # bash -eo pipefail
+        run: |
+          MODE="--dry-run"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.dry_run }}" = "false" ]; then MODE="--send"; fi
+          elif [ "${{ vars.DIGEST_ENABLED }}" = "true" ]; then
+            MODE="--send"
+          fi
+          echo "mode: $MODE"
+          uv run python -m federal_ja.analysis digest $MODE --out work/digest \
+            --max-usd "${{ inputs.max_usd || '0.35' }}" 2> >(tee work_digest.log >&2)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: digest
+          path: |
+            work/digest/
+            work_digest.log
+          if-no-files-found: ignore

@@ -16,9 +16,11 @@ Special Notices.
 src/federal_ja/
   collect/     builds the dataset from SAM.gov and publishes it (this README)
   analysis/    EXPERIMENTAL AI labels (themes, extracted details) and the reader spreadsheet (below)
+  digest/      EXPERIMENTAL daily email of the most remarkable new J&As (below)
 tests/         tests (collection, and the analysis package on synthetic fixtures)
 docs/analysis_validation.md   how the analysis categories were validated
 docs/field_extraction.md      how field extraction works and how it was checked
+docs/digest.md                the daily "Whoa J&As" email digest
 .github/workflows/daily.yml   daily collection job
 ```
 
@@ -338,6 +340,28 @@ at the dataset commit the AI tables were built from, so every row joins.
   reads the notice, attachment and page tables at the same commit as the AI
   tables (`--revision`, default `main`); those tables only grow, so every
   notice an AI row was built from is there.
+
+## Daily email digest (`federal_ja.analysis digest`, experimental)
+
+A short daily email, sent through [Buttondown](https://buttondown.com), with
+up to five of the most remarkable J&A notices first collected since the last
+email (fewer, or none, when nothing stands out): a headline, why it is
+notable, one or two verbatim quotes with their page, and links. Claude picks
+and writes them up; code checks that every quote is in the notice's text and
+that every dollar figure comes from a verified quote or a quote-checked
+extraction value, and drops what fails. Every email ends with a one-line list
+of all the new notices it covered. About $0.10 a day ($0.01-0.14 in a 7-day
+backtest).
+
+```sh
+uv run python -m federal_ja.analysis digest --dry-run --out work/digest   # digest.md + picks.json, sends nothing
+```
+
+`.github/workflows/digest.yml` runs it after the daily extraction (or
+collection) and sends only when the repository variable `DIGEST_ENABLED` is
+`true`. What is "new" is tracked with a watermark in
+`analysis/digest_state.json`, saved only after a successful send. Rubric,
+checks, cost, triggers and how to turn it on: [docs/digest.md](docs/digest.md).
 
 ## License
 

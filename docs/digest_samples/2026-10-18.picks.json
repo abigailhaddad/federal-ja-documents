@@ -1,0 +1,156 @@
+{
+ "experimental": true,
+ "digest_version": "2026-10-21.digest2",
+ "mode": "dry_run",
+ "run_at": "2026-10-21T16:30:24.588814+00:00",
+ "as_of": "2026-10-18T22:00:00+00:00",
+ "window": {
+  "kind": "manual",
+  "after": "2026-10-18T00:00:00+00:00",
+  "until": "2026-10-18T23:59:59+00:00",
+  "notices_first_seen_in_window": 89,
+  "max_first_seen_at": "2026-10-18T20:43:38+00:00"
+ },
+ "dataset_revision": "e93882dcc18c1d76244974093b3696fd5e5e016e",
+ "candidates": 12,
+ "excluded": {
+  "posted_more_than_14_days_before": 77
+ },
+ "with_extraction_row": 0,
+ "with_document_text": 8,
+ "budget": {
+  "max_usd": 0.18,
+  "spent": 0.060214,
+  "calls": [
+   {
+    "stage": "rank",
+    "model": "claude-sonnet-5-5",
+    "input_tokens": 28254,
+    "output_tokens": 754,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.060214,
+    "worst_case_usd": 0.1204
+   }
+  ]
+ },
+ "ranked": [
+  "f699fc3bd0d94e1d8474ba6400d7c0b9",
+  "9c53bc2e46c04e79b1b4004f2c091a9d",
+  "9862d91fd94344fe8b254d1de6c42fe2",
+  "83290de9c8a349d3ae210f489c7397e7",
+  "87fa4242d7d34586a4e47988e2482a3a",
+  "031ed3737db44d93ba3228c461ce4d61",
+  "a66e6d4eb0264c4893ac951b8449acb4",
+  "22d6a970a8964c4ba69a3c5c9b780c66",
+  "a82b39c3158d4794be208a6295573b59",
+  "8d92db594b3342b7b974f6fc92b3ef1f",
+  "b4867188261047ae980a7c1ee7bd8df3",
+  "5e3c8c2e77644ae885acf3f5b8c58597"
+ ],
+ "model_answer": {
+  "picks": [
+   {
+    "notice_id": "22d6a970a8964c4ba69a3c5c9b780c66",
+    "headline": "Navy sole-sources more KPMG audit, AI and budget-system work, citing Congress and SecDef urgency",
+    "why": "The Navy plans a sole-source cost-plus-fixed-fee modification to KPMG for a Rapid Response Team, a Navy Budget Orchestration System and Foundry data objects. The document cites a congressional FY28 auditability mandate and a Secretary of Defense memo calling anything less than the 2028 goal \"unacceptable\".",
+    "quotes": [
+     {
+      "text": "In June 2025, the Secretary of Defense signed a memorandum reiterating the urgency of this goal, stating that anything less than achieving the 2028 goal as \"unacceptable\"",
+      "page": "JEFO redact_Redacted.pdf, page 3"
+     },
+     {
+      "text": "The current Navy budget process operates across fragmented organizations, disconnected workflows, and separate data environments, which necessitates extensive manual coordination.",
+      "page": "JEFO redact_Redacted.pdf, page 1"
+     }
+    ],
+    "vendor": "KPMG",
+    "value": "",
+    "authority": "10 U.S.C. 3406(c)(5)"
+   },
+   {
+    "notice_id": "87fa4242d7d34586a4e47988e2482a3a",
+    "headline": "ICE sole-sources Hootsuite social media platform with AI and visual recognition",
+    "why": "ICE's Office of Public Affairs wants Hootsuite licenses via Carahsoft, citing proprietary AI trained on twelve years of social media data and image and video recognition. The document also says it will help raise awareness about victims of crimes linked to immigration.",
+    "quotes": [
+     {
+      "text": "Proprietary AI capability unavailable from other sources. Carahsoft provides access to the platform’s proprietary AI capability, Wisdom, which has been trained on twelve years of historical social media data.",
+      "page": "1.5.1-BNJ_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Carahsoft Technology Corp.",
+    "value": "",
+    "authority": "FAR 8.401(b)"
+   }
+  ]
+ },
+ "picks": [
+  {
+   "notice_id": "22d6a970a8964c4ba69a3c5c9b780c66",
+   "rank": 1,
+   "headline": "Navy sole-sources more KPMG audit, AI and budget-system work, citing Congress and SecDef urgency",
+   "why": "The Navy plans a sole-source cost-plus-fixed-fee modification to KPMG for a Rapid Response Team, a Navy Budget Orchestration System and Foundry data objects. The document cites a congressional FY28 auditability mandate and a Secretary of Defense memo calling anything less than the 2028 goal \"unacceptable\".",
+   "quotes": [
+    {
+     "text": "In June 2025, the Secretary of Defense signed a memorandum reiterating the urgency of this goal, stating that anything less than achieving the 2028 goal as \"unacceptable\"",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "186bca266c9147849a24dbc8414a39eb",
+       "page_number": 3,
+       "text_source": "transcription"
+      }
+     ],
+     "where": "JEFO redact_Redacted.pdf, p. 3 (machine-transcribed page)",
+     "model_page": "JEFO redact_Redacted.pdf, page 3"
+    },
+    {
+     "text": "The current Navy budget process operates across fragmented organizations, disconnected workflows, and separate data environments, which necessitates extensive manual coordination.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "186bca266c9147849a24dbc8414a39eb",
+       "page_number": 1,
+       "text_source": "transcription"
+      }
+     ],
+     "where": "JEFO redact_Redacted.pdf, p. 1 (machine-transcribed page)",
+     "model_page": "JEFO redact_Redacted.pdf, page 1"
+    }
+   ],
+   "vendor": "KPMG",
+   "value": null,
+   "authority": "10 U.S.C. 3406(c)(5)",
+   "model_rank": 1
+  },
+  {
+   "notice_id": "87fa4242d7d34586a4e47988e2482a3a",
+   "rank": 2,
+   "headline": "ICE sole-sources Hootsuite social media platform with AI and visual recognition",
+   "why": "ICE's Office of Public Affairs wants Hootsuite licenses via Carahsoft, citing proprietary AI trained on twelve years of social media data and image and video recognition. The document also says it will help raise awareness about victims of crimes linked to immigration.",
+   "quotes": [
+    {
+     "text": "Proprietary AI capability unavailable from other sources. Carahsoft provides access to the platform’s proprietary AI capability, Wisdom, which has been trained on twelve years of historical social media data.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "1fe83ebae23940f08b19efb918d71953",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "1.5.1-BNJ_Redacted.pdf, p. 2",
+     "model_page": "1.5.1-BNJ_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Carahsoft Technology Corp.",
+   "value": null,
+   "authority": "FAR 8.401(b)",
+   "model_rank": 2
+  }
+ ],
+ "dropped_by_checks": [],
+ "subject": "Whoa J&As — Oct 18: Navy sole-sources more KPMG audit, AI and budget-system work, citing Congress and SecDef urgency",
+ "body": "## 1. Navy sole-sources more KPMG audit, AI and budget-system work, citing Congress and SecDef urgency\n\n**DEPT OF THE NAVY (DEPT OF DEFENSE) · KPMG · 10 U.S.C. 3406(c)(5)**  \n*Posted 2026-10-07, award N0018922DZ015, “Financial Management Data Transformation, Data Analytics and Data Engineering Services”*\n\nThe Navy plans a sole-source cost-plus-fixed-fee modification to KPMG for a Rapid Response Team, a Navy Budget Orchestration System and Foundry data objects. The document cites a congressional FY28 auditability mandate and a Secretary of Defense memo calling anything less than the 2028 goal \"unacceptable\".\n\n> “In June 2025, the Secretary of Defense signed a memorandum reiterating the urgency of this goal, stating that anything less than achieving the 2028 goal as \"unacceptable\"”  \n> — JEFO redact_Redacted.pdf, p. 3 (machine-transcribed page)\n\n> “The current Navy budget process operates across fragmented organizations, disconnected workflows, and separate data environments, which necessitates extensive manual coordination.”  \n> — JEFO redact_Redacted.pdf, p. 1 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/22d6a970a8964c4ba69a3c5c9b780c66/view) · [JEFO redact_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/22d6a970a8964c4ba69a3c5c9b780c66/186bca266c9147849a24dbc8414a39eb_JEFO_redact_Redacted.pdf)\n\n## 2. ICE sole-sources Hootsuite social media platform with AI and visual recognition\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Carahsoft Technology Corp. · FAR 8.401(b)**  \n*Posted 2026-10-08, award 70RTAC26A00000011, “Social Media Management Support Services”*\n\nICE's Office of Public Affairs wants Hootsuite licenses via Carahsoft, citing proprietary AI trained on twelve years of social media data and image and video recognition. The document also says it will help raise awareness about victims of crimes linked to immigration.\n\n> “Proprietary AI capability unavailable from other sources. Carahsoft provides access to the platform’s proprietary AI capability, Wisdom, which has been trained on twelve years of historical social media data.”  \n> — 1.5.1-BNJ_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/87fa4242d7d34586a4e47988e2482a3a/view) · [1.5.1-BNJ_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/87fa4242d7d34586a4e47988e2482a3a/1fe83ebae23940f08b19efb918d71953_1.5.1-BNJ_Redacted.pdf)\n\n## All new notices (12)\n\n- ★ Navy · Financial Management Data Transformation, Data Analytics and Data Engineering Services · [SAM.gov](https://sam.gov/opp/22d6a970a8964c4ba69a3c5c9b780c66/view)\n- ★ US Immigration and Customs Enforcement · Social Media Management Support Services · [SAM.gov](https://sam.gov/opp/87fa4242d7d34586a4e47988e2482a3a/view)\n- Defense Logistics Agency · 1720 - Justifications and Approvals Notice for the procurement of Navy spares · [SAM.gov](https://sam.gov/opp/9c53bc2e46c04e79b1b4004f2c091a9d/view)\n- Defense Logistics Agency · 1720 - Justifications and Approvals Notice for the procurement of Navy spares · [SAM.gov](https://sam.gov/opp/9862d91fd94344fe8b254d1de6c42fe2/view)\n- Defense Logistics Agency · 59--TERMINAL BOX · [SAM.gov](https://sam.gov/opp/83290de9c8a349d3ae210f489c7397e7/view)\n- Federal LAW Enforcement Training Center · FLETC WMATA Smart Benefits · [SAM.gov](https://sam.gov/opp/031ed3737db44d93ba3228c461ce4d61/view)\n- Federal LAW Enforcement Training Center · FLETC WMATA Smart Benefits · [SAM.gov](https://sam.gov/opp/a66e6d4eb0264c4893ac951b8449acb4/view)\n- Navy · A-123 Audit Support Services · [SAM.gov](https://sam.gov/opp/5e3c8c2e77644ae885acf3f5b8c58597/view)\n- Navy · UiPath Testing Environment · [SAM.gov](https://sam.gov/opp/a82b39c3158d4794be208a6295573b59/view)\n- Navy · UiPath Testing Environment · [SAM.gov](https://sam.gov/opp/8d92db594b3342b7b974f6fc92b3ef1f/view)\n- Navy · UiPath Testing Environment · [SAM.gov](https://sam.gov/opp/b4867188261047ae980a7c1ee7bd8df3/view)\n- Veterans Affairs · ACSI Surveys · [SAM.gov](https://sam.gov/opp/f699fc3bd0d94e1d8474ba6400d7c0b9/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 12 new notices reviewed (first collected Oct 17 20:00 ET to Oct 18 16:43 ET); 77 notices first collected then but posted more than 14 days earlier were left out.\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.0602
+}

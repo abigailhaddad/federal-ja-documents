@@ -1,0 +1,452 @@
+{
+ "experimental": true,
+ "digest_version": "2026-10-21.digest2",
+ "mode": "dry_run",
+ "run_at": "2026-10-21T16:29:46.566228+00:00",
+ "as_of": "2026-10-16T16:00:00+00:00",
+ "window": {
+  "kind": "manual",
+  "after": "2026-10-16T00:00:00+00:00",
+  "until": "2026-10-16T23:59:59+00:00",
+  "notices_first_seen_in_window": 10487,
+  "max_first_seen_at": "2026-10-16T12:24:02+00:00"
+ },
+ "dataset_revision": "e93882dcc18c1d76244974093b3696fd5e5e016e",
+ "candidates": 27,
+ "excluded": {
+  "outside_posted_window": 10460
+ },
+ "with_extraction_row": 25,
+ "with_document_text": 25,
+ "budget": {
+  "max_usd": 0.18,
+  "spent": 0.136573,
+  "calls": [
+   {
+    "stage": "screen",
+    "model": "claude-haiku-5-5",
+    "input_tokens": 34546,
+    "output_tokens": 1911,
+    "cache_creation_input_tokens": 1066,
+    "cache_read_input_tokens": 0,
+    "cost_usd": 0.004437,
+    "worst_case_usd": 0.0065
+   },
+   {
+    "stage": "rank",
+    "model": "claude-sonnet-5-5",
+    "input_tokens": 60125,
+    "output_tokens": 1572,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.132136,
+    "worst_case_usd": 0.1716
+   }
+  ]
+ },
+ "screen": [
+  {
+   "notice_id": "ba03f3b292974c1d82e341f1c24484dd",
+   "title": "Support Services for Epidemiology - NIEHS",
+   "score": 9,
+   "reason": "$132M ceiling increase, 2-year extension, cites DOGE EO and staffing disruption delays."
+  },
+  {
+   "notice_id": "780a515435314f1f8bec32cf76c18a9f",
+   "title": "Southern Europe/Northern Africa J&A",
+   "score": 7,
+   "reason": "$70M bridge (up to $210M) for 425 days, incumbent food prime vendor, supply-break urgency."
+  },
+  {
+   "notice_id": "be31499a00a346988debf5435b7503cf",
+   "title": "LOGCAP CES",
+   "score": 7,
+   "reason": "Urgent LOGCAP CENTCOM equipment inventory bypassing fair opportunity; Operation Epic Fury."
+  },
+  {
+   "notice_id": "7a97dbfdd83f440e993ee459c530402c",
+   "title": "HSIN Modernization",
+   "score": 7,
+   "reason": "HSIN modernization extension; unforeseen migration delays, repeated extension of task order."
+  },
+  {
+   "notice_id": "079a4370d7304e07a948bc35ca402200",
+   "title": "Post-Award Sole Source Justification - SPE60525D9504, Jordan Posts, Camps and Stations",
+   "score": 6,
+   "reason": "Post-award J&A citing Middle East fuel crisis urgency for 34.3M gallons jet fuel."
+  },
+  {
+   "notice_id": "02ae837d64134e129529a568897316d0",
+   "title": "Operations and Maintenance (O&M) Services for the TSA Systems Integration Facility (TSIF) and Freedom Center",
+   "score": 6,
+   "reason": "Bridge PO after multiple FY2026 funding lapses prevented timely award; candid dysfunction."
+  },
+  {
+   "notice_id": "236f4595c8ad45f5b2cadb0fa5c89373",
+   "title": "Roleplayer Services",
+   "score": 6,
+   "reason": "Bridge contract forced by GAO bid protest stay; protest-driven chaos."
+  },
+  {
+   "notice_id": "b6a7f35acac846bba8f57f7980e73e67",
+   "title": "Engineering anomaly support to the existing Geostationary Operational Environmental Satellite (GOES)-NOP series spacecraft imager and sounder instruments",
+   "score": 5,
+   "reason": "Sole-source L3Harris GOES instrument engineering support, five years; proprietary but routine-ish."
+  },
+  {
+   "notice_id": "ef28dcf53d39448d9e92928152ba8299",
+   "title": "Engineering anomaly support to the existing Geostationary Operational Environmental Satellite (GOES)-NOP series spacecraft bus",
+   "score": 5,
+   "reason": "Sole-source Boeing GOES spacecraft bus anomaly support; notable vendor, sizeable scope."
+  },
+  {
+   "notice_id": "82fe3af35d68421d8fdcc05bf7278bad",
+   "title": "Justification for an Exception to Fair Opportunity for WHOI Order N6660418DC828/N6660426FC852",
+   "score": 4,
+   "reason": "WHOI UUV integration task order; NSA-approved encryption, proprietary code, post-award."
+  },
+  {
+   "notice_id": "e699c814d78e493998964395a67bd87d",
+   "title": "NIDS4 Extension Justification and Approval",
+   "score": 4,
+   "reason": "Peraton NIDS 4 extension for nuclear modernization; modest $8.9M, incumbent transition risk."
+  },
+  {
+   "notice_id": "b6c2c6dd45fe4ab69b2b087ec5da1093",
+   "title": "FSS SSJ 2026 09 15",
+   "score": 3,
+   "reason": "Blank ED FSS J&A template for mobile devices; no values or rationale filled in."
+  },
+  {
+   "notice_id": "18e860823e4940c9a208f36a2ff998ac",
+   "title": "Justification for an Exception to Fair Opportunity - Modification to Air Force CEMS task order",
+   "score": 3,
+   "reason": "Ceiling increase to buy TOAD software licenses; routine software renewal, small."
+  },
+  {
+   "notice_id": "cb8623edfcbe40a8b8e0a2f0b3a2717b",
+   "title": "ACSI Surveys",
+   "score": 3,
+   "reason": "Single-source ACSI survey order to CFI Group; sizeable but otherwise boilerplate."
+  },
+  {
+   "notice_id": "963d36291006470d835275548f451330",
+   "title": "USMS AFD Justification for CCA_SCA_HI Vehicle Services",
+   "score": 3,
+   "reason": "Sub-$500K vehicle towing bridge for USMS; small and routine."
+  },
+  {
+   "notice_id": "6a33678a6d8e41ac91c4342bdd7a4286",
+   "title": "J&A-Ceiling Increase-NCA_ECA_NV Vehicle Services",
+   "score": 3,
+   "reason": "Small USMS vehicle services ceiling increase; routine."
+  },
+  {
+   "notice_id": "7334611412a64f9699fdbdd06a0e0c3b",
+   "title": "16--STABILATOR ASSEMBLY",
+   "score": 3,
+   "reason": "Sikorsky critical safety stabilator spares, sole source; routine data-rights spares."
+  },
+  {
+   "notice_id": "355a5896d3e243639a6724a18ad4dcd1",
+   "title": "13--Redacted J&A for sole source GS07F184GA/N0017426F1167",
+   "score": 3,
+   "reason": "X-ray baggage scanners via GSA schedule from sole distributor; routine equipment buy."
+  },
+  {
+   "notice_id": "c1f36365c76d4e77be65444bc0e51586",
+   "title": "FSS SSJ 2026 09 15",
+   "score": 2,
+   "reason": "Same ED FSS mobile devices notice with no document text; routine."
+  },
+  {
+   "notice_id": "5e540dd03c5a41e991eb2451616351e5",
+   "title": "Service Maintenance Agreement for GE Equipment",
+   "score": 2,
+   "reason": "Annual OEM post-warranty service maintenance on GE equipment; routine."
+  },
+  {
+   "notice_id": "8d54873cc2824f18ad6cb667d2da717b",
+   "title": "SPE4A526R0180",
+   "score": 2,
+   "reason": "Boeing structural panels, four units; routine OEM spare parts."
+  },
+  {
+   "notice_id": "4d739012d3e141a28210a6b52d732620",
+   "title": "JEFO",
+   "score": 2,
+   "reason": "$508K ultrasound systems OEM-unique order for USNS Mercy; routine."
+  },
+  {
+   "notice_id": "b43f452678974abfacba6bb3465496ff",
+   "title": "Notice of Intent to Sole Source - Counterterrorism Guides",
+   "score": 2,
+   "reason": "Small proprietary training app renewal for TSA; routine."
+  },
+  {
+   "notice_id": "2bbfa7d909c9438aabe530d793aab98e",
+   "title": "General Services Administration (GSA) seeks to lease the following space: Mandeville, Louisiana",
+   "score": 2,
+   "reason": "Succeeding lease in Mandeville, Louisiana; routine leasing."
+  },
+  {
+   "notice_id": "4992a1a2f9514a45a41ef5b2edd5b9d0",
+   "title": "4810 - VALVE, CONTROL",
+   "score": 2,
+   "reason": "Nuclear reactor control valve spare from sole manufacturer; routine spare part."
+  },
+  {
+   "notice_id": "da9169845684434c8fb48b22f6b7b60a",
+   "title": "Single Source Justification - Hive Expeditionary System V2",
+   "score": 2,
+   "reason": "Air Force single-source J&A with no substantive text; routine."
+  },
+  {
+   "notice_id": "ab4a976df57b4437824197bb7307c615",
+   "title": "1650-01-574-6518- PARTS KIT,HYDRAULIC",
+   "score": 2,
+   "reason": "Hydraulic parts kits from sole source distributor; routine spares."
+  }
+ ],
+ "ranked": [
+  "ba03f3b292974c1d82e341f1c24484dd",
+  "780a515435314f1f8bec32cf76c18a9f",
+  "be31499a00a346988debf5435b7503cf",
+  "7a97dbfdd83f440e993ee459c530402c",
+  "079a4370d7304e07a948bc35ca402200",
+  "02ae837d64134e129529a568897316d0",
+  "236f4595c8ad45f5b2cadb0fa5c89373",
+  "b6a7f35acac846bba8f57f7980e73e67",
+  "ef28dcf53d39448d9e92928152ba8299",
+  "82fe3af35d68421d8fdcc05bf7278bad",
+  "e699c814d78e493998964395a67bd87d",
+  "b6c2c6dd45fe4ab69b2b087ec5da1093",
+  "18e860823e4940c9a208f36a2ff998ac",
+  "cb8623edfcbe40a8b8e0a2f0b3a2717b",
+  "963d36291006470d835275548f451330",
+  "6a33678a6d8e41ac91c4342bdd7a4286",
+  "7334611412a64f9699fdbdd06a0e0c3b"
+ ],
+ "model_answer": {
+  "picks": [
+   {
+    "notice_id": "ba03f3b292974c1d82e341f1c24484dd",
+    "headline": "NIEHS blames DOGE executive order and staffing changes for missed epidemiology recompete",
+    "why": "The J&A says Executive Order 14158 caused unforeseen circumstances that significantly delayed the recompete, along with staffing changes and organizational transition. It extends the incumbent's ordering period to June 29, 2028 and raises the ceiling by $20,000,000. It also says the recompete has not yet begun.",
+    "quotes": [
+     {
+      "text": "Executive Order 14158 of January 20, 2025 Establishing and Implementing the President’s “Department of Government Efficiency” caused unforeseen circumstances beyond the control of the acquisition office",
+      "page": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, page 1"
+     },
+     {
+      "text": "The current recompetition has not yet begun and requires full two years to ensure proper attention is made to the process",
+      "page": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, page 2"
+     }
+    ],
+    "vendor": "Social & Scientific Systems Inc.",
+    "value": "$20,000,000",
+    "authority": "41 U.S.C. 3304(a)(1)"
+   },
+   {
+    "notice_id": "02ae837d64134e129529a568897316d0",
+    "headline": "TSA facility contract bridged after three FY2026 funding lapses and furlough backlog",
+    "why": "TSA says multiple lapses in appropriations during FY2026 and staff furloughs left it unable to award a follow-on in time. It is buying a 30-day bridge, with a 30-day option, from the incumbent while a SourceAmerica award is arranged.",
+    "quotes": [
+     {
+      "text": "this process was severely delayed due to staff furloughs and the resulting administrative backlog",
+      "page": "SAP Commercial SAT to 9M Single Source Justification JAN 2026 OM Services Approved.pdf, page 2"
+     }
+    ],
+    "vendor": "The Building People, LLC",
+    "value": "$483,475",
+    "authority": "FAR 8.002"
+   },
+   {
+    "notice_id": "be31499a00a346988debf5435b7503cf",
+    "headline": "Army sole-sources Vectrus to inventory combat-damaged CENTCOM equipment in Kuwait for Operation Epic Fury",
+    "why": "The Army cites urgency for LOGCAP V work on equipment sets in Kuwait that it describes as un-inventoried and of unknown combat readiness. It says Vectrus is the only contractor positioned to perform on that timeline.",
+    "quotes": [
+     {
+      "text": "these [REDACTED] assets are currently un-inventoried and of unknown combat readiness.",
+      "page": "A02 JEFO_CENTCOM Equipment Sets_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Vectrus",
+    "value": "",
+    "authority": "RFO 16.507-6(b)(1)"
+   },
+   {
+    "notice_id": "7a97dbfdd83f440e993ee459c530402c",
+    "headline": "DHS HSIN modernization slips after shutdowns and loss of legacy SharePoint developers",
+    "why": "DHS says shutdowns cost it access to networks and key personnel, and that almost all the resources that built the legacy customizations are no longer available. It seeks a 3-month extension with BridgePhase.",
+    "quotes": [
+     {
+      "text": "Almost all of the resources that originally developed many of these customized features are no longer available, resulting in major hurdles in extracting requirements.",
+      "page": "Sole Source Justification (HSIN Modernization_52.217-8)_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "BridgePhase, LLC",
+    "value": "",
+    "authority": "GSAR 538.7104-3(b)(ii)"
+   },
+   {
+    "notice_id": "236f4595c8ad45f5b2cadb0fa5c89373",
+    "headline": "FLETC bridges roleplayer services after GAO protest stays the new award",
+    "why": "The follow-on contract was awarded September 10, 2026 but is under a statutory stay of performance because of a GAO bid protest. FLETC proposes a four-month sole-source bridge with the incumbent.",
+    "quotes": [
+     {
+      "text": "that follow on contract 70LGLY26CGLB00006 is currently under a statutory stay of performance due to a bid protest filed with the Government Accountability Office (GAO).",
+      "page": "JA for RP Bridge redacted_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Ops Tech Alliance",
+    "value": "",
+    "authority": "41 U.S.C. 3304(a)(1)"
+   }
+  ]
+ },
+ "picks": [
+  {
+   "notice_id": "ba03f3b292974c1d82e341f1c24484dd",
+   "rank": 1,
+   "headline": "NIEHS blames DOGE executive order and staffing changes for missed epidemiology recompete",
+   "why": "The J&A says Executive Order 14158 caused unforeseen circumstances that significantly delayed the recompete, along with staffing changes and organizational transition. It extends the incumbent's ordering period to June 29, 2028 and raises the ceiling by $20,000,000. It also says the recompete has not yet begun.",
+   "quotes": [
+    {
+     "text": "Executive Order 14158 of January 20, 2025 Establishing and Implementing the President’s “Department of Government Efficiency” caused unforeseen circumstances beyond the control of the acquisition office",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "9045b2b05d714c96b054ba0d36b72ec1",
+       "page_number": 1,
+       "text_source": "native"
+      }
+     ],
+     "where": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, p. 1",
+     "model_page": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, page 1"
+    },
+    {
+     "text": "The current recompetition has not yet begun and requires full two years to ensure proper attention is made to the process",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "9045b2b05d714c96b054ba0d36b72ec1",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, p. 2",
+     "model_page": "JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, page 2"
+    }
+   ],
+   "vendor": "Social & Scientific Systems Inc.",
+   "value": "$20,000,000 (modification/increase)",
+   "authority": "41 U.S.C. 3304(a)(1); RFO 6.103-1",
+   "model_rank": 1
+  },
+  {
+   "notice_id": "02ae837d64134e129529a568897316d0",
+   "rank": 2,
+   "headline": "TSA facility contract bridged after three FY2026 funding lapses and furlough backlog",
+   "why": "TSA says multiple lapses in appropriations during FY2026 and staff furloughs left it unable to award a follow-on in time. It is buying a 30-day bridge, with a 30-day option, from the incumbent while a SourceAmerica award is arranged.",
+   "quotes": [
+    {
+     "text": "this process was severely delayed due to staff furloughs and the resulting administrative backlog",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "d12485de6bb3443d9d2ef468ce933728",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "SAP Commercial SAT to 9M Single Source Justification JAN 2026 OM Services Approved.pdf, p. 2",
+     "model_page": "SAP Commercial SAT to 9M Single Source Justification JAN 2026 OM Services Approved.pdf, page 2"
+    }
+   ],
+   "vendor": "The Building People, LLC",
+   "value": "$483,475 (total)",
+   "authority": "FAR 8.002",
+   "model_rank": 2
+  },
+  {
+   "notice_id": "be31499a00a346988debf5435b7503cf",
+   "rank": 3,
+   "headline": "Army sole-sources Vectrus to inventory combat-damaged CENTCOM equipment in Kuwait for Operation Epic Fury",
+   "why": "The Army cites urgency for LOGCAP V work on equipment sets in Kuwait that it describes as un-inventoried and of unknown combat readiness. It says Vectrus is the only contractor positioned to perform on that timeline.",
+   "quotes": [
+    {
+     "text": "these [REDACTED] assets are currently un-inventoried and of unknown combat readiness.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "345ed29af7d14b81b603c460083399bf",
+       "page_number": 2,
+       "text_source": "transcription"
+      }
+     ],
+     "where": "A02 JEFO_CENTCOM Equipment Sets_Redacted.pdf, p. 2 (machine-transcribed page)",
+     "model_page": "A02 JEFO_CENTCOM Equipment Sets_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Vectrus",
+   "value": "value redacted",
+   "authority": "RFO 16.507-6(b)(1)",
+   "model_rank": 3
+  },
+  {
+   "notice_id": "7a97dbfdd83f440e993ee459c530402c",
+   "rank": 4,
+   "headline": "DHS HSIN modernization slips after shutdowns and loss of legacy SharePoint developers",
+   "why": "DHS says shutdowns cost it access to networks and key personnel, and that almost all the resources that built the legacy customizations are no longer available. It seeks a 3-month extension with BridgePhase.",
+   "quotes": [
+    {
+     "text": "Almost all of the resources that originally developed many of these customized features are no longer available, resulting in major hurdles in extracting requirements.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "f2feeccd6b5e4d4b8eea53cfe3448249",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "Sole Source Justification (HSIN Modernization_52.217-8)_Redacted.pdf, p. 2",
+     "model_page": "Sole Source Justification (HSIN Modernization_52.217-8)_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "BridgePhase, LLC",
+   "value": "value redacted",
+   "authority": "GSAR 538.7104-3(b)(ii); 41 U.S.C. 3304(a)(1)",
+   "model_rank": 4
+  },
+  {
+   "notice_id": "236f4595c8ad45f5b2cadb0fa5c89373",
+   "rank": 5,
+   "headline": "FLETC bridges roleplayer services after GAO protest stays the new award",
+   "why": "The follow-on contract was awarded September 10, 2026 but is under a statutory stay of performance because of a GAO bid protest. FLETC proposes a four-month sole-source bridge with the incumbent.",
+   "quotes": [
+    {
+     "text": "that follow on contract 70LGLY26CGLB00006 is currently under a statutory stay of performance due to a bid protest filed with the Government Accountability Office (GAO).",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "3a40a0dd6cea4d38aef7b37691507d3f",
+       "page_number": 2,
+       "text_source": "transcription"
+      }
+     ],
+     "where": "JA for RP Bridge redacted_Redacted.pdf, p. 2 (machine-transcribed page)",
+     "model_page": "JA for RP Bridge redacted_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Ops Tech Alliance",
+   "value": "value redacted",
+   "authority": "41 U.S.C. 3304(a)(1); RFO Subpart 6.103-1",
+   "model_rank": 5
+  }
+ ],
+ "dropped_by_checks": [],
+ "subject": "Whoa J&As — Oct 16: NIEHS blames DOGE executive order and staffing changes for missed epidemiology recompete",
+ "body": "## 1. NIEHS blames DOGE executive order and staffing changes for missed epidemiology recompete\n\n**NATIONAL INSTITUTES OF HEALTH (HEALTH AND HUMAN SERVICES, DEPARTMENT OF) · Social & Scientific Systems Inc. · $20,000,000 (modification/increase) · 41 U.S.C. 3304(a)(1); RFO 6.103-1**  \n*Posted 2026-10-15, award HHSN273201600003I, “Support Services for Epidemiology - NIEHS”*\n\nThe J&A says Executive Order 14158 caused unforeseen circumstances that significantly delayed the recompete, along with staffing changes and organizational transition. It extends the incumbent's ordering period to June 29, 2028 and raises the ceiling by $20,000,000. It also says the recompete has not yet begun.\n\n> “Executive Order 14158 of January 20, 2025 Establishing and Implementing the President’s “Department of Government Efficiency” caused unforeseen circumstances beyond the control of the acquisition office”  \n> — JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, p. 1\n\n> “The current recompetition has not yet begun and requires full two years to ensure proper attention is made to the process”  \n> — JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/ba03f3b292974c1d82e341f1c24484dd/view) · [JA_SSS_HHSN273201600003I_PDF_Final 6.9.26.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/ba03f3b292974c1d82e341f1c24484dd/9045b2b05d714c96b054ba0d36b72ec1_JA_SSS_HHSN273201600003I_PDF_Final_6.9.26.pdf)\n\n## 2. TSA facility contract bridged after three FY2026 funding lapses and furlough backlog\n\n**TRANSPORTATION SECURITY ADMINISTRATION (HOMELAND SECURITY, DEPARTMENT OF) · The Building People, LLC · $483,475 (total) · FAR 8.002**  \n*Posted 2026-10-15, award 70T01026P7668N004, “Operations and Maintenance (O&M) Services for the TSA Systems Integration Facility (TSIF) and Freedom Center”*\n\nTSA says multiple lapses in appropriations during FY2026 and staff furloughs left it unable to award a follow-on in time. It is buying a 30-day bridge, with a 30-day option, from the incumbent while a SourceAmerica award is arranged.\n\n> “this process was severely delayed due to staff furloughs and the resulting administrative backlog”  \n> — SAP Commercial SAT to 9M Single Source Justification JAN 2026 OM Services Approved.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/02ae837d64134e129529a568897316d0/view) · [SAP Commercial SAT to 9M Single Source Justification JAN 2026 OM Services Approved.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/02ae837d64134e129529a568897316d0/d12485de6bb3443d9d2ef468ce933728_SAP_Commercial_SAT_to_9M_Single_Source_Justification_JAN_2026_OM_Services_Approved.pdf)\n\n## 3. Army sole-sources Vectrus to inventory combat-damaged CENTCOM equipment in Kuwait for Operation Epic Fury\n\n**DEPT OF THE ARMY (DEPT OF DEFENSE) · Vectrus · value redacted · RFO 16.507-6(b)(1)**  \n*Posted 2026-10-15, award W52P1J19D0045, “LOGCAP CES”*\n\nThe Army cites urgency for LOGCAP V work on equipment sets in Kuwait that it describes as un-inventoried and of unknown combat readiness. It says Vectrus is the only contractor positioned to perform on that timeline.\n\n> “these [REDACTED] assets are currently un-inventoried and of unknown combat readiness.”  \n> — A02 JEFO_CENTCOM Equipment Sets_Redacted.pdf, p. 2 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/be31499a00a346988debf5435b7503cf/view) · [A02 JEFO_CENTCOM Equipment Sets_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/be31499a00a346988debf5435b7503cf/345ed29af7d14b81b603c460083399bf_A02_JEFO_CENTCOM_Equipment_Sets_Redacted.pdf)\n\n## 4. DHS HSIN modernization slips after shutdowns and loss of legacy SharePoint developers\n\n**OFFICE OF PROCUREMENT OPERATIONS (HOMELAND SECURITY, DEPARTMENT OF) · BridgePhase, LLC · value redacted · GSAR 538.7104-3(b)(ii); 41 U.S.C. 3304(a)(1)**  \n*Posted 2026-10-15, award GS-35F-687GA, “HSIN Modernization”*\n\nDHS says shutdowns cost it access to networks and key personnel, and that almost all the resources that built the legacy customizations are no longer available. It seeks a 3-month extension with BridgePhase.\n\n> “Almost all of the resources that originally developed many of these customized features are no longer available, resulting in major hurdles in extracting requirements.”  \n> — Sole Source Justification (HSIN Modernization_52.217-8)_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/7a97dbfdd83f440e993ee459c530402c/view) · [Sole Source Justification (HSIN Modernization_52.217-8)_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/7a97dbfdd83f440e993ee459c530402c/f2feeccd6b5e4d4b8eea53cfe3448249_Sole_Source_Justification_HSIN_Modernization_52.217-8__Redacted.pdf)\n\n## 5. FLETC bridges roleplayer services after GAO protest stays the new award\n\n**FEDERAL LAW ENFORCEMENT TRAINING CENTER (HOMELAND SECURITY, DEPARTMENT OF) · Ops Tech Alliance · value redacted · 41 U.S.C. 3304(a)(1); RFO Subpart 6.103-1**  \n*Posted 2026-10-15, award 70LGLY26CGLB00008, “Roleplayer Services”*\n\nThe follow-on contract was awarded September 10, 2026 but is under a statutory stay of performance because of a GAO bid protest. FLETC proposes a four-month sole-source bridge with the incumbent.\n\n> “that follow on contract 70LGLY26CGLB00006 is currently under a statutory stay of performance due to a bid protest filed with the Government Accountability Office (GAO).”  \n> — JA for RP Bridge redacted_Redacted.pdf, p. 2 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/236f4595c8ad45f5b2cadb0fa5c89373/view) · [JA for RP Bridge redacted_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/236f4595c8ad45f5b2cadb0fa5c89373/3a40a0dd6cea4d38aef7b37691507d3f_JA_for_RP_Bridge_redacted_Redacted.pdf)\n\n## All new notices (27)\n\n- ★ National Institutes of Health · Support Services for Epidemiology - NIEHS · Social & Scientific Systems Inc. · $20,000,000 · 41 U.S.C. 3304(a)(1); RFO 6.103-1 · [SAM.gov](https://sam.gov/opp/ba03f3b292974c1d82e341f1c24484dd/view)\n- ★ Transportation Security Administration · Operations and Maintenance (O&M) Services for the TSA Systems Integration Facility (TSIF)… · The Building People, LLC · $483,475 · FAR 8.002 · [SAM.gov](https://sam.gov/opp/02ae837d64134e129529a568897316d0/view)\n- ★ Army · LOGCAP CES · Vectrus · value redacted · RFO 16.507-6(b)(1) · [SAM.gov](https://sam.gov/opp/be31499a00a346988debf5435b7503cf/view)\n- ★ Office of Procurement Operations · HSIN Modernization · BridgePhase, LLC · value redacted · GSAR 538.7104-3(b)(ii); 41 U.S.C. 3304(a)(1) · [SAM.gov](https://sam.gov/opp/7a97dbfdd83f440e993ee459c530402c/view)\n- ★ Federal LAW Enforcement Training Center · Roleplayer Services · Ops Tech Alliance · value redacted · 41 U.S.C. 3304(a)(1); RFO Subpart 6.103-1 · [SAM.gov](https://sam.gov/opp/236f4595c8ad45f5b2cadb0fa5c89373/view)\n- Defense Logistics Agency · Southern Europe/Northern Africa J&A · EFS Ebrex Sarl · $70,000,000 · 10 U.S.C. § 3204(a)(1) · [SAM.gov](https://sam.gov/opp/780a515435314f1f8bec32cf76c18a9f/view)\n- AIR Force · NIDS4 Extension Justification and Approval · Peraton, Inc. · $8,909,600 · 10 U.S.C. 3204(a)(1); 10 U.S.C. § 3204(b)(B)(ii) · [SAM.gov](https://sam.gov/opp/e699c814d78e493998964395a67bd87d/view)\n- Navy · 4810 - VALVE, CONTROL · Metrex Valve Corp. · $512,900 · 10 USC 3264(A) (1); 10 U.S.C. 3204(A)(1) · [SAM.gov](https://sam.gov/opp/4992a1a2f9514a45a41ef5b2edd5b9d0/view)\n- Defense Logistics Agency · JEFO · Sonosite · $508,263 · Revolutionary FAR Overhaul (RFO) FAR 16.507-6(b)(2) (as implemented by DOD Class Deviation 2026-O0045 (MAR 2026) · [SAM.gov](https://sam.gov/opp/4d739012d3e141a28210a6b52d732620/view)\n- US Marshals Service · J&A-Ceiling Increase-NCA_ECA_NV Vehicle Services · RBEX Inc. · $500,000 · 41 USC 3304(a)(1); 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/6a33678a6d8e41ac91c4342bdd7a4286/view)\n- US Marshals Service · USMS AFD Justification for CCA_SCA_HI Vehicle Services · RBEX Inc. · $500,000 · 41 USC 3304(a)(1) · [SAM.gov](https://sam.gov/opp/963d36291006470d835275548f451330/view)\n- AIR Force · Single Source Justification - Hive Expeditionary System V2 · [SAM.gov](https://sam.gov/opp/da9169845684434c8fb48b22f6b7b60a/view)\n- Defense Logistics Agency · 16--STABILATOR ASSEMBLY · Sikorsky (78286) · value redacted · 10 USC 3204(A) (1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/7334611412a64f9699fdbdd06a0e0c3b/view)\n- Defense Logistics Agency · 1650-01-574-6518- PARTS KIT,HYDRAULIC · TRIUMPH ACTUATION SYSTEMS LLC · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/ab4a976df57b4437824197bb7307c615/view)\n- Defense Logistics Agency · Post-Award Sole Source Justification - SPE60525D9504, Jordan Posts, Camps and Stations · value redacted · 10 U.S.C. §3204(a)(2); FAR 6.302-2 · [SAM.gov](https://sam.gov/opp/079a4370d7304e07a948bc35ca402200/view)\n- Defense Logistics Agency · SPE4A526R0180 · The Boeing Company · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/8d54873cc2824f18ad6cb667d2da717b/view)\n- Education · FSS SSJ 2026 09 15 · [SAM.gov](https://sam.gov/opp/b6c2c6dd45fe4ab69b2b087ec5da1093/view)\n- Education · FSS SSJ 2026 09 15 · [SAM.gov](https://sam.gov/opp/c1f36365c76d4e77be65444bc0e51586/view)\n- National Institutes of Health · Justification for an Exception to Fair Opportunity - Modification to Air Force CEMS task… · Concept Plus LLC · value redacted · 16.507-6(b)(2) (HHSAR Class Deviation 2026-01 Amendment 2) · [SAM.gov](https://sam.gov/opp/18e860823e4940c9a208f36a2ff998ac/view)\n- National Oceanic and Atmospheric Administration · Engineering anomaly support to the existing Geostationary Operational Environmental… · The Boeing Company · value redacted · 41 U.S.C. 3304(a)(1) as implemented by RFO Subpart 6.103-1 · [SAM.gov](https://sam.gov/opp/ef28dcf53d39448d9e92928152ba8299/view)\n- National Oceanic and Atmospheric Administration · Engineering anomaly support to the existing Geostationary Operational Environmental… · L3Harris Technologies, Inc. · value redacted · 41 U.S.C. 3304(a)(1) · [SAM.gov](https://sam.gov/opp/b6a7f35acac846bba8f57f7980e73e67/view)\n- Navy · 13--Redacted J&A for sole source GS07F184GA/N0017426F1167 · Autoclear LLC · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/355a5896d3e243639a6724a18ad4dcd1/view)\n- Navy · Justification for an Exception to Fair Opportunity for WHOI Order… · WHOI · FAR 16.505(b)(2)(i)(B) · [SAM.gov](https://sam.gov/opp/82fe3af35d68421d8fdcc05bf7278bad/view)\n- Public Buildings Service · General Services Administration (GSA) seeks to lease the following space: Mandeville,… · value redacted · GSAM 570.402-1(a) and 570.203-2 · [SAM.gov](https://sam.gov/opp/2bbfa7d909c9438aabe530d793aab98e/view)\n- Transportation Security Administration · Notice of Intent to Sole Source - Counterterrorism Guides · QuickSeries Publishing Inc. · value redacted · [SAM.gov](https://sam.gov/opp/b43f452678974abfacba6bb3465496ff/view)\n- Veterans Affairs · ACSI Surveys · value redacted · GSAR 538.7104-3(b)(1)(ii) · [SAM.gov](https://sam.gov/opp/cb8623edfcbe40a8b8e0a2f0b3a2717b/view)\n- Veterans Affairs · Service Maintenance Agreement for GE Equipment · GE Healthcare · FAR 16.505(b)(2)(i)(B) · [SAM.gov](https://sam.gov/opp/5e540dd03c5a41e991eb2451616351e5/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 27 new notices reviewed (first collected Oct 15 20:00 ET to Oct 16 08:24 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.1366
+}

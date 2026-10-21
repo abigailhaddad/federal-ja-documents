@@ -1,0 +1,477 @@
+{
+ "experimental": true,
+ "digest_version": "2026-10-21.digest2",
+ "mode": "dry_run",
+ "run_at": "2026-10-21T16:29:47.809544+00:00",
+ "as_of": "2026-10-15T16:00:00+00:00",
+ "window": {
+  "kind": "manual",
+  "after": "2026-10-16T00:00:00+00:00",
+  "until": "2026-10-16T23:59:59+00:00",
+  "notices_first_seen_in_window": 10487,
+  "max_first_seen_at": "2026-10-16T12:24:02+00:00"
+ },
+ "dataset_revision": "e93882dcc18c1d76244974093b3696fd5e5e016e",
+ "candidates": 34,
+ "excluded": {
+  "outside_posted_window": 10453
+ },
+ "with_extraction_row": 31,
+ "with_document_text": 31,
+ "budget": {
+  "max_usd": 0.18,
+  "spent": 0.13536399999999998,
+  "calls": [
+   {
+    "stage": "screen",
+    "model": "claude-haiku-5-5",
+    "input_tokens": 42432,
+    "output_tokens": 3134,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 1066,
+    "cost_usd": 0.005714,
+    "worst_case_usd": 0.0071
+   },
+   {
+    "stage": "rank",
+    "model": "claude-sonnet-5-5",
+    "input_tokens": 58902,
+    "output_tokens": 1568,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.12965,
+    "worst_case_usd": 0.1741
+   }
+  ]
+ },
+ "screen": [
+  {
+   "notice_id": "9ca2e17f9368437baa365b7db8ee0c23",
+   "title": "Field Service Management Services 3.12 Areas [3A/4A]_ [5A/8A]_1D_2D [4D/5D] [3S/5S] [4S/6S]",
+   "score": 7,
+   "reason": "$170M REO field services follow-on citing unusual urgency; contracts expiring November 2026."
+  },
+  {
+   "notice_id": "e0ef04062f9c4b32833b5e196f831b1c",
+   "title": "Advanced Cyber Security Threat Detection Analysis Platform",
+   "score": 6,
+   "reason": "Urgent reprocurement after prior contractor default and termination for cause; 30-day delivery."
+  },
+  {
+   "notice_id": "7716091b214f4c8a9aedd224690fcdba",
+   "title": "Platform Automation, Implementation, Sustainment, Operations and Licensing",
+   "score": 6,
+   "reason": "$90M ServiceNow sole-source including UAS Blue List; large, sustained expansion."
+  },
+  {
+   "notice_id": "748a34bba7e4494faae508cb0bb33b3f",
+   "title": "GSAR 538.7104-3 Sole source justification",
+   "score": 5,
+   "reason": "Repeated extension of Deloitte call through 2028 for counter-threat analytics services."
+  },
+  {
+   "notice_id": "cee512e7e36742c2a705c57c69f1df71",
+   "title": "Artificial Intelligence/Machine Learning Analytics",
+   "score": 5,
+   "reason": "AI/ML analytics SaaS sole-source licenses; disruption and proprietary platform claims."
+  },
+  {
+   "notice_id": "1627aa3ebda24da2b7726837c3d0e51a",
+   "title": "JOFOC - Architecture and Data Modernization Support",
+   "score": 5,
+   "reason": "MITRE FFRDC sole-source task order; inherently governmental closeness justification."
+  },
+  {
+   "notice_id": "29cef81046e546f2b1ebccc31229dd12",
+   "title": "6632--Chemistry Immunoassay CPRR",
+   "score": 4,
+   "reason": "Proprietary immunoassay analyzers bridge order across six VA facilities; moderate."
+  },
+  {
+   "notice_id": "e482a4a788e3426fa786feeb0a1f8715",
+   "title": "LISA Engineering Test Unit (ETU) Telescope",
+   "score": 4,
+   "reason": "$15.7M NASA sole-source telescope tied to ESA mission; sizeable but not headline."
+  },
+  {
+   "notice_id": "ad467f4ba1314e628dceb4ec23ccfc30",
+   "title": "Digital Masons Subscription",
+   "score": 4,
+   "reason": "Sole-source AV maintenance for Secretariat; proprietary undocumented system knowledge."
+  },
+  {
+   "notice_id": "6f9edfd418094e84a48b3c66065ff2d6",
+   "title": "Website Maintenance and Design",
+   "score": 4,
+   "reason": "Sole-source website order including AI chatbot sustainment; modest value."
+  },
+  {
+   "notice_id": "a2ba96bbd08b440897200fdef7f98f91",
+   "title": "Gartner, Inc. Research and Advisory Subscriptions JA",
+   "score": 3,
+   "reason": "Routine Gartner subscription renewal under ESI BPA; boilerplate sole-source justification."
+  },
+  {
+   "notice_id": "bbcdf38e4cea475f83b4ac0d7220da6b",
+   "title": "Justification and Approval (J&A) for TekSynap AV/IT Systems",
+   "score": 3,
+   "reason": "$5.9M AV/VTC logical follow-on under GSA schedule; mostly routine."
+  },
+  {
+   "notice_id": "81beaaf4d1434309bad180578a527b7d",
+   "title": "Generator, Direct Cu",
+   "score": 3,
+   "reason": "OEM declined data rights for 20 generators; mildly unusual."
+  },
+  {
+   "notice_id": "0066d6a2728b45119df568aa08155572",
+   "title": "6632--Chemistry Immunoassay CPRR",
+   "score": 3,
+   "reason": "Single-site proprietary analyzer service order; routine brand lock."
+  },
+  {
+   "notice_id": "88ca252b42d5424c8c254d72f75b9681",
+   "title": "6630--VISN Lab Urinalysis Bridge BPA",
+   "score": 3,
+   "reason": "Short-term urinalysis bridge BPA to incumbent; routine continuity justification."
+  },
+  {
+   "notice_id": "a2185a6047e1497cade21667e608e412",
+   "title": "6630--VISN Lab Urinalysis Bridge BPA",
+   "score": 3,
+   "reason": "Duplicate urinalysis bridge BPA notice; routine continuity justification."
+  },
+  {
+   "notice_id": "4396ae767e2f4a578f9075f349504c27",
+   "title": "6ME0094 - JOFOC Extension Bangor, ME",
+   "score": 3,
+   "reason": "GSA lease extension for USDA space; delays in replacement space."
+  },
+  {
+   "notice_id": "4fbf0cd40823445898cdff3a3548fbde",
+   "title": "6630--VISN Lab Hematology Bridge BPA",
+   "score": 3,
+   "reason": "Hematology bridge BPA to Beckman; routine continuity justification."
+  },
+  {
+   "notice_id": "be7987c7d7ab454a9d90575598f5474a",
+   "title": "282CBCS CCTV System",
+   "score": 3,
+   "reason": "Intrusion detection expansion limited to incumbent integration; routine."
+  },
+  {
+   "notice_id": "e5b9160fe966485694aa56759a2dec82",
+   "title": "Sole Source Justification - A-E Type C Services",
+   "score": 2,
+   "reason": "Architect-engineer construction-phase services; original designer, routine."
+  },
+  {
+   "notice_id": "ced408d1960e4edcbde81539f07c9f25",
+   "title": "H241--Air Handling Unit E-1-1, Air Study (VA-26-00082585) - 541 - Services Procurement - VAMC Cleveland",
+   "score": 2,
+   "reason": "Small $14K Andover HVAC air study; territory agreement, routine."
+  },
+  {
+   "notice_id": "4235366b1c874f36bcd2a227636c62c4",
+   "title": "59--TERMINAL BOX",
+   "score": 2,
+   "reason": "Sole-source terminal box spares; technical data limits, routine."
+  },
+  {
+   "notice_id": "a0714f3f5be94ee592360961416d1688",
+   "title": "17--BUFFER CYL ASSY",
+   "score": 2,
+   "reason": "Critical safety buffer cylinder, two approved sources; routine spares."
+  },
+  {
+   "notice_id": "20f1b275e155405db23f37c81013b8d9",
+   "title": "NRP, ROLLER SWAGING / NSN 1680-01-619-9211 / CV-22 AIRCRAFT",
+   "score": 2,
+   "reason": "Single approved source roller swaging part; routine source approval."
+  },
+  {
+   "notice_id": "b5e78eb717944a0faabda485d143559b",
+   "title": "SPE4A726R0512 - 5895 - NRP, TRACKBALL, DATA / WSIC K",
+   "score": 2,
+   "reason": "Single-source trackball data unit; routine technical data limitation."
+  },
+  {
+   "notice_id": "84c1f7dea038484db394c77e33b3e4ea",
+   "title": "Redacted Justification & Approval (J&A)",
+   "score": 2,
+   "reason": "OEM engine generator IDIQ; technical data unavailable, routine."
+  },
+  {
+   "notice_id": "16f95f57d5ee403caf3f09e9ed2906e6",
+   "title": "FPC Morgantown Comprehensive Medical Services FY27 OCT 26",
+   "score": 2,
+   "reason": "Off-site inmate medical services order; no document text, routine."
+  },
+  {
+   "notice_id": "7baa6e4274f34a17830285c7903a58f3",
+   "title": "NOZZLE, TURBINE, AIRC 2840-01-632-5800OK 6029T45G14",
+   "score": 2,
+   "reason": "Three GE turbine nozzles; OEM source approval, routine."
+  },
+  {
+   "notice_id": "1be0c21fd21e437eb5edd572bfd8ac58",
+   "title": "Electronic Security Services",
+   "score": 2,
+   "reason": "SEC security services extension, follow-on to FSS order; routine."
+  },
+  {
+   "notice_id": "41d5f47bb0eb47e197cb58d76fd752e1",
+   "title": "Notice of Intent to Sole Source Dental Equipment Delivery, De-installation and Installation Service, USN Hospital Yokosuka Japan, and Supporting Clinics",
+   "score": 1,
+   "reason": "Dental equipment installation notice; no document text, routine."
+  },
+  {
+   "notice_id": "343cd834a80b4884942f2cc736d748fe",
+   "title": "ACTUATOR HOUSING, NSN 1620-016835794, Part-Number 42357- 141, Weapon System Designator Code 11F",
+   "score": 1,
+   "reason": "Spare actuator housing J&A with no text; routine."
+  },
+  {
+   "notice_id": "54702ffbe5da4649bc8aea569c4dbf37",
+   "title": "16--VALVE,REGULATING SY",
+   "score": 1,
+   "reason": "Routine OEM valve spares under source-controlled drawing."
+  },
+  {
+   "notice_id": "7108e9f93d7f4c218c777bf8daad9d89",
+   "title": "65 -- Hospital Supply Division",
+   "score": 1,
+   "reason": "Dental chair package with install; routine brand-only justification."
+  },
+  {
+   "notice_id": "bc7a630aef214e33bd93291f49fa1984",
+   "title": "65 -- Hospital Supply Division",
+   "score": 1,
+   "reason": "Dental chair package with install; routine brand-only justification."
+  }
+ ],
+ "ranked": [
+  "9ca2e17f9368437baa365b7db8ee0c23",
+  "e0ef04062f9c4b32833b5e196f831b1c",
+  "7716091b214f4c8a9aedd224690fcdba",
+  "748a34bba7e4494faae508cb0bb33b3f",
+  "cee512e7e36742c2a705c57c69f1df71",
+  "1627aa3ebda24da2b7726837c3d0e51a",
+  "29cef81046e546f2b1ebccc31229dd12",
+  "e482a4a788e3426fa786feeb0a1f8715",
+  "ad467f4ba1314e628dceb4ec23ccfc30",
+  "6f9edfd418094e84a48b3c66065ff2d6",
+  "a2ba96bbd08b440897200fdef7f98f91",
+  "bbcdf38e4cea475f83b4ac0d7220da6b",
+  "81beaaf4d1434309bad180578a527b7d",
+  "0066d6a2728b45119df568aa08155572",
+  "88ca252b42d5424c8c254d72f75b9681",
+  "a2185a6047e1497cade21667e608e412",
+  "4396ae767e2f4a578f9075f349504c27"
+ ],
+ "model_answer": {
+  "picks": [
+   {
+    "notice_id": "9ca2e17f9368437baa365b7db8ee0c23",
+    "headline": "HUD sole-sources $170M property-preservation contracts after vendors suspended operations over unpaid invoices",
+    "why": "HUD cites unusual and compelling urgency for follow-on Field Service Management contracts in eight areas. It says it chose not to exercise the next option because of poor performance: key vendors suspended operations over outstanding invoices, and non-payments escalated to Congressional inquiries.",
+    "quotes": [
+     {
+      "text": "key vendors suspending operations because of outstanding client invoices, lack of property preservation and maintenance triggering property liens and blocking the marketing or sale of homes, and non-payments escalated to Congressional inquiries",
+      "page": "JOFOC Number 26-30_FSM_COMP-ADVOC_SIGNED.pdf, page 3"
+     }
+    ],
+    "vendor": "Alpine Companies Inc.",
+    "value": "$170,829,743",
+    "authority": "41 USC 3304 (a)(2)"
+   },
+   {
+    "notice_id": "e0ef04062f9c4b32833b5e196f831b1c",
+    "headline": "DTRA reprocures nuclear-enterprise cyber toolkits after terminating first contractor for cause",
+    "why": "DTRA proposes a new sole-source award to NextCom LLC after the prior contractor failed to deliver conforming products and was terminated for cause. It says reopening competition would take an estimated six to nine months, and initial units are needed within 30 days.",
+    "quotes": [
+     {
+      "text": "The contractor subsequently failed to deliver conforming products, and the Government terminated the contract for cause.",
+      "page": "MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "NextCom LLC",
+    "value": "$5,000,000",
+    "authority": "41 U.S.C. 1901"
+   },
+   {
+    "notice_id": "748a34bba7e4494faae508cb0bb33b3f",
+    "headline": "State extends Deloitte AI and sanctions support up to two years, no ceiling",
+    "why": "State proposes a one-year extension plus two six-month options for Deloitte's call covering AI development and sanctions work. The document says the BPA and call had no maximum ceiling and that, given the recent reorganization and staffing levels, changing contractors would be highly disruptive.",
+    "quotes": [
+     {
+      "text": "Given the recent Department reorganization and current staffing levels, a\nchange in contract at this point would be highly disruptive to TFS core efforts.",
+      "page": "LSJ Template CfA PMSS Deloitte_Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Deloitte Consulting LLP",
+    "value": "",
+    "authority": "GSAR 538.7104-3, paragraph (b)(iii)"
+   },
+   {
+    "notice_id": "7716091b214f4c8a9aedd224690fcdba",
+    "headline": "DCMA plans $90M ServiceNow expansion, including fraud detection and FMS budget tracking",
+    "why": "DCMA proposes a one-year base plus four option years with Carahsoft to sustain and expand its ServiceNow platform with seventeen new capabilities. The document says the services are integrally related to the proprietary platform and DCMA's configuration.",
+    "quotes": [
+     {
+      "text": "Overall Total Contract Amount: $90,467,667.83",
+      "page": "TAB A -JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf, page 1"
+     }
+    ],
+    "vendor": "Carahsoft Technology Corp.",
+    "value": "$90,467,667.83",
+    "authority": "41 U.S.C. 152(3 as prescribed in FAR 8.401 and 538.7104-3(b)(ii)"
+   },
+   {
+    "notice_id": "0066d6a2728b45119df568aa08155572",
+    "headline": "VA sole-sources lab analyzers for a year after missing procurement package deadline, citing staffing shortages",
+    "why": "The VA is bridging East Orange VAMC's chemistry testing with Beckman Coulter for a year. The document attributes the prior sole source to extensive delays in submitting a long-term procurement package due to staffing shortages, and says the medical center missed its submission date.",
+    "quotes": [
+     {
+      "text": "because of the extensive\ndelays in submitting a long-term procurement package due to staffing shortages.",
+      "page": "FAR 8 Sole Source Justification - Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Beckman Coulter, Inc.",
+    "value": "",
+    "authority": "GSAM/R 538.7104-3(b)(1)(ii)"
+   }
+  ]
+ },
+ "picks": [
+  {
+   "notice_id": "9ca2e17f9368437baa365b7db8ee0c23",
+   "rank": 1,
+   "headline": "HUD sole-sources $170M property-preservation contracts after vendors suspended operations over unpaid invoices",
+   "why": "HUD cites unusual and compelling urgency for follow-on Field Service Management contracts in eight areas. It says it chose not to exercise the next option because of poor performance: key vendors suspended operations over outstanding invoices, and non-payments escalated to Congressional inquiries.",
+   "quotes": [
+    {
+     "text": "key vendors suspending operations because of outstanding client invoices, lack of property preservation and maintenance triggering property liens and blocking the marketing or sale of homes, and non-payments escalated to Congressional inquiries",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "26c620cab19e4407b47991701fc1fd1f",
+       "page_number": 3,
+       "text_source": "native"
+      }
+     ],
+     "where": "JOFOC Number 26-30_FSM_COMP-ADVOC_SIGNED.pdf, p. 3",
+     "model_page": "JOFOC Number 26-30_FSM_COMP-ADVOC_SIGNED.pdf, page 3"
+    }
+   ],
+   "vendor": "Alpine Companies Inc.",
+   "value": "$170,829,743 (total incl. options)",
+   "authority": "41 USC 3304 (a)(2); FAR Overhaul 6.103-2",
+   "model_rank": 1
+  },
+  {
+   "notice_id": "e0ef04062f9c4b32833b5e196f831b1c",
+   "rank": 2,
+   "headline": "DTRA reprocures nuclear-enterprise cyber toolkits after terminating first contractor for cause",
+   "why": "DTRA proposes a new sole-source award to NextCom LLC after the prior contractor failed to deliver conforming products and was terminated for cause. It says reopening competition would take an estimated six to nine months, and initial units are needed within 30 days.",
+   "quotes": [
+    {
+     "text": "The contractor subsequently failed to deliver conforming products, and the Government terminated the contract for cause.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "07467b57740745138f8314db5ac8af51",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf, p. 2",
+     "model_page": "MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "NextCom LLC",
+   "value": "$5,000,000 (ceiling)",
+   "authority": "41 U.S.C. 1901",
+   "model_rank": 2
+  },
+  {
+   "notice_id": "748a34bba7e4494faae508cb0bb33b3f",
+   "rank": 3,
+   "headline": "State extends Deloitte AI and sanctions support up to two years, no ceiling",
+   "why": "State proposes a one-year extension plus two six-month options for Deloitte's call covering AI development and sanctions work. The document says the BPA and call had no maximum ceiling and that, given the recent reorganization and staffing levels, changing contractors would be highly disruptive.",
+   "quotes": [
+    {
+     "text": "Given the recent Department reorganization and current staffing levels, a change in contract at this point would be highly disruptive to TFS core efforts.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "9b8abe6139ba44e3980098ca643dffbc",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "LSJ Template CfA PMSS Deloitte_Redacted.pdf, p. 2",
+     "model_page": "LSJ Template CfA PMSS Deloitte_Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Deloitte Consulting LLP",
+   "value": "value redacted",
+   "authority": "GSAR 538.7104-3, paragraph (b)(iii)",
+   "model_rank": 3
+  },
+  {
+   "notice_id": "7716091b214f4c8a9aedd224690fcdba",
+   "rank": 4,
+   "headline": "DCMA plans $90M ServiceNow expansion, including fraud detection and FMS budget tracking",
+   "why": "DCMA proposes a one-year base plus four option years with Carahsoft to sustain and expand its ServiceNow platform with seventeen new capabilities. The document says the services are integrally related to the proprietary platform and DCMA's configuration.",
+   "quotes": [
+    {
+     "text": "Overall Total Contract Amount: $90,467,667.83",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "dd9805aa900a45179476c3ecd8936386",
+       "page_number": 1,
+       "text_source": "transcription"
+      }
+     ],
+     "where": "TAB A -JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf, p. 1 (machine-transcribed page)",
+     "model_page": "TAB A -JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf, page 1"
+    }
+   ],
+   "vendor": "Carahsoft Technology Corp.",
+   "value": "$90,467,668 (total incl. options)",
+   "authority": "41 U.S.C. 152(3 as prescribed in FAR 8.401 and 538.7104-3(b)(ii)",
+   "model_rank": 4
+  },
+  {
+   "notice_id": "0066d6a2728b45119df568aa08155572",
+   "rank": 5,
+   "headline": "VA sole-sources lab analyzers for a year after missing procurement package deadline, citing staffing shortages",
+   "why": "The VA is bridging East Orange VAMC's chemistry testing with Beckman Coulter for a year. The document attributes the prior sole source to extensive delays in submitting a long-term procurement package due to staffing shortages, and says the medical center missed its submission date.",
+   "quotes": [
+    {
+     "text": "because of the extensive delays in submitting a long-term procurement package due to staffing shortages.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "d44daf023fdb491ab2683de11028f954",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "FAR 8 Sole Source Justification - Redacted.pdf, p. 2",
+     "model_page": "FAR 8 Sole Source Justification - Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Beckman Coulter, Inc.",
+   "value": "value redacted",
+   "authority": "GSAM/R 538.7104-3(b)(1)(ii)",
+   "model_rank": 5
+  }
+ ],
+ "dropped_by_checks": [],
+ "subject": "Whoa J&As — Oct 15: HUD sole-sources $170M property-preservation contracts after vendors suspended operations over unpaid invoices",
+ "body": "## 1. HUD sole-sources $170M property-preservation contracts after vendors suspended operations over unpaid invoices\n\n**HOUSING AND URBAN DEVELOPMENT, DEPARTMENT OF · Alpine Companies Inc. · $170,829,743 (total incl. options) · 41 USC 3304 (a)(2); FAR Overhaul 6.103-2**  \n*Posted 2026-10-14, award {3A_4A}_Contract_86614526D00001_{5A_8A}_Contract_86614526D00002_{3S_5S}_Contract_86614526D00007_{4S_6S}_Contract_86614526D00008, “Field Service Management Services 3.12 Areas [3A/4A]_ [5A/8A]_1D_2D [4D/5D] [3S/5S] [4S/6S]”*\n\nHUD cites unusual and compelling urgency for follow-on Field Service Management contracts in eight areas. It says it chose not to exercise the next option because of poor performance: key vendors suspended operations over outstanding invoices, and non-payments escalated to Congressional inquiries.\n\n> “key vendors suspending operations because of outstanding client invoices, lack of property preservation and maintenance triggering property liens and blocking the marketing or sale of homes, and non-payments escalated to Congressional inquiries”  \n> — JOFOC Number 26-30_FSM_COMP-ADVOC_SIGNED.pdf, p. 3\n\n[SAM.gov notice](https://sam.gov/opp/9ca2e17f9368437baa365b7db8ee0c23/view) · [JOFOC Number 26-30_FSM_COMP-ADVOC_SIGNED.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/9ca2e17f9368437baa365b7db8ee0c23/26c620cab19e4407b47991701fc1fd1f_JOFOC_Number_26-30_FSM_COMP-ADVOC_SIGNED.pdf) · [Signed Cancelled solicitation 86614526R00001 (19).pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/9ca2e17f9368437baa365b7db8ee0c23/ee464b2e7c4247e29dc1e3b6231d7bac_Signed_Cancelled_solicitation_86614526R00001_19_.pdf)\n\n## 2. DTRA reprocures nuclear-enterprise cyber toolkits after terminating first contractor for cause\n\n**DEFENSE THREAT REDUCTION AGENCY (DTRA) (DEPT OF DEFENSE) · NextCom LLC · $5,000,000 (ceiling) · 41 U.S.C. 1901**  \n*Posted 2026-10-14, award HDTRA126PE017, “Advanced Cyber Security Threat Detection Analysis Platform”*\n\nDTRA proposes a new sole-source award to NextCom LLC after the prior contractor failed to deliver conforming products and was terminated for cause. It says reopening competition would take an estimated six to nine months, and initial units are needed within 30 days.\n\n> “The contractor subsequently failed to deliver conforming products, and the Government terminated the contract for cause.”  \n> — MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/e0ef04062f9c4b32833b5e196f831b1c/view) · [MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/e0ef04062f9c4b32833b5e196f831b1c/07467b57740745138f8314db5ac8af51_MobileKit_Reprocurement_JA_Final_20260916_Redacted.pdf)\n\n## 3. State extends Deloitte AI and sanctions support up to two years, no ceiling\n\n**STATE, DEPARTMENT OF · Deloitte Consulting LLP · value redacted · GSAR 538.7104-3, paragraph (b)(iii)**  \n*Posted 2026-10-14, award 19AQMM19A0280, “GSAR 538.7104-3 Sole source justification”*\n\nState proposes a one-year extension plus two six-month options for Deloitte's call covering AI development and sanctions work. The document says the BPA and call had no maximum ceiling and that, given the recent reorganization and staffing levels, changing contractors would be highly disruptive.\n\n> “Given the recent Department reorganization and current staffing levels, a change in contract at this point would be highly disruptive to TFS core efforts.”  \n> — LSJ Template CfA PMSS Deloitte_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/748a34bba7e4494faae508cb0bb33b3f/view) · [LSJ Template CfA PMSS Deloitte_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/748a34bba7e4494faae508cb0bb33b3f/9b8abe6139ba44e3980098ca643dffbc_LSJ_Template_CfA_PMSS_Deloitte_Redacted.pdf)\n\n## 4. DCMA plans $90M ServiceNow expansion, including fraud detection and FMS budget tracking\n\n**DEFENSE CONTRACT MANAGEMENT AGENCY (DCMA) (DEPT OF DEFENSE) · Carahsoft Technology Corp. · $90,467,668 (total incl. options) · 41 U.S.C. 152(3 as prescribed in FAR 8.401 and 538.7104-3(b)(ii)**  \n*Posted 2026-10-14, award N6600119A0120, “Platform Automation, Implementation, Sustainment, Operations and Licensing”*\n\nDCMA proposes a one-year base plus four option years with Carahsoft to sustain and expand its ServiceNow platform with seventeen new capabilities. The document says the services are integrally related to the proprietary platform and DCMA's configuration.\n\n> “Overall Total Contract Amount: $90,467,667.83”  \n> — TAB A -JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf, p. 1 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/7716091b214f4c8a9aedd224690fcdba/view) · [TAB A -JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/7716091b214f4c8a9aedd224690fcdba/dd9805aa900a45179476c3ecd8936386_TAB_A_-JA_CAFM_ServiceNowExpansion-v2_redacted1_Redacted.pdf)\n\n## 5. VA sole-sources lab analyzers for a year after missing procurement package deadline, citing staffing shortages\n\n**VETERANS AFFAIRS, DEPARTMENT OF · Beckman Coulter, Inc. · value redacted · GSAM/R 538.7104-3(b)(1)(ii)**  \n*Posted 2026-10-14, award V797D70260, “6632--Chemistry Immunoassay CPRR”*\n\nThe VA is bridging East Orange VAMC's chemistry testing with Beckman Coulter for a year. The document attributes the prior sole source to extensive delays in submitting a long-term procurement package due to staffing shortages, and says the medical center missed its submission date.\n\n> “because of the extensive delays in submitting a long-term procurement package due to staffing shortages.”  \n> — FAR 8 Sole Source Justification - Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/0066d6a2728b45119df568aa08155572/view) · [FAR 8 Sole Source Justification - Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/0066d6a2728b45119df568aa08155572/d44daf023fdb491ab2683de11028f954_FAR_8_Sole_Source_Justification_-_Redacted.pdf) · [V797D70260 36C24227N0116_2.docx](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/0066d6a2728b45119df568aa08155572/b70110ae073a454b837921fdddac80d1_V797D70260_36C24227N0116_2.docx)\n\n## All new notices (34)\n\n- ★ Housing and Urban Development · Field Service Management Services 3.12 Areas [3A/4A]_ [5A/8A]_1D_2D [4D/5D] [3S/5S]… · Alpine Companies Inc. · $170,829,743 · 41 USC 3304 (a)(2); FAR Overhaul 6.103-2 · [SAM.gov](https://sam.gov/opp/9ca2e17f9368437baa365b7db8ee0c23/view)\n- ★ Defense Threat Reduction Agency (DTRA) · Advanced Cyber Security Threat Detection Analysis Platform · NextCom LLC · $5,000,000 · 41 U.S.C. 1901 · [SAM.gov](https://sam.gov/opp/e0ef04062f9c4b32833b5e196f831b1c/view)\n- ★ State · GSAR 538.7104-3 Sole source justification · Deloitte Consulting LLP · value redacted · GSAR 538.7104-3, paragraph (b)(iii) · [SAM.gov](https://sam.gov/opp/748a34bba7e4494faae508cb0bb33b3f/view)\n- ★ Defense Contract Management Agency (DCMA) · Platform Automation, Implementation, Sustainment, Operations and Licensing · Carahsoft Technology Corp. · $90,467,668 · 41 U.S.C. 152(3 as prescribed in FAR 8.401 and 538.7104-3(b)(ii) · [SAM.gov](https://sam.gov/opp/7716091b214f4c8a9aedd224690fcdba/view)\n- ★ Veterans Affairs · 6632--Chemistry Immunoassay CPRR · Beckman Coulter, Inc. · value redacted · GSAM/R 538.7104-3(b)(1)(ii) · [SAM.gov](https://sam.gov/opp/0066d6a2728b45119df568aa08155572/view)\n- National Aeronautics and Space Administration · LISA Engineering Test Unit (ETU) Telescope · L3Harris Technologies, Inc. · $15,700,000 · 10 U.S.C. 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/e482a4a788e3426fa786feeb0a1f8715/view)\n- AIR Force · Justification and Approval (J&A) for TekSynap AV/IT Systems · TekSynap · $5,900,000 · GSAR 538.7104-3(b)(iii); FAR 8.405-6(a)(1)(i)(C) · [SAM.gov](https://sam.gov/opp/bbcdf38e4cea475f83b4ac0d7220da6b/view)\n- Education · JOFOC - Architecture and Data Modernization Support · MITRE Corp. · $4,800,000 · FAR 6.103-3 · [SAM.gov](https://sam.gov/opp/1627aa3ebda24da2b7726837c3d0e51a/view)\n- Defense Contract Management Agency (DCMA) · Artificial Intelligence/Machine Learning Analytics · Poplicus, Inc. d/b/a Air Enterprise · $1,813,602 · 41 U.S.C. 152(3); 538.7104-3(b)(ii) · [SAM.gov](https://sam.gov/opp/cee512e7e36742c2a705c57c69f1df71/view)\n- Office of the Assistant Secretary for Administration (ASA) · Website Maintenance and Design · RIVA SOLUTIONS, INC. · $862,054 · GSAM/R 538.7104-3(b)(1)(ii) · [SAM.gov](https://sam.gov/opp/6f9edfd418094e84a48b3c66065ff2d6/view)\n- Securities and Exchange Commission · Electronic Security Services · Signet Technologies DBA Convergint Federal · $597,080 · GSAR 538.7104-3(b)(iii) · [SAM.gov](https://sam.gov/opp/1be0c21fd21e437eb5edd572bfd8ac58/view)\n- Veterans Affairs · H241--Air Handling Unit E-1-1, Air Study (VA-26-00082585) - 541 - Services Procurement -… · Schneider Electric · $14,000 · FAR 13.106-1(b) · [SAM.gov](https://sam.gov/opp/ced408d1960e4edcbde81539f07c9f25/view)\n- Army · 282CBCS CCTV System · Advantor Systems Corporation · value redacted · 10 U.S.C. 2304(a)(1) or 41 U.S.C. 3304(a)(1) as implemented in FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/be7987c7d7ab454a9d90575598f5474a/view)\n- Army · Sole Source Justification - A-E Type C Services · Zerr Berg Architects, Inc. · value redacted · 10 U.S.C. 2304(c)(1), as implemented by FAR 6.103-1 · [SAM.gov](https://sam.gov/opp/e5b9160fe966485694aa56759a2dec82/view)\n- Defense Health Agency (DHA) · Notice of Intent to Sole Source Dental Equipment Delivery, De-installation and… · [SAM.gov](https://sam.gov/opp/41d5f47bb0eb47e197cb58d76fd752e1/view)\n- Defense Logistics Agency · 16--VALVE,REGULATING SY · Eaton Aerospace, LLC. · value redacted · 10 USC 3204(A) (1) · [SAM.gov](https://sam.gov/opp/54702ffbe5da4649bc8aea569c4dbf37/view)\n- Defense Logistics Agency · 17--BUFFER CYL ASSY · The Entwistle Company LLC (20722) · value redacted · 10 USC 3204(A) (1) · [SAM.gov](https://sam.gov/opp/a0714f3f5be94ee592360961416d1688/view)\n- Defense Logistics Agency · 59--TERMINAL BOX · DRS TECHNOLOGIES CANADA · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/4235366b1c874f36bcd2a227636c62c4/view)\n- Defense Logistics Agency · 65 -- Hospital Supply Division · A-dec, Inc. · value redacted · FAR 8.405-6(a)(1)(i)(B) · [SAM.gov](https://sam.gov/opp/7108e9f93d7f4c218c777bf8daad9d89/view)\n- Defense Logistics Agency · 65 -- Hospital Supply Division · A-dec, Inc. · value redacted · FAR 8.405-6(a)(1)(i)(B) · [SAM.gov](https://sam.gov/opp/bc7a630aef214e33bd93291f49fa1984/view)\n- Defense Logistics Agency · ACTUATOR HOUSING, NSN 1620-016835794, Part-Number 42357- 141, Weapon System Designator… · [SAM.gov](https://sam.gov/opp/343cd834a80b4884942f2cc736d748fe/view)\n- Defense Logistics Agency · Generator, Direct Cu · Mission Systems Wimborne Limited · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/81beaaf4d1434309bad180578a527b7d/view)\n- Defense Logistics Agency · NOZZLE, TURBINE, AIRC 2840-01-632-5800OK 6029T45G14 · GENERAL ELECTRIC COMPANY (GE) · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/7baa6e4274f34a17830285c7903a58f3/view)\n- Defense Logistics Agency · NRP, ROLLER SWAGING / NSN 1680-01-619-9211 / CV-22 AIRCRAFT · REXNORD INDUSTRIES · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/20f1b275e155405db23f37c81013b8d9/view)\n- Defense Logistics Agency · Redacted Justification & Approval (J&A) · C.E. Niehoff · value redacted · 10 United States Code (U.S.C.) 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/84c1f7dea038484db394c77e33b3e4ea/view)\n- Defense Logistics Agency · SPE4A726R0512 - 5895 - NRP, TRACKBALL, DATA / WSIC K · CORTRON, INC. · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/b5e78eb717944a0faabda485d143559b/view)\n- Federal Prison System / Bureau of Prisons · FPC Morgantown Comprehensive Medical Services FY27 OCT 26 · [SAM.gov](https://sam.gov/opp/16f95f57d5ee403caf3f09e9ed2906e6/view)\n- Navy · Gartner, Inc. Research and Advisory Subscriptions JA · Gartner, Inc. · value redacted · GSAM 538.7104-4; GSAM 538.7104-3(b)(ii) · [SAM.gov](https://sam.gov/opp/a2ba96bbd08b440897200fdef7f98f91/view)\n- Public Buildings Service · 6ME0094 - JOFOC Extension Bangor, ME · value redacted · 41 U.S.C. 3304(a)(1) · [SAM.gov](https://sam.gov/opp/4396ae767e2f4a578f9075f349504c27/view)\n- State · Digital Masons Subscription · Digital Masons · value redacted · 41 USC 3304; FAR 6.103-1 · [SAM.gov](https://sam.gov/opp/ad467f4ba1314e628dceb4ec23ccfc30/view)\n- Veterans Affairs · 6630--VISN Lab Hematology Bridge BPA · Beckman Coulter, Inc. · value redacted · FAR 8.405-6(a)(1)(A); FAR 8.405-6(a)(1)(B) · [SAM.gov](https://sam.gov/opp/4fbf0cd40823445898cdff3a3548fbde/view)\n- Veterans Affairs · 6630--VISN Lab Urinalysis Bridge BPA · Beckman Coulter, Inc. · value redacted · FAR 8.405-6(a)(1)(A); FAR 8.405-6(a)(1)(B) · [SAM.gov](https://sam.gov/opp/88ca252b42d5424c8c254d72f75b9681/view)\n- Veterans Affairs · 6630--VISN Lab Urinalysis Bridge BPA · Beckman Coulter, Inc. · value redacted · FAR 8.405-6(a)(1)(A); FAR 8.405-6(a)(1)(B) · [SAM.gov](https://sam.gov/opp/a2185a6047e1497cade21667e608e412/view)\n- Veterans Affairs · 6632--Chemistry Immunoassay CPRR · Beckman Coulter, Inc. · value redacted · GSAM/R 538.7104-3(b)(1)(ii) · [SAM.gov](https://sam.gov/opp/29cef81046e546f2b1ebccc31229dd12/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 34 new notices reviewed (first collected Oct 15 20:00 ET to Oct 16 08:24 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.1354
+}
