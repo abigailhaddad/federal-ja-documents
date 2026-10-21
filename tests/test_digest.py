@@ -176,7 +176,7 @@ def test_render_pick():
     picks, _ = verify.verify_picks({"picks": [pick()]}, {"n1": c})
     when = T("2026-10-22T14:00:00")
     s = render.subject(picks, when)
-    assert s == "Whoa J&As — Oct 22: VA loses all its contracting staff to deferred resignation"
+    assert s == "WOAH! J&As — Oct 22: VA loses all its contracting staff to deferred resignation"
     b = render.body(picks, {"n1": c}, 12, {"from_label": "Oct 21", "to_label": "Oct 22", "left_out_old": 3,
                                           "max_age_days": 14})
     assert "## 1. VA loses all its contracting staff" in b
@@ -184,15 +184,15 @@ def test_render_pick():
            "(total incl. options) · FAR 6.302-2" in b
     assert "> “The Government lost all of its contracting staff" in b and "> — JA_Redacted.pdf, p. 1" in b
     assert "[SAM.gov notice](https://sam.gov/opp/n1/view)" in b and "JA%20Redacted.pdf" in b
-    assert "12 new notices reviewed" in b and "3 notices first collected then but posted more than 14 days" in b
-    assert "AI-selected" in b and not b.startswith("---")
+    assert "12 new notices reviewed" in b and "3 older notices skipped" in b
+    assert "AI-picked" in b and not b.startswith("---")
 
 
 def test_render_zero_picks():
     when = T("2026-10-22T03:00:00")   # 23:00 on Oct 21 in Eastern time
-    assert render.subject([], when) == "Whoa J&As — Oct 21: nothing whoa-worthy"
+    assert render.subject([], when) == "WOAH! J&As — Oct 21: nothing WOAH-worthy"
     b = render.body([], {}, 7, {"from_label": "a", "to_label": "b"})
-    assert b.startswith("Nothing whoa-worthy today (7 new notices reviewed).")
+    assert b.startswith("Nothing WOAH-worthy today (7 new notices reviewed).")
 
 
 def test_transcribed_page_is_labelled():
@@ -270,7 +270,7 @@ def test_dry_run_writes_files_and_never_sends_or_saves(tmp_path):
     assert not (tmp_path / "state.json").exists()
     rep = json.loads((tmp_path / "out" / "picks.json").read_text())
     assert rep["mode"] == "dry_run" and rep["candidates"] == 1 and len(rep["picks"]) == 1
-    assert (tmp_path / "out" / "digest.md").read_text().startswith("# Whoa J&As — Oct 21: VA loses")
+    assert (tmp_path / "out" / "digest.md").read_text().startswith("# WOAH! J&As — Oct 21: VA loses")
 
 
 def test_failed_send_leaves_state_unchanged(tmp_path):
@@ -306,8 +306,8 @@ def test_zero_picks_email_and_skip_option(tmp_path):
     run(tmp_path, args(tmp_path, "--send", "--zero-picks", "skip"), send_fn=ok, picks=[])
     assert sent == [] and not (tmp_path / "state.json").exists()
     run(tmp_path, args(tmp_path, "--send"), send_fn=ok, picks=[])
-    assert sent[0][0] == "Whoa J&As — Oct 21: nothing whoa-worthy"
-    assert sent[0][1].startswith("Nothing whoa-worthy today (1 new notice reviewed).")
+    assert sent[0][0] == "WOAH! J&As — Oct 21: nothing WOAH-worthy"
+    assert sent[0][1].startswith("Nothing WOAH-worthy today (1 new notice reviewed).")
 
 
 def test_draft_does_not_move_the_state(tmp_path):
@@ -319,7 +319,7 @@ def test_draft_does_not_move_the_state(tmp_path):
 
 
 def test_recovers_watermark_from_buttondown_when_state_save_failed(tmp_path):
-    recent = [{"id": "em_9", "subject": "Whoa J&As — Oct 21: x", "creation_date": "2026-10-21T12:00:00Z",
+    recent = [{"id": "em_9", "subject": "WOAH! J&As — Oct 21: x", "creation_date": "2026-10-21T12:00:00Z",
                "metadata": {"kind": buttondown.METADATA_KIND, "to_watermark": "2026-10-21T11:00:00+00:00"}}]
 
     def boom(*a, **k):
@@ -409,9 +409,9 @@ def test_short_org_keeps_acronyms():
 def test_zero_picks_email_still_lists_all_notices():
     c = candidate()
     b = render.body([], {}, 1, {"from_label": "a", "to_label": "b"}, all_cands=[c])
-    assert b.startswith("Nothing whoa-worthy today (1 new notice reviewed).")
+    assert b.startswith("Nothing WOAH-worthy today (1 new notice reviewed).")
     assert "## All new notices (1)" in b and "[SAM.gov](https://sam.gov/opp/n1/view)" in b
-    assert b.index("All new notices") < b.index("*What this is:*")
+    assert b.index("All new notices") < b.index("*WOAH! J&As:*")
 
 
 def test_excerpt_shares_the_budget_between_versions_of_the_justification():
@@ -428,3 +428,16 @@ def test_excerpt_shares_the_budget_between_versions_of_the_justification():
     # with room left over, the other attachments follow
     text, _, _ = model.excerpt(c, 20000)
     assert text.index("NEW2") < text.index("[PWS.pdf")
+
+
+def test_all_notices_shows_gist_under_each_line():
+    a, b = candidate("a"), candidate("b")
+    a.meta.update(sub_tier="DEPT OF THE ARMY", title="Bridge for pharmacy services")
+    b.meta.update(sub_tier="DEPT OF THE NAVY", title="Spare parts")
+    out = render.all_notices([a, b], [], gists={"a": "Bridge while a protest of the follow-on is resolved.", "b": ""})
+    la = next(l for l in out.splitlines() if "Bridge for pharmacy" in l)
+    i = out.splitlines().index(la)
+    assert out.splitlines()[i + 1].strip() == "Bridge while a protest of the follow-on is resolved."
+    lb = out.splitlines().index(next(l for l in out.splitlines() if "Spare parts" in l))
+    assert not out.splitlines()[lb + 1].strip().startswith("Bridge")
+    assert "not quote-checked" in out

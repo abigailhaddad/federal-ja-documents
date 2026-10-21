@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 from .candidates import Candidate
 
 ET = ZoneInfo("America/New_York")
-PREFIX = "Whoa J&As"
+PREFIX = "WOAH! J&As"
 DATASET_URL = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents"
 PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
 MAX_DOC_LINKS = 3
@@ -21,7 +21,7 @@ def day_label(d: datetime) -> str:
 
 
 def subject(picks: list[dict], when: datetime) -> str:
-    top = picks[0]["headline"].rstrip(".") if picks else "nothing whoa-worthy"
+    top = picks[0]["headline"].rstrip(".") if picks else "nothing WOAH-worthy"
     return f"{PREFIX} — {day_label(when)}: {top}"
 
 
@@ -38,20 +38,16 @@ def _fmt_et(iso: str | None) -> str:
 
 
 def footer(n_reviewed: int, window: dict) -> str:
+    old = window.get("left_out_old")
     return (
         "---\n\n"
-        f"*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) "
-        f"notices posted on SAM.gov, from the public [federal-ja-documents dataset]({DATASET_URL}). "
-        f"Today: {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} reviewed "
-        f"(first collected {window.get('from_label', '?')} to {window.get('to_label', '?')})"
-        + (f"; {window['left_out_old']} notice{'s' if window['left_out_old'] != 1 else ''} first collected then "
-           f"but posted more than {window.get('max_age_days')} days earlier were left out"
-           if window.get("left_out_old") else "")
-        + ".\n\n"
-        "*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked "
-        "word for word against the notice's document text, and dollar figures come from those quotes or "
-        "from quote-checked extraction fields. AI can still misread a document: check the source before "
-        f"relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md)."
+        f"*WOAH! J&As:* a daily pick of new federal sole-source justifications (J&As) from SAM.gov, via the "
+        f"[federal-ja-documents dataset]({DATASET_URL}). {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
+        f"reviewed today (first collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
+        + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
+        + ").\n\n"
+        "AI-picked and AI-written (Claude). Quotes are checked word for word against the documents, "
+        f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md)."
     )
 
 
@@ -93,7 +89,7 @@ def _ext_value(e: dict) -> str | None:
     return "value redacted" if e.get("value_redacted") is True else None
 
 
-def all_notices(cands: list[Candidate], picks: list[dict]) -> str:
+def all_notices(cands: list[Candidate], picks: list[dict], gists: dict | None = None) -> str:
     """'All new notices (N)': every candidate, one line each. Vendor, value
     and authority only from the extraction's quote-checked fields (left out
     when the notice has no extraction row or the field is empty); picks first
@@ -113,19 +109,21 @@ def all_notices(cands: list[Candidate], picks: list[dict]) -> str:
         bits = [short_org(c.meta), _trim(c.meta.get("title") or "(no title)", TITLE_CHARS), e.get("vendor"),
                 _ext_value(e), e.get("authority_cited")]
         star = "\u2605 " if c.notice_id in rank else ""
+        gist = _md_escape_line((gists or {}).get(c.notice_id) or "")
         lines.append(f"- {star}" + " \u00b7 ".join(_md_escape_line(str(b)) for b in bits if b)
-                     + f" \u00b7 [SAM.gov]({link})")
+                     + f" \u00b7 [SAM.gov]({link})" + (f"  \n  {gist}" if gist else ""))
     lines.append("")
     lines.append("*Vendor, value and authority are shown only where the AI extraction found them with a "
-                 "quote checked against the document; blank means not extracted yet or not stated, not none.*")
+                 "quote checked against the document; blank means not extracted yet or not stated, not none. "
+                 "The one-line summaries are AI-written from each notice's text and are not quote-checked.*")
     return "\n".join(lines) + "\n"
 
 
 def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window: dict,
-         all_cands: list[Candidate] | None = None) -> str:
-    listing = ("\n" + all_notices(all_cands, picks)) if all_cands else ""
+         all_cands: list[Candidate] | None = None, gists: dict | None = None) -> str:
+    listing = ("\n" + all_notices(all_cands, picks, gists)) if all_cands else ""
     if not picks:
-        return (f"Nothing whoa-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
+        return (f"Nothing WOAH-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
                 f"reviewed).\n" + listing + "\n" + footer(n_reviewed, window) + "\n")
     out = []
     for p in picks:

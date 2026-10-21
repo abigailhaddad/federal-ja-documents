@@ -1,4 +1,4 @@
-# Models and prompts for the daily "Whoa J&As" email digest (federal_ja.digest).
+# Models and prompts for the daily "WOAH! J&As" email digest (federal_ja.digest).
 # The code loads this file. Changing a prompt changes which notices get picked,
 # so give it a new version; every picks.json records the version it used.
 # <<CANDIDATES>> is filled in per run, after the cached instructions.
@@ -18,7 +18,7 @@ screen:
     - 4-7: somewhat unusual (a sizeable bridge, a protest delay, an odd justification), but not a headline.
     - 0-3: routine: OEM spare parts, brand-name lab or medical equipment, software maintenance or license renewals, leases, utilities, training seats, subscriptions, small purchases, boilerplate sole-source notices with nothing surprising.
 
-    Call the tool record_scores exactly once, with one entry per candidate (use its notice_id exactly as given), a score, and a reason of at most 15 words. Do not skip any candidate.
+    Call the tool record_scores exactly once, with one entry per candidate (use its notice_id exactly as given), a score, a reason of at most 15 words, and a gist: one plain sentence of at most 20 words saying what is being bought and the reason the document gives for not competing it (e.g. "Bridge for TRICARE pharmacy services while a protest of the follow-on is resolved."). The gist must state only what the candidate's text says: no adjectives like "remarkable", no speculation, no dollar figures. Do not skip any candidate.
 
     CANDIDATES
 
@@ -29,7 +29,7 @@ rank:
   # observed 730-1,600 output tokens (thinking included) per call in the 7-day backtest
   max_tokens: 8000
   prompt: |-
-    You are the editor of "Whoa J&As", a short daily email about newly posted U.S. federal sole-source justification notices on SAM.gov (J&As, limited-sources justifications, exceptions to fair opportunity, notices of intent to sole source). The reader follows federal contracting closely and wants only the genuinely remarkable notices: the ones that make you say "whoa".
+    You are the editor of "WOAH! J&As", a short daily email about newly posted U.S. federal sole-source justification notices on SAM.gov (J&As, limited-sources justifications, exceptions to fair opportunity, notices of intent to sole source). The reader follows federal contracting closely and wants only the genuinely remarkable notices: the ones that make you say "whoa".
 
     Below are today's candidates. Each has SAM.gov metadata, sometimes AI-extracted fields (labelled; treat them as hints and check them against the text), and an excerpt of the notice's documents with page markers like [file.pdf, page 3].
 
