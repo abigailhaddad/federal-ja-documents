@@ -4,7 +4,7 @@ https://api.buttondown.com/v1/openapi.json, and changelog on 2026-10-21).
 * ``POST https://api.buttondown.com/v1/emails`` with
   ``Authorization: Token <key>``; body ``subject``, ``body`` (Markdown is
   detected), ``status``, ``metadata``. Success is ``201`` with the Email.
-* ``status``: ``about_to_send`` sends now; ``draft`` only saves a draft. The
+* ``status``: ``about_to_send`` sends now (or, with ``publish_date``, is created as ``scheduled``); ``draft`` only saves a draft. The
   request pins ``X-API-Version: 2026-04-01``, under which a missing status
   means ``draft`` (the older default was to send immediately), so nothing is
   sent by accident; and an explicit ``about_to_send`` needs the
@@ -73,7 +73,8 @@ def _request(method: str, url: str, *, attempts: int = 4, **kw):
     raise SendError(f"Buttondown {method} {url} failed after {attempts} attempts: {last}")
 
 
-def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_to_send") -> dict:
+def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_to_send",
+               publish_date: str | None = None) -> dict:
     """Create (and, with about_to_send, send) one email. Returns
     {id, status, absolute_url}. Raises SendError on any failure.
 
@@ -85,6 +86,11 @@ def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_
         raise SendError("body starts with '---' (Buttondown reads that as frontmatter)")
     payload = {"subject": subject, "body": body, "status": status,
                "metadata": {"kind": METADATA_KIND, **metadata}}
+    if publish_date and status == "about_to_send":
+        # 2026-10-21: deliver at a set time (the run itself finishes ~3am ET).
+        # Buttondown holds a "scheduled" email until publish_date.
+        payload["status"] = "scheduled"
+        payload["publish_date"] = publish_date
     last = None
     for i in range(4):
         try:
