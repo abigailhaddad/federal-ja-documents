@@ -72,6 +72,16 @@ TOOL_NAME = "record_ja_fields"
 # notices (5 of 9,766 on 2026-10-17) are mostly price lists and appendices.
 MAX_EXTRACT_CHARS = 380_000
 MIN_FIELD_QUOTE_WORDS = 2
+# Output cap per call (thinking + the tool answer). 16,000 until extract6: the
+# VA CCN notice 085682f1 used 13,000-14,300 output tokens with every prompt
+# (extract3, the two-call trial, extract5), about 88% of it thinking (its
+# stored answer is ~6,500 characters), and one extract5 run hit the cap.
+# Haiku 5.5 allows 128,000. Only calls that need the room use it, at $0.50 per
+# million output tokens (a full 32,000-token call costs $0.016). The SDK's
+# non-streaming guard does not apply because llm.call sets its own timeout;
+# EXTRACT_TIMEOUT_S leaves room for a call that runs to the cap.
+MAX_OUTPUT_TOKENS = 32_000
+EXTRACT_TIMEOUT_S = 600
 
 AUTHORITY_PLAIN = [
     "only one responsible source",
@@ -971,7 +981,8 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
     best = None
     for attempt in range(1 + max(0, retries)):
         kw = {"effort": effort} if effort else {}
-        raw, u = call_fn(prompt, schema=SCHEMA, tool_name=TOOL_NAME, model=model, max_tokens=16000, **kw)
+        raw, u = call_fn(prompt, schema=SCHEMA, tool_name=TOOL_NAME, model=model,
+                         max_tokens=MAX_OUTPUT_TOKENS, timeout=EXTRACT_TIMEOUT_S, **kw)
         if not isinstance(raw, dict):
             raise llm.ModelError(f"model returned {type(raw).__name__}, not an object")
         bad = shape_errors(raw)

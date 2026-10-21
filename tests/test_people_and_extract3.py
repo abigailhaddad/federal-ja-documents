@@ -287,3 +287,38 @@ def test_placeholder_empty_strings_are_empty(doc):
     assert f["incumbent_piid"] is None and f["covered_piids"] == []
     assert f["people"][0]["title"] is None and f["people"][0]["organization"] is None
     assert not [d for d in dropped if d["field"] in ("incumbent_piid", "covered_piids") or d["field"].startswith("people")]
+
+
+def test_prompt_names_exactly_the_known_kinds():
+    """extract6: the facts instruction lists the allowed kinds by name (the
+    extract5 runs invented 4 and 8 entries of other kinds). The list must be
+    the code's list, in the same order as the per-kind instructions."""
+    import re
+    line = next(l for l in extract.PROMPT_CACHED.splitlines() if l.strip().startswith("- facts:"))
+    listed = re.search(r"listed below, spelled exactly as written: ([a-z_, ]+)\.", line).group(1)
+    assert tuple(k.strip() for k in listed.split(",")) == extract.FACT_KINDS
+    assert "ONLY" in line and "thrown away" in line
+    order = re.findall(r'\* kind "([a-z_]+)"', extract.PROMPT_CACHED)
+    assert tuple(order) == extract.FACT_KINDS
+
+
+def test_prompt_points_at_funding_lines():
+    """extract6: both extract5 runs missed "(e) Type of funding: One Big
+    Beautiful Bill Act" on an ICE notice whose other version says TBD."""
+    line = next(l for l in extract.PROMPT_CACHED.splitlines() if '* kind "funding_source"' in l)
+    for s in ('"(e) Type of funding:"', '"Funding:"', '"Appropriation:"', "Check every attachment", '"TBD"'):
+        assert s in line
+
+
+def test_output_cap_leaves_room_for_long_answers(doc):
+    """The VA CCN notice used 13,000-14,300 output tokens with every prompt
+    and one extract5 run hit the 16,000 cap; extract6 sends 32,000 and a
+    timeout long enough for a call that runs to it."""
+    seen = {}
+
+    def call(prompt, *, schema, tool_name, model, max_tokens, **kw):
+        seen.update(max_tokens=max_tokens, **kw)
+        return answer(), {"input_tokens": 1000, "output_tokens": 200, "cost_usd": 0.0002}
+    extract.extract_document(doc, call_fn=call, retries=0)
+    assert seen["max_tokens"] == extract.MAX_OUTPUT_TOKENS == 32_000
+    assert seen["timeout"] == extract.EXTRACT_TIMEOUT_S >= 600
