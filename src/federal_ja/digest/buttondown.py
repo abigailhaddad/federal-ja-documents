@@ -110,7 +110,9 @@ def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_
 def recent_digests(days: int = 10) -> list[dict]:
     """This project's digest emails created in the last ``days`` days
     (metadata.kind == METADATA_KIND), any status but draft."""
-    start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # a plain date: Buttondown 422s a datetime here ("Datetimes provided to
+    # dates should have zero time", first real run 2026-10-21)
+    start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
     url = f"{API}/emails"
     params = {"creation_date__start": start, "-status": "draft", "ordering": "-creation_date"}
     out = []
