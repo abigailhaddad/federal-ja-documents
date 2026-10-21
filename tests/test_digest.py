@@ -185,7 +185,7 @@ def test_render_pick():
     assert "> “The Government lost all of its contracting staff" in b and "> — JA_Redacted.pdf, p. 1" in b
     assert "[SAM.gov notice](https://sam.gov/opp/n1/view)" in b and "JA%20Redacted.pdf" in b
     assert "12 new notices reviewed" in b and "3 older notices skipped" in b
-    assert "Chosen and written up by AI" in b and not b.startswith("---")
+    assert "Chosen and written up by Claude" in b and not b.startswith("---")
 
 
 def test_render_zero_picks():

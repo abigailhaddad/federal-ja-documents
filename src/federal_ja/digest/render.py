@@ -50,7 +50,7 @@ def footer(n_reviewed: int, window: dict) -> str:
         f"reviewed today (first collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
         + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
         + ").\n\n"
-        "Chosen and written up by AI (Claude). Quotes are checked word for word against the documents, "
+        "Chosen and written up by Claude. Quotes are checked word for word against the documents, "
         f"but check the source before relying on anything. [How it works]({PROJECT_URL}/blob/main/docs/digest.md).\n\n"
         f"Archive & RSS: [{SITE_URL}]({SITE_URL}) · Subscribe: [{SUBSCRIBE_URL}]({SUBSCRIBE_URL})"
     )
