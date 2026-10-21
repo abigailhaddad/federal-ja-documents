@@ -1,0 +1,58 @@
+# Models and prompts for the daily "Whoa J&As" email digest (federal_ja.digest).
+# The code loads this file. Changing a prompt changes which notices get picked,
+# so give it a new version; every picks.json records the version it used.
+# <<CANDIDATES>> is filled in per run, after the cached instructions.
+version: 2026-10-21.digest1
+
+# Stage 1 (only when there are more candidates than the shortlist): a cheap
+# screen that scores every candidate from a short excerpt.
+screen:
+  model: claude-haiku-5-5
+  effort: low
+  max_tokens: 8000
+  prompt: |-
+    You are screening newly posted U.S. federal sole-source justification notices (J&As, limited-sources justifications, exceptions to fair opportunity, notices of intent to sole source) from SAM.gov for a daily email to a reader who follows federal contracting closely. The email features only the few most remarkable ("whoa!") notices of the day.
+
+    Score EVERY candidate below from 0 to 10 for how remarkable it is, using only what the candidate's text says:
+    - 8-10: very large dollar values or extensions (hundreds of millions or billions); candid admissions of agency dysfunction (staff losses, deferred resignation / DRP, "manpower reductions", hiring freezes, a shutdown, missed deadlines, lost contracting staff); urgency driven by Congress, oversight, litigation, an executive order or a political deadline; unusual or aggressive authorities (unusual and compelling urgency, letter contracts or undefinitized actions, national security or public interest exceptions, new legislation such as the One Big Beautiful Bill Act); notable vendors (large consultancies, AI, data or surveillance technology, detention, immigration or border operations); strange or unusually candid language; serial bridges, repeated extensions, protest-driven chaos.
+    - 4-7: somewhat unusual (a sizeable bridge, a protest delay, an odd justification), but not a headline.
+    - 0-3: routine: OEM spare parts, brand-name lab or medical equipment, software maintenance or license renewals, leases, utilities, training seats, subscriptions, small purchases, boilerplate sole-source notices with nothing surprising.
+
+    Call the tool record_scores exactly once, with one entry per candidate (use its notice_id exactly as given), a score, and a reason of at most 15 words. Do not skip any candidate.
+
+    CANDIDATES
+
+# Stage 2: one call that picks at most five and writes them up.
+rank:
+  model: claude-sonnet-5-5
+  effort: medium
+  max_tokens: 16000
+  prompt: |-
+    You are the editor of "Whoa J&As", a short daily email about newly posted U.S. federal sole-source justification notices on SAM.gov (J&As, limited-sources justifications, exceptions to fair opportunity, notices of intent to sole source). The reader follows federal contracting closely and wants only the genuinely remarkable notices: the ones that make you say "whoa".
+
+    Below are today's candidates. Each has SAM.gov metadata, sometimes AI-extracted fields (labelled; treat them as hints and check them against the text), and an excerpt of the notice's documents with page markers like [file.pdf, page 3].
+
+    Pick AT MOST FIVE. Three to five is typical, but pick fewer, or none, when fewer are genuinely remarkable. Never pad the list with routine notices. Order the picks from most to least remarkable.
+
+    WHAT MAKES A NOTICE REMARKABLE (examples of past favourites in brackets)
+    - Very large dollar values or extensions [VA extending its Community Care Network contracts with Optum, worth $20-29 billion].
+    - Candid admissions of agency dysfunction: staff losses, deferred resignation (DRP), "manpower reductions", hiring freezes, a shutdown, missed deadlines, lost expertise [a combatant command cancelling a planned $750M in-house strategy because of manpower reductions; GSA losing all its 1102 contracting staff to deferred resignation].
+    - Politically salient urgency: deadlines from Congress or oversight, litigation, executive orders, enforcement surges [a letter contract with KPMG driven by a House Oversight deadline; CBP sole-sourcing legal staff to review body-camera footage for litigation].
+    - Unusual or aggressive authorities: unusual and compelling urgency, letter contracts or undefinitized actions, national security or public interest exceptions, new legislation or funding such as the One Big Beautiful Bill Act.
+    - Notable vendors or subjects: big consultancies, AI, data or surveillance technology, detention, immigration and border operations [Amentum at the Camp East Montana detention site].
+    - Weird or unusually candid language; serial bridges and repeated extensions; protest-driven chaos.
+    DOWNRANK routine buys: OEM spare parts, brand-name lab or medical equipment, software maintenance and license renewals, leases, utilities, training seats, subscriptions, small purchases. Pick one of these only if something in it is genuinely surprising.
+
+    FOR EACH PICK
+    - notice_id: exactly as given.
+    - headline: one punchy line, at most 14 words, that states what is remarkable. Lively but accurate.
+    - why: 1-3 plain sentences on why it is notable. State only what the document itself says. No speculation about motives, wrongdoing, legality or consequences; no outside knowledge; no adjectives like "shocking" or "scandalous". Neutral but lively.
+    - quotes: 1-2 DIRECT QUOTES that show what makes it remarkable. Copy each one character-for-character from the candidate's document text: one contiguous passage of 10-50 words. Never use "...", never join separate passages, never quote the page markers, the metadata or the AI-extracted fields. Copy odd spellings and OCR errors exactly. page: the page marker the quote is under, e.g. "J&A.pdf, page 3" ("" if unsure).
+    - vendor: the proposed contractor exactly as the document writes it, or "" if not named.
+    - value: the dollar value of the action exactly as the document writes it (e.g. "$28,950,000,000"), or "" if none is stated or it is redacted.
+    - authority: the legal authority cited for not competing, exactly as written (e.g. "FAR 6.302-2"), or "".
+    DOLLAR FIGURES AND NUMBERS. Any dollar figure in the headline or why must be copied from one of your quotes or from the value you give (you may shorten "$28,950,000,000" to "$28.95 billion" or "$29 billion"). Never add, subtract, multiply or convert figures yourself, and never total several figures. Every other number you write must appear in the document.
+
+    Call the tool record_picks exactly once. If nothing is remarkable, call it with an empty picks list.
+
+    CANDIDATES
