@@ -362,7 +362,7 @@ collection) and sends only when the repository variable `DIGEST_ENABLED` is
 `true`. What is "new" is tracked with a watermark in
 `analysis/digest_state.json`, saved only after a successful send. Rubric,
 checks, cost, triggers and how to turn it on: [docs/digest.md](docs/digest.md).
-Web archive and RSS feed of every sent issue: https://woah-jas.abigailhaddad.com
+Web archive and RSS feed of every sent issue: https://woah-jas.abigailhaddad.com · subscribe by email: https://buttondown.com/abigailhaddad
 
 ## License
 
