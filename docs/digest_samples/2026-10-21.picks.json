@@ -1,8 +1,8 @@
 {
  "experimental": true,
- "digest_version": "2026-10-21.digest1",
+ "digest_version": "2026-10-21.digest2",
  "mode": "dry_run",
- "run_at": "2026-10-21T16:13:07.239984+00:00",
+ "run_at": "2026-10-21T16:30:52.836287+00:00",
  "as_of": "2026-10-21T16:00:00+00:00",
  "window": {
   "kind": "manual",
@@ -17,28 +17,28 @@
  "with_extraction_row": 0,
  "with_document_text": 27,
  "budget": {
-  "max_usd": 0.28,
-  "spent": 0.113564,
+  "max_usd": 0.18,
+  "spent": 0.122221,
   "calls": [
    {
     "stage": "screen",
     "model": "claude-haiku-5-5",
-    "input_tokens": 36213,
-    "output_tokens": 2281,
+    "input_tokens": 37107,
+    "output_tokens": 2213,
     "cache_creation_input_tokens": 0,
     "cache_read_input_tokens": 1066,
-    "cost_usd": 0.004666,
+    "cost_usd": 0.004721,
     "worst_case_usd": 0.0067
    },
    {
     "stage": "rank",
     "model": "claude-sonnet-5-5",
-    "input_tokens": 48384,
-    "output_tokens": 1575,
+    "input_tokens": 52367,
+    "output_tokens": 1660,
     "cache_creation_input_tokens": 0,
-    "cache_read_input_tokens": 2011,
-    "cost_usd": 0.108898,
-    "worst_case_usd": 0.2399
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.1175,
+    "worst_case_usd": 0.1664
    }
   ]
  },
@@ -47,109 +47,115 @@
    "notice_id": "f276ee9684e447dfb175747512c6f568",
    "title": "Legal Staffing Support and eDiscovery Services",
    "score": 8,
-   "reason": "CBP sole source for litigation eDiscovery tied to Secure America Act challenges; candid, high-profile."
+   "reason": "CBP sole-source legal eDiscovery tied to Secure America Act litigation and body camera review."
   },
   {
    "notice_id": "37a5b7df3e7b42bfb41b04372277738f",
    "title": "Notice of Intent to Sole Source - Telecommunications Analysis Software Support",
-   "score": 7,
-   "reason": "ICE sole source to Pen-Link for wiretap/surveillance analysis software; surveillance vendor, large scope."
+   "score": 8,
+   "reason": "ICE sole source to Pen-Link for wiretap and surveillance analysis platform, 5-year term."
   },
   {
    "notice_id": "1c2c3295991443d9a8e3c8c9eb274750",
    "title": "Collective Joint Training Bridge Contract",
    "score": 7,
-   "reason": "Bridge due to contractor overburn and funding limits; EO 14402 approval delay; candid."
+   "reason": "Bridge contract after contractor overburn and funding gaps; EO 14402 approval delay."
   },
   {
    "notice_id": "f3805dae0006405aacf117722d1f4992",
    "title": "Justification for Exception to Fair Opportunity, Governance Communication Assessments & Classified Services (GCACS ) III Extension",
    "score": 7,
-   "reason": "Classified-systems task order extended repeatedly via six-month bridges; USCIS, protest-like chaos."
+   "reason": "Classified-systems task order extended repeatedly via serial 6-month bridges; USCIS, 8(a) vendor."
   },
   {
    "notice_id": "979f929181f841408bd24cfa097349bf",
    "title": "JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION",
    "score": 6,
-   "reason": "Post-award JOFOC citing EO 14402 FFP mandate; actuarial pension work, Sears/McClatchy plans; modest interest."
+   "reason": "Post-award JOFOC citing EO 14402 FFP mandate; Sears/McClatchy pension work, mildly unusual."
   },
   {
    "notice_id": "86750493376a45dfa7fe2b92b6cc3e5d",
    "title": "Justification for Other Than Full and Open Competition: Spacecraft Optical Navigation and Autonomy Modules (Contract 80ARC026C0006)",
    "score": 6,
-   "reason": "Post-award JOFOC for $11.9M autonomy modules under APFIT; notable novel spacecraft vendor."
+   "reason": "Post-award JOFOC for APFIT autonomy modules; scrivener's error correction and protest-like capability statement."
   },
   {
    "notice_id": "e25509e392e44676bfe14bff8e4399cd",
    "title": "Medical Claims Support Extension",
    "score": 6,
-   "reason": "ICE detention-related medical claims contractor Acentra extended via options; sensitive immigration health vendor."
+   "reason": "ICE detention-related medical claims contractor extension with multiple options via sole source."
   },
   {
    "notice_id": "d87505498a6f4085bbd21da684c491a2",
    "title": "General Dynamics Information Technology (GDIT) - Intent to Sole Source",
    "score": 6,
-   "reason": "FAA sole source to GDIT for telecom voice services; large incumbent, transition-driven rationale."
+   "reason": "FAA sole source to GDIT for telecom voice services; large incumbent, transition risk rationale."
   },
   {
    "notice_id": "5e8b5bf99d7f4c539fe600c1029b9ea2",
    "title": "Professional and Scientific Support Services",
    "score": 6,
-   "reason": "NIH biosecurity support bridge task order, $2.27M, extendable to six months; policy-driven."
+   "reason": "NIH bridge task order $2.27M under FSS, extension options, science policy oversight."
   },
   {
    "notice_id": "626025c110ca4432815c6f6d244862af",
    "title": "Notice of Intent to Sole Source - Post-delivery support of developed?space and ground hardware and software",
    "score": 5,
-   "reason": "Space RCO sole source post-delivery support with 6-month FOC rush; modest notability."
+   "reason": "Space RCO sole source for ground system transition with 6-month deadline; moderately unusual."
   },
   {
    "notice_id": "249dfb318fab4536a8286b5e82a226cc",
    "title": "JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION (JOFOC) Research Triangle Park (RTP) Facilities Operations & Maintenance Support Services Extension",
    "score": 5,
-   "reason": "Six-month extension of EPA facilities O&M contract; modest bridge."
+   "reason": "EPA facilities O&M six-month extension; sizeable bridge extension."
   },
   {
    "notice_id": "0d71f5cb9ee84cbd87ff88c27ed2c690",
    "title": "Senior Leader Immersion Course Pilot (SLIC)",
    "score": 4,
-   "reason": "Senior leader course replacing legacy SLOC; sole source pilot, mildly unusual."
+   "reason": "Senior leader course replacing legacy SLOC; sole source, modest interest."
   },
   {
    "notice_id": "5b4bf2c7a2d74eed8a1753b6d07b9867",
    "title": "Military Sealift Commands (MSC) Communication Security (COMSEC) Key Management Infrastructure (KMI) Support Bridge Extension",
    "score": 4,
-   "reason": "Bridge extension for COMSEC KMI support; repeated bridge, routine services."
-  },
-  {
-   "notice_id": "fe04a0d694db45a4a4611cbd9f5a09f1",
-   "title": "Social Media Management Support Services",
-   "score": 4,
-   "reason": "ICE social media platform sole source to Hootsuite; surveillance-adjacent but routine subscription."
+   "reason": "Bridge extension for COMSEC support services; bridge with unspecified follow-on delay."
   },
   {
    "notice_id": "e1e459a42ba342d4868eeffeab983517",
    "title": "Notice of Intent of Sole Source Award firm fixed price AE Services Contract for Engineering During Construction (EDC)",
    "score": 3,
-   "reason": "Routine A-E engineering during construction sole source to Black & Veatch; no surprising elements."
+   "reason": "Routine sole-source A-E engineering-during-construction notice for Black & Veatch; nothing surprising."
   },
   {
    "notice_id": "1802417294ed44169066ed5890211754",
    "title": "Notice of Intent of Sole Source Award firm fixed price AE Services purchase order",
    "score": 3,
-   "reason": "Routine A-E EDC sole source to Tetra Tech for water pipeline project."
-  },
-  {
-   "notice_id": "d2f546186bca4ccaa2def8a05fcb10a2",
-   "title": "Notice of Intent to Sole Source for Construction Phase Services related to the VA Louisville project",
-   "score": 3,
-   "reason": "Routine construction phase services sole source modification for VA project."
+   "reason": "Routine sole-source A-E EDC notice for Tetra Tech; nothing surprising."
   },
   {
    "notice_id": "0159736ea04b482d96a54e9a2119e458",
    "title": "Enterprise Leadership Seminar (ELS) for USSF Senior Enlisted Leaders and Colonels",
    "score": 3,
-   "reason": "Leadership seminar seats sole source to UNC; training seats routine."
+   "reason": "Single-source leadership seminar cohorts; routine training seats."
+  },
+  {
+   "notice_id": "fe04a0d694db45a4a4611cbd9f5a09f1",
+   "title": "Social Media Management Support Services",
+   "score": 3,
+   "reason": "Hootsuite social media licenses for ICE public affairs; software subscription."
+  },
+  {
+   "notice_id": "d2f546186bca4ccaa2def8a05fcb10a2",
+   "title": "Notice of Intent to Sole Source for Construction Phase Services related to the VA Louisville project",
+   "score": 2,
+   "reason": "Routine construction-phase services sole source to design firm."
+  },
+  {
+   "notice_id": "789396299eca46bc99c6645e02176042",
+   "title": "SOLE SOURCE - HyperWorks Technical Support and Software Maintenance",
+   "score": 2,
+   "reason": "Routine software maintenance renewal sole source."
   },
   {
    "notice_id": "e02abed6e8ca4839906e182ed151290c",
@@ -161,7 +167,7 @@
    "notice_id": "0dc4929c05b94ce685604112ff656753",
    "title": "USGS Move and Store Equipment Federal Center, Rolla, MO 65401",
    "score": 2,
-   "reason": "Small moving and storage sole source from lessor; routine."
+   "reason": "Small moving and storage sole source; routine."
   },
   {
    "notice_id": "c074f72f8a37405ca35e698de237b25c",
@@ -173,55 +179,49 @@
    "notice_id": "d6ead1664dc747cc8f420a7651b8cd26",
    "title": "Award 19AQMM26F1619",
    "score": 2,
-   "reason": "Brand-name power distribution units; routine IT hardware."
+   "reason": "PDU hardware brand-name order; routine."
   },
   {
    "notice_id": "47b5eb2a83d645daab8a5e346dd7ba59",
    "title": "Award 19AQMM26F1639",
    "score": 2,
-   "reason": "Brand-name media destroyer purchase; routine equipment."
+   "reason": "Brand-name media destroyer purchase; routine."
   },
   {
    "notice_id": "fc884227feea4ab8bf412a96463e5ff2",
    "title": "Award 19AQMM26F1611",
    "score": 2,
-   "reason": "Brand-name HPE Juniper maintenance and license renewals; routine."
+   "reason": "Juniper hardware care and license renewals; routine."
   },
   {
    "notice_id": "48272c0caef547d3bfe1033efc98cebd",
    "title": "Award 19AQMM26F1616",
    "score": 2,
-   "reason": "Brand-name chassis purchase for FEST communications; routine."
+   "reason": "PacStar chassis brand-name purchase; routine."
   },
   {
    "notice_id": "547ff8ff5d664cad85e6c8c7c3e748b3",
    "title": "Notice of Intent for Sole Source award for Society for Industrial and Applied Mathematics (SIAM) Journal Subscription",
    "score": 1,
-   "reason": "Routine journal subscription sole source to SIAM."
-  },
-  {
-   "notice_id": "789396299eca46bc99c6645e02176042",
-   "title": "SOLE SOURCE - HyperWorks Technical Support and Software Maintenance",
-   "score": 1,
-   "reason": "Routine software maintenance sole source to Siemens."
+   "reason": "Journal subscription sole source; routine."
   },
   {
    "notice_id": "ba8b6f46a15c4632a2ee110b2573dc5d",
    "title": "BATTERY,THERMAL",
    "score": 1,
-   "reason": "OEM thermal battery spare parts, routine."
+   "reason": "OEM spare part battery; routine."
   },
   {
    "notice_id": "d78c7c21ae5d40c493d6b4c1437fde5c",
    "title": "NSN 2530-01-554-8288 (Parts Kit, Ball Joint)",
    "score": 1,
-   "reason": "OEM spare parts kit, routine."
+   "reason": "OEM spare parts kit; routine."
   },
   {
    "notice_id": "063fb3039cf24a6498fb923773ec04ad",
    "title": "Award 19AQMM26F1697",
    "score": 1,
-   "reason": "Brand-name HP workstation purchase; routine."
+   "reason": "Brand-name workstation purchase; routine."
   },
   {
    "notice_id": "96f6f892988b48f7a0beb042c2839b8e",
@@ -233,13 +233,13 @@
    "notice_id": "c0b6ba11b00f4c40b8d87bd0a48e526e",
    "title": "Redacted J&A",
    "score": 1,
-   "reason": "OEM rotor compressor spare parts; routine."
+   "reason": "OEM compressor rotor spare part; routine."
   },
   {
    "notice_id": "e53bec51c6e64c9aa1868710347bfcd4",
    "title": "SPE4A726R0634  6220 - LIGHT, COCKPIT, AIRCRAFT / WSIC F",
    "score": 1,
-   "reason": "OEM aircraft cockpit light spare part; routine."
+   "reason": "Aircraft cockpit light OEM spare part; routine."
   },
   {
    "notice_id": "ac93924ce3f54584bd72b1a9b65566e4",
@@ -262,28 +262,28 @@
   "249dfb318fab4536a8286b5e82a226cc",
   "0d71f5cb9ee84cbd87ff88c27ed2c690",
   "5b4bf2c7a2d74eed8a1753b6d07b9867",
-  "fe04a0d694db45a4a4611cbd9f5a09f1",
   "e1e459a42ba342d4868eeffeab983517",
   "1802417294ed44169066ed5890211754",
-  "d2f546186bca4ccaa2def8a05fcb10a2",
   "0159736ea04b482d96a54e9a2119e458",
-  "e02abed6e8ca4839906e182ed151290c",
-  "0dc4929c05b94ce685604112ff656753"
+  "fe04a0d694db45a4a4611cbd9f5a09f1",
+  "d2f546186bca4ccaa2def8a05fcb10a2",
+  "789396299eca46bc99c6645e02176042",
+  "e02abed6e8ca4839906e182ed151290c"
  ],
  "model_answer": {
   "picks": [
    {
     "notice_id": "f276ee9684e447dfb175747512c6f568",
-    "headline": "CBP sole-sources legal reviewers for body-camera footage in 'unusual urgency' litigation surge",
-    "why": "CBP cites unusual urgency to place an order with Contact Government Services for document review in litigation over its enforcement operations. The document says an unanticipated rise in discovery and litigation demands has strained its Office of Chief Counsel.",
+    "headline": "CBP sole-sources contract attorneys to review body-camera footage for litigation, citing unusual urgency",
+    "why": "CBP proposes an order to Contact Government Services under an unusual-urgency authority for document review in litigation. The document says a rise in discovery and litigation demands has strained its Office of Chief Counsel's resources, and failing court deadlines can lead to monetary sanctions.",
     "quotes": [
      {
-      "text": "CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely",
+      "text": "CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely fashion.",
       "page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 2"
      },
      {
-      "text": "litigation challenging CBP’s operational implementation of the Secure America Act’s directives and ability to execute the White House’s priorities.",
-      "page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 1"
+      "text": "Failing to meet these deadlines can lead to dire consequences, including monetary sanctions against the Agency and adverse decisions.",
+      "page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 2"
      }
     ],
     "vendor": "Contact Government Services, LLC (CGS)",
@@ -292,12 +292,12 @@
    },
    {
     "notice_id": "e25509e392e44676bfe14bff8e4399cd",
-    "headline": "ICE extends sole-source detainee medical claims contract after VA 'abruptly terminated' support",
-    "why": "ICE says the VA ended claims processing for detained people's medical care on October 3, 2025, creating an emergency. It now plans to add six more option periods to the Acentra Health contract that was issued directly.",
+    "headline": "ICE extends detainee medical claims contract with Acentra after VA abruptly ended the support",
+    "why": "ICE says the VA Financial Services Center ended medical claims processing support on October 3, 2025, creating an emergency. It now proposes adding six option periods, running to 2030, to the sole-source Acentra contract.",
     "quotes": [
      {
-      "text": "was abruptly terminated by the VA on October 3, 2025. This termination created an emergency because it compromised ICE's ability to provide medical care",
-      "page": "5.1.1-P00005_JOFOC_Claims_Redacted.pdf, page 2, machine-transcribed"
+      "text": "This support, which was historically provided by the Veteran's Administration (VA) Financial Services Center (VAFSC), was abruptly terminated by the VA on October 3, 2025.",
+      "page": "5.1.1-P00005_JOFOC_Claims_Redacted.pdf, page 2"
      }
     ],
     "vendor": "Acentra Health, LLC (Acentra)",
@@ -305,23 +305,9 @@
     "authority": "41 U.S.C. §3304 as implemented by RFO 6.103-1"
    },
    {
-    "notice_id": "1c2c3295991443d9a8e3c8c9eb274750",
-    "headline": "Joint Staff training bridge needed because new executive order requires approval of non-FFP contracts",
-    "why": "The Navy is awarding a sole-source bridge to Serco because the incumbent burned labor hours faster than expected and funding ran out. The follow-on award awaits Assistant Secretary approval under a new rule implementing EO 14402.",
-    "quotes": [
-     {
-      "text": "the contractor has been utilizing level of effort hours at a faster rate than anticipated and funding constraints have only allowed the current task order to be funded until 29 September",
-      "page": "Collective Joint Training Bridge JA Redacted.pdf, page 1"
-     }
-    ],
-    "vendor": "Serco, Inc",
-    "value": "",
-    "authority": "10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2"
-   },
-   {
     "notice_id": "37a5b7df3e7b42bfb41b04372277738f",
-    "headline": "ICE/HSI plans Pen-Link wiretap analysis software with embedded generative AI assistant",
-    "why": "HSI intends a sole-source award to Pen-Link for telecom analysis covering live intercepts, GPS tracking and geofence alerts. Requirements include an embedded generative AI assistant using ICE-provided Azure accounts.",
+    "headline": "ICE/HSI plans sole-source wiretap and telecom analysis software with embedded generative AI",
+    "why": "HSI intends a sole-source award to Pen-Link for telecommunications analysis software, with one base year and four option years. The requirements include live intercepts, GPS tracking, and a generative AI assistant on ICE-provided Azure accounts.",
     "quotes": [
      {
       "text": "An embedded Generative AI assistant (leveraging ICE/HSI-provided Azure AI accounts) enabling users to search, query, filter, interact with, summarize, map, and visualize",
@@ -333,18 +319,32 @@
     "authority": "RFO 6.103-1"
    },
    {
-    "notice_id": "fe04a0d694db45a4a4611cbd9f5a09f1",
-    "headline": "ICE buys Hootsuite social-media platform with AI and visual recognition, sole source",
-    "why": "ICE's public affairs office is sole-sourcing Hootsuite through Carahsoft. The justification cites proprietary AI trained on social media data and image and video recognition.",
+    "notice_id": "1c2c3295991443d9a8e3c8c9eb274750",
+    "headline": "Joint Staff training bridge needed because a new executive order requires Navy approval of the contract type",
+    "why": "Navy is sole-sourcing a bridge to Serco because the follow-on non-FFP award must be approved by the Assistant Secretary of the Navy under a rule implementing EO 14402. The document says the time frame for that approval is not known.",
     "quotes": [
      {
-      "text": "Proprietary AI capability unavailable from other sources.",
-      "page": "1.5.1-BNJ_Redacted.pdf, page 2"
+      "text": "The exact time frame is not known for approval to be granted and therefore the contracting activity must award a standalone bridge contract to allow for continued contract support.",
+      "page": "Collective Joint Training Bridge JA Redacted.pdf, page 1"
      }
     ],
-    "vendor": "Carahsoft Technology Corp.",
+    "vendor": "Serco, Inc",
     "value": "",
-    "authority": "RFO 8.401(b) and GSAR 538.7104-4"
+    "authority": "10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2"
+   },
+   {
+    "notice_id": "86750493376a45dfa7fe2b92b6cc3e5d",
+    "headline": "NASA sole-sources $11.89M autonomy modules; a correction admits a competitor's response was missed",
+    "why": "NASA Ames awarded EraDrive a sole-source contract valued at $11,890,000. A later correction says the original statement that no capability statements were received was a scrivener's error, and that one from Rhea Space Activity was evaluated.",
+    "quotes": [
+     {
+      "text": "One capability statement was received, from Rhea Space Activity, Inc., on June 30, 2026, within the response period.",
+      "page": "80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf, page 1"
+     }
+    ],
+    "vendor": "EraDrive, Inc.",
+    "value": "$11,890,000",
+    "authority": "10 U.S.C. 3204(a)(1), FAR 6.103-1"
    }
   ]
  },
@@ -352,11 +352,11 @@
   {
    "notice_id": "f276ee9684e447dfb175747512c6f568",
    "rank": 1,
-   "headline": "CBP sole-sources legal reviewers for body-camera footage in 'unusual urgency' litigation surge",
-   "why": "CBP cites unusual urgency to place an order with Contact Government Services for document review in litigation over its enforcement operations. The document says an unanticipated rise in discovery and litigation demands has strained its Office of Chief Counsel.",
+   "headline": "CBP sole-sources contract attorneys to review body-camera footage for litigation, citing unusual urgency",
+   "why": "CBP proposes an order to Contact Government Services under an unusual-urgency authority for document review in litigation. The document says a rise in discovery and litigation demands has strained its Office of Chief Counsel's resources, and failing court deadlines can lead to monetary sanctions.",
    "quotes": [
     {
-     "text": "CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely",
+     "text": "CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely fashion.",
      "match": "exact",
      "pages": [
       {
@@ -369,17 +369,17 @@
      "model_page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 2"
     },
     {
-     "text": "litigation challenging CBP’s operational implementation of the Secure America Act’s directives and ability to execute the White House’s priorities.",
+     "text": "Failing to meet these deadlines can lead to dire consequences, including monetary sanctions against the Agency and adverse decisions.",
      "match": "exact",
      "pages": [
       {
        "resource_id": "9d03811abcad4f25bf6dcf41a2921b4a",
-       "page_number": 1,
+       "page_number": 2,
        "text_source": "native"
       }
      ],
-     "where": "SSJ_Legal_Staffing_Final_Redacted.pdf, p. 1",
-     "model_page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 1"
+     "where": "SSJ_Legal_Staffing_Final_Redacted.pdf, p. 2",
+     "model_page": "SSJ_Legal_Staffing_Final_Redacted.pdf, page 2"
     }
    ],
    "vendor": "Contact Government Services, LLC (CGS)",
@@ -390,11 +390,11 @@
   {
    "notice_id": "e25509e392e44676bfe14bff8e4399cd",
    "rank": 2,
-   "headline": "ICE extends sole-source detainee medical claims contract after VA 'abruptly terminated' support",
-   "why": "ICE says the VA ended claims processing for detained people's medical care on October 3, 2025, creating an emergency. It now plans to add six more option periods to the Acentra Health contract that was issued directly.",
+   "headline": "ICE extends detainee medical claims contract with Acentra after VA abruptly ended the support",
+   "why": "ICE says the VA Financial Services Center ended medical claims processing support on October 3, 2025, creating an emergency. It now proposes adding six option periods, running to 2030, to the sole-source Acentra contract.",
    "quotes": [
     {
-     "text": "was abruptly terminated by the VA on October 3, 2025. This termination created an emergency because it compromised ICE's ability to provide medical care",
+     "text": "This support, which was historically provided by the Veteran's Administration (VA) Financial Services Center (VAFSC), was abruptly terminated by the VA on October 3, 2025.",
      "match": "exact",
      "pages": [
       {
@@ -404,7 +404,7 @@
       }
      ],
      "where": "5.1.1-P00005_JOFOC_Claims_Redacted.pdf, p. 2 (machine-transcribed page)",
-     "model_page": "5.1.1-P00005_JOFOC_Claims_Redacted.pdf, page 2, machine-transcribed"
+     "model_page": "5.1.1-P00005_JOFOC_Claims_Redacted.pdf, page 2"
     }
    ],
    "vendor": "Acentra Health, LLC (Acentra)",
@@ -413,35 +413,10 @@
    "model_rank": 2
   },
   {
-   "notice_id": "1c2c3295991443d9a8e3c8c9eb274750",
-   "rank": 3,
-   "headline": "Joint Staff training bridge needed because new executive order requires approval of non-FFP contracts",
-   "why": "The Navy is awarding a sole-source bridge to Serco because the incumbent burned labor hours faster than expected and funding ran out. The follow-on award awaits Assistant Secretary approval under a new rule implementing EO 14402.",
-   "quotes": [
-    {
-     "text": "the contractor has been utilizing level of effort hours at a faster rate than anticipated and funding constraints have only allowed the current task order to be funded until 29 September",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "e702c4eb7545414cbf6e3c1dc9f16d6a",
-       "page_number": 1,
-       "text_source": "native"
-      }
-     ],
-     "where": "Collective Joint Training Bridge JA Redacted.pdf, p. 1",
-     "model_page": "Collective Joint Training Bridge JA Redacted.pdf, page 1"
-    }
-   ],
-   "vendor": "Serco, Inc",
-   "value": null,
-   "authority": "10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2",
-   "model_rank": 3
-  },
-  {
    "notice_id": "37a5b7df3e7b42bfb41b04372277738f",
-   "rank": 4,
-   "headline": "ICE/HSI plans Pen-Link wiretap analysis software with embedded generative AI assistant",
-   "why": "HSI intends a sole-source award to Pen-Link for telecom analysis covering live intercepts, GPS tracking and geofence alerts. Requirements include an embedded generative AI assistant using ICE-provided Azure accounts.",
+   "rank": 3,
+   "headline": "ICE/HSI plans sole-source wiretap and telecom analysis software with embedded generative AI",
+   "why": "HSI intends a sole-source award to Pen-Link for telecommunications analysis software, with one base year and four option years. The requirements include live intercepts, GPS tracking, and a generative AI assistant on ICE-provided Azure accounts.",
    "quotes": [
     {
      "text": "An embedded Generative AI assistant (leveraging ICE/HSI-provided Azure AI accounts) enabling users to search, query, filter, interact with, summarize, map, and visualize",
@@ -460,37 +435,82 @@
    "vendor": "Pen-Link, Limited",
    "value": null,
    "authority": "RFO 6.103-1",
-   "model_rank": 4
+   "model_rank": 3
   },
   {
-   "notice_id": "fe04a0d694db45a4a4611cbd9f5a09f1",
-   "rank": 5,
-   "headline": "ICE buys Hootsuite social-media platform with AI and visual recognition, sole source",
-   "why": "ICE's public affairs office is sole-sourcing Hootsuite through Carahsoft. The justification cites proprietary AI trained on social media data and image and video recognition.",
+   "notice_id": "1c2c3295991443d9a8e3c8c9eb274750",
+   "rank": 4,
+   "headline": "Joint Staff training bridge needed because a new executive order requires Navy approval of the contract type",
+   "why": "Navy is sole-sourcing a bridge to Serco because the follow-on non-FFP award must be approved by the Assistant Secretary of the Navy under a rule implementing EO 14402. The document says the time frame for that approval is not known.",
    "quotes": [
     {
-     "text": "Proprietary AI capability unavailable from other sources.",
+     "text": "The exact time frame is not known for approval to be granted and therefore the contracting activity must award a standalone bridge contract to allow for continued contract support.",
      "match": "exact",
      "pages": [
       {
-       "resource_id": "1fe83ebae23940f08b19efb918d71953",
-       "page_number": 2,
+       "resource_id": "e702c4eb7545414cbf6e3c1dc9f16d6a",
+       "page_number": 1,
        "text_source": "native"
       }
      ],
-     "where": "1.5.1-BNJ_Redacted.pdf, p. 2",
-     "model_page": "1.5.1-BNJ_Redacted.pdf, page 2"
+     "where": "Collective Joint Training Bridge JA Redacted.pdf, p. 1",
+     "model_page": "Collective Joint Training Bridge JA Redacted.pdf, page 1"
     }
    ],
-   "vendor": "Carahsoft Technology Corp.",
+   "vendor": "Serco, Inc",
    "value": null,
-   "authority": "RFO 8.401(b) and GSAR 538.7104-4",
+   "authority": "10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2",
+   "model_rank": 4
+  },
+  {
+   "notice_id": "86750493376a45dfa7fe2b92b6cc3e5d",
+   "rank": 5,
+   "headline": "NASA sole-sources $11.89M autonomy modules; a correction admits a competitor's response was missed",
+   "why": "NASA Ames awarded EraDrive a sole-source contract valued at $11,890,000. A later correction says the original statement that no capability statements were received was a scrivener's error, and that one from Rhea Space Activity was evaluated.",
+   "quotes": [
+    {
+     "text": "One capability statement was received, from Rhea Space Activity, Inc., on June 30, 2026, within the response period.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "fd405ceb3dcc499682ca84f6492dbea4",
+       "page_number": 1,
+       "text_source": "native"
+      }
+     ],
+     "where": "80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf, p. 1",
+     "model_page": "80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf, page 1"
+    },
+    {
+     "text": "The estimated value is $11,890,000 and the period of performance is from the date of award through December 31, 2028 (the end of the first quarter of fiscal year (FY) 2029), corresponding to final delivery of the autonomy modules. 3.",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "46bbb3bdf4ab41f68b6b443769cb0380",
+       "page_number": 1,
+       "text_source": "native"
+      }
+     ],
+     "where": "EraDrive_JOFOC_80ARC026R0008_Redacted_for_Posting_9292026.pdf, p. 1",
+     "model_page": "",
+     "added_by_code": true
+    }
+   ],
+   "vendor": "EraDrive, Inc.",
+   "value": "$11,890,000",
+   "authority": null,
    "model_rank": 5
   }
  ],
- "dropped_by_checks": [],
- "subject": "Whoa J&As — Oct 21: CBP sole-sources legal reviewers for body-camera footage in 'unusual urgency' litigation surge",
- "body": "## 1. CBP sole-sources legal reviewers for body-camera footage in 'unusual urgency' litigation surge\n\n**US CUSTOMS AND BORDER PROTECTION (HOMELAND SECURITY, DEPARTMENT OF) · Contact Government Services, LLC (CGS) · GSAR 538.7104-3(b)(1)(i)**  \n*Posted 2026-10-20, award 70B04C26F00001107, “Legal Staffing Support and eDiscovery Services”*\n\nCBP cites unusual urgency to place an order with Contact Government Services for document review in litigation over its enforcement operations. The document says an unanticipated rise in discovery and litigation demands has strained its Office of Chief Counsel.\n\n> “CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely”  \n> — SSJ_Legal_Staffing_Final_Redacted.pdf, p. 2\n\n> “litigation challenging CBP’s operational implementation of the Secure America Act’s directives and ability to execute the White House’s priorities.”  \n> — SSJ_Legal_Staffing_Final_Redacted.pdf, p. 1\n\n[SAM.gov notice](https://sam.gov/opp/f276ee9684e447dfb175747512c6f568/view) · [SSJ_Legal_Staffing_Final_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/f276ee9684e447dfb175747512c6f568/9d03811abcad4f25bf6dcf41a2921b4a_SSJ_Legal_Staffing_Final_Redacted.pdf)\n\n## 2. ICE extends sole-source detainee medical claims contract after VA 'abruptly terminated' support\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Acentra Health, LLC (Acentra) · 41 U.S.C. §3304 as implemented by RFO 6.103-1**  \n*Posted 2026-10-20, award 70CDCR26C00000002, “Medical Claims Support Extension”*\n\nICE says the VA ended claims processing for detained people's medical care on October 3, 2025, creating an emergency. It now plans to add six more option periods to the Acentra Health contract that was issued directly.\n\n> “was abruptly terminated by the VA on October 3, 2025. This termination created an emergency because it compromised ICE's ability to provide medical care”  \n> — 5.1.1-P00005_JOFOC_Claims_Redacted.pdf, p. 2 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/e25509e392e44676bfe14bff8e4399cd/view) · [5.1.1-P00005_JOFOC_Claims_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/e25509e392e44676bfe14bff8e4399cd/e3ac2d517409448b9e5ec8aaabf1b1bb_5.1.1-P00005_JOFOC_Claims_Redacted.pdf)\n\n## 3. Joint Staff training bridge needed because new executive order requires approval of non-FFP contracts\n\n**DEPT OF THE NAVY (DEPT OF DEFENSE) · Serco, Inc · 10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2**  \n*Posted 2026-10-20, award N0018926CD020, “Collective Joint Training Bridge Contract”*\n\nThe Navy is awarding a sole-source bridge to Serco because the incumbent burned labor hours faster than expected and funding ran out. The follow-on award awaits Assistant Secretary approval under a new rule implementing EO 14402.\n\n> “the contractor has been utilizing level of effort hours at a faster rate than anticipated and funding constraints have only allowed the current task order to be funded until 29 September”  \n> — Collective Joint Training Bridge JA Redacted.pdf, p. 1\n\n[SAM.gov notice](https://sam.gov/opp/1c2c3295991443d9a8e3c8c9eb274750/view) · [Collective Joint Training Bridge JA Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/1c2c3295991443d9a8e3c8c9eb274750/e702c4eb7545414cbf6e3c1dc9f16d6a_Collective_Joint_Training_Bridge_JA_Redacted.pdf)\n\n## 4. ICE/HSI plans Pen-Link wiretap analysis software with embedded generative AI assistant\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Pen-Link, Limited · RFO 6.103-1**  \n*Posted 2026-10-20, “Notice of Intent to Sole Source - Telecommunications Analysis Software Support”*\n\nHSI intends a sole-source award to Pen-Link for telecom analysis covering live intercepts, GPS tracking and geofence alerts. Requirements include an embedded generative AI assistant using ICE-provided Azure accounts.\n\n> “An embedded Generative AI assistant (leveraging ICE/HSI-provided Azure AI accounts) enabling users to search, query, filter, interact with, summarize, map, and visualize”  \n> — 1.2.1-NOI High Level Requirements 10.14.2026.pdf, p. 4\n\n[SAM.gov notice](https://sam.gov/opp/37a5b7df3e7b42bfb41b04372277738f/view) · [1.2.1-NOI High Level Requirements 10.14.2026.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/37a5b7df3e7b42bfb41b04372277738f/8531508496cd4664a6f2f8c539eb06f1_1.2.1-NOI_High_Level_Requirements_10.14.2026.pdf)\n\n## 5. ICE buys Hootsuite social-media platform with AI and visual recognition, sole source\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Carahsoft Technology Corp. · RFO 8.401(b) and GSAR 538.7104-4**  \n*Posted 2026-10-20, award 70RTAC26A00000011, “Social Media Management Support Services”*\n\nICE's public affairs office is sole-sourcing Hootsuite through Carahsoft. The justification cites proprietary AI trained on social media data and image and video recognition.\n\n> “Proprietary AI capability unavailable from other sources.”  \n> — 1.5.1-BNJ_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/fe04a0d694db45a4a4611cbd9f5a09f1/view) · [1.5.1-BNJ_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/fe04a0d694db45a4a4611cbd9f5a09f1/1fe83ebae23940f08b19efb918d71953_1.5.1-BNJ_Redacted.pdf)\n\n## All new notices (34)\n\n- ★ US Customs and Border Protection · Legal Staffing Support and eDiscovery Services · [SAM.gov](https://sam.gov/opp/f276ee9684e447dfb175747512c6f568/view)\n- ★ US Immigration and Customs Enforcement · Medical Claims Support Extension · [SAM.gov](https://sam.gov/opp/e25509e392e44676bfe14bff8e4399cd/view)\n- ★ Navy · Collective Joint Training Bridge Contract · [SAM.gov](https://sam.gov/opp/1c2c3295991443d9a8e3c8c9eb274750/view)\n- ★ US Immigration and Customs Enforcement · Notice of Intent to Sole Source - Telecommunications Analysis Software Support · [SAM.gov](https://sam.gov/opp/37a5b7df3e7b42bfb41b04372277738f/view)\n- ★ US Immigration and Customs Enforcement · Social Media Management Support Services · [SAM.gov](https://sam.gov/opp/fe04a0d694db45a4a4611cbd9f5a09f1/view)\n- AIR Force · Enterprise Leadership Seminar (ELS) for USSF Senior Enlisted Leaders and Colonels · [SAM.gov](https://sam.gov/opp/0159736ea04b482d96a54e9a2119e458/view)\n- AIR Force · Notice of Intent to Sole Source - Post-delivery support of developed?space and ground… · [SAM.gov](https://sam.gov/opp/626025c110ca4432815c6f6d244862af/view)\n- AIR Force · Senior Leader Immersion Course Pilot (SLIC) · [SAM.gov](https://sam.gov/opp/0d71f5cb9ee84cbd87ff88c27ed2c690/view)\n- Army · Notice of Intent for Sole Source award for Society for Industrial and Applied Mathematics… · [SAM.gov](https://sam.gov/opp/547ff8ff5d664cad85e6c8c7c3e748b3/view)\n- Army · Notice of Intent of Sole Source Award firm fixed price AE Services Contract for… · [SAM.gov](https://sam.gov/opp/e1e459a42ba342d4868eeffeab983517/view)\n- Army · Notice of Intent of Sole Source Award firm fixed price AE Services purchase order · [SAM.gov](https://sam.gov/opp/1802417294ed44169066ed5890211754/view)\n- Army · Notice of Intent to Sole Source - Replacement Marine Fire Detection and Alarm System … · [SAM.gov](https://sam.gov/opp/e02abed6e8ca4839906e182ed151290c/view)\n- Army · Notice of Intent to Sole Source - Replacement Marine Fire Detection and Alarm System … · [SAM.gov](https://sam.gov/opp/c074f72f8a37405ca35e698de237b25c/view)\n- Army · Notice of Intent to Sole Source for Construction Phase Services related to the VA… · [SAM.gov](https://sam.gov/opp/d2f546186bca4ccaa2def8a05fcb10a2/view)\n- Defense Information Systems Agency (DISA) · Military Sealift Commands (MSC) Communication Security (COMSEC) Key Management… · [SAM.gov](https://sam.gov/opp/5b4bf2c7a2d74eed8a1753b6d07b9867/view)\n- Defense Logistics Agency · \"3040-01-294-4866, SHAFT,SHOULDERED, WSDC: YLN, HELICOPTER, SEAHAWK, H-60. · [SAM.gov](https://sam.gov/opp/ac93924ce3f54584bd72b1a9b65566e4/view)\n- Defense Logistics Agency · BATTERY,THERMAL · [SAM.gov](https://sam.gov/opp/ba8b6f46a15c4632a2ee110b2573dc5d/view)\n- Defense Logistics Agency · NSN 2530-01-554-8288 (Parts Kit, Ball Joint) · [SAM.gov](https://sam.gov/opp/d78c7c21ae5d40c493d6b4c1437fde5c/view)\n- Defense Logistics Agency · Redacted J&A · [SAM.gov](https://sam.gov/opp/c0b6ba11b00f4c40b8d87bd0a48e526e/view)\n- Defense Logistics Agency · SPE4A726R0634  6220 - LIGHT, COCKPIT, AIRCRAFT / WSIC F · [SAM.gov](https://sam.gov/opp/e53bec51c6e64c9aa1868710347bfcd4/view)\n- Environmental Protection Agency · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION (JOFOC) Research Triangle Park… · [SAM.gov](https://sam.gov/opp/249dfb318fab4536a8286b5e82a226cc/view)\n- Federal Aviation Administration · General Dynamics Information Technology (GDIT) - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/d87505498a6f4085bbd21da684c491a2/view)\n- National Aeronautics and Space Administration · Justification for Other Than Full and Open Competition: Spacecraft Optical Navigation and… · [SAM.gov](https://sam.gov/opp/86750493376a45dfa7fe2b92b6cc3e5d/view)\n- Navy · SOLE SOURCE - HyperWorks Technical Support and Software Maintenance · [SAM.gov](https://sam.gov/opp/789396299eca46bc99c6645e02176042/view)\n- Office of the Assistant Secretary for Financial Resources (ASFR) · Professional and Scientific Support Services · [SAM.gov](https://sam.gov/opp/5e8b5bf99d7f4c539fe600c1029b9ea2/view)\n- Pension Benefit Guaranty Corporation · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION · [SAM.gov](https://sam.gov/opp/979f929181f841408bd24cfa097349bf/view)\n- Public Buildings Service · USGS Move and Store Equipment Federal Center, Rolla, MO 65401 · [SAM.gov](https://sam.gov/opp/0dc4929c05b94ce685604112ff656753/view)\n- State · Award 19AQMM26F1611 · [SAM.gov](https://sam.gov/opp/fc884227feea4ab8bf412a96463e5ff2/view)\n- State · Award 19AQMM26F1616 · [SAM.gov](https://sam.gov/opp/48272c0caef547d3bfe1033efc98cebd/view)\n- State · Award 19AQMM26F1619 · [SAM.gov](https://sam.gov/opp/d6ead1664dc747cc8f420a7651b8cd26/view)\n- State · Award 19AQMM26F1639 · [SAM.gov](https://sam.gov/opp/47b5eb2a83d645daab8a5e346dd7ba59/view)\n- State · Award 19AQMM26F1697 · [SAM.gov](https://sam.gov/opp/063fb3039cf24a6498fb923773ec04ad/view)\n- US Citizenship and Immigration Services · Justification for Exception to Fair Opportunity, Governance Communication Assessments &… · [SAM.gov](https://sam.gov/opp/f3805dae0006405aacf117722d1f4992/view)\n- Veterans Affairs · J042--Fire Alarm System Monitoring and Programming INTENT TO SOLE SOURCE · [SAM.gov](https://sam.gov/opp/96f6f892988b48f7a0beb042c2839b8e/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 34 new notices reviewed (first collected Oct 20 20:00 ET to Oct 21 07:42 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
- "spent_usd": 0.1136,
- "rerendered": "picks re-checked from the stored model answer with the final verify.py, and re-rendered"
+ "dropped_by_checks": [
+  {
+   "notice_id": "86750493376a45dfa7fe2b92b6cc3e5d",
+   "what": "authority",
+   "value": "10 U.S.C. 3204(a)(1), FAR 6.103-1",
+   "reason": "not in the text"
+  }
+ ],
+ "subject": "Whoa J&As — Oct 21: CBP sole-sources contract attorneys to review body-camera footage for litigation, citing unusual urgency",
+ "body": "## 1. CBP sole-sources contract attorneys to review body-camera footage for litigation, citing unusual urgency\n\n**US CUSTOMS AND BORDER PROTECTION (HOMELAND SECURITY, DEPARTMENT OF) · Contact Government Services, LLC (CGS) · GSAR 538.7104-3(b)(1)(i)**  \n*Posted 2026-10-20, award 70B04C26F00001107, “Legal Staffing Support and eDiscovery Services”*\n\nCBP proposes an order to Contact Government Services under an unusual-urgency authority for document review in litigation. The document says a rise in discovery and litigation demands has strained its Office of Chief Counsel's resources, and failing court deadlines can lead to monetary sanctions.\n\n> “CBP has experienced an unanticipated and unexpected rise in discovery and litigation demands that have strained OCC’s resources and ability to meet operational demands in a timely fashion.”  \n> — SSJ_Legal_Staffing_Final_Redacted.pdf, p. 2\n\n> “Failing to meet these deadlines can lead to dire consequences, including monetary sanctions against the Agency and adverse decisions.”  \n> — SSJ_Legal_Staffing_Final_Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/f276ee9684e447dfb175747512c6f568/view) · [SSJ_Legal_Staffing_Final_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/f276ee9684e447dfb175747512c6f568/9d03811abcad4f25bf6dcf41a2921b4a_SSJ_Legal_Staffing_Final_Redacted.pdf)\n\n## 2. ICE extends detainee medical claims contract with Acentra after VA abruptly ended the support\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Acentra Health, LLC (Acentra) · 41 U.S.C. §3304 as implemented by RFO 6.103-1**  \n*Posted 2026-10-20, award 70CDCR26C00000002, “Medical Claims Support Extension”*\n\nICE says the VA Financial Services Center ended medical claims processing support on October 3, 2025, creating an emergency. It now proposes adding six option periods, running to 2030, to the sole-source Acentra contract.\n\n> “This support, which was historically provided by the Veteran's Administration (VA) Financial Services Center (VAFSC), was abruptly terminated by the VA on October 3, 2025.”  \n> — 5.1.1-P00005_JOFOC_Claims_Redacted.pdf, p. 2 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/e25509e392e44676bfe14bff8e4399cd/view) · [5.1.1-P00005_JOFOC_Claims_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/e25509e392e44676bfe14bff8e4399cd/e3ac2d517409448b9e5ec8aaabf1b1bb_5.1.1-P00005_JOFOC_Claims_Redacted.pdf)\n\n## 3. ICE/HSI plans sole-source wiretap and telecom analysis software with embedded generative AI\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Pen-Link, Limited · RFO 6.103-1**  \n*Posted 2026-10-20, “Notice of Intent to Sole Source - Telecommunications Analysis Software Support”*\n\nHSI intends a sole-source award to Pen-Link for telecommunications analysis software, with one base year and four option years. The requirements include live intercepts, GPS tracking, and a generative AI assistant on ICE-provided Azure accounts.\n\n> “An embedded Generative AI assistant (leveraging ICE/HSI-provided Azure AI accounts) enabling users to search, query, filter, interact with, summarize, map, and visualize”  \n> — 1.2.1-NOI High Level Requirements 10.14.2026.pdf, p. 4\n\n[SAM.gov notice](https://sam.gov/opp/37a5b7df3e7b42bfb41b04372277738f/view) · [1.2.1-NOI High Level Requirements 10.14.2026.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/37a5b7df3e7b42bfb41b04372277738f/8531508496cd4664a6f2f8c539eb06f1_1.2.1-NOI_High_Level_Requirements_10.14.2026.pdf)\n\n## 4. Joint Staff training bridge needed because a new executive order requires Navy approval of the contract type\n\n**DEPT OF THE NAVY (DEPT OF DEFENSE) · Serco, Inc · 10 U.S.C. 3204(a)(1)-(2) as implemented by FAR 6.103-1 and FAR 6.103-2**  \n*Posted 2026-10-20, award N0018926CD020, “Collective Joint Training Bridge Contract”*\n\nNavy is sole-sourcing a bridge to Serco because the follow-on non-FFP award must be approved by the Assistant Secretary of the Navy under a rule implementing EO 14402. The document says the time frame for that approval is not known.\n\n> “The exact time frame is not known for approval to be granted and therefore the contracting activity must award a standalone bridge contract to allow for continued contract support.”  \n> — Collective Joint Training Bridge JA Redacted.pdf, p. 1\n\n[SAM.gov notice](https://sam.gov/opp/1c2c3295991443d9a8e3c8c9eb274750/view) · [Collective Joint Training Bridge JA Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/1c2c3295991443d9a8e3c8c9eb274750/e702c4eb7545414cbf6e3c1dc9f16d6a_Collective_Joint_Training_Bridge_JA_Redacted.pdf)\n\n## 5. NASA sole-sources $11.89M autonomy modules; a correction admits a competitor's response was missed\n\n**NATIONAL AERONAUTICS AND SPACE ADMINISTRATION · EraDrive, Inc. · $11,890,000**  \n*Posted 2026-10-20, award 80ARC026C0006, “Justification for Other Than Full and Open Competition: Spacecraft Optical Navigation and Autonomy Modules (Contract 80ARC026C0006)”*\n\nNASA Ames awarded EraDrive a sole-source contract valued at $11,890,000. A later correction says the original statement that no capability statements were received was a scrivener's error, and that one from Rhea Space Activity was evaluated.\n\n> “One capability statement was received, from Rhea Space Activity, Inc., on June 30, 2026, within the response period.”  \n> — 80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf, p. 1\n\n> “The estimated value is $11,890,000 and the period of performance is from the date of award through December 31, 2028 (the end of the first quarter of fiscal year (FY) 2029), corresponding to final delivery of the autonomy modules. 3.”  \n> — EraDrive_JOFOC_80ARC026R0008_Redacted_for_Posting_9292026.pdf, p. 1 (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/86750493376a45dfa7fe2b92b6cc3e5d/view) · [EraDrive_JOFOC_80ARC026R0008_Redacted_for_Posting_9292026.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/86750493376a45dfa7fe2b92b6cc3e5d/46bbb3bdf4ab41f68b6b443769cb0380_EraDrive_JOFOC_80ARC026R0008_Redacted_for_Posting_9292026.pdf) · [80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/86750493376a45dfa7fe2b92b6cc3e5d/fd405ceb3dcc499682ca84f6492dbea4_80ARC026R0008_JOFOC_Section10_Correction_PUBLIC.pdf)\n\n## All new notices (34)\n\n- ★ US Customs and Border Protection · Legal Staffing Support and eDiscovery Services · [SAM.gov](https://sam.gov/opp/f276ee9684e447dfb175747512c6f568/view)\n- ★ US Immigration and Customs Enforcement · Medical Claims Support Extension · [SAM.gov](https://sam.gov/opp/e25509e392e44676bfe14bff8e4399cd/view)\n- ★ US Immigration and Customs Enforcement · Notice of Intent to Sole Source - Telecommunications Analysis Software Support · [SAM.gov](https://sam.gov/opp/37a5b7df3e7b42bfb41b04372277738f/view)\n- ★ Navy · Collective Joint Training Bridge Contract · [SAM.gov](https://sam.gov/opp/1c2c3295991443d9a8e3c8c9eb274750/view)\n- ★ National Aeronautics and Space Administration · Justification for Other Than Full and Open Competition: Spacecraft Optical Navigation and… · [SAM.gov](https://sam.gov/opp/86750493376a45dfa7fe2b92b6cc3e5d/view)\n- AIR Force · Enterprise Leadership Seminar (ELS) for USSF Senior Enlisted Leaders and Colonels · [SAM.gov](https://sam.gov/opp/0159736ea04b482d96a54e9a2119e458/view)\n- AIR Force · Notice of Intent to Sole Source - Post-delivery support of developed?space and ground… · [SAM.gov](https://sam.gov/opp/626025c110ca4432815c6f6d244862af/view)\n- AIR Force · Senior Leader Immersion Course Pilot (SLIC) · [SAM.gov](https://sam.gov/opp/0d71f5cb9ee84cbd87ff88c27ed2c690/view)\n- Army · Notice of Intent for Sole Source award for Society for Industrial and Applied Mathematics… · [SAM.gov](https://sam.gov/opp/547ff8ff5d664cad85e6c8c7c3e748b3/view)\n- Army · Notice of Intent of Sole Source Award firm fixed price AE Services Contract for… · [SAM.gov](https://sam.gov/opp/e1e459a42ba342d4868eeffeab983517/view)\n- Army · Notice of Intent of Sole Source Award firm fixed price AE Services purchase order · [SAM.gov](https://sam.gov/opp/1802417294ed44169066ed5890211754/view)\n- Army · Notice of Intent to Sole Source - Replacement Marine Fire Detection and Alarm System … · [SAM.gov](https://sam.gov/opp/e02abed6e8ca4839906e182ed151290c/view)\n- Army · Notice of Intent to Sole Source - Replacement Marine Fire Detection and Alarm System … · [SAM.gov](https://sam.gov/opp/c074f72f8a37405ca35e698de237b25c/view)\n- Army · Notice of Intent to Sole Source for Construction Phase Services related to the VA… · [SAM.gov](https://sam.gov/opp/d2f546186bca4ccaa2def8a05fcb10a2/view)\n- Defense Information Systems Agency (DISA) · Military Sealift Commands (MSC) Communication Security (COMSEC) Key Management… · [SAM.gov](https://sam.gov/opp/5b4bf2c7a2d74eed8a1753b6d07b9867/view)\n- Defense Logistics Agency · \"3040-01-294-4866, SHAFT,SHOULDERED, WSDC: YLN, HELICOPTER, SEAHAWK, H-60. · [SAM.gov](https://sam.gov/opp/ac93924ce3f54584bd72b1a9b65566e4/view)\n- Defense Logistics Agency · BATTERY,THERMAL · [SAM.gov](https://sam.gov/opp/ba8b6f46a15c4632a2ee110b2573dc5d/view)\n- Defense Logistics Agency · NSN 2530-01-554-8288 (Parts Kit, Ball Joint) · [SAM.gov](https://sam.gov/opp/d78c7c21ae5d40c493d6b4c1437fde5c/view)\n- Defense Logistics Agency · Redacted J&A · [SAM.gov](https://sam.gov/opp/c0b6ba11b00f4c40b8d87bd0a48e526e/view)\n- Defense Logistics Agency · SPE4A726R0634  6220 - LIGHT, COCKPIT, AIRCRAFT / WSIC F · [SAM.gov](https://sam.gov/opp/e53bec51c6e64c9aa1868710347bfcd4/view)\n- Environmental Protection Agency · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION (JOFOC) Research Triangle Park… · [SAM.gov](https://sam.gov/opp/249dfb318fab4536a8286b5e82a226cc/view)\n- Federal Aviation Administration · General Dynamics Information Technology (GDIT) - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/d87505498a6f4085bbd21da684c491a2/view)\n- Navy · SOLE SOURCE - HyperWorks Technical Support and Software Maintenance · [SAM.gov](https://sam.gov/opp/789396299eca46bc99c6645e02176042/view)\n- Office of the Assistant Secretary for Financial Resources (ASFR) · Professional and Scientific Support Services · [SAM.gov](https://sam.gov/opp/5e8b5bf99d7f4c539fe600c1029b9ea2/view)\n- Pension Benefit Guaranty Corporation · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION · [SAM.gov](https://sam.gov/opp/979f929181f841408bd24cfa097349bf/view)\n- Public Buildings Service · USGS Move and Store Equipment Federal Center, Rolla, MO 65401 · [SAM.gov](https://sam.gov/opp/0dc4929c05b94ce685604112ff656753/view)\n- State · Award 19AQMM26F1611 · [SAM.gov](https://sam.gov/opp/fc884227feea4ab8bf412a96463e5ff2/view)\n- State · Award 19AQMM26F1616 · [SAM.gov](https://sam.gov/opp/48272c0caef547d3bfe1033efc98cebd/view)\n- State · Award 19AQMM26F1619 · [SAM.gov](https://sam.gov/opp/d6ead1664dc747cc8f420a7651b8cd26/view)\n- State · Award 19AQMM26F1639 · [SAM.gov](https://sam.gov/opp/47b5eb2a83d645daab8a5e346dd7ba59/view)\n- State · Award 19AQMM26F1697 · [SAM.gov](https://sam.gov/opp/063fb3039cf24a6498fb923773ec04ad/view)\n- US Citizenship and Immigration Services · Justification for Exception to Fair Opportunity, Governance Communication Assessments &… · [SAM.gov](https://sam.gov/opp/f3805dae0006405aacf117722d1f4992/view)\n- US Immigration and Customs Enforcement · Social Media Management Support Services · [SAM.gov](https://sam.gov/opp/fe04a0d694db45a4a4611cbd9f5a09f1/view)\n- Veterans Affairs · J042--Fire Alarm System Monitoring and Programming INTENT TO SOLE SOURCE · [SAM.gov](https://sam.gov/opp/96f6f892988b48f7a0beb042c2839b8e/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 34 new notices reviewed (first collected Oct 20 20:00 ET to Oct 21 07:42 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.1222
 }

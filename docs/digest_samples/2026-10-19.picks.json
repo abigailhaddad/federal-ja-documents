@@ -1,8 +1,8 @@
 {
  "experimental": true,
- "digest_version": "2026-10-21.digest1",
+ "digest_version": "2026-10-21.digest2",
  "mode": "dry_run",
- "run_at": "2026-10-21T16:11:34.447616+00:00",
+ "run_at": "2026-10-21T16:29:15.771103+00:00",
  "as_of": "2026-10-19T16:00:00+00:00",
  "window": {
   "kind": "manual",
@@ -17,18 +17,18 @@
  "with_extraction_row": 0,
  "with_document_text": 1,
  "budget": {
-  "max_usd": 0.28,
-  "spent": 0.011033,
+  "max_usd": 0.18,
+  "spent": 0.011331,
   "calls": [
    {
     "stage": "rank",
     "model": "claude-sonnet-5-5",
-    "input_tokens": 4764,
+    "input_tokens": 4883,
     "output_tokens": 50,
-    "cache_creation_input_tokens": 2011,
+    "cache_creation_input_tokens": 2130,
     "cache_read_input_tokens": 0,
-    "cost_usd": 0.011033,
-    "worst_case_usd": 0.1672
+    "cost_usd": 0.011331,
+    "worst_case_usd": 0.0875
    }
   ]
  },
@@ -42,6 +42,5 @@
  "dropped_by_checks": [],
  "subject": "Whoa J&As — Oct 19: nothing whoa-worthy",
  "body": "Nothing whoa-worthy today (1 new notice reviewed).\n\n## All new notices (1)\n\n- Veterans Affairs · DA10--PUPPET ENTERPRISE SOFTWARE (VA-26-00062749) · [SAM.gov](https://sam.gov/opp/abbeb9ff66624ee880a67d9120638145/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 1 new notice reviewed (first collected Oct 18 20:00 ET to Oct 19 09:04 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
- "spent_usd": 0.011,
- "rerendered": "picks re-checked from the stored model answer with the final verify.py, and re-rendered"
+ "spent_usd": 0.0113
 }

@@ -1,8 +1,8 @@
 {
  "experimental": true,
- "digest_version": "2026-10-21.digest1",
+ "digest_version": "2026-10-21.digest2",
  "mode": "dry_run",
- "run_at": "2026-10-21T16:12:56.975451+00:00",
+ "run_at": "2026-10-21T16:30:36.259499+00:00",
  "as_of": "2026-10-20T16:00:00+00:00",
  "window": {
   "kind": "manual",
@@ -20,48 +20,48 @@
  "with_extraction_row": 0,
  "with_document_text": 70,
  "budget": {
-  "max_usd": 0.28,
-  "spent": 0.129259,
+  "max_usd": 0.18,
+  "spent": 0.12079000000000001,
   "calls": [
    {
     "stage": "screen",
     "model": "claude-haiku-5-5",
-    "input_tokens": 44317,
-    "output_tokens": 3932,
+    "input_tokens": 45098,
+    "output_tokens": 4081,
     "cache_creation_input_tokens": 0,
     "cache_read_input_tokens": 1066,
-    "cost_usd": 0.006302,
-    "worst_case_usd": 0.0072
+    "cost_usd": 0.006454,
+    "worst_case_usd": 0.0073
    },
    {
     "stage": "screen",
     "model": "claude-haiku-5-5",
     "input_tokens": 41275,
-    "output_tokens": 3688,
+    "output_tokens": 3457,
     "cache_creation_input_tokens": 0,
     "cache_read_input_tokens": 1066,
-    "cost_usd": 0.005876,
+    "cost_usd": 0.00576,
     "worst_case_usd": 0.0073
    },
    {
     "stage": "screen",
     "model": "claude-haiku-5-5",
     "input_tokens": 9436,
-    "output_tokens": 723,
+    "output_tokens": 753,
     "cache_creation_input_tokens": 0,
     "cache_read_input_tokens": 1066,
-    "cost_usd": 0.001209,
+    "cost_usd": 0.001224,
     "worst_case_usd": 0.0047
    },
    {
     "stage": "rank",
     "model": "claude-sonnet-5-5",
-    "input_tokens": 51956,
-    "output_tokens": 1558,
+    "input_tokens": 50323,
+    "output_tokens": 1054,
     "cache_creation_input_tokens": 0,
-    "cache_read_input_tokens": 2011,
-    "cost_usd": 0.115872,
-    "worst_case_usd": 0.2455
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.107352,
+    "worst_case_usd": 0.1631
    }
   ]
  },
@@ -70,541 +70,541 @@
    "notice_id": "53d80bf144804de8a5e5138dd62cf873",
    "title": "Camp East Montana",
    "score": 10,
-   "reason": "Letter contract, $1.23B detention services to Amentum funded by One Big Beautiful Bill."
+   "reason": "ICE letter-contract detention at Camp East Montana, OBBBA funding, revised duration; huge value."
   },
   {
    "notice_id": "8febc2f3caa144d8b08672d26fbd2a1b",
    "title": "Camp East Montana",
    "score": 10,
-   "reason": "Letter contract, $1.23B ICE detention sole source funded by One Big Beautiful Bill."
+   "reason": "ICE Camp East Montana detention, $1.23B sole source, OBBBA-funded letter contract."
   },
   {
    "notice_id": "3280f97fd5a045459cf5e0e31ea1415d",
    "title": "Intent to Sole Source to Anthropic",
    "score": 8,
-   "reason": "Sole source continuity award for Anthropic Claude enterprise AI access at HHS."
+   "reason": "HHS sole-source continuity award for Anthropic Claude AI enterprise access; notable vendor."
   },
   {
    "notice_id": "48dc3833e6924541a157465024a2fa5a",
    "title": "Notice of Intent to Sole Source - Telecommunications Analysis Software Support",
    "score": 8,
-   "reason": "ICE wiretap/CALEA surveillance analysis software sole source; surveillance tech vendor"
+   "reason": "ICE sole source to Pen-Link for wiretap, CALEA, live intercept surveillance; large data capacity."
   },
   {
    "notice_id": "c4bad86f34314b579a52144c1c0d2fa0",
    "title": "Q201--CCN R3 Contract Extension",
    "score": 7,
-   "reason": "Unusual and compelling urgency extension of large VA community care network IDIQ, up to one year."
+   "reason": "Urgency-based one-year bridge of large VA community care network IDIQ, Region 3."
   },
   {
    "notice_id": "aec0b46dc3cb4ad3ad60cbf629f91d9c",
    "title": "Q201--CCN R2 Contract Extension",
    "score": 7,
-   "reason": "Unusual and compelling urgency extension of large VA community care Region 2 IDIQ."
+   "reason": "Urgency-based one-year extension of large VA community care network IDIQ, Region 2."
   },
   {
    "notice_id": "4c7b9989ded94a8d91879c37640e95c2",
    "title": "Q201--CCN R2 Contract Extension",
    "score": 7,
-   "reason": "Duplicate of VA Region 2 community care urgency extension notice."
+   "reason": "Duplicate posting of VA community care Region 2 urgency extension."
   },
   {
    "notice_id": "085682f126fe48469dc67e2031a3f08a",
    "title": "Q201--CCN R1 Contract Extension",
    "score": 7,
-   "reason": "Unusual and compelling urgency extension of large VA community care Region 1 IDIQ."
-  },
-  {
-   "notice_id": "a63893dde8d245d5a3033ff4e89a8d0a",
-   "title": "Justification for Interim Contract Area Studies Course Instructors",
-   "score": 6,
-   "reason": "Unusual and compelling urgency bridge contract to prevent lapse in State training instructors."
-  },
-  {
-   "notice_id": "bbd5b3c48856426590b5ff7e8e665afe",
-   "title": "Justification for Interim Contract Area Studies Course Instructors",
-   "score": 6,
-   "reason": "Unusual and compelling urgency bridge contract to prevent lapse in State training instructors."
+   "reason": "Urgency-based one-year extension of large VA community care network IDIQ, Region 1."
   },
   {
    "notice_id": "bbb330117065468cba78b17e6f255e14",
    "title": "JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION",
+   "score": 7,
+   "reason": "DARPA sole-source IDIQ to JHU APL UARC, nearly $500M ceiling."
+  },
+  {
+   "notice_id": "b01657fa20a34ec99f57f9237b0d48d9",
+   "title": "AT&T OneWeb Kits and Satellite Communication (SATCOM) Sole Source Justification Modification",
    "score": 6,
-   "reason": "About $500M IDIQ ceiling sole source to JHU APL UARC for DARPA."
+   "reason": "Coast Guard sole-source AT&T LEO SATCOM modification expanding scope; notable vendor."
   },
   {
    "notice_id": "592d7a09c17d4f8b9f621db969205ea2",
    "title": "DAI Application Support Services",
    "score": 6,
-   "reason": "Ceiling increase for CACI sole source tied to Advana and DAI modernization."
+   "reason": "Task order ceiling increase to CACI for DAI data migration into Advana; notable vendor."
   },
   {
    "notice_id": "58927173fe23490d9801121d0e823a83",
    "title": "Notice of Intent to Solicit from a Single Source - Forensic Equipment / Software",
    "score": 6,
-   "reason": "DHS forensics equipment and support sole source to Parsons; investigative tech"
+   "reason": "ICE single-source forensic equipment and support for Homeland Security Task Force investigations."
   },
   {
    "notice_id": "077d851fe0a7404abb51862ff565859f",
    "title": "WTI 1-27 Sole Source J&A",
    "score": 5,
-   "reason": "Unusual and compelling urgency sole source for foreign adversary air threat replication; small dollar value."
+   "reason": "Unusual and compelling urgency for foreign adversary air threat replication; small value."
   },
   {
-   "notice_id": "1f0535378cff4fd9a76f1a2454ce5866",
-   "title": "USS WICHITA (LCS 13) SERM-803-27 NEW WORK",
+   "notice_id": "a63893dde8d245d5a3033ff4e89a8d0a",
+   "title": "Justification for Interim Contract Area Studies Course Instructors",
    "score": 5,
-   "reason": "Urgent exception to fair opportunity for Navy ship berthing modification during maintenance."
+   "reason": "Unusual-urgency bridge for State Dept area studies instructors; mission continuity."
   },
   {
-   "notice_id": "5927b3b796aa4aca8e2a935826ef965d",
-   "title": "J&A for IDIQ Increase on Base Operations Support (BOS) services at Pensacola Naval Regional Complex and Naval Hospital Pensacola, Florida",
+   "notice_id": "bbd5b3c48856426590b5ff7e8e665afe",
+   "title": "Justification for Interim Contract Area Studies Course Instructors",
    "score": 5,
-   "reason": "Hurricane-driven $10M IDIQ capacity increase for base operations repairs; urgent recovery."
-  },
-  {
-   "notice_id": "b01657fa20a34ec99f57f9237b0d48d9",
-   "title": "AT&T OneWeb Kits and Satellite Communication (SATCOM) Sole Source Justification Modification",
-   "score": 5,
-   "reason": "Sole source LEO SATCOM modification to AT&T, expanded scope, notable vendor."
+   "reason": "Unusual-urgency bridge for State Dept area studies instructors, second vendor."
   },
   {
    "notice_id": "4152a2b4aae142869e86d6a07b709ab9",
    "title": "Notice of Intent to Award a Sole Source Contract to CIS for 8841 and 8851 Voice Over Internet Protocol Devicies",
    "score": 5,
-   "reason": "National security SCRM sole source for VoIP phones; small dollar but unusual authority"
-  },
-  {
-   "notice_id": "045e7a7863ff4ef2845155e13504c4c6",
-   "title": "INTENT TO SOLE SOURCE - FLASHPOINT INTELLIGENCE CAPABILITIES AND SERVICES",
-   "score": 5,
-   "reason": "Sole-source dark/deep-web threat intelligence subscription for Treasury critical infrastructure"
+   "reason": "National security supply-chain justification for CIS VoIP phones; small dollar value."
   },
   {
    "notice_id": "36733e8748a74a9c9e9e97975acb8798",
    "title": "Notice of Single Source - Information Security & Privacy Service (AIS) Security and Strategic Support Services",
    "score": 5,
-   "reason": "FAA security services extension to 2028 pending delayed competitive follow-on"
+   "reason": "FAA single-source extension of security contract while follow-on competition is delayed."
   },
   {
    "notice_id": "7c0f60892caa408bad296b64f31c2017",
    "title": "Redacted Limited Sources Justification for PRISM Hosting, Operations, and Maintenance Services",
    "score": 5,
-   "reason": "Mission-critical retirement system sole-source after IAA expiration; continuity-driven, somewhat unusual transition."
+   "reason": "Sole-source PRISM hosting to original developer after IAA expiration; some continuity-driven urgency."
   },
   {
    "notice_id": "ab68572d22544619b8345db7219b9bfd",
    "title": "Notice of Intent to Sole Source: NOAA- Satellite Ocean Color System Vicarious Calibration  Marine Optical BuoY (MOBY) Operations and Maintenance",
    "score": 5,
-   "reason": "Unusual and compelling urgency claim for ocean color calibration buoy sole source to university."
+   "reason": "Sole-source to University of Miami citing unusual and compelling urgency for ocean color calibration."
   },
   {
-   "notice_id": "c814836c507b49c6901c243b2427c517",
-   "title": "Sole Source Justification and Approval - Airborne Special Operations Testing Directorate Blade Hours (Fort Bragg)",
+   "notice_id": "1f0535378cff4fd9a76f1a2454ce5866",
+   "title": "USS WICHITA (LCS 13) SERM-803-27 NEW WORK",
    "score": 4,
-   "reason": "Unusual urgency sole source for parachute flight services; blade-hour scheduling constraints."
+   "reason": "Urgent new work exception to fair opportunity on Navy ship berthing modification."
   },
   {
    "notice_id": "6079e0383973481dbbe9d293808f1438",
    "title": "Operations and Maintenance (O&M) services for the TSA Systems Integration Facility (TSIF) and Freedom Center.",
    "score": 4,
-   "reason": "Limited-source bridge to prevent service interruption pending AbilityOne transition; several million."
+   "reason": "Limited-source bridge to SourceAmerica pending AbilityOne transition; continuity concern."
   },
   {
    "notice_id": "847dc3ae9f454c2f9c542efae9f5bc97",
    "title": "Redacted Justification and Approval (J & A)",
    "score": 4,
-   "reason": "Extension of 8(a) contract via FAR Part 12 J&A; 8(a) release is somewhat unusual."
+   "reason": "Six-month sole-source extension of Fort Benning services contract after 8(a) release."
+  },
+  {
+   "notice_id": "5927b3b796aa4aca8e2a935826ef965d",
+   "title": "J&A for IDIQ Increase on Base Operations Support (BOS) services at Pensacola Naval Regional Complex and Naval Hospital Pensacola, Florida",
+   "score": 4,
+   "reason": "Hurricane Isaias emergency $10M IDIQ capacity increase for Pensacola base services."
+  },
+  {
+   "notice_id": "045e7a7863ff4ef2845155e13504c4c6",
+   "title": "INTENT TO SOLE SOURCE - FLASHPOINT INTELLIGENCE CAPABILITIES AND SERVICES",
+   "score": 4,
+   "reason": "Treasury sole-source threat intelligence subscription with dark-web monitoring; notable data vendor, five-year term."
   },
   {
    "notice_id": "9367a638d74540bf89fdff2810728841",
    "title": "Building Operation Support (BOS) Services Bridge Notice of Intent to Sole Source",
    "score": 4,
-   "reason": "DISA building operations bridge after small-business set-aside incumbent; somewhat unusual"
+   "reason": "DISA building operations bridge for former small-business incumbent; bridge action, moderate interest."
   },
   {
    "notice_id": "c9ca802fe6d44869933db7464a08ec95",
    "title": "Intent to Sole Source Fire Suppression and Emergency Response Service",
    "score": 4,
-   "reason": "VA sole source fire services to City of Minneapolis; unusual government-to-government award"
+   "reason": "VA sole source to City of Minneapolis for fire services; unusual government-to-government award."
   },
   {
    "notice_id": "d6153561f9c54f95ad7d782ecd04bb48",
    "title": "Intent to Sole Source Fire Suppression and Emergency Response Service",
    "score": 4,
-   "reason": "VA sole source fire services to City of Minneapolis; unusual government-to-government award"
+   "reason": "VA sole source to City of Minneapolis for fire services; unusual government-to-government award."
   },
   {
    "notice_id": "dc27aeb0593f4feea8b930d0469d728c",
    "title": "Intent to Sole Source Fire Suppression and Emergency Response Service",
    "score": 4,
-   "reason": "VA sole source fire services to City of Minneapolis; unusual government-to-government award"
+   "reason": "VA sole source to City of Minneapolis for fire services; unusual government-to-government award."
+  },
+  {
+   "notice_id": "1bcf1521ec7e42b8805edfe88b7eebbe",
+   "title": "Notice of Intent to Award a Sole Source 8(a) Procurement to Next Generation Logistics, LLC, for Towboat Services",
+   "score": 4,
+   "reason": "Sole-source 8(a) towboat lease; mildly unusual service but small and routine."
   },
   {
    "notice_id": "40c7fe234982477e95877a01a6c695a5",
    "title": "Capacity Increase of Indefinite Delivery Architect-Engineering (AE) Services Multiple Award Task Order Contract (MATOC) for Mechanical-Electrical Design and Related Projects, Primarily Various Locations, Alaska",
    "score": 3,
-   "reason": "Routine capacity increase to A-E MATOC; no dollar figures or unusual urgency shown."
+   "reason": "Routine capacity increase to A-E MATOC; no notable details."
   },
   {
    "notice_id": "5db2b72fd89e4fd88256739e6263cc9b",
    "title": "IHS Produce Prescription Pilot Program",
    "score": 3,
-   "reason": "Small sole source nutrition program support contract, about $596K, routine."
+   "reason": "Small produce prescription pilot support sole source, about $596K."
+  },
+  {
+   "notice_id": "c814836c507b49c6901c243b2427c517",
+   "title": "Sole Source Justification and Approval - Airborne Special Operations Testing Directorate Blade Hours (Fort Bragg)",
+   "score": 3,
+   "reason": "Small sole-source flight services for parachute training; routine urgency language."
   },
   {
    "notice_id": "e94281e007c44fd88347516312007e84",
    "title": "N0010425R0007 Solicitation",
    "score": 3,
-   "reason": "Limited-source long-term pump spares LTA, about $30.5M, routine OEM parts."
+   "reason": "Navy long-term sole-source pump spares, about $30.5M, OEM-type routine."
   },
   {
    "notice_id": "311baecfc7994ab383c4d2f960ed6361",
    "title": "V302--Veterans Health Administration (VHA) Commercial Air Patient Transport",
    "score": 3,
-   "reason": "FSS sole source task order for veterans commercial air booking; routine."
-  },
-  {
-   "notice_id": "8e48609ed8a44639ba4269a9475ba57c",
-   "title": "Facility Maintenance and Improvements",
-   "score": 3,
-   "reason": "IDIQ facility maintenance sole source via Treasury, no urgency shown."
+   "reason": "Non-competitive FSS task order for VA veteran commercial air booking."
   },
   {
    "notice_id": "0e46948019284c9cbbfb9e06f9cd2649",
    "title": "Notice of Intent to Sole Source  Boston Scientific",
    "score": 3,
-   "reason": "Emergency sole source purchase of interventional lab supplies from Boston Scientific."
+   "reason": "Emergency sole-source catheters purchase from Boston Scientific at NIH."
   },
   {
    "notice_id": "309886539113455bb68f1908bf6a61da",
    "title": "U008--Notice of Intent to Sole Source Implementation Science Training",
    "score": 3,
-   "reason": "University sole-source training; cites Revolutionary FAR Overhaul, otherwise routine"
+   "reason": "Sole source to UCSF for training; cites Revolutionary FAR Overhaul, otherwise routine."
   },
   {
    "notice_id": "3679718c04604a7dbf1becf4390ce1bf",
    "title": "Notice of Intent to Single Source MH-139A Battery Maintenance Service",
    "score": 3,
-   "reason": "Battery maintenance single source with funds not presently available"
+   "reason": "Unfunded battery maintenance notice; funds not presently available."
+  },
+  {
+   "notice_id": "e98890d27bb14b97b70033f3994d8880",
+   "title": "Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton",
+   "score": 3,
+   "reason": "Exclusive venue A/V provider for Marine Corps Ball; modest value."
+  },
+  {
+   "notice_id": "b1efe05ada424eec86616e724d981e9a",
+   "title": "Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton",
+   "score": 3,
+   "reason": "Duplicate exclusive venue A/V provider notice for Marine Corps Ball."
+  },
+  {
+   "notice_id": "f5f514d35a1b473e9ed75a88d6164fd3",
+   "title": "Intent to Sole Source - Fertility Preservation Lab Services",
+   "score": 3,
+   "reason": "Sole source oocyte storage lab services; unusual but routine."
+  },
+  {
+   "notice_id": "64a6dad4e05c4a59ac68d2769c4fc4f5",
+   "title": "Intent to Award Sole Source: Acoustical Society",
+   "score": 3,
+   "reason": "Professional society membership sole source; odd but small."
+  },
+  {
+   "notice_id": "c846f935bb7c4445a2f1f2f21e0a94e8",
+   "title": "NOTICE OF INTENT TO SINGLE SOURCE - Frontgrade Technologies Inc.",
+   "score": 3,
+   "reason": "Single-source conversion kits for radar system; routine OEM-type procurement, no surprises."
+  },
+  {
+   "notice_id": "7b6650cb07e447ca91ede909449c2291",
+   "title": "NOTICE OF INTENT TO AWARD A SOLE SOURCE IMMIX TECHNOLOGY, INC.",
+   "score": 3,
+   "reason": "Navy sole-source via Immix reseller with redacted J&A; little detail, appears routine."
   },
   {
    "notice_id": "73cf4d8b9fa644b5babe5741ddcf0ae6",
    "title": "Special Notice to Sole Source Master BPA Explosion Effects and Blast Loading Device and Supplies",
    "score": 3,
-   "reason": "Five-year master BPA for explosive detonators; specialized but routine-sounding sole source."
-  },
-  {
-   "notice_id": "1bcf1521ec7e42b8805edfe88b7eebbe",
-   "title": "Notice of Intent to Award a Sole Source 8(a) Procurement to Next Generation Logistics, LLC, for Towboat Services",
-   "score": 3,
-   "reason": "Small 8(a) towboat lease; routine small sole-source action."
-  },
-  {
-   "notice_id": "4370726bbb6e48c3a72e15eb37bbfc72",
-   "title": "Intent to Award Sole Source - Air Boss to WM. David Schultz",
-   "score": 3,
-   "reason": "Airshow air boss sole source; quirky but routine services."
-  },
-  {
-   "notice_id": "b896006238ef4d94b5cb2ae912d06621",
-   "title": "J065--Cadwell EMG Support Agreement Intent to Sole Source For Louis Stokes Cleveland VA Medical Center",
-   "score": 3,
-   "reason": "Routine VA sole source for EMG equipment agreement; DEI clause is boilerplate."
+   "reason": "Five-year master BPA for explosive detonators to one vendor; sole-source but mostly routine supplies."
   },
   {
    "notice_id": "744e6ad90f284d1dac05ab703418670e",
    "title": "J&A SPE4A726R0708",
    "score": 2,
-   "reason": "Routine DLA sole source spare part strainer assembly; values redacted."
+   "reason": "Routine DLA sole-source spare part, strainer assembly."
   },
   {
    "notice_id": "83fbf0a4b84d4210836ceafa0e92b23d",
    "title": "US GOVERNMENT AWARDS SOLE SOURCE LEASE IN RENO, NV",
    "score": 2,
-   "reason": "Routine succeeding lease with incumbent lessor for FBI office space."
+   "reason": "Routine GSA succeeding lease for FBI office space in Reno."
+  },
+  {
+   "notice_id": "d986c8ec89ee40a9b23833487423f4bf",
+   "title": "Notice of Intent to Sole Source ATIS and 3GPP Annual Membership",
+   "score": 2,
+   "reason": "Routine annual standards organization membership renewal."
   },
   {
    "notice_id": "82fb5525f0384728aa6c3408d483728d",
    "title": "Instrument Management and Maintenance Services for U.S. Navy Medicine Readiness and Training Command (USNMRTC) Guantanamo Bay, Cuba",
    "score": 2,
-   "reason": "Routine instrument tray maintenance J&A; administrative publication only."
+   "reason": "Routine redacted J&A for instrument tray maintenance services."
   },
   {
    "notice_id": "a947171b7df94dc8b1b02e77d6976712",
    "title": "HSQ Energy Management Control System Justification and Approval Document",
    "score": 2,
-   "reason": "Routine energy control system sole source posting, values redacted."
+   "reason": "Routine energy management control system sole-source posting."
   },
   {
    "notice_id": "dcedf6f84d754e809737b29d24b25ee2",
    "title": "J--Notice of Intent to Sole Source",
    "score": 2,
-   "reason": "Small under-SAT sole source repair of Caterpillar blade brakes."
+   "reason": "Small sole-source Caterpillar blade repair under simplified threshold."
   },
   {
    "notice_id": "19f644b80f0b40bab570d1eb362960ea",
    "title": "Valve Regulating FL",
    "score": 2,
-   "reason": "Routine DLA sole source regulating valves, OEM-type parts."
+   "reason": "Routine DLA sole-source regulating valve spares."
+  },
+  {
+   "notice_id": "aec427652535471eab86973f4fd21d42",
+   "title": "41--HLDG FR SUB ASSY",
+   "score": 2,
+   "reason": "Routine NAVSUP sole-source spare assembly."
+  },
+  {
+   "notice_id": "8e48609ed8a44639ba4269a9475ba57c",
+   "title": "Facility Maintenance and Improvements",
+   "score": 2,
+   "reason": "Routine facility maintenance IDIQ setup for Treasury building."
+  },
+  {
+   "notice_id": "52166809e4b843b2a075e39fee169206",
+   "title": "\"NSN 1615-01-502-6255, AXLE ASSEMBLY, WSDC: YLN, HELICOPTER, SEAHAWK, H-60.",
+   "score": 2,
+   "reason": "Routine DLA sole-source helicopter axle assembly spares."
+  },
+  {
+   "notice_id": "0c3e9dce43d24a65b1f1e264cc996966",
+   "title": "26--VALVE,PNEUMATIC TIRE",
+   "score": 2,
+   "reason": "Routine DLA sole-source pneumatic valve spares."
   },
   {
    "notice_id": "1682c2bb9e1543e3bb3712a69f30b9ea",
    "title": "W065--Notice of Intent (NOI)-Sole Source-Olympus America, Inc Gastrointestinal Endoscope Medical Equipment Lease Equipment",
    "score": 2,
-   "reason": "Proprietary endoscope equipment lease notice; routine brand-name medical equipment."
+   "reason": "Routine OEM endoscope equipment lease, proprietary equipment."
   },
   {
    "notice_id": "0efc1ffd6a794892ac14d339a4ebcafb",
    "title": "General Services Administration (GSA) Lease: Office Space Oxford, Mississippi",
    "score": 2,
-   "reason": "Routine GSA lease extension justification for office space."
+   "reason": "Routine GSA lease extension justification for Oxford, Mississippi office."
   },
   {
    "notice_id": "b332db10ced644a8920bc1e5c7ced8bc",
    "title": "Notice of Intent to Sole Source-AAMC Ancillary Services",
    "score": 2,
-   "reason": "Routine convention ancillary services sole source under simplified acquisition."
+   "reason": "Routine sole-source convention carpeting and ancillary services under simplified procedures."
+  },
+  {
+   "notice_id": "4b6699fc08f04ddca9a095a6ed5b6676",
+   "title": "J&A SPE4A726R0668",
+   "score": 2,
+   "reason": "Routine DLA sole-source insulation blanket IQC."
   },
   {
    "notice_id": "789b7e13344a46d081f1e59b2ed81ea8",
    "title": "Notice of Intent to Sole Source - Arthrex Lease NHCP",
    "score": 2,
-   "reason": "Brand-name surgical equipment placement agreement; routine"
+   "reason": "Routine OEM equipment placement agreement at a naval hospital."
   },
   {
    "notice_id": "10ae68a772f44599a7a75b1f9b3d4355",
    "title": "Intent to Award Sole Source - Air Boss to WM. David Schultz",
    "score": 2,
-   "reason": "Airshow air boss services sole source; routine"
-  },
-  {
-   "notice_id": "c2045803bbec4307b57d6a82502df4f0",
-   "title": "Intent to Sole Source: Repair of MTS 688 Class ESF Diesel Generator (EDG) Sets",
-   "score": 2,
-   "reason": "Diesel generator slip ring repair sole source; routine"
+   "reason": "Routine airshow air boss services sole source."
   },
   {
    "notice_id": "bce345f2e88040a6bf3ec30bf2d3a99c",
    "title": "Intent to Award Sole Source - Air Boss to WM. David Schultz",
    "score": 2,
-   "reason": "Airshow air boss services sole source; routine"
+   "reason": "Duplicate routine airshow air boss sole source."
   },
   {
-   "notice_id": "e98890d27bb14b97b70033f3994d8880",
-   "title": "Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton",
+   "notice_id": "3c5387541209434eae7d46d1639cc396",
+   "title": "PRTD Aging Oven - Sole Source Justification",
    "score": 2,
-   "reason": "Exclusive venue A/V provider for Marine Corps Ball; routine"
+   "reason": "Routine brand-name environmental chamber purchase below threshold."
   },
   {
-   "notice_id": "b1efe05ada424eec86616e724d981e9a",
-   "title": "Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton",
+   "notice_id": "45db7ac0879c4fa9b762aa18a4f5b8da",
+   "title": "Intent to Sole Source - BD FACSCanto II instrument",
    "score": 2,
-   "reason": "Duplicate of exclusive venue A/V sole source; routine"
+   "reason": "Routine flow cytometer OEM service contract."
   },
   {
    "notice_id": "ea9ce96f989b4c0ebc1753b715d6e81e",
    "title": "Notice of Intent to Sole Source Hall Rental to Virginia Community College System Office for USMB Concerts and Recordings",
    "score": 2,
-   "reason": "Concert hall rental sole source for Marine Band; routine"
+   "reason": "Routine concert hall rental from a community college."
   },
   {
-   "notice_id": "f5f514d35a1b473e9ed75a88d6164fd3",
-   "title": "Intent to Sole Source - Fertility Preservation Lab Services",
+   "notice_id": "d06e756871b5403a93f6ac2fa46f604f",
+   "title": "6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services",
    "score": 2,
-   "reason": "Oocyte storage sole source for NIH patients; routine"
+   "reason": "Routine brand-name GeneXpert instrument rental and service."
+  },
+  {
+   "notice_id": "15a55c60f69d4d19baa86854e8791435",
+   "title": "6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services",
+   "score": 2,
+   "reason": "Duplicate routine Cepheid instrument rental notice."
+  },
+  {
+   "notice_id": "5c6978ad81544a5796aa907f18fcc4fb",
+   "title": "J065--Notice of Intent to Sole Source Laerdal Medical Corp 3G Critical Care Manikin additional Maintenance and Warranty",
+   "score": 2,
+   "reason": "Routine manikin maintenance and warranty modification."
+  },
+  {
+   "notice_id": "9fa7e3a2d15b4c079c53495574498276",
+   "title": "Intent to Sole Source - IntelliBlate Ximitry Probe",
+   "score": 2,
+   "reason": "Single-use OEM surgical probe, routine brand-name notice."
   },
   {
    "notice_id": "3bd3552a58d8417ab202d4f4a8c76769",
    "title": "H261--Intent to Sole Source | Five Year IDIQ | Generator Testing and Maintenance | Marion VAMC",
    "score": 2,
-   "reason": "Generator testing IDIQ sole source to distributor; routine"
+   "reason": "Generator maintenance IDIQ with authorized distributor; routine."
   },
   {
-   "notice_id": "64a6dad4e05c4a59ac68d2769c4fc4f5",
-   "title": "Intent to Award Sole Source: Acoustical Society",
+   "notice_id": "889667914a75446c9aa21e94ded61d19",
+   "title": "J065--M-GAIT System - Service Repair - Intent to Sole Source",
    "score": 2,
-   "reason": "Professional society membership sole source; odd but small and routine"
+   "reason": "Routine OEM service maintenance agreement for M-GAIT system."
+  },
+  {
+   "notice_id": "2daea7dd16384281bbf552c03fd31856",
+   "title": "J065--M-GAIT System - Service Repair - Intent to Sole Source",
+   "score": 2,
+   "reason": "Duplicate routine OEM service maintenance notice."
   },
   {
    "notice_id": "23f40a64908b490ea5fbf3ef65c48c10",
    "title": "Notice of Intent to Award Sole Source: Netwrix Data Classification License",
    "score": 2,
-   "reason": "Data classification software license sole source; small purchase"
+   "reason": "Small software license sole source for containerized version."
   },
   {
    "notice_id": "1c94de9749f94e23b4f649fba7f203eb",
    "title": "Notice of Intent to Sole Source - VRC Maintenance and Calibration Services w/three option years",
    "score": 2,
-   "reason": "OEM-only calibration of cold spray machines; routine"
+   "reason": "Routine cold spray machine calibration from sole OEM."
   },
   {
-   "notice_id": "c846f935bb7c4445a2f1f2f21e0a94e8",
-   "title": "NOTICE OF INTENT TO SINGLE SOURCE - Frontgrade Technologies Inc.",
+   "notice_id": "1fa9b939f08a4dabbbe83d7caeedc38c",
+   "title": "Post Award Single Source Justification - PMSC Elevators",
    "score": 2,
-   "reason": "Routine single-source conversion kits for radar system; no dysfunction or large value."
+   "reason": "Small post-award elevator maintenance justification; routine."
   },
   {
-   "notice_id": "7b6650cb07e447ca91ede909449c2291",
-   "title": "NOTICE OF INTENT TO AWARD A SOLE SOURCE IMMIX TECHNOLOGY, INC.",
+   "notice_id": "4370726bbb6e48c3a72e15eb37bbfc72",
+   "title": "Intent to Award Sole Source - Air Boss to WM. David Schultz",
    "score": 2,
-   "reason": "Navy sole-source via Immix reseller; attachment cut, nothing notable visible."
+   "reason": "Air show air boss services sole-sourced to an individual; routine small event contract."
+  },
+  {
+   "notice_id": "b896006238ef4d94b5cb2ae912d06621",
+   "title": "J065--Cadwell EMG Support Agreement Intent to Sole Source For Louis Stokes Cleveland VA Medical Center",
+   "score": 2,
+   "reason": "Sole-source EMG equipment agreement with routine brand-name justification; DEI clause is minor."
   },
   {
    "notice_id": "577bf1c180f243a9823e8229f19b6873",
    "title": "F--Notice of Intent to Sole Source Modification for Contract 68HE0925C0002",
    "score": 2,
-   "reason": "Sole-source modification notice with details unavailable; appears routine."
+   "reason": "Sole-source modification notice with details only in attachment; appears routine."
   },
   {
    "notice_id": "8af7241dbb4242739699576e18ea20fa",
    "title": "66--Notice of Intent to Sole Source",
    "score": 2,
-   "reason": "Thermo instrument upgrade sole source; routine brand-name equipment."
+   "reason": "Thermo instrument upgrade sole-sourced to OEM; routine lab equipment."
   },
   {
    "notice_id": "1abb6e435c4e42449360a7c021ec8bfd",
    "title": "J065--36C25927Q0027| Intent to Sole Source on FujiFilm Synapse Cardiology PACS Service and Licenses for Salt Lake City VA Medical Center",
    "score": 1,
-   "reason": "Routine intent to sole source for PACS maintenance and licenses."
-  },
-  {
-   "notice_id": "d986c8ec89ee40a9b23833487423f4bf",
-   "title": "Notice of Intent to Sole Source ATIS and 3GPP Annual Membership",
-   "score": 1,
-   "reason": "Routine annual standards organization membership renewal."
-  },
-  {
-   "notice_id": "aec427652535471eab86973f4fd21d42",
-   "title": "41--HLDG FR SUB ASSY",
-   "score": 1,
-   "reason": "Routine NAVSUP spares sole source; details redacted."
-  },
-  {
-   "notice_id": "52166809e4b843b2a075e39fee169206",
-   "title": "\"NSN 1615-01-502-6255, AXLE ASSEMBLY, WSDC: YLN, HELICOPTER, SEAHAWK, H-60.",
-   "score": 1,
-   "reason": "Routine DLA helicopter axle assembly sole source."
-  },
-  {
-   "notice_id": "0c3e9dce43d24a65b1f1e264cc996966",
-   "title": "26--VALVE,PNEUMATIC TIRE",
-   "score": 1,
-   "reason": "Routine DLA pneumatic tire valve sole source spare part."
-  },
-  {
-   "notice_id": "4b6699fc08f04ddca9a095a6ed5b6676",
-   "title": "J&A SPE4A726R0668",
-   "score": 1,
-   "reason": "Routine DLA insulation blanket sole source spare parts."
+   "reason": "Routine notice of intent for OEM PACS maintenance and licenses."
   },
   {
    "notice_id": "ca7a71e7027143b6862f413fae8d1d46",
    "title": "Notice of Intent to Award Single Source - Flow 3D Software Maintenance",
    "score": 1,
-   "reason": "Routine single-source software maintenance notice; no document text."
+   "reason": "Routine single-source software maintenance renewal notice."
   },
   {
    "notice_id": "7c6f792cf82448c8afbb5e6d979c6514",
    "title": "J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance",
    "score": 1,
-   "reason": "OEM mass spectrometer maintenance; routine"
+   "reason": "Routine OEM instrument maintenance notice."
   },
   {
    "notice_id": "16a994df8abc43f6a0cb038a8b37008f",
    "title": "J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance",
    "score": 1,
-   "reason": "OEM mass spectrometer maintenance; routine"
+   "reason": "Duplicate routine OEM instrument maintenance notice."
   },
   {
    "notice_id": "33a2049a556e4b60ad1b5eee775ac194",
    "title": "Notice of Intent to Sole Source  AB Sciex LLC",
    "score": 1,
-   "reason": "OEM mass spectrometer service renewal; routine"
+   "reason": "Routine annual OEM mass spectrometer service renewal."
   },
   {
-   "notice_id": "3c5387541209434eae7d46d1639cc396",
-   "title": "PRTD Aging Oven - Sole Source Justification",
+   "notice_id": "c2045803bbec4307b57d6a82502df4f0",
+   "title": "Intent to Sole Source: Repair of MTS 688 Class ESF Diesel Generator (EDG) Sets",
    "score": 1,
-   "reason": "Aging oven brand purchase; routine small purchase"
+   "reason": "Routine shipyard generator slip ring repair notice."
   },
   {
-   "notice_id": "45db7ac0879c4fa9b762aa18a4f5b8da",
-   "title": "Intent to Sole Source - BD FACSCanto II instrument",
+   "notice_id": "7f8ce5fdb3874b838545be745dd6311f",
+   "title": "6515--Inari FlowTriever Retrieval Aspiration System (5) Intent to Sole Source Base Four (4) Option Years VA Pittsburgh Healthcare System",
    "score": 1,
-   "reason": "OEM flow cytometer service contract; routine"
+   "reason": "Brand-name medical device rental notice."
   },
   {
    "notice_id": "fed9202f152a4443ab79d4b29a6494fb",
    "title": "Notice of Intent to Award Sole Source to CFRS, Inc.",
    "score": 1,
-   "reason": "Attachment-only notice with no details; nothing remarkable"
-  },
-  {
-   "notice_id": "d06e756871b5403a93f6ac2fa46f604f",
-   "title": "6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services",
-   "score": 1,
-   "reason": "OEM diagnostic instrument rental and service; routine"
-  },
-  {
-   "notice_id": "15a55c60f69d4d19baa86854e8791435",
-   "title": "6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services",
-   "score": 1,
-   "reason": "Duplicate OEM diagnostic instrument rental; routine"
-  },
-  {
-   "notice_id": "5c6978ad81544a5796aa907f18fcc4fb",
-   "title": "J065--Notice of Intent to Sole Source Laerdal Medical Corp 3G Critical Care Manikin additional Maintenance and Warranty",
-   "score": 1,
-   "reason": "OEM manikin maintenance modification; routine"
-  },
-  {
-   "notice_id": "9fa7e3a2d15b4c079c53495574498276",
-   "title": "Intent to Sole Source - IntelliBlate Ximitry Probe",
-   "score": 1,
-   "reason": "Brand-name surgical probe purchase; routine"
+   "reason": "No substantive content; attachment-only sole source notice."
   },
   {
    "notice_id": "ae098d4d6e874ba48c2a978a130dfec4",
    "title": "J046--NOTICE OF INTENT TO SOLE SOURCE Baltimore VAMC WRO300H Reverse Osmosis Dialysis Water System Service Support Evoqua Water Technologies, LLC",
    "score": 1,
-   "reason": "OEM water system annual service; routine"
-  },
-  {
-   "notice_id": "889667914a75446c9aa21e94ded61d19",
-   "title": "J065--M-GAIT System - Service Repair - Intent to Sole Source",
-   "score": 1,
-   "reason": "OEM equipment service maintenance agreement; routine"
-  },
-  {
-   "notice_id": "2daea7dd16384281bbf552c03fd31856",
-   "title": "J065--M-GAIT System - Service Repair - Intent to Sole Source",
-   "score": 1,
-   "reason": "Duplicate OEM equipment service maintenance; routine"
+   "reason": "Routine annual dialysis water system service."
   },
   {
    "notice_id": "bf6b20798a274eb2936262d401e097a7",
    "title": "Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion Medicine, NIH Clinical Center",
    "score": 1,
-   "reason": "Brand-name lab instruments from Fisher; routine"
+   "reason": "Routine lab instrument purchase notice from Fisher Scientific."
   },
   {
    "notice_id": "b95b5fc579dd4e7fa6b27d283a9049ff",
    "title": "Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion Medicine, NIH Clinical Center",
    "score": 1,
-   "reason": "Duplicate brand-name lab instrument notice; routine"
-  },
-  {
-   "notice_id": "1fa9b939f08a4dabbbe83d7caeedc38c",
-   "title": "Post Award Single Source Justification - PMSC Elevators",
-   "score": 1,
-   "reason": "Post-award elevator maintenance justification; small value, routine"
-  },
-  {
-   "notice_id": "7f8ce5fdb3874b838545be745dd6311f",
-   "title": "6515--Inari FlowTriever Retrieval Aspiration System (5) Intent to Sole Source Base Four (4) Option Years VA Pittsburgh Healthcare System",
-   "score": -1,
-   "reason": "not scored by the model"
+   "reason": "Duplicate routine lab instrument notice."
   }
  ],
  "ranked": [
@@ -616,46 +616,41 @@
   "aec0b46dc3cb4ad3ad60cbf629f91d9c",
   "4c7b9989ded94a8d91879c37640e95c2",
   "085682f126fe48469dc67e2031a3f08a",
-  "a63893dde8d245d5a3033ff4e89a8d0a",
-  "bbd5b3c48856426590b5ff7e8e665afe",
   "bbb330117065468cba78b17e6f255e14",
+  "b01657fa20a34ec99f57f9237b0d48d9",
   "592d7a09c17d4f8b9f621db969205ea2",
   "58927173fe23490d9801121d0e823a83",
   "077d851fe0a7404abb51862ff565859f",
-  "1f0535378cff4fd9a76f1a2454ce5866",
-  "5927b3b796aa4aca8e2a935826ef965d",
-  "b01657fa20a34ec99f57f9237b0d48d9",
+  "a63893dde8d245d5a3033ff4e89a8d0a",
+  "bbd5b3c48856426590b5ff7e8e665afe",
   "4152a2b4aae142869e86d6a07b709ab9",
-  "045e7a7863ff4ef2845155e13504c4c6",
-  "36733e8748a74a9c9e9e97975acb8798"
+  "36733e8748a74a9c9e9e97975acb8798",
+  "7c0f60892caa408bad296b64f31c2017",
+  "ab68572d22544619b8345db7219b9bfd"
  ],
  "model_answer": {
   "picks": [
    {
     "notice_id": "53d80bf144804de8a5e5138dd62cf873",
-    "headline": "ICE letter-contracts Amentum for Camp East Montana after terminating prior contract, $1.2B",
-    "why": "ICE proposes a sole-source letter contract with Amentum Services Inc. for detention services at Camp East Montana, funded by the One Big Beautiful Bill Act. The justification cites performance deficiencies under the Army-issued contract, which ICE terminated.",
+    "headline": "ICE definitizes Camp East Montana letter contract with Amentum at about $2.8 billion",
+    "why": "The revised J&A definitizes a sole-source letter contract with Amentum and says the estimated total value has increased because of a longer period of performance. It states Amentum is the only responsible source because of its ownership and operational control of the facility infrastructure.",
     "quotes": [
      {
-      "text": "Because this is a letter contract, the estimated total value is based upon the independent government cost estimate (IGCE) until the contract is fully negotiated at definitization.",
-      "page": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, page 1, machine-transcribed"
-     },
-     {
-      "text": "ICE was not the source selection authority for the original task order, resulting in a contract and Performance Work Statement (PWS) that did not accurately reflect ICE's operational needs",
-      "page": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, page 3, machine-transcribed"
+      "text": "The definitized action reflects an increased period of performance and increased\nestimated cost from the original letter contract planning assumptions.",
+      "page": "Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, page 1"
      }
     ],
     "vendor": "Amentum Services Inc.",
-    "value": "$1,229,179,038.02",
+    "value": "$2,796,540,325.26",
     "authority": "RFO 6.103-1"
    },
    {
     "notice_id": "c4bad86f34314b579a52144c1c0d2fa0",
-    "headline": "VA extends Community Care Network Region 3 sole-source amid protests and 1,600 questions",
-    "why": "VA seeks up to one year of unusual-and-compelling-urgency performance for CCN Region 3 because the next-generation procurement is delayed. The document cites two protests, more than 1,600 industry questions and possible litigation.",
+    "headline": "VA extends CCN Region 3 community care contract a year amid protests",
+    "why": "VA is using unusual and compelling urgency to extend CCN Region 3 for up to one year, through September 30, 2027. It cites two protests, more than 1,600 industry questions and potential litigation risk as pushing back the follow-on award.",
     "quotes": [
      {
-      "text": "The scope and complexity of the procurement, combined with two protests, more than 1,600 industry questions, and potential future litigation risks, continue to push key milestones to the right.",
+      "text": "The scope and complexity of the procurement, combined with two protests,\nmore than 1,600 industry questions, and potential future litigation risks, continue to\npush key milestones to the right.",
       "page": "Attachment 1 - Justification  Approval Redacted R3.pdf, page 3"
      }
     ],
@@ -664,46 +659,27 @@
     "authority": "RFO 6.103-2"
    },
    {
-    "notice_id": "bbb330117065468cba78b17e6f255e14",
-    "headline": "DARPA plans $499.8M five-year sole-source IDIQ with Johns Hopkins APL",
-    "why": "DARPA seeks a single-contractor IDIQ with JHU/APL, a UARC, with a stated ceiling and 60-month term.",
-    "quotes": [
-     {
-      "text": "The estimated IDIQ ceiling amount is $499,800,000 (maximum quantity) with a 60-month period of performance. The guaranteed minimum is $10,000.",
-      "page": "JA for Other Than Full and Open Competition_Redacted.pdf, page 1"
-     }
-    ],
-    "vendor": "Johns Hopkins University, Applied Physics Laboratory (JHU/APL)",
-    "value": "$499,800,000",
-    "authority": "10 U.S.C. § 3204(a)(3)"
-   },
-   {
-    "notice_id": "3280f97fd5a045459cf5e0e31ea1415d",
-    "headline": "HHS plans sole-source continuity buy of Anthropic's Claude for its workforce",
-    "why": "HHS intends a stopgap sole-source award for enterprise access to Claude, pending a competitive multiple-award BPA for frontier AI models.",
-    "quotes": [
-     {
-      "text": "This action provides continued enterprise access to Anthropic's Claude frontier models and advanced features (Claude for Enterprise / Claude for Government) for authorized HHS workforce",
-      "page": ""
-     }
-    ],
-    "vendor": "Anthropic",
-    "value": "",
-    "authority": "FAR 13.106-1(b)(1)"
-   },
-   {
     "notice_id": "077d851fe0a7404abb51862ff565859f",
-    "headline": "GAO protest forces Marine Corps sole-source for Mi-24 Hind adversary aircraft",
-    "why": "After a protest and corrective action, the Marine Corps awarded a sole-source purchase order for adversary rotary-wing and drone threat replication. The J&A says the stay left a gap that advance planning could not have prevented.",
+    "headline": "Marine Corps sole-sources Mi-24 HIND adversary air after protest stalls award",
+    "why": "A GAO protest stayed a competitive award, and the Government took voluntary corrective action. It then sole-sourced a roughly four-week urgent buy of adversary helicopter and drone threat replication for the WTI 1-27 course.",
     "quotes": [
      {
-      "text": "The stay occurred 49 days prior to the live-flight phase, creating an unexpected, immediate gap in cont racted threat repli cation that could not have been prevented through advance planning.",
-      "page": "MCIWEST WTI-1-27 JA signed (1).pdf, page 3"
+      "text": "The stay occurred 49 days prior to the live-flight phase, creating\nan unexpected, immediate gap in cont racted threat repli cation",
+      "page": "MCIWEST WTI-1-27 JA signed (1).pdf, page 2"
      }
     ],
     "vendor": "VTS Aviation LLC",
     "value": "$527,834.44",
     "authority": "10 U.S.C. 3204(a)(2)"
+   },
+   {
+    "notice_id": "3280f97fd5a045459cf5e0e31ea1415d",
+    "headline": "HHS plans sole-source continuity award for Anthropic's Claude enterprise-wide",
+    "why": "HHS intends a limited continuity-of-services award for Claude access for its workforce. The notice says it is pending award of a competitive multiple-award BPA.",
+    "quotes": [],
+    "vendor": "Anthropic",
+    "value": "",
+    "authority": "FAR 13.106-1(b)(1)"
    }
   ]
  },
@@ -711,60 +687,47 @@
   {
    "notice_id": "53d80bf144804de8a5e5138dd62cf873",
    "rank": 1,
-   "headline": "ICE letter-contracts Amentum for Camp East Montana after terminating prior contract, $1.2B",
-   "why": "ICE proposes a sole-source letter contract with Amentum Services Inc. for detention services at Camp East Montana, funded by the One Big Beautiful Bill Act. The justification cites performance deficiencies under the Army-issued contract, which ICE terminated.",
+   "headline": "ICE definitizes Camp East Montana letter contract with Amentum at about $2.8 billion",
+   "why": "The revised J&A definitizes a sole-source letter contract with Amentum and says the estimated total value has increased because of a longer period of performance. It states Amentum is the only responsible source because of its ownership and operational control of the facility infrastructure.",
    "quotes": [
     {
-     "text": "Because this is a letter contract, the estimated total value is based upon the independent government cost estimate (IGCE) until the contract is fully negotiated at definitization.",
+     "text": "The definitized action reflects an increased period of performance and increased estimated cost from the original letter contract planning assumptions.",
      "match": "exact",
      "pages": [
       {
-       "resource_id": "d83bcd08bad544b3aa3b1c22a208bcc9",
+       "resource_id": "d542b26604ce40a598782fbee8c9a018",
        "page_number": 1,
-       "text_source": "transcription"
+       "text_source": "native"
       }
      ],
-     "where": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 1 (machine-transcribed page)",
-     "model_page": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, page 1, machine-transcribed"
+     "where": "Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, p. 1",
+     "model_page": "Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, page 1"
     },
     {
-     "text": "ICE was not the source selection authority for the original task order, resulting in a contract and Performance Work Statement (PWS) that did not accurately reflect ICE's operational needs",
+     "text": "Total | | | $2,796,540,325.26 Note: The total estimated value is based on the Government's current pricing assumptions and the independent government cost estimate supporting definitization.",
      "match": "exact",
      "pages": [
       {
-       "resource_id": "d83bcd08bad544b3aa3b1c22a208bcc9",
-       "page_number": 3,
+       "resource_id": "d542b26604ce40a598782fbee8c9a018",
+       "page_number": 2,
        "text_source": "transcription"
       }
      ],
-     "where": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 3 (machine-transcribed page)",
-     "model_page": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, page 3, machine-transcribed"
-    },
-    {
-     "text": "Total | | | $1,229,179,038.02 Note: Because this is a letter contract, the estimated total value is based upon the independent government cost estimate (IGCE) until the contract is fully",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "d83bcd08bad544b3aa3b1c22a208bcc9",
-       "page_number": 1,
-       "text_source": "transcription"
-      }
-     ],
-     "where": "Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 1 (machine-transcribed page)",
+     "where": "Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, p. 2 (machine-transcribed page)",
      "model_page": "",
      "added_by_code": true
     }
    ],
    "vendor": "Amentum Services Inc.",
-   "value": "$1,229,179,038.02",
+   "value": "$2,796,540,325.26",
    "authority": "RFO 6.103-1",
    "model_rank": 1
   },
   {
    "notice_id": "c4bad86f34314b579a52144c1c0d2fa0",
    "rank": 2,
-   "headline": "VA extends Community Care Network Region 3 sole-source amid protests and 1,600 questions",
-   "why": "VA seeks up to one year of unusual-and-compelling-urgency performance for CCN Region 3 because the next-generation procurement is delayed. The document cites two protests, more than 1,600 industry questions and possible litigation.",
+   "headline": "VA extends CCN Region 3 community care contract a year amid protests",
+   "why": "VA is using unusual and compelling urgency to extend CCN Region 3 for up to one year, through September 30, 2027. It cites two protests, more than 1,600 industry questions and potential litigation risk as pushing back the follow-on award.",
    "quotes": [
     {
      "text": "The scope and complexity of the procurement, combined with two protests, more than 1,600 industry questions, and potential future litigation risks, continue to push key milestones to the right.",
@@ -786,63 +749,13 @@
    "model_rank": 2
   },
   {
-   "notice_id": "bbb330117065468cba78b17e6f255e14",
-   "rank": 3,
-   "headline": "DARPA plans $499.8M five-year sole-source IDIQ with Johns Hopkins APL",
-   "why": "DARPA seeks a single-contractor IDIQ with JHU/APL, a UARC, with a stated ceiling and 60-month term.",
-   "quotes": [
-    {
-     "text": "The estimated IDIQ ceiling amount is $499,800,000 (maximum quantity) with a 60-month period of performance. The guaranteed minimum is $10,000.",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "6d9580a1947a492cadf81d3c89e06bbe",
-       "page_number": 1,
-       "text_source": "native"
-      }
-     ],
-     "where": "JA for Other Than Full and Open Competition_Redacted.pdf, p. 1",
-     "model_page": "JA for Other Than Full and Open Competition_Redacted.pdf, page 1"
-    }
-   ],
-   "vendor": "Johns Hopkins University, Applied Physics Laboratory (JHU/APL)",
-   "value": "$499,800,000",
-   "authority": "10 U.S.C. § 3204(a)(3)",
-   "model_rank": 3
-  },
-  {
-   "notice_id": "3280f97fd5a045459cf5e0e31ea1415d",
-   "rank": 4,
-   "headline": "HHS plans sole-source continuity buy of Anthropic's Claude for its workforce",
-   "why": "HHS intends a stopgap sole-source award for enterprise access to Claude, pending a competitive multiple-award BPA for frontier AI models.",
-   "quotes": [
-    {
-     "text": "This action provides continued enterprise access to Anthropic's Claude frontier models and advanced features (Claude for Enterprise / Claude for Government) for authorized HHS workforce",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "sam_description",
-       "page_number": null,
-       "text_source": "native"
-      }
-     ],
-     "where": "SAM.gov notice description",
-     "model_page": ""
-    }
-   ],
-   "vendor": "Anthropic",
-   "value": null,
-   "authority": null,
-   "model_rank": 4
-  },
-  {
    "notice_id": "077d851fe0a7404abb51862ff565859f",
-   "rank": 5,
-   "headline": "GAO protest forces Marine Corps sole-source for Mi-24 Hind adversary aircraft",
-   "why": "After a protest and corrective action, the Marine Corps awarded a sole-source purchase order for adversary rotary-wing and drone threat replication. The J&A says the stay left a gap that advance planning could not have prevented.",
+   "rank": 3,
+   "headline": "Marine Corps sole-sources Mi-24 HIND adversary air after protest stalls award",
+   "why": "A GAO protest stayed a competitive award, and the Government took voluntary corrective action. It then sole-sourced a roughly four-week urgent buy of adversary helicopter and drone threat replication for the WTI 1-27 course.",
    "quotes": [
     {
-     "text": "The stay occurred 49 days prior to the live-flight phase, creating an unexpected, immediate gap in cont racted threat repli cation that could not have been prevented through advance planning.",
+     "text": "The stay occurred 49 days prior to the live-flight phase, creating an unexpected, immediate gap in cont racted threat repli cation",
      "match": "exact",
      "pages": [
       {
@@ -852,7 +765,7 @@
       }
      ],
      "where": "MCIWEST WTI-1-27 JA signed (1).pdf, p. 2",
-     "model_page": "MCIWEST WTI-1-27 JA signed (1).pdf, page 3"
+     "model_page": "MCIWEST WTI-1-27 JA signed (1).pdf, page 2"
     },
     {
      "text": "The estimated dollar value of the contract is $527,834.44, funded using FY26 Operations and Maintenance, Marine Corps (O&M, MC) appropriations. 4.",
@@ -872,19 +785,17 @@
    "vendor": "VTS Aviation LLC",
    "value": "$527,834.44",
    "authority": "10 U.S.C. 3204(a)(2)",
-   "model_rank": 5
+   "model_rank": 3
   }
  ],
  "dropped_by_checks": [
   {
    "notice_id": "3280f97fd5a045459cf5e0e31ea1415d",
-   "what": "authority",
-   "value": "FAR 13.106-1(b)(1)",
-   "reason": "not in the text"
+   "what": "pick",
+   "reason": "no quote verified"
   }
  ],
- "subject": "Whoa J&As — Oct 20: ICE letter-contracts Amentum for Camp East Montana after terminating prior contract, $1.2B",
- "body": "## 1. ICE letter-contracts Amentum for Camp East Montana after terminating prior contract, $1.2B\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Amentum Services Inc. · $1,229,179,038.02 · RFO 6.103-1**  \n*Posted 2026-10-19, award 70CDCR26C00000016, “Camp East Montana”*\n\nICE proposes a sole-source letter contract with Amentum Services Inc. for detention services at Camp East Montana, funded by the One Big Beautiful Bill Act. The justification cites performance deficiencies under the Army-issued contract, which ICE terminated.\n\n> “Because this is a letter contract, the estimated total value is based upon the independent government cost estimate (IGCE) until the contract is fully negotiated at definitization.”  \n> — Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 1 (machine-transcribed page)\n\n> “ICE was not the source selection authority for the original task order, resulting in a contract and Performance Work Statement (PWS) that did not accurately reflect ICE's operational needs”  \n> — Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 3 (machine-transcribed page)\n\n> “Total | | | $1,229,179,038.02 Note: Because this is a letter contract, the estimated total value is based upon the independent government cost estimate (IGCE) until the contract is fully”  \n> — Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf, p. 1 (machine-transcribed page) (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/53d80bf144804de8a5e5138dd62cf873/view) · [Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/53d80bf144804de8a5e5138dd62cf873/d83bcd08bad544b3aa3b1c22a208bcc9_Other_Than_Full_and_Open_Competition_Redacted_for_Public_Release.pdf) · [Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/53d80bf144804de8a5e5138dd62cf873/d542b26604ce40a598782fbee8c9a018_Other_Than_Full_and_Open_Competition_Redacted_for_Public_Release_10.19.26.pdf)\n\n## 2. VA extends Community Care Network Region 3 sole-source amid protests and 1,600 questions\n\n**VETERANS AFFAIRS, DEPARTMENT OF · RFO 6.103-2**  \n*Posted 2026-10-19, award 36C79119D0006, “Q201--CCN R3 Contract Extension”*\n\nVA seeks up to one year of unusual-and-compelling-urgency performance for CCN Region 3 because the next-generation procurement is delayed. The document cites two protests, more than 1,600 industry questions and possible litigation.\n\n> “The scope and complexity of the procurement, combined with two protests, more than 1,600 industry questions, and potential future litigation risks, continue to push key milestones to the right.”  \n> — Attachment 1 - Justification  Approval Redacted R3.pdf, p. 3\n\n[SAM.gov notice](https://sam.gov/opp/c4bad86f34314b579a52144c1c0d2fa0/view) · [Attachment 1 - Justification  Approval Redacted R3.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/c4bad86f34314b579a52144c1c0d2fa0/fa1e4af44f4444d587726fbde019bcf6_Attachment_1_-_Justification_Approval_Redacted_R3.pdf) · [36C79119D0006 P00152_2.docx](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/c4bad86f34314b579a52144c1c0d2fa0/2930175d7b6449359032dd679845b053_36C79119D0006_P00152_2.docx)\n\n## 3. DARPA plans $499.8M five-year sole-source IDIQ with Johns Hopkins APL\n\n**DEFENSE ADVANCED RESEARCH PROJECTS AGENCY  (DARPA) (DEPT OF DEFENSE) · Johns Hopkins University, Applied Physics Laboratory (JHU/APL) · $499,800,000 · 10 U.S.C. § 3204(a)(3)**  \n*Posted 2026-10-19, award HR001127DE001, “JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION”*\n\nDARPA seeks a single-contractor IDIQ with JHU/APL, a UARC, with a stated ceiling and 60-month term.\n\n> “The estimated IDIQ ceiling amount is $499,800,000 (maximum quantity) with a 60-month period of performance. The guaranteed minimum is $10,000.”  \n> — JA for Other Than Full and Open Competition_Redacted.pdf, p. 1\n\n[SAM.gov notice](https://sam.gov/opp/bbb330117065468cba78b17e6f255e14/view) · [JA for Other Than Full and Open Competition_Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/bbb330117065468cba78b17e6f255e14/6d9580a1947a492cadf81d3c89e06bbe_JA_for_Other_Than_Full_and_Open_Competition_Redacted.pdf)\n\n## 4. HHS plans sole-source continuity buy of Anthropic's Claude for its workforce\n\n**OFFICE OF THE ASSISTANT SECRETARY FOR FINANCIAL RESOURCES (ASFR) (HEALTH AND HUMAN SERVICES, DEPARTMENT OF) · Anthropic**  \n*Posted 2026-10-19, “Intent to Sole Source to Anthropic”*\n\nHHS intends a stopgap sole-source award for enterprise access to Claude, pending a competitive multiple-award BPA for frontier AI models.\n\n> “This action provides continued enterprise access to Anthropic's Claude frontier models and advanced features (Claude for Enterprise / Claude for Government) for authorized HHS workforce”  \n> — SAM.gov notice description\n\n[SAM.gov notice](https://sam.gov/opp/3280f97fd5a045459cf5e0e31ea1415d/view)\n\n## 5. GAO protest forces Marine Corps sole-source for Mi-24 Hind adversary aircraft\n\n**DEPT OF THE NAVY (DEPT OF DEFENSE) · VTS Aviation LLC · $527,834.44 · 10 U.S.C. 3204(a)(2)**  \n*Posted 2026-10-19, award M0068126P0076, “WTI 1-27 Sole Source J&A”*\n\nAfter a protest and corrective action, the Marine Corps awarded a sole-source purchase order for adversary rotary-wing and drone threat replication. The J&A says the stay left a gap that advance planning could not have prevented.\n\n> “The stay occurred 49 days prior to the live-flight phase, creating an unexpected, immediate gap in cont racted threat repli cation that could not have been prevented through advance planning.”  \n> — MCIWEST WTI-1-27 JA signed (1).pdf, p. 2\n\n> “The estimated dollar value of the contract is $527,834.44, funded using FY26 Operations and Maintenance, Marine Corps (O&M, MC) appropriations. 4.”  \n> — MCIWEST WTI-1-27 JA signed (1).pdf, p. 1 (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/077d851fe0a7404abb51862ff565859f/view) · [MCIWEST WTI-1-27 JA signed (1).pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/077d851fe0a7404abb51862ff565859f/9909d154bbac44c88e43017196bb3d08_MCIWEST_WTI-1-27_JA_signed_1_.pdf)\n\n## All new notices (90)\n\n- ★ US Immigration and Customs Enforcement · Camp East Montana · [SAM.gov](https://sam.gov/opp/53d80bf144804de8a5e5138dd62cf873/view)\n- ★ Veterans Affairs · Q201--CCN R3 Contract Extension · [SAM.gov](https://sam.gov/opp/c4bad86f34314b579a52144c1c0d2fa0/view)\n- ★ Defense Advanced Research Projects Agency (DARPA) · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION · [SAM.gov](https://sam.gov/opp/bbb330117065468cba78b17e6f255e14/view)\n- ★ Office of the Assistant Secretary for Financial Resources (ASFR) · Intent to Sole Source to Anthropic · [SAM.gov](https://sam.gov/opp/3280f97fd5a045459cf5e0e31ea1415d/view)\n- ★ Navy · WTI 1-27 Sole Source J&A · [SAM.gov](https://sam.gov/opp/077d851fe0a7404abb51862ff565859f/view)\n- AIR Force · HSQ Energy Management Control System Justification and Approval Document · [SAM.gov](https://sam.gov/opp/a947171b7df94dc8b1b02e77d6976712/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/10ae68a772f44599a7a75b1f9b3d4355/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/bce345f2e88040a6bf3ec30bf2d3a99c/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/4370726bbb6e48c3a72e15eb37bbfc72/view)\n- AIR Force · Intent to Award Sole Source: Acoustical Society · [SAM.gov](https://sam.gov/opp/64a6dad4e05c4a59ac68d2769c4fc4f5/view)\n- AIR Force · Notice of Intent to Award a Sole Source Contract to CIS for 8841 and 8851 Voice Over… · [SAM.gov](https://sam.gov/opp/4152a2b4aae142869e86d6a07b709ab9/view)\n- AIR Force · Notice of Intent to Award Sole Source: Netwrix Data Classification License · [SAM.gov](https://sam.gov/opp/23f40a64908b490ea5fbf3ef65c48c10/view)\n- AIR Force · Notice of Intent to Single Source MH-139A Battery Maintenance Service · [SAM.gov](https://sam.gov/opp/3679718c04604a7dbf1becf4390ce1bf/view)\n- Army · Capacity Increase of Indefinite Delivery Architect-Engineering (AE) Services Multiple… · [SAM.gov](https://sam.gov/opp/40c7fe234982477e95877a01a6c695a5/view)\n- Army · Notice of Intent to Award a Sole Source 8(a) Procurement to Next Generation Logistics,… · [SAM.gov](https://sam.gov/opp/1bcf1521ec7e42b8805edfe88b7eebbe/view)\n- Army · Notice of Intent to Award Single Source - Flow 3D Software Maintenance · [SAM.gov](https://sam.gov/opp/ca7a71e7027143b6862f413fae8d1d46/view)\n- Army · Notice of Intent to Sole Source-AAMC Ancillary Services · [SAM.gov](https://sam.gov/opp/b332db10ced644a8920bc1e5c7ced8bc/view)\n- Army · Redacted Justification and Approval (J & A) · [SAM.gov](https://sam.gov/opp/847dc3ae9f454c2f9c542efae9f5bc97/view)\n- Army · Sole Source Justification and Approval - Airborne Special Operations Testing Directorate… · [SAM.gov](https://sam.gov/opp/c814836c507b49c6901c243b2427c517/view)\n- Army · Special Notice to Sole Source Master BPA Explosion Effects and Blast Loading Device and… · [SAM.gov](https://sam.gov/opp/73cf4d8b9fa644b5babe5741ddcf0ae6/view)\n- Bureau of Indian Affairs · J--Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/dcedf6f84d754e809737b29d24b25ee2/view)\n- Bureau of the Fiscal Service · Facility Maintenance and Improvements · [SAM.gov](https://sam.gov/opp/8e48609ed8a44639ba4269a9475ba57c/view)\n- Defense Health Agency (DHA) · Instrument Management and Maintenance Services for U.S. Navy Medicine Readiness and… · [SAM.gov](https://sam.gov/opp/82fb5525f0384728aa6c3408d483728d/view)\n- Defense Health Agency (DHA) · Notice of Intent to Sole Source - Arthrex Lease NHCP · [SAM.gov](https://sam.gov/opp/789b7e13344a46d081f1e59b2ed81ea8/view)\n- Defense Information Systems Agency (DISA) · Building Operation Support (BOS) Services Bridge Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/9367a638d74540bf89fdff2810728841/view)\n- Defense Logistics Agency · \"NSN 1615-01-502-6255, AXLE ASSEMBLY, WSDC: YLN, HELICOPTER, SEAHAWK, H-60. · [SAM.gov](https://sam.gov/opp/52166809e4b843b2a075e39fee169206/view)\n- Defense Logistics Agency · 26--VALVE,PNEUMATIC TIRE · [SAM.gov](https://sam.gov/opp/0c3e9dce43d24a65b1f1e264cc996966/view)\n- Defense Logistics Agency · DAI Application Support Services · [SAM.gov](https://sam.gov/opp/592d7a09c17d4f8b9f621db969205ea2/view)\n- Defense Logistics Agency · J&A SPE4A726R0668 · [SAM.gov](https://sam.gov/opp/4b6699fc08f04ddca9a095a6ed5b6676/view)\n- Defense Logistics Agency · J&A SPE4A726R0708 · [SAM.gov](https://sam.gov/opp/744e6ad90f284d1dac05ab703418670e/view)\n- Defense Logistics Agency · Valve Regulating FL · [SAM.gov](https://sam.gov/opp/19f644b80f0b40bab570d1eb362960ea/view)\n- Departmental Offices · INTENT TO SOLE SOURCE - FLASHPOINT INTELLIGENCE CAPABILITIES AND SERVICES · [SAM.gov](https://sam.gov/opp/045e7a7863ff4ef2845155e13504c4c6/view)\n- Environmental Protection Agency · 66--Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/8af7241dbb4242739699576e18ea20fa/view)\n- Environmental Protection Agency · F--Notice of Intent to Sole Source Modification for Contract 68HE0925C0002 · [SAM.gov](https://sam.gov/opp/577bf1c180f243a9823e8229f19b6873/view)\n- Federal Aviation Administration · NOTICE OF INTENT TO SINGLE SOURCE - Frontgrade Technologies Inc. · [SAM.gov](https://sam.gov/opp/c846f935bb7c4445a2f1f2f21e0a94e8/view)\n- Federal Aviation Administration · Notice of Single Source - Information Security & Privacy Service (AIS) Security and… · [SAM.gov](https://sam.gov/opp/36733e8748a74a9c9e9e97975acb8798/view)\n- Federal Retirement Thrift Investment Board · Redacted Limited Sources Justification for PRISM Hosting, Operations, and Maintenance… · [SAM.gov](https://sam.gov/opp/7c0f60892caa408bad296b64f31c2017/view)\n- Indian Health Service · IHS Produce Prescription Pilot Program · [SAM.gov](https://sam.gov/opp/5db2b72fd89e4fd88256739e6263cc9b/view)\n- Library of Congress · PRTD Aging Oven - Sole Source Justification · [SAM.gov](https://sam.gov/opp/3c5387541209434eae7d46d1639cc396/view)\n- National Institutes of Health · Intent to Sole Source - BD FACSCanto II instrument · [SAM.gov](https://sam.gov/opp/45db7ac0879c4fa9b762aa18a4f5b8da/view)\n- National Institutes of Health · Intent to Sole Source - Fertility Preservation Lab Services · [SAM.gov](https://sam.gov/opp/f5f514d35a1b473e9ed75a88d6164fd3/view)\n- National Institutes of Health · Intent to Sole Source - IntelliBlate Ximitry Probe · [SAM.gov](https://sam.gov/opp/9fa7e3a2d15b4c079c53495574498276/view)\n- National Institutes of Health · Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion… · [SAM.gov](https://sam.gov/opp/bf6b20798a274eb2936262d401e097a7/view)\n- National Institutes of Health · Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion… · [SAM.gov](https://sam.gov/opp/b95b5fc579dd4e7fa6b27d283a9049ff/view)\n- National Institutes of Health · Notice of Intent to Sole Source  AB Sciex LLC · [SAM.gov](https://sam.gov/opp/33a2049a556e4b60ad1b5eee775ac194/view)\n- National Institutes of Health · Notice of Intent to Sole Source  Boston Scientific · [SAM.gov](https://sam.gov/opp/0e46948019284c9cbbfb9e06f9cd2649/view)\n- National Oceanic and Atmospheric Administration · Notice of Intent to Sole Source: NOAA- Satellite Ocean Color System Vicarious Calibration… · [SAM.gov](https://sam.gov/opp/ab68572d22544619b8345db7219b9bfd/view)\n- National Telecommunications and Information Administration · Notice of Intent to Sole Source ATIS and 3GPP Annual Membership · [SAM.gov](https://sam.gov/opp/d986c8ec89ee40a9b23833487423f4bf/view)\n- Navy · 41--HLDG FR SUB ASSY · [SAM.gov](https://sam.gov/opp/aec427652535471eab86973f4fd21d42/view)\n- Navy · Intent to Sole Source: Repair of MTS 688 Class ESF Diesel Generator (EDG) Sets · [SAM.gov](https://sam.gov/opp/c2045803bbec4307b57d6a82502df4f0/view)\n- Navy · J&A for IDIQ Increase on Base Operations Support (BOS) services at Pensacola Naval… · [SAM.gov](https://sam.gov/opp/5927b3b796aa4aca8e2a935826ef965d/view)\n- Navy · N0010425R0007 Solicitation · [SAM.gov](https://sam.gov/opp/e94281e007c44fd88347516312007e84/view)\n- Navy · Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton · [SAM.gov](https://sam.gov/opp/e98890d27bb14b97b70033f3994d8880/view)\n- Navy · Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton · [SAM.gov](https://sam.gov/opp/b1efe05ada424eec86616e724d981e9a/view)\n- Navy · NOTICE OF INTENT TO AWARD A SOLE SOURCE IMMIX TECHNOLOGY, INC. · [SAM.gov](https://sam.gov/opp/7b6650cb07e447ca91ede909449c2291/view)\n- Navy · Notice of Intent to Award Sole Source to CFRS, Inc. · [SAM.gov](https://sam.gov/opp/fed9202f152a4443ab79d4b29a6494fb/view)\n- Navy · Notice of Intent to Sole Source - VRC Maintenance and Calibration Services w/three option… · [SAM.gov](https://sam.gov/opp/1c94de9749f94e23b4f649fba7f203eb/view)\n- Navy · Notice of Intent to Sole Source Hall Rental to Virginia Community College System Office… · [SAM.gov](https://sam.gov/opp/ea9ce96f989b4c0ebc1753b715d6e81e/view)\n- Navy · USS WICHITA (LCS 13) SERM-803-27 NEW WORK · [SAM.gov](https://sam.gov/opp/1f0535378cff4fd9a76f1a2454ce5866/view)\n- Public Buildings Service · General Services Administration (GSA) Lease: Office Space Oxford, Mississippi · [SAM.gov](https://sam.gov/opp/0efc1ffd6a794892ac14d339a4ebcafb/view)\n- Public Buildings Service · US GOVERNMENT AWARDS SOLE SOURCE LEASE IN RENO, NV · [SAM.gov](https://sam.gov/opp/83fbf0a4b84d4210836ceafa0e92b23d/view)\n- State · Justification for Interim Contract Area Studies Course Instructors · [SAM.gov](https://sam.gov/opp/a63893dde8d245d5a3033ff4e89a8d0a/view)\n- State · Justification for Interim Contract Area Studies Course Instructors · [SAM.gov](https://sam.gov/opp/bbd5b3c48856426590b5ff7e8e665afe/view)\n- State · Post Award Single Source Justification - PMSC Elevators · [SAM.gov](https://sam.gov/opp/1fa9b939f08a4dabbbe83d7caeedc38c/view)\n- Transportation Security Administration · Operations and Maintenance (O&M) services for the TSA Systems Integration Facility (TSIF)… · [SAM.gov](https://sam.gov/opp/6079e0383973481dbbe9d293808f1438/view)\n- US Coast Guard · AT&T OneWeb Kits and Satellite Communication (SATCOM) Sole Source Justification… · [SAM.gov](https://sam.gov/opp/b01657fa20a34ec99f57f9237b0d48d9/view)\n- US Immigration and Customs Enforcement · Camp East Montana · [SAM.gov](https://sam.gov/opp/8febc2f3caa144d8b08672d26fbd2a1b/view)\n- US Immigration and Customs Enforcement · Notice of Intent to Sole Source - Telecommunications Analysis Software Support · [SAM.gov](https://sam.gov/opp/48dc3833e6924541a157465024a2fa5a/view)\n- US Immigration and Customs Enforcement · Notice of Intent to Solicit from a Single Source - Forensic Equipment / Software · [SAM.gov](https://sam.gov/opp/58927173fe23490d9801121d0e823a83/view)\n- Veterans Affairs · 6515--Inari FlowTriever Retrieval Aspiration System (5) Intent to Sole Source Base Four… · [SAM.gov](https://sam.gov/opp/7f8ce5fdb3874b838545be745dd6311f/view)\n- Veterans Affairs · 6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services · [SAM.gov](https://sam.gov/opp/d06e756871b5403a93f6ac2fa46f604f/view)\n- Veterans Affairs · 6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services · [SAM.gov](https://sam.gov/opp/15a55c60f69d4d19baa86854e8791435/view)\n- Veterans Affairs · H261--Intent to Sole Source | Five Year IDIQ | Generator Testing and Maintenance | Marion… · [SAM.gov](https://sam.gov/opp/3bd3552a58d8417ab202d4f4a8c76769/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/c9ca802fe6d44869933db7464a08ec95/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/d6153561f9c54f95ad7d782ecd04bb48/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/dc27aeb0593f4feea8b930d0469d728c/view)\n- Veterans Affairs · J046--NOTICE OF INTENT TO SOLE SOURCE Baltimore VAMC WRO300H Reverse Osmosis Dialysis… · [SAM.gov](https://sam.gov/opp/ae098d4d6e874ba48c2a978a130dfec4/view)\n- Veterans Affairs · J065--36C25927Q0027| Intent to Sole Source on FujiFilm Synapse Cardiology PACS Service… · [SAM.gov](https://sam.gov/opp/1abb6e435c4e42449360a7c021ec8bfd/view)\n- Veterans Affairs · J065--Cadwell EMG Support Agreement Intent to Sole Source For Louis Stokes Cleveland VA… · [SAM.gov](https://sam.gov/opp/b896006238ef4d94b5cb2ae912d06621/view)\n- Veterans Affairs · J065--M-GAIT System - Service Repair - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/889667914a75446c9aa21e94ded61d19/view)\n- Veterans Affairs · J065--M-GAIT System - Service Repair - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/2daea7dd16384281bbf552c03fd31856/view)\n- Veterans Affairs · J065--Notice of Intent to Sole Source Laerdal Medical Corp 3G Critical Care Manikin… · [SAM.gov](https://sam.gov/opp/5c6978ad81544a5796aa907f18fcc4fb/view)\n- Veterans Affairs · J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance · [SAM.gov](https://sam.gov/opp/7c6f792cf82448c8afbb5e6d979c6514/view)\n- Veterans Affairs · J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance · [SAM.gov](https://sam.gov/opp/16a994df8abc43f6a0cb038a8b37008f/view)\n- Veterans Affairs · Q201--CCN R1 Contract Extension · [SAM.gov](https://sam.gov/opp/085682f126fe48469dc67e2031a3f08a/view)\n- Veterans Affairs · Q201--CCN R2 Contract Extension · [SAM.gov](https://sam.gov/opp/aec0b46dc3cb4ad3ad60cbf629f91d9c/view)\n- Veterans Affairs · Q201--CCN R2 Contract Extension · [SAM.gov](https://sam.gov/opp/4c7b9989ded94a8d91879c37640e95c2/view)\n- Veterans Affairs · U008--Notice of Intent to Sole Source Implementation Science Training · [SAM.gov](https://sam.gov/opp/309886539113455bb68f1908bf6a61da/view)\n- Veterans Affairs · V302--Veterans Health Administration (VHA) Commercial Air Patient Transport · [SAM.gov](https://sam.gov/opp/311baecfc7994ab383c4d2f960ed6361/view)\n- Veterans Affairs · W065--Notice of Intent (NOI)-Sole Source-Olympus America, Inc Gastrointestinal Endoscope… · [SAM.gov](https://sam.gov/opp/1682c2bb9e1543e3bb3712a69f30b9ea/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 90 new notices reviewed (first collected Oct 19 20:00 ET to Oct 20 07:42 ET); 254 notices first collected then but posted more than 14 days earlier were left out.\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
- "spent_usd": 0.1293,
- "rerendered": "picks re-checked from the stored model answer with the final verify.py, and re-rendered"
+ "subject": "Whoa J&As — Oct 20: ICE definitizes Camp East Montana letter contract with Amentum at about $2.8 billion",
+ "body": "## 1. ICE definitizes Camp East Montana letter contract with Amentum at about $2.8 billion\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · Amentum Services Inc. · $2,796,540,325.26 · RFO 6.103-1**  \n*Posted 2026-10-19, award 70CDCR26C00000016, “Camp East Montana”*\n\nThe revised J&A definitizes a sole-source letter contract with Amentum and says the estimated total value has increased because of a longer period of performance. It states Amentum is the only responsible source because of its ownership and operational control of the facility infrastructure.\n\n> “The definitized action reflects an increased period of performance and increased estimated cost from the original letter contract planning assumptions.”  \n> — Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, p. 1\n\n> “Total | | | $2,796,540,325.26 Note: The total estimated value is based on the Government's current pricing assumptions and the independent government cost estimate supporting definitization.”  \n> — Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf, p. 2 (machine-transcribed page) (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/53d80bf144804de8a5e5138dd62cf873/view) · [Other Than Full and Open Competition Redacted for Public Release_10.19.26.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/53d80bf144804de8a5e5138dd62cf873/d542b26604ce40a598782fbee8c9a018_Other_Than_Full_and_Open_Competition_Redacted_for_Public_Release_10.19.26.pdf) · [Other_Than_Full_and_Open_Competition_Redacted for Public Release.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/53d80bf144804de8a5e5138dd62cf873/d83bcd08bad544b3aa3b1c22a208bcc9_Other_Than_Full_and_Open_Competition_Redacted_for_Public_Release.pdf)\n\n## 2. VA extends CCN Region 3 community care contract a year amid protests\n\n**VETERANS AFFAIRS, DEPARTMENT OF · RFO 6.103-2**  \n*Posted 2026-10-19, award 36C79119D0006, “Q201--CCN R3 Contract Extension”*\n\nVA is using unusual and compelling urgency to extend CCN Region 3 for up to one year, through September 30, 2027. It cites two protests, more than 1,600 industry questions and potential litigation risk as pushing back the follow-on award.\n\n> “The scope and complexity of the procurement, combined with two protests, more than 1,600 industry questions, and potential future litigation risks, continue to push key milestones to the right.”  \n> — Attachment 1 - Justification  Approval Redacted R3.pdf, p. 3\n\n[SAM.gov notice](https://sam.gov/opp/c4bad86f34314b579a52144c1c0d2fa0/view) · [Attachment 1 - Justification  Approval Redacted R3.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/c4bad86f34314b579a52144c1c0d2fa0/fa1e4af44f4444d587726fbde019bcf6_Attachment_1_-_Justification_Approval_Redacted_R3.pdf) · [36C79119D0006 P00152_2.docx](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/c4bad86f34314b579a52144c1c0d2fa0/2930175d7b6449359032dd679845b053_36C79119D0006_P00152_2.docx)\n\n## 3. Marine Corps sole-sources Mi-24 HIND adversary air after protest stalls award\n\n**DEPT OF THE NAVY (DEPT OF DEFENSE) · VTS Aviation LLC · $527,834.44 · 10 U.S.C. 3204(a)(2)**  \n*Posted 2026-10-19, award M0068126P0076, “WTI 1-27 Sole Source J&A”*\n\nA GAO protest stayed a competitive award, and the Government took voluntary corrective action. It then sole-sourced a roughly four-week urgent buy of adversary helicopter and drone threat replication for the WTI 1-27 course.\n\n> “The stay occurred 49 days prior to the live-flight phase, creating an unexpected, immediate gap in cont racted threat repli cation”  \n> — MCIWEST WTI-1-27 JA signed (1).pdf, p. 2\n\n> “The estimated dollar value of the contract is $527,834.44, funded using FY26 Operations and Maintenance, Marine Corps (O&M, MC) appropriations. 4.”  \n> — MCIWEST WTI-1-27 JA signed (1).pdf, p. 1 (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/077d851fe0a7404abb51862ff565859f/view) · [MCIWEST WTI-1-27 JA signed (1).pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/077d851fe0a7404abb51862ff565859f/9909d154bbac44c88e43017196bb3d08_MCIWEST_WTI-1-27_JA_signed_1_.pdf)\n\n## All new notices (90)\n\n- ★ US Immigration and Customs Enforcement · Camp East Montana · [SAM.gov](https://sam.gov/opp/53d80bf144804de8a5e5138dd62cf873/view)\n- ★ Veterans Affairs · Q201--CCN R3 Contract Extension · [SAM.gov](https://sam.gov/opp/c4bad86f34314b579a52144c1c0d2fa0/view)\n- ★ Navy · WTI 1-27 Sole Source J&A · [SAM.gov](https://sam.gov/opp/077d851fe0a7404abb51862ff565859f/view)\n- AIR Force · HSQ Energy Management Control System Justification and Approval Document · [SAM.gov](https://sam.gov/opp/a947171b7df94dc8b1b02e77d6976712/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/10ae68a772f44599a7a75b1f9b3d4355/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/bce345f2e88040a6bf3ec30bf2d3a99c/view)\n- AIR Force · Intent to Award Sole Source - Air Boss to WM. David Schultz · [SAM.gov](https://sam.gov/opp/4370726bbb6e48c3a72e15eb37bbfc72/view)\n- AIR Force · Intent to Award Sole Source: Acoustical Society · [SAM.gov](https://sam.gov/opp/64a6dad4e05c4a59ac68d2769c4fc4f5/view)\n- AIR Force · Notice of Intent to Award a Sole Source Contract to CIS for 8841 and 8851 Voice Over… · [SAM.gov](https://sam.gov/opp/4152a2b4aae142869e86d6a07b709ab9/view)\n- AIR Force · Notice of Intent to Award Sole Source: Netwrix Data Classification License · [SAM.gov](https://sam.gov/opp/23f40a64908b490ea5fbf3ef65c48c10/view)\n- AIR Force · Notice of Intent to Single Source MH-139A Battery Maintenance Service · [SAM.gov](https://sam.gov/opp/3679718c04604a7dbf1becf4390ce1bf/view)\n- Army · Capacity Increase of Indefinite Delivery Architect-Engineering (AE) Services Multiple… · [SAM.gov](https://sam.gov/opp/40c7fe234982477e95877a01a6c695a5/view)\n- Army · Notice of Intent to Award a Sole Source 8(a) Procurement to Next Generation Logistics,… · [SAM.gov](https://sam.gov/opp/1bcf1521ec7e42b8805edfe88b7eebbe/view)\n- Army · Notice of Intent to Award Single Source - Flow 3D Software Maintenance · [SAM.gov](https://sam.gov/opp/ca7a71e7027143b6862f413fae8d1d46/view)\n- Army · Notice of Intent to Sole Source-AAMC Ancillary Services · [SAM.gov](https://sam.gov/opp/b332db10ced644a8920bc1e5c7ced8bc/view)\n- Army · Redacted Justification and Approval (J & A) · [SAM.gov](https://sam.gov/opp/847dc3ae9f454c2f9c542efae9f5bc97/view)\n- Army · Sole Source Justification and Approval - Airborne Special Operations Testing Directorate… · [SAM.gov](https://sam.gov/opp/c814836c507b49c6901c243b2427c517/view)\n- Army · Special Notice to Sole Source Master BPA Explosion Effects and Blast Loading Device and… · [SAM.gov](https://sam.gov/opp/73cf4d8b9fa644b5babe5741ddcf0ae6/view)\n- Bureau of Indian Affairs · J--Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/dcedf6f84d754e809737b29d24b25ee2/view)\n- Bureau of the Fiscal Service · Facility Maintenance and Improvements · [SAM.gov](https://sam.gov/opp/8e48609ed8a44639ba4269a9475ba57c/view)\n- Defense Advanced Research Projects Agency (DARPA) · JUSTIFICATION FOR OTHER THAN FULL AND OPEN COMPETITION · [SAM.gov](https://sam.gov/opp/bbb330117065468cba78b17e6f255e14/view)\n- Defense Health Agency (DHA) · Instrument Management and Maintenance Services for U.S. Navy Medicine Readiness and… · [SAM.gov](https://sam.gov/opp/82fb5525f0384728aa6c3408d483728d/view)\n- Defense Health Agency (DHA) · Notice of Intent to Sole Source - Arthrex Lease NHCP · [SAM.gov](https://sam.gov/opp/789b7e13344a46d081f1e59b2ed81ea8/view)\n- Defense Information Systems Agency (DISA) · Building Operation Support (BOS) Services Bridge Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/9367a638d74540bf89fdff2810728841/view)\n- Defense Logistics Agency · \"NSN 1615-01-502-6255, AXLE ASSEMBLY, WSDC: YLN, HELICOPTER, SEAHAWK, H-60. · [SAM.gov](https://sam.gov/opp/52166809e4b843b2a075e39fee169206/view)\n- Defense Logistics Agency · 26--VALVE,PNEUMATIC TIRE · [SAM.gov](https://sam.gov/opp/0c3e9dce43d24a65b1f1e264cc996966/view)\n- Defense Logistics Agency · DAI Application Support Services · [SAM.gov](https://sam.gov/opp/592d7a09c17d4f8b9f621db969205ea2/view)\n- Defense Logistics Agency · J&A SPE4A726R0668 · [SAM.gov](https://sam.gov/opp/4b6699fc08f04ddca9a095a6ed5b6676/view)\n- Defense Logistics Agency · J&A SPE4A726R0708 · [SAM.gov](https://sam.gov/opp/744e6ad90f284d1dac05ab703418670e/view)\n- Defense Logistics Agency · Valve Regulating FL · [SAM.gov](https://sam.gov/opp/19f644b80f0b40bab570d1eb362960ea/view)\n- Departmental Offices · INTENT TO SOLE SOURCE - FLASHPOINT INTELLIGENCE CAPABILITIES AND SERVICES · [SAM.gov](https://sam.gov/opp/045e7a7863ff4ef2845155e13504c4c6/view)\n- Environmental Protection Agency · 66--Notice of Intent to Sole Source · [SAM.gov](https://sam.gov/opp/8af7241dbb4242739699576e18ea20fa/view)\n- Environmental Protection Agency · F--Notice of Intent to Sole Source Modification for Contract 68HE0925C0002 · [SAM.gov](https://sam.gov/opp/577bf1c180f243a9823e8229f19b6873/view)\n- Federal Aviation Administration · NOTICE OF INTENT TO SINGLE SOURCE - Frontgrade Technologies Inc. · [SAM.gov](https://sam.gov/opp/c846f935bb7c4445a2f1f2f21e0a94e8/view)\n- Federal Aviation Administration · Notice of Single Source - Information Security & Privacy Service (AIS) Security and… · [SAM.gov](https://sam.gov/opp/36733e8748a74a9c9e9e97975acb8798/view)\n- Federal Retirement Thrift Investment Board · Redacted Limited Sources Justification for PRISM Hosting, Operations, and Maintenance… · [SAM.gov](https://sam.gov/opp/7c0f60892caa408bad296b64f31c2017/view)\n- Indian Health Service · IHS Produce Prescription Pilot Program · [SAM.gov](https://sam.gov/opp/5db2b72fd89e4fd88256739e6263cc9b/view)\n- Library of Congress · PRTD Aging Oven - Sole Source Justification · [SAM.gov](https://sam.gov/opp/3c5387541209434eae7d46d1639cc396/view)\n- National Institutes of Health · Intent to Sole Source - BD FACSCanto II instrument · [SAM.gov](https://sam.gov/opp/45db7ac0879c4fa9b762aa18a4f5b8da/view)\n- National Institutes of Health · Intent to Sole Source - Fertility Preservation Lab Services · [SAM.gov](https://sam.gov/opp/f5f514d35a1b473e9ed75a88d6164fd3/view)\n- National Institutes of Health · Intent to Sole Source - IntelliBlate Ximitry Probe · [SAM.gov](https://sam.gov/opp/9fa7e3a2d15b4c079c53495574498276/view)\n- National Institutes of Health · Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion… · [SAM.gov](https://sam.gov/opp/bf6b20798a274eb2936262d401e097a7/view)\n- National Institutes of Health · Intent to Sole Source - Medical/Scientific Instruments for the Department of Transfusion… · [SAM.gov](https://sam.gov/opp/b95b5fc579dd4e7fa6b27d283a9049ff/view)\n- National Institutes of Health · Notice of Intent to Sole Source  AB Sciex LLC · [SAM.gov](https://sam.gov/opp/33a2049a556e4b60ad1b5eee775ac194/view)\n- National Institutes of Health · Notice of Intent to Sole Source  Boston Scientific · [SAM.gov](https://sam.gov/opp/0e46948019284c9cbbfb9e06f9cd2649/view)\n- National Oceanic and Atmospheric Administration · Notice of Intent to Sole Source: NOAA- Satellite Ocean Color System Vicarious Calibration… · [SAM.gov](https://sam.gov/opp/ab68572d22544619b8345db7219b9bfd/view)\n- National Telecommunications and Information Administration · Notice of Intent to Sole Source ATIS and 3GPP Annual Membership · [SAM.gov](https://sam.gov/opp/d986c8ec89ee40a9b23833487423f4bf/view)\n- Navy · 41--HLDG FR SUB ASSY · [SAM.gov](https://sam.gov/opp/aec427652535471eab86973f4fd21d42/view)\n- Navy · Intent to Sole Source: Repair of MTS 688 Class ESF Diesel Generator (EDG) Sets · [SAM.gov](https://sam.gov/opp/c2045803bbec4307b57d6a82502df4f0/view)\n- Navy · J&A for IDIQ Increase on Base Operations Support (BOS) services at Pensacola Naval… · [SAM.gov](https://sam.gov/opp/5927b3b796aa4aca8e2a935826ef965d/view)\n- Navy · N0010425R0007 Solicitation · [SAM.gov](https://sam.gov/opp/e94281e007c44fd88347516312007e84/view)\n- Navy · Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton · [SAM.gov](https://sam.gov/opp/e98890d27bb14b97b70033f3994d8880/view)\n- Navy · Notice of Intent Sole Source Audio/Visual Services at the Washington Hilton · [SAM.gov](https://sam.gov/opp/b1efe05ada424eec86616e724d981e9a/view)\n- Navy · NOTICE OF INTENT TO AWARD A SOLE SOURCE IMMIX TECHNOLOGY, INC. · [SAM.gov](https://sam.gov/opp/7b6650cb07e447ca91ede909449c2291/view)\n- Navy · Notice of Intent to Award Sole Source to CFRS, Inc. · [SAM.gov](https://sam.gov/opp/fed9202f152a4443ab79d4b29a6494fb/view)\n- Navy · Notice of Intent to Sole Source - VRC Maintenance and Calibration Services w/three option… · [SAM.gov](https://sam.gov/opp/1c94de9749f94e23b4f649fba7f203eb/view)\n- Navy · Notice of Intent to Sole Source Hall Rental to Virginia Community College System Office… · [SAM.gov](https://sam.gov/opp/ea9ce96f989b4c0ebc1753b715d6e81e/view)\n- Navy · USS WICHITA (LCS 13) SERM-803-27 NEW WORK · [SAM.gov](https://sam.gov/opp/1f0535378cff4fd9a76f1a2454ce5866/view)\n- Office of the Assistant Secretary for Financial Resources (ASFR) · Intent to Sole Source to Anthropic · [SAM.gov](https://sam.gov/opp/3280f97fd5a045459cf5e0e31ea1415d/view)\n- Public Buildings Service · General Services Administration (GSA) Lease: Office Space Oxford, Mississippi · [SAM.gov](https://sam.gov/opp/0efc1ffd6a794892ac14d339a4ebcafb/view)\n- Public Buildings Service · US GOVERNMENT AWARDS SOLE SOURCE LEASE IN RENO, NV · [SAM.gov](https://sam.gov/opp/83fbf0a4b84d4210836ceafa0e92b23d/view)\n- State · Justification for Interim Contract Area Studies Course Instructors · [SAM.gov](https://sam.gov/opp/a63893dde8d245d5a3033ff4e89a8d0a/view)\n- State · Justification for Interim Contract Area Studies Course Instructors · [SAM.gov](https://sam.gov/opp/bbd5b3c48856426590b5ff7e8e665afe/view)\n- State · Post Award Single Source Justification - PMSC Elevators · [SAM.gov](https://sam.gov/opp/1fa9b939f08a4dabbbe83d7caeedc38c/view)\n- Transportation Security Administration · Operations and Maintenance (O&M) services for the TSA Systems Integration Facility (TSIF)… · [SAM.gov](https://sam.gov/opp/6079e0383973481dbbe9d293808f1438/view)\n- US Coast Guard · AT&T OneWeb Kits and Satellite Communication (SATCOM) Sole Source Justification… · [SAM.gov](https://sam.gov/opp/b01657fa20a34ec99f57f9237b0d48d9/view)\n- US Immigration and Customs Enforcement · Camp East Montana · [SAM.gov](https://sam.gov/opp/8febc2f3caa144d8b08672d26fbd2a1b/view)\n- US Immigration and Customs Enforcement · Notice of Intent to Sole Source - Telecommunications Analysis Software Support · [SAM.gov](https://sam.gov/opp/48dc3833e6924541a157465024a2fa5a/view)\n- US Immigration and Customs Enforcement · Notice of Intent to Solicit from a Single Source - Forensic Equipment / Software · [SAM.gov](https://sam.gov/opp/58927173fe23490d9801121d0e823a83/view)\n- Veterans Affairs · 6515--Inari FlowTriever Retrieval Aspiration System (5) Intent to Sole Source Base Four… · [SAM.gov](https://sam.gov/opp/7f8ce5fdb3874b838545be745dd6311f/view)\n- Veterans Affairs · 6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services · [SAM.gov](https://sam.gov/opp/d06e756871b5403a93f6ac2fa46f604f/view)\n- Veterans Affairs · 6632--Notice of Intent to Sole Source Cepheid GeneExpert Rental and Associated Services · [SAM.gov](https://sam.gov/opp/15a55c60f69d4d19baa86854e8791435/view)\n- Veterans Affairs · H261--Intent to Sole Source | Five Year IDIQ | Generator Testing and Maintenance | Marion… · [SAM.gov](https://sam.gov/opp/3bd3552a58d8417ab202d4f4a8c76769/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/c9ca802fe6d44869933db7464a08ec95/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/d6153561f9c54f95ad7d782ecd04bb48/view)\n- Veterans Affairs · Intent to Sole Source Fire Suppression and Emergency Response Service · [SAM.gov](https://sam.gov/opp/dc27aeb0593f4feea8b930d0469d728c/view)\n- Veterans Affairs · J046--NOTICE OF INTENT TO SOLE SOURCE Baltimore VAMC WRO300H Reverse Osmosis Dialysis… · [SAM.gov](https://sam.gov/opp/ae098d4d6e874ba48c2a978a130dfec4/view)\n- Veterans Affairs · J065--36C25927Q0027| Intent to Sole Source on FujiFilm Synapse Cardiology PACS Service… · [SAM.gov](https://sam.gov/opp/1abb6e435c4e42449360a7c021ec8bfd/view)\n- Veterans Affairs · J065--Cadwell EMG Support Agreement Intent to Sole Source For Louis Stokes Cleveland VA… · [SAM.gov](https://sam.gov/opp/b896006238ef4d94b5cb2ae912d06621/view)\n- Veterans Affairs · J065--M-GAIT System - Service Repair - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/889667914a75446c9aa21e94ded61d19/view)\n- Veterans Affairs · J065--M-GAIT System - Service Repair - Intent to Sole Source · [SAM.gov](https://sam.gov/opp/2daea7dd16384281bbf552c03fd31856/view)\n- Veterans Affairs · J065--Notice of Intent to Sole Source Laerdal Medical Corp 3G Critical Care Manikin… · [SAM.gov](https://sam.gov/opp/5c6978ad81544a5796aa907f18fcc4fb/view)\n- Veterans Affairs · J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance · [SAM.gov](https://sam.gov/opp/7c6f792cf82448c8afbb5e6d979c6514/view)\n- Veterans Affairs · J066--Notice of Intent to Sole Source Agilent Mass Spectrometry Maintenance · [SAM.gov](https://sam.gov/opp/16a994df8abc43f6a0cb038a8b37008f/view)\n- Veterans Affairs · Q201--CCN R1 Contract Extension · [SAM.gov](https://sam.gov/opp/085682f126fe48469dc67e2031a3f08a/view)\n- Veterans Affairs · Q201--CCN R2 Contract Extension · [SAM.gov](https://sam.gov/opp/aec0b46dc3cb4ad3ad60cbf629f91d9c/view)\n- Veterans Affairs · Q201--CCN R2 Contract Extension · [SAM.gov](https://sam.gov/opp/4c7b9989ded94a8d91879c37640e95c2/view)\n- Veterans Affairs · U008--Notice of Intent to Sole Source Implementation Science Training · [SAM.gov](https://sam.gov/opp/309886539113455bb68f1908bf6a61da/view)\n- Veterans Affairs · V302--Veterans Health Administration (VHA) Commercial Air Patient Transport · [SAM.gov](https://sam.gov/opp/311baecfc7994ab383c4d2f960ed6361/view)\n- Veterans Affairs · W065--Notice of Intent (NOI)-Sole Source-Olympus America, Inc Gastrointestinal Endoscope… · [SAM.gov](https://sam.gov/opp/1682c2bb9e1543e3bb3712a69f30b9ea/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 90 new notices reviewed (first collected Oct 19 20:00 ET to Oct 20 07:42 ET); 254 notices first collected then but posted more than 14 days earlier were left out.\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.1208
 }

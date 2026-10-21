@@ -1,8 +1,8 @@
 {
  "experimental": true,
- "digest_version": "2026-10-21.digest1",
+ "digest_version": "2026-10-21.digest2",
  "mode": "dry_run",
- "run_at": "2026-10-21T16:11:59.144899+00:00",
+ "run_at": "2026-10-21T16:29:48.159248+00:00",
  "as_of": "2026-10-17T16:00:00+00:00",
  "window": {
   "kind": "manual",
@@ -17,18 +17,18 @@
  "with_extraction_row": 17,
  "with_document_text": 17,
  "budget": {
-  "max_usd": 0.28,
-  "spent": 0.125006,
+  "max_usd": 0.18,
+  "spent": 0.12268,
   "calls": [
    {
     "stage": "rank",
     "model": "claude-sonnet-5-5",
-    "input_tokens": 56833,
-    "output_tokens": 1496,
+    "input_tokens": 56952,
+    "output_tokens": 1261,
     "cache_creation_input_tokens": 0,
-    "cache_read_input_tokens": 2011,
-    "cost_usd": 0.125006,
-    "worst_case_usd": 0.2501
+    "cache_read_input_tokens": 2130,
+    "cost_usd": 0.12268,
+    "worst_case_usd": 0.1704
    }
   ]
  },
@@ -54,16 +54,40 @@
  "model_answer": {
   "picks": [
    {
-    "notice_id": "3d71fffad77244fba5894490c51a97d3",
-    "headline": "State sole-sources bridge lodging for 652 families after options and IDIQs both expired",
-    "why": "State says the 52.217-8 extensions are exhausted and the underlying IDIQs have expired, so it needs three bridge contracts while a recompete is evaluated. It cites unusual and compelling urgency and risk of eviction for families.",
+    "notice_id": "1085edc5fb024f1a9159649f3e1e7c66",
+    "headline": "HHS extends Deloitte repatriation support six months, citing recent real-world emergency repatriations",
+    "why": "ACF is bridging Deloitte's task order from September 30, 2026 to March 29, 2027 without competition. The document says recent real-world repatriation events created the need and cites surging cohorts during active international crises.",
     "quotes": [
      {
-      "text": "The Option to Extend Services clause (FAR 52.217-8) under each of the above task orders has already been exercised in full and is no longer available as a basis for further extension.",
-      "page": "PCS Lodging - SAM.gov 10.13.2026.pdf, page 3"
-     },
+      "text": "Recent real-world repatriation events and evolving operational demands have created a critical requirement to update procedures, coordinate with interagency partners, and integrate lessons learned into program operations.",
+      "page": "75ACF121F80033 - P00012 - SSJ - Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "Deloitte Consulting LLP",
+    "value": "",
+    "authority": "GSAM/R 538.7104-3(b)(1)(i)"
+   },
+   {
+    "notice_id": "44c27c14f105492baf7ae0418865f5b8",
+    "headline": "ICE sole-sources A-File integration linking its litigation system to USCIS repository",
+    "why": "ICE would modify Procentrix's RIMU task order to integrate OPLA's PLAnet case system with USCIS's STACKS A-File repository. The notice cites incumbent knowledge as a logical follow-on, and the value is redacted.",
+    "quotes": [
      {
-      "text": "affected families face the extreme risk of eviction from their current lodging with little to no notice",
+      "text": "ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system with the United States Citizenship and Immigration Service’s (USCIS) STACKS digital A-File repository",
+      "page": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, page 2"
+     }
+    ],
+    "vendor": "PROCENTRIX LLC",
+    "value": "",
+    "authority": "RFO FAR 16.507-6(b)(3)"
+   },
+   {
+    "notice_id": "3d71fffad77244fba5894490c51a97d3",
+    "headline": "State bridges three PCS lodging contracts after options and IDIQs ran out, citing 652 families",
+    "why": "State says the 52.217-8 options are exhausted and the underlying IDIQs have expired, while a recompete is under evaluation. It cites urgency to avoid eviction risk for 652 families.",
+    "quotes": [
+     {
+      "text": "the Government does not have sufficient time to identify, vet, and transition to a new vendor without risking a lapse in lodging services for the 652 families currently housed under this program.",
       "page": "PCS Lodging - SAM.gov 10.13.2026.pdf, page 3"
      }
     ],
@@ -73,84 +97,79 @@
    },
    {
     "notice_id": "de99779d561a49e28e5ed72ad109ac36",
-    "headline": "DLA's Western Africa food contract grows from $22M to $307.6M, now on second bridge",
-    "why": "The J&A traces the EFS prime vendor contract's ceiling increases, citing the Niger military takeover and airlifts. It is now on a second bridge, with 180-day ramp-up cited for any new vendor.",
+    "headline": "DLA's second Western Africa food bridge follows Niger takeover and airlifted supplies",
+    "why": "The J&A recounts the contract's maximum rising to $307,600,000.00 after the Niger Military led takeover affected supply routes and forced airlifts. It is now a second bridge to EFS through December 14, 2027.",
     "quotes": [
      {
-      "text": "the Niger Military led takeover in July 2023 significantly impacted supply routes.",
-      "page": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, page 3"
+      "text": "the Niger Military led takeover in July 2023 significantly impacted supply routes. Due to the critical need to utilize airlifts for the inbound supply chain",
+      "page": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, page 2"
      }
     ],
     "vendor": "EFS Ebrex Sarl",
-    "value": "$700,000",
+    "value": "$700,000.00",
     "authority": "10 U.S.C. § 3204(a)(1)"
-   },
-   {
-    "notice_id": "71c4d8cfdc524f6ba7dfb9f0cb2003e9",
-    "headline": "DLA bridges Zone 4 ship food contract after noncompetitive ceiling jump to $385M",
-    "why": "A 425-day bridge goes to EFS, whose contract maximum was raised noncompetitively from $140M to $385M in 2024. The document says only EFS has a fully implemented STORES catalog.",
-    "quotes": [
-     {
-      "text": "a modification to the contract was issued which increased the contract maximum value from $140,000,000.00 to $385,000,000.00.",
-      "page": "[Final Redacted JA Z4.pdf, page 2, machine-transcribed]"
-     }
-    ],
-    "vendor": "EFS Ebrex Sarl",
-    "value": "$33,000,000.00",
-    "authority": "10 U.S.C. § 3204(a)(1)"
-   },
-   {
-    "notice_id": "44c27c14f105492baf7ae0418865f5b8",
-    "headline": "ICE sole-sources Procentrix to link A-File repository with litigation case system",
-    "why": "ICE would modify the RIMU task order to integrate OPLA's PLAnet litigation system with USCIS's STACKS A-File repository. It cites logical follow-on authority under the Revolutionary FAR Overhaul.",
-    "quotes": [
-     {
-      "text": "ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system",
-      "page": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, page 2"
-     }
-    ],
-    "vendor": "PROCENTRIX LLC",
-    "value": "",
-    "authority": "RFO FAR 16.507-6(b)(3)"
-   },
-   {
-    "notice_id": "191f18cd7a6e4078a437f89a611abd15",
-    "headline": "State bridges MENA aid monitoring to MSI after USAID programs moved over",
-    "why": "State cites the July 2025 transition of USAID programs and conflict in several MENA countries as reasons for an 18-month sole-source bridge to MSI.",
-    "quotes": [
-     {
-      "text": "In July 2025, active USAID programs transitioned to the State Department, substantially increasing NEA/AC's oversight responsibilities.",
-      "page": "JA GSA NEA-MELO -SAM announcement.pdf, page 3"
-     }
-    ],
-    "vendor": "MSI",
-    "value": "",
-    "authority": "GSAR 538.7104-3(b)(iii)"
    }
   ]
  },
  "picks": [
   {
-   "notice_id": "3d71fffad77244fba5894490c51a97d3",
+   "notice_id": "1085edc5fb024f1a9159649f3e1e7c66",
    "rank": 1,
-   "headline": "State sole-sources bridge lodging for 652 families after options and IDIQs both expired",
-   "why": "State says the 52.217-8 extensions are exhausted and the underlying IDIQs have expired, so it needs three bridge contracts while a recompete is evaluated. It cites unusual and compelling urgency and risk of eviction for families.",
+   "headline": "HHS extends Deloitte repatriation support six months, citing recent real-world emergency repatriations",
+   "why": "ACF is bridging Deloitte's task order from September 30, 2026 to March 29, 2027 without competition. The document says recent real-world repatriation events created the need and cites surging cohorts during active international crises.",
    "quotes": [
     {
-     "text": "The Option to Extend Services clause (FAR 52.217-8) under each of the above task orders has already been exercised in full and is no longer available as a basis for further extension.",
+     "text": "Recent real-world repatriation events and evolving operational demands have created a critical requirement to update procedures, coordinate with interagency partners, and integrate lessons learned into program operations.",
      "match": "exact",
      "pages": [
       {
-       "resource_id": "1b371ef1b82844069f5ef7ea3e423c5c",
+       "resource_id": "942f94642d124d6cbb2ee31ec4922125",
        "page_number": 2,
-       "text_source": "transcription"
+       "text_source": "native"
       }
      ],
-     "where": "PCS Lodging - SAM.gov 10.13.2026.pdf, p. 2 (machine-transcribed page)",
-     "model_page": "PCS Lodging - SAM.gov 10.13.2026.pdf, page 3"
-    },
+     "where": "75ACF121F80033 - P00012 - SSJ - Redacted.pdf, p. 2",
+     "model_page": "75ACF121F80033 - P00012 - SSJ - Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "Deloitte Consulting LLP",
+   "value": "value redacted",
+   "authority": "GSAM/R 538.7104-3(b)(1)(i); FAR 8.405-6(a)(1)(i)(A)",
+   "model_rank": 1
+  },
+  {
+   "notice_id": "44c27c14f105492baf7ae0418865f5b8",
+   "rank": 2,
+   "headline": "ICE sole-sources A-File integration linking its litigation system to USCIS repository",
+   "why": "ICE would modify Procentrix's RIMU task order to integrate OPLA's PLAnet case system with USCIS's STACKS A-File repository. The notice cites incumbent knowledge as a logical follow-on, and the value is redacted.",
+   "quotes": [
     {
-     "text": "affected families face the extreme risk of eviction from their current lodging with little to no notice",
+     "text": "ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system with the United States Citizenship and Immigration Service’s (USCIS) STACKS digital A-File repository",
+     "match": "exact",
+     "pages": [
+      {
+       "resource_id": "0c530385d0014092b4573e25152534cc",
+       "page_number": 2,
+       "text_source": "native"
+      }
+     ],
+     "where": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, p. 2",
+     "model_page": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, page 2"
+    }
+   ],
+   "vendor": "PROCENTRIX LLC",
+   "value": "value redacted",
+   "authority": "RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106",
+   "model_rank": 2
+  },
+  {
+   "notice_id": "3d71fffad77244fba5894490c51a97d3",
+   "rank": 3,
+   "headline": "State bridges three PCS lodging contracts after options and IDIQs ran out, citing 652 families",
+   "why": "State says the 52.217-8 options are exhausted and the underlying IDIQs have expired, while a recompete is under evaluation. It cites urgency to avoid eviction risk for 652 families.",
+   "quotes": [
+    {
+     "text": "the Government does not have sufficient time to identify, vet, and transition to a new vendor without risking a lapse in lodging services for the 652 families currently housed under this program.",
      "match": "exact",
      "pages": [
       {
@@ -166,16 +185,16 @@
    "vendor": "Madison Hospitality Services, LLC",
    "value": "$19,600,000 (total incl. options)",
    "authority": "FAR 6.103-2; 41 USC 3304",
-   "model_rank": 1
+   "model_rank": 3
   },
   {
    "notice_id": "de99779d561a49e28e5ed72ad109ac36",
-   "rank": 2,
-   "headline": "DLA's Western Africa food contract grows from $22M to $307.6M, now on second bridge",
-   "why": "The J&A traces the EFS prime vendor contract's ceiling increases, citing the Niger military takeover and airlifts. It is now on a second bridge, with 180-day ramp-up cited for any new vendor.",
+   "rank": 4,
+   "headline": "DLA's second Western Africa food bridge follows Niger takeover and airlifted supplies",
+   "why": "The J&A recounts the contract's maximum rising to $307,600,000.00 after the Niger Military led takeover affected supply routes and forced airlifts. It is now a second bridge to EFS through December 14, 2027.",
    "quotes": [
     {
-     "text": "the Niger Military led takeover in July 2023 significantly impacted supply routes.",
+     "text": "the Niger Military led takeover in July 2023 significantly impacted supply routes. Due to the critical need to utilize airlifts for the inbound supply chain",
      "match": "exact",
      "pages": [
       {
@@ -185,21 +204,7 @@
       }
      ],
      "where": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 2",
-     "model_page": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, page 3"
-    },
-    {
-     "text": "The original competitively awarded prime vendor contract for foodservice support in the Western Africa AOR, SPE300-20-D-4067, was awarded to EFS on September 16, 2020, with a maximum dollar value of $22,000,000.00.",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "c5dae583dded478f97111a78761d9db2",
-       "page_number": 1,
-       "text_source": "native"
-      }
-     ],
-     "where": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 1",
-     "model_page": "",
-     "added_by_code": true
+     "model_page": "TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, page 2"
     },
     {
      "text": "Due to the critical need to utilize airlifts for the inbound supply chain in addition to delays in the competitive follow-on acquisition, a modification was processed in December 2023 to increase the maximum from $97,600,000.00 to $307,600,000.00.",
@@ -219,87 +224,11 @@
    "vendor": "EFS Ebrex Sarl",
    "value": "$700,000 (total)",
    "authority": "10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1",
-   "model_rank": 2
-  },
-  {
-   "notice_id": "71c4d8cfdc524f6ba7dfb9f0cb2003e9",
-   "rank": 3,
-   "headline": "DLA bridges Zone 4 ship food contract after noncompetitive ceiling jump to $385M",
-   "why": "A 425-day bridge goes to EFS, whose contract maximum was raised noncompetitively from $140M to $385M in 2024. The document says only EFS has a fully implemented STORES catalog.",
-   "quotes": [
-    {
-     "text": "a modification to the contract was issued which increased the contract maximum value from $140,000,000.00 to $385,000,000.00.",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "0dcc85dd4afc4670904d8a2cf52ff720",
-       "page_number": 2,
-       "text_source": "transcription"
-      }
-     ],
-     "where": "Final Redacted JA Z4.pdf, p. 2 (machine-transcribed page)",
-     "model_page": "[Final Redacted JA Z4.pdf, page 2, machine-transcribed]"
-    }
-   ],
-   "vendor": "EFS Ebrex Sarl",
-   "value": "$33,000,000 (total)",
-   "authority": "10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1",
-   "model_rank": 3
-  },
-  {
-   "notice_id": "44c27c14f105492baf7ae0418865f5b8",
-   "rank": 4,
-   "headline": "ICE sole-sources Procentrix to link A-File repository with litigation case system",
-   "why": "ICE would modify the RIMU task order to integrate OPLA's PLAnet litigation system with USCIS's STACKS A-File repository. It cites logical follow-on authority under the Revolutionary FAR Overhaul.",
-   "quotes": [
-    {
-     "text": "ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "0c530385d0014092b4573e25152534cc",
-       "page_number": 2,
-       "text_source": "native"
-      }
-     ],
-     "where": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, p. 2",
-     "model_page": "Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, page 2"
-    }
-   ],
-   "vendor": "PROCENTRIX LLC",
-   "value": "value redacted",
-   "authority": "RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106",
    "model_rank": 4
-  },
-  {
-   "notice_id": "191f18cd7a6e4078a437f89a611abd15",
-   "rank": 5,
-   "headline": "State bridges MENA aid monitoring to MSI after USAID programs moved over",
-   "why": "State cites the July 2025 transition of USAID programs and conflict in several MENA countries as reasons for an 18-month sole-source bridge to MSI.",
-   "quotes": [
-    {
-     "text": "In July 2025, active USAID programs transitioned to the State Department, substantially increasing NEA/AC's oversight responsibilities.",
-     "match": "exact",
-     "pages": [
-      {
-       "resource_id": "29e982f08c124891b8d2d4613a1d0ee5",
-       "page_number": 3,
-       "text_source": "native"
-      }
-     ],
-     "where": "JA GSA NEA-MELO -SAM announcement.pdf, p. 3",
-     "model_page": "JA GSA NEA-MELO -SAM announcement.pdf, page 3"
-    }
-   ],
-   "vendor": "MSI",
-   "value": null,
-   "authority": "GSAR 538.7104-3(b)(iii)",
-   "model_rank": 5
   }
  ],
  "dropped_by_checks": [],
- "subject": "Whoa J&As — Oct 17: State sole-sources bridge lodging for 652 families after options and IDIQs both expired",
- "body": "## 1. State sole-sources bridge lodging for 652 families after options and IDIQs both expired\n\n**STATE, DEPARTMENT OF · Madison Hospitality Services, LLC · $19,600,000 (total incl. options) · FAR 6.103-2; 41 USC 3304**  \n*Posted 2026-10-16, award CA-FY26-0000281, “Permanent Change of Station (PCS) Lodging Program”*\n\nState says the 52.217-8 extensions are exhausted and the underlying IDIQs have expired, so it needs three bridge contracts while a recompete is evaluated. It cites unusual and compelling urgency and risk of eviction for families.\n\n> “The Option to Extend Services clause (FAR 52.217-8) under each of the above task orders has already been exercised in full and is no longer available as a basis for further extension.”  \n> — PCS Lodging - SAM.gov 10.13.2026.pdf, p. 2 (machine-transcribed page)\n\n> “affected families face the extreme risk of eviction from their current lodging with little to no notice”  \n> — PCS Lodging - SAM.gov 10.13.2026.pdf, p. 3 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/3d71fffad77244fba5894490c51a97d3/view) · [PCS Lodging - SAM.gov 10.13.2026.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/3d71fffad77244fba5894490c51a97d3/1b371ef1b82844069f5ef7ea3e423c5c_PCS_Lodging_-_SAM.gov_10.13.2026.pdf)\n\n## 2. DLA's Western Africa food contract grows from $22M to $307.6M, now on second bridge\n\n**DEFENSE LOGISTICS AGENCY (DEPT OF DEFENSE) · EFS Ebrex Sarl · $700,000 (total) · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1**  \n*Posted 2026-10-16, award SPE300-27-D-4113, “Western Africa J&A”*\n\nThe J&A traces the EFS prime vendor contract's ceiling increases, citing the Niger military takeover and airlifts. It is now on a second bridge, with 180-day ramp-up cited for any new vendor.\n\n> “the Niger Military led takeover in July 2023 significantly impacted supply routes.”  \n> — TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 2\n\n> “The original competitively awarded prime vendor contract for foodservice support in the Western Africa AOR, SPE300-20-D-4067, was awarded to EFS on September 16, 2020, with a maximum dollar value of $22,000,000.00.”  \n> — TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 1 (source of the figure above, quoted by the checks)\n\n> “Due to the critical need to utilize airlifts for the inbound supply chain in addition to delays in the competitive follow-on acquisition, a modification was processed in December 2023 to increase the maximum from $97,600,000.00 to $307,600,000.00.”  \n> — TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 2 (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/de99779d561a49e28e5ed72ad109ac36/view) · [TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/de99779d561a49e28e5ed72ad109ac36/c5dae583dded478f97111a78761d9db2_TAB_1_JA_Western_Africa_Bridge_2_-_REDACTED_Final.pdf)\n\n## 3. DLA bridges Zone 4 ship food contract after noncompetitive ceiling jump to $385M\n\n**DEFENSE LOGISTICS AGENCY (DEPT OF DEFENSE) · EFS Ebrex Sarl · $33,000,000 (total) · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1**  \n*Posted 2026-10-16, award SPE300-27-D-4111, “Europe Zone 4 Afloat J&A”*\n\nA 425-day bridge goes to EFS, whose contract maximum was raised noncompetitively from $140M to $385M in 2024. The document says only EFS has a fully implemented STORES catalog.\n\n> “a modification to the contract was issued which increased the contract maximum value from $140,000,000.00 to $385,000,000.00.”  \n> — Final Redacted JA Z4.pdf, p. 2 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/71c4d8cfdc524f6ba7dfb9f0cb2003e9/view) · [Final Redacted JA Z4.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/71c4d8cfdc524f6ba7dfb9f0cb2003e9/0dcc85dd4afc4670904d8a2cf52ff720_Final_Redacted_JA_Z4.pdf)\n\n## 4. ICE sole-sources Procentrix to link A-File repository with litigation case system\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · PROCENTRIX LLC · value redacted · RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106**  \n*Posted 2026-10-16, award 70CTD022D00000011, “Justification - Records & Information Management Unit (RIMU)”*\n\nICE would modify the RIMU task order to integrate OPLA's PLAnet litigation system with USCIS's STACKS A-File repository. It cites logical follow-on authority under the Revolutionary FAR Overhaul.\n\n> “ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system”  \n> — Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/44c27c14f105492baf7ae0418865f5b8/view) · [Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/44c27c14f105492baf7ae0418865f5b8/0c530385d0014092b4573e25152534cc_Justification_for_Exception_to_Fair_Opportunity_-_RIMU_A-File_Mod_Redacted.pdf)\n\n## 5. State bridges MENA aid monitoring to MSI after USAID programs moved over\n\n**STATE, DEPARTMENT OF · MSI · GSAR 538.7104-3(b)(iii)**  \n*Posted 2026-10-16, award 19AQMM26F1191, “Near Eastern Affairs Monitoring, Evaluation, Leaning, and Analytic Services (NEA MELA)”*\n\nState cites the July 2025 transition of USAID programs and conflict in several MENA countries as reasons for an 18-month sole-source bridge to MSI.\n\n> “In July 2025, active USAID programs transitioned to the State Department, substantially increasing NEA/AC's oversight responsibilities.”  \n> — JA GSA NEA-MELO -SAM announcement.pdf, p. 3\n\n[SAM.gov notice](https://sam.gov/opp/191f18cd7a6e4078a437f89a611abd15/view) · [JA GSA NEA-MELO -SAM announcement.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/191f18cd7a6e4078a437f89a611abd15/29e982f08c124891b8d2d4613a1d0ee5_JA_GSA_NEA-MELO_-SAM_announcement.pdf)\n\n## All new notices (17)\n\n- ★ State · Permanent Change of Station (PCS) Lodging Program · Madison Hospitality Services, LLC · $19,600,000 · FAR 6.103-2; 41 USC 3304 · [SAM.gov](https://sam.gov/opp/3d71fffad77244fba5894490c51a97d3/view)\n- ★ Defense Logistics Agency · Western Africa J&A · EFS Ebrex Sarl · $700,000 · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1 · [SAM.gov](https://sam.gov/opp/de99779d561a49e28e5ed72ad109ac36/view)\n- ★ Defense Logistics Agency · Europe Zone 4 Afloat J&A · EFS Ebrex Sarl · $33,000,000 · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1 · [SAM.gov](https://sam.gov/opp/71c4d8cfdc524f6ba7dfb9f0cb2003e9/view)\n- ★ US Immigration and Customs Enforcement · Justification - Records & Information Management Unit (RIMU) · PROCENTRIX LLC · value redacted · RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106 · [SAM.gov](https://sam.gov/opp/44c27c14f105492baf7ae0418865f5b8/view)\n- ★ State · Near Eastern Affairs Monitoring, Evaluation, Leaning, and Analytic Services (NEA MELA) · MSI · GSAR 538.7104-3(b)(iii) · [SAM.gov](https://sam.gov/opp/191f18cd7a6e4078a437f89a611abd15/view)\n- Defense Advanced Research Projects Agency (DARPA) · HR001124C0315 DARPA JUSTIFICATION AND APPROVAL FOR OTHER THAN FULL AND OPEN COMPETITION · University of Michigan · $5,000,000 · 10 U.S.C. § 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/0ec0d027c57c45bb9d97d4e6410d2c82/view)\n- Defense Advanced Research Projects Agency (DARPA) · HR001124C0378 DARPA JUSTIFICATION AND APPROVAL FOR OTHER THAN FULL AND OPEN COMPETITION · Ginkgo Bioworks, Inc. · $5,000,000 · 10 U.S.C. § 3204(a)(1); FAR Part 6.302-1 · [SAM.gov](https://sam.gov/opp/0feb80306a5c403ebfb82be750435479/view)\n- US Marshals Service · Jewelry, Art, Antiques & Collectibles (JAAC) · Gaston & Sheehan Auctioneers, Inc. · $4,500,000 · 6.103-2 Unusual and Compelling Urgency Authority 41 USC 3304(a)(1) · [SAM.gov](https://sam.gov/opp/2fb06f4d3e054884968f8c3dd94a5c4d/view)\n- National Aeronautics and Space Administration · Space Flight Closeout Crew Vehicle · Enterprise Rent-A-Car · $70,000 · 10 U.S.C. 3204(a)(2); FAR 6.302-2 · [SAM.gov](https://sam.gov/opp/389ca2cde02342139000dd28eecd58ec/view)\n- National Aeronautics and Space Administration · Space Flight Closeout Crew Vehicle · Enterprise Rent-A-Car · $70,000 · 10 U.S.C. 3204(a)(2); FAR 6.302-2 · [SAM.gov](https://sam.gov/opp/8c5765fbeda34be395c8114399f185e8/view)\n- Federal Prison System / Bureau of Prisons · Urgent Chiller Repairs FCI Aliceville · JOHNSON CONTROLS BUILDING SOLUTIONS · $43,000 · 41 U.S.C. 1901 · [SAM.gov](https://sam.gov/opp/78d530312d704acf91b441d352978491/view)\n- Army · Class Justification and Approval - Brand Name - Cisco products for the Walla Walla… · Title 10 United States Code (U.S.C.) §3204(a)(1) as implemented in Revolutionary Federal Acquisition Regulation (FAR) Overhaul (RFO) FAR 6.103-1; RFO FAR 6.103-1(d) · [SAM.gov](https://sam.gov/opp/0648190d97994994ae71b814ec4fe5a7/view)\n- Defense Logistics Agency · 30--PARTS KIT,ELECTRO-M · BEAVER AEROSPACE & DEFNESE INC · value redacted · 10 U.S.C. 3204(a)(1) as implemented by FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/f39ffde427ef4ba58a02c2aa419da97c/view)\n- Defense Logistics Agency · Redacted Justification & Approval (J&A) · Independent Rough Terrain Center, LLC · value redacted · 10 United States Code (U.S.C.) 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/c5bf1a7244154ac0a205da0b2cf8fbdf/view)\n- Defense Logistics Agency · SPE4A6-26-R-X302, NSN 3110-01-495-4847, BEARING, BALL, AIRFRAME · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/e4c45ad2d6654414b26c0d318e61bda4/view)\n- Navy · The Justification and Approval (J&A) to award a contract on a sole source basis for… · Kapule, LLC · value redacted · 10 U.S.C. 3204(a)(2) · [SAM.gov](https://sam.gov/opp/cfded78777cc469fa9c07889c65e620c/view)\n- Office of the Assistant Secretary for Financial Resources (ASFR) · Repatriation Evaluation Support Services  Bridge Support Services · Deloitte Consulting LLP · value redacted · GSAM/R 538.7104-3(b)(1)(i); FAR 8.405-6(a)(1)(i)(A) · [SAM.gov](https://sam.gov/opp/1085edc5fb024f1a9159649f3e1e7c66/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 17 new notices reviewed (first collected Oct 16 20:00 ET to Oct 17 00:31 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
- "spent_usd": 0.125,
- "rerendered": "picks re-checked from the stored model answer with the final verify.py, and re-rendered"
+ "subject": "Whoa J&As — Oct 17: HHS extends Deloitte repatriation support six months, citing recent real-world emergency repatriations",
+ "body": "## 1. HHS extends Deloitte repatriation support six months, citing recent real-world emergency repatriations\n\n**OFFICE OF THE ASSISTANT SECRETARY FOR FINANCIAL RESOURCES (ASFR) (HEALTH AND HUMAN SERVICES, DEPARTMENT OF) · Deloitte Consulting LLP · value redacted · GSAM/R 538.7104-3(b)(1)(i); FAR 8.405-6(a)(1)(i)(A)**  \n*Posted 2026-10-16, award 47QRAA18D001P, “Repatriation Evaluation Support Services  Bridge Support Services”*\n\nACF is bridging Deloitte's task order from September 30, 2026 to March 29, 2027 without competition. The document says recent real-world repatriation events created the need and cites surging cohorts during active international crises.\n\n> “Recent real-world repatriation events and evolving operational demands have created a critical requirement to update procedures, coordinate with interagency partners, and integrate lessons learned into program operations.”  \n> — 75ACF121F80033 - P00012 - SSJ - Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/1085edc5fb024f1a9159649f3e1e7c66/view) · [75ACF121F80033 - P00012 - SSJ - Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/1085edc5fb024f1a9159649f3e1e7c66/942f94642d124d6cbb2ee31ec4922125_75ACF121F80033_-_P00012_-_SSJ_-_Redacted.pdf)\n\n## 2. ICE sole-sources A-File integration linking its litigation system to USCIS repository\n\n**US IMMIGRATION AND CUSTOMS ENFORCEMENT (HOMELAND SECURITY, DEPARTMENT OF) · PROCENTRIX LLC · value redacted · RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106**  \n*Posted 2026-10-16, award 70CTD022D00000011, “Justification - Records & Information Management Unit (RIMU)”*\n\nICE would modify Procentrix's RIMU task order to integrate OPLA's PLAnet case system with USCIS's STACKS A-File repository. The notice cites incumbent knowledge as a logical follow-on, and the value is redacted.\n\n> “ICE requires the RIMU records-management environment to be modified to integrate the Office of the Principal Legal Advisor’s (OPLA) PLAnet litigation case management system with the United States Citizenship and Immigration Service’s (USCIS) STACKS digital A-File repository”  \n> — Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf, p. 2\n\n[SAM.gov notice](https://sam.gov/opp/44c27c14f105492baf7ae0418865f5b8/view) · [Justification for Exception to Fair Opportunity - RIMU A-File Mod Redacted.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/44c27c14f105492baf7ae0418865f5b8/0c530385d0014092b4573e25152534cc_Justification_for_Exception_to_Fair_Opportunity_-_RIMU_A-File_Mod_Redacted.pdf)\n\n## 3. State bridges three PCS lodging contracts after options and IDIQs ran out, citing 652 families\n\n**STATE, DEPARTMENT OF · Madison Hospitality Services, LLC · $19,600,000 (total incl. options) · FAR 6.103-2; 41 USC 3304**  \n*Posted 2026-10-16, award CA-FY26-0000281, “Permanent Change of Station (PCS) Lodging Program”*\n\nState says the 52.217-8 options are exhausted and the underlying IDIQs have expired, while a recompete is under evaluation. It cites urgency to avoid eviction risk for 652 families.\n\n> “the Government does not have sufficient time to identify, vet, and transition to a new vendor without risking a lapse in lodging services for the 652 families currently housed under this program.”  \n> — PCS Lodging - SAM.gov 10.13.2026.pdf, p. 3 (machine-transcribed page)\n\n[SAM.gov notice](https://sam.gov/opp/3d71fffad77244fba5894490c51a97d3/view) · [PCS Lodging - SAM.gov 10.13.2026.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/3d71fffad77244fba5894490c51a97d3/1b371ef1b82844069f5ef7ea3e423c5c_PCS_Lodging_-_SAM.gov_10.13.2026.pdf)\n\n## 4. DLA's second Western Africa food bridge follows Niger takeover and airlifted supplies\n\n**DEFENSE LOGISTICS AGENCY (DEPT OF DEFENSE) · EFS Ebrex Sarl · $700,000 (total) · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1**  \n*Posted 2026-10-16, award SPE300-27-D-4113, “Western Africa J&A”*\n\nThe J&A recounts the contract's maximum rising to $307,600,000.00 after the Niger Military led takeover affected supply routes and forced airlifts. It is now a second bridge to EFS through December 14, 2027.\n\n> “the Niger Military led takeover in July 2023 significantly impacted supply routes. Due to the critical need to utilize airlifts for the inbound supply chain”  \n> — TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 2\n\n> “Due to the critical need to utilize airlifts for the inbound supply chain in addition to delays in the competitive follow-on acquisition, a modification was processed in December 2023 to increase the maximum from $97,600,000.00 to $307,600,000.00.”  \n> — TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf, p. 2 (source of the figure above, quoted by the checks)\n\n[SAM.gov notice](https://sam.gov/opp/de99779d561a49e28e5ed72ad109ac36/view) · [TAB 1 JA Western Africa Bridge 2 - REDACTED Final.pdf](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/e93882dcc18c1d76244974093b3696fd5e5e016e/files/de99779d561a49e28e5ed72ad109ac36/c5dae583dded478f97111a78761d9db2_TAB_1_JA_Western_Africa_Bridge_2_-_REDACTED_Final.pdf)\n\n## All new notices (17)\n\n- ★ Office of the Assistant Secretary for Financial Resources (ASFR) · Repatriation Evaluation Support Services  Bridge Support Services · Deloitte Consulting LLP · value redacted · GSAM/R 538.7104-3(b)(1)(i); FAR 8.405-6(a)(1)(i)(A) · [SAM.gov](https://sam.gov/opp/1085edc5fb024f1a9159649f3e1e7c66/view)\n- ★ US Immigration and Customs Enforcement · Justification - Records & Information Management Unit (RIMU) · PROCENTRIX LLC · value redacted · RFO FAR 16.507-6(b)(3); 41 U.S. Code § 4106 · [SAM.gov](https://sam.gov/opp/44c27c14f105492baf7ae0418865f5b8/view)\n- ★ State · Permanent Change of Station (PCS) Lodging Program · Madison Hospitality Services, LLC · $19,600,000 · FAR 6.103-2; 41 USC 3304 · [SAM.gov](https://sam.gov/opp/3d71fffad77244fba5894490c51a97d3/view)\n- ★ Defense Logistics Agency · Western Africa J&A · EFS Ebrex Sarl · $700,000 · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1 · [SAM.gov](https://sam.gov/opp/de99779d561a49e28e5ed72ad109ac36/view)\n- Defense Logistics Agency · Europe Zone 4 Afloat J&A · EFS Ebrex Sarl · $33,000,000 · 10 U.S.C. § 3204(a)(1); Revolutionary FAR Overhaul Part 6.103-1 · [SAM.gov](https://sam.gov/opp/71c4d8cfdc524f6ba7dfb9f0cb2003e9/view)\n- Defense Advanced Research Projects Agency (DARPA) · HR001124C0315 DARPA JUSTIFICATION AND APPROVAL FOR OTHER THAN FULL AND OPEN COMPETITION · University of Michigan · $5,000,000 · 10 U.S.C. § 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/0ec0d027c57c45bb9d97d4e6410d2c82/view)\n- Defense Advanced Research Projects Agency (DARPA) · HR001124C0378 DARPA JUSTIFICATION AND APPROVAL FOR OTHER THAN FULL AND OPEN COMPETITION · Ginkgo Bioworks, Inc. · $5,000,000 · 10 U.S.C. § 3204(a)(1); FAR Part 6.302-1 · [SAM.gov](https://sam.gov/opp/0feb80306a5c403ebfb82be750435479/view)\n- US Marshals Service · Jewelry, Art, Antiques & Collectibles (JAAC) · Gaston & Sheehan Auctioneers, Inc. · $4,500,000 · 6.103-2 Unusual and Compelling Urgency Authority 41 USC 3304(a)(1) · [SAM.gov](https://sam.gov/opp/2fb06f4d3e054884968f8c3dd94a5c4d/view)\n- National Aeronautics and Space Administration · Space Flight Closeout Crew Vehicle · Enterprise Rent-A-Car · $70,000 · 10 U.S.C. 3204(a)(2); FAR 6.302-2 · [SAM.gov](https://sam.gov/opp/389ca2cde02342139000dd28eecd58ec/view)\n- National Aeronautics and Space Administration · Space Flight Closeout Crew Vehicle · Enterprise Rent-A-Car · $70,000 · 10 U.S.C. 3204(a)(2); FAR 6.302-2 · [SAM.gov](https://sam.gov/opp/8c5765fbeda34be395c8114399f185e8/view)\n- Federal Prison System / Bureau of Prisons · Urgent Chiller Repairs FCI Aliceville · JOHNSON CONTROLS BUILDING SOLUTIONS · $43,000 · 41 U.S.C. 1901 · [SAM.gov](https://sam.gov/opp/78d530312d704acf91b441d352978491/view)\n- Army · Class Justification and Approval - Brand Name - Cisco products for the Walla Walla… · Title 10 United States Code (U.S.C.) §3204(a)(1) as implemented in Revolutionary Federal Acquisition Regulation (FAR) Overhaul (RFO) FAR 6.103-1; RFO FAR 6.103-1(d) · [SAM.gov](https://sam.gov/opp/0648190d97994994ae71b814ec4fe5a7/view)\n- Defense Logistics Agency · 30--PARTS KIT,ELECTRO-M · BEAVER AEROSPACE & DEFNESE INC · value redacted · 10 U.S.C. 3204(a)(1) as implemented by FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/f39ffde427ef4ba58a02c2aa419da97c/view)\n- Defense Logistics Agency · Redacted Justification & Approval (J&A) · Independent Rough Terrain Center, LLC · value redacted · 10 United States Code (U.S.C.) 3204(a)(1); FAR 6.302-1 · [SAM.gov](https://sam.gov/opp/c5bf1a7244154ac0a205da0b2cf8fbdf/view)\n- Defense Logistics Agency · SPE4A6-26-R-X302, NSN 3110-01-495-4847, BEARING, BALL, AIRFRAME · value redacted · 10 U.S.C. 3204(a)(1) · [SAM.gov](https://sam.gov/opp/e4c45ad2d6654414b26c0d318e61bda4/view)\n- Navy · The Justification and Approval (J&A) to award a contract on a sole source basis for… · Kapule, LLC · value redacted · 10 U.S.C. 3204(a)(2) · [SAM.gov](https://sam.gov/opp/cfded78777cc469fa9c07889c65e620c/view)\n- State · Near Eastern Affairs Monitoring, Evaluation, Leaning, and Analytic Services (NEA MELA) · MSI · GSAR 538.7104-3(b)(iii) · [SAM.gov](https://sam.gov/opp/191f18cd7a6e4078a437f89a611abd15/view)\n\n*Vendor, value and authority are shown only where the AI extraction found them with a quote checked against the document; blank means not extracted yet or not stated, not none.*\n\n---\n\n*What this is:* a daily pick of the most remarkable new federal sole-source justification (J&A) notices posted on SAM.gov, from the public [federal-ja-documents dataset](https://huggingface.co/datasets/abigailhaddad/federal-ja-documents). Today: 17 new notices reviewed (first collected Oct 16 20:00 ET to Oct 17 00:31 ET).\n\n*How:* the picks and write-ups are AI-selected and AI-written (Claude). Every quote was checked word for word against the notice's document text, and dollar figures come from those quotes or from quote-checked extraction fields. AI can still misread a document: check the source before relying on anything. [How it works](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md).\n",
+ "spent_usd": 0.1227
 }

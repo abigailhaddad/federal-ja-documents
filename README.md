@@ -349,7 +349,9 @@ email (fewer, or none, when nothing stands out): a headline, why it is
 notable, one or two verbatim quotes with their page, and links. Claude picks
 and writes them up; code checks that every quote is in the notice's text and
 that every dollar figure comes from a verified quote or a quote-checked
-extraction value, and drops what fails. About $0.10-0.20 a day.
+extraction value, and drops what fails. Every email ends with a one-line list
+of all the new notices it covered. About $0.10 a day ($0.01-0.14 in a 7-day
+backtest).
 
 ```sh
 uv run python -m federal_ja.analysis digest --dry-run --out work/digest   # digest.md + picks.json, sends nothing
