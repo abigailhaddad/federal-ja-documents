@@ -332,12 +332,12 @@ at the dataset commit the AI tables were built from, so every row joins.
   USAspending and AI columns; AI columns are marked), Theme tags (every quote
   with its page).
 - Document links point at that dataset commit, so they keep working.
-- **One dataset commit only.** The workbook stops with an error when the AI
-  tables record more than one `dataset_revision`. Once the daily extraction
-  has published, they do (each run reads the dataset as of that day, and the
-  theme snapshot is from `11a221ab5ae9`), so the command fails on the latest
-  dataset; `--revision <a dataset commit from before the first daily
-  extraction publish>` still builds the 2026-10-18 workbook.
+- **Mixed dataset commits.** Once the daily extraction has published, the AI
+  rows record several `dataset_revision`s (each run reads the dataset as of
+  that day; the theme snapshot is from `11a221ab5ae9`). The workbook then
+  reads the notice, attachment and page tables at the same commit as the AI
+  tables (`--revision`, default `main`); those tables only grow, so every
+  notice an AI row was built from is there.
 
 ## License
 

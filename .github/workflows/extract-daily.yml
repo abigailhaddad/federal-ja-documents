@@ -31,6 +31,13 @@ on:
         description: "Publish analysis/extractions.parquet to Hugging Face"
         type: boolean
         default: false
+      workers:
+        # 2026-10-21: for a by-hand backfill. At 4 workers a run does about 6
+        # notices a minute (extract6 trial runs), so the 240-minute job
+        # timeout caps one run at about 1,450 notices; more workers finish a
+        # backfill in fewer runs if the API rate limit allows (429s retry).
+        description: "Parallel model calls"
+        default: "4"
 
 concurrency:
   group: analysis-extraction
@@ -60,7 +67,7 @@ jobs:
           # the next run and the rest are still published. Anything else stops.
           set +e
           uv run python -m federal_ja.analysis extract --seed-from-hf --out work/extract \
-            --max-usd "${{ inputs.max_usd || '2' }}" --workers 4 2> >(tee extract.log >&2)
+            --max-usd "${{ inputs.max_usd || '2' }}" --workers "${{ inputs.workers || '4' }}" 2> >(tee extract.log >&2)
           rc=$?
           set -e
           if [ "$rc" -gt 1 ]; then exit "$rc"; fi

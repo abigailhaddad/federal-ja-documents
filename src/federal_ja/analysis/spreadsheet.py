@@ -4,7 +4,7 @@ EXPERIMENTAL (it includes the AI-generated columns). Everything is read from the
 published Hugging Face dataset, so no local files are needed:
 
 * ``analysis/extractions.parquet``, ``analysis/theme_status.parquet`` and
-  ``analysis/theme_tags.parquet`` (the AI tables, a static snapshot), and
+  ``analysis/theme_tags.parquet`` (the AI tables; extractions refresh daily, themes are a one-off snapshot), and
 * ``data/notices.parquet``, ``data/attachments.parquet`` and ``data/pages.parquet``
   read at the SAME dataset commit the AI tables were built from, so every row
   joins. Notices posted after that snapshot are not in the workbook until the
@@ -38,9 +38,22 @@ NOT_REVIEWED = {"no_text": "not reviewed (no readable text)", "too_long": "not r
 
 # --------------------------------------------------------------------------- loading
 
+def data_revision(revs: set[str], rev: str | None) -> str:
+    """The dataset commit to read the data tables at: the AI rows' one commit,
+    or ``rev`` itself when they record several (see ``load_tables``)."""
+    return next(iter(revs)) if len(revs) == 1 else (rev or "main")
+
+
 def load_tables(rev: str | None = None) -> dict[str, pd.DataFrame]:
-    """Read the AI tables at ``rev`` (default: main), then the data tables at the
-    dataset commit the AI tables record."""
+    """Read the AI tables at ``rev`` (default: main), then the data tables.
+
+    When every AI row records the same dataset commit, the data tables are read
+    at that commit (the original one-off snapshot). Since the daily extraction
+    job (2026-10-21) extraction rows are added at newer commits while the theme
+    tables stay on their 2026-10-18 commit, so the rows record several commits;
+    then the data tables are read at ``rev`` itself, the same commit as the AI
+    tables. The data tables only grow, so that commit has every notice any AI
+    row was built from."""
     import duckdb
 
     c = duckdb.connect()
@@ -48,9 +61,7 @@ def load_tables(rev: str | None = None) -> dict[str, pd.DataFrame]:
     t = {name: c.sql(f"select * from '{head}analysis/{name}.parquet'").df()
          for name in ("extractions", "theme_status", "theme_tags")}
     revs = set(t["extractions"].dataset_revision.dropna()) | set(t["theme_status"].dataset_revision.dropna())
-    if len(revs) != 1:
-        raise ValueError(f"AI tables were built from more than one dataset commit: {sorted(revs)}")
-    data_rev = revs.pop()
+    data_rev = data_revision(revs, rev)
     base = HF_BASE + data_rev + "/"
     t["notices"] = c.sql(f"select * from '{base}data/notices.parquet'").df()
     t["attachments"] = c.sql(
