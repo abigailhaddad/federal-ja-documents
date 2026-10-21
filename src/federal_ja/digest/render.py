@@ -56,6 +56,9 @@ def footer(n_reviewed: int, window: dict) -> str:
 
 
 _SMALL = frozenset({"and", "of", "the", "for", "on", "in", "to", "at"})
+# short all-caps words that are acronyms even though they have a vowel
+_ACRONYMS = frozenset({"US", "USA", "ICE", "VA", "AID", "USAID", "IRS", "EPA", "FAA", "TSA", "SEC", "NASA", "NOAA",
+                       "HUD", "HHS", "DOE", "DOJ", "DOT", "DEA", "ATF", "FBI", "USDA", "GSA", "OPM", "SBA"})
 _DROP = re.compile(r",\s*DEPARTMENT OF( THE)?$|^DEPT\.? OF( THE)?\s+|^DEPARTMENT OF( THE)?\s+", re.I)
 TITLE_CHARS = 90
 
@@ -70,7 +73,8 @@ def short_org(m: dict) -> str:
         lw = w.lower()
         if i and lw in _SMALL:
             words.append(lw)
-        elif len(w) <= 3 or "." in w or w.startswith("(") or not w.isupper():
+        elif ("." in w or w.startswith("(") or not w.isupper() or w in _ACRONYMS
+              or (len(w) <= 4 and not set(w) & set("AEIOU"))):
             words.append(w)
         else:
             words.append(w.capitalize())

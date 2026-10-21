@@ -402,6 +402,8 @@ def test_short_org_keeps_acronyms():
     assert render.short_org({"sub_tier": "DEFENSE CONTRACT MANAGEMENT AGENCY (DCMA)"}) == \
         "Defense Contract Management Agency (DCMA)"
     assert render.short_org({"agency": "DEPT OF DEFENSE"}) == "Defense"
+    assert render.short_org({"sub_tier": "DEPT OF THE AIR FORCE"}) == "Air Force"
+    assert render.short_org({"sub_tier": "US IMMIGRATION AND CUSTOMS ENFORCEMENT"}) == "US Immigration and Customs Enforcement"
 
 
 def test_zero_picks_email_still_lists_all_notices():

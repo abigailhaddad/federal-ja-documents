@@ -3,7 +3,8 @@
 Seven digests built by `digest --dry-run` on GitHub Actions (prompt
 `2026-10-21.digest2`, the final code of this branch), one per day, all read at
 dataset commit `e93882dcc18c1d76244974093b3696fd5e5e016e`. Nothing was sent.
-Each day has the email as it would go out (`<day>.md`) and the full run record
+The lists were rendered just before a cosmetic fix to agency names
+("AIR Force" is now "Air Force"). Each day has the email as it would go out (`<day>.md`) and the full run record
 (`<day>.picks.json`: candidates, exclusions, screen scores, the model's raw
 answer, what the checks dropped, token use and cost).
 
