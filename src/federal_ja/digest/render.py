@@ -45,7 +45,9 @@ def footer(n_reviewed: int, window: dict) -> str:
     old = window.get("left_out_old")
     return (
         "---\n\n"
-        f"*WOAH! J&As:* a daily pick of new federal sole-source justifications (J&As) from SAM.gov, via the "
+        f"*WOAH! J&As:* new federal J&As (justifications for contracts awarded without full and open "
+        f"competition) posted on SAM.gov, all listed above, with the most remarkable few picked out by Claude, "
+        f"via the "
         f"[federal-ja-documents dataset]({DATASET_URL}). {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
         f"reviewed today (first collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
         + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
