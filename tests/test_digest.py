@@ -297,6 +297,26 @@ def test_successful_send_saves_watermark_and_rerun_sends_nothing_new(tmp_path):
     assert len(sent) == 1
 
 
+def test_never_a_second_email_the_same_day_even_with_new_notices(tmp_path, monkeypatch):
+    sent = []
+
+    def ok(subject, body, *, metadata, status):
+        sent.append(subject)
+        return {"id": f"em_{len(sent)}", "status": "about_to_send"}
+    assert run(tmp_path, args(tmp_path, "--send"), send_fn=ok) == 0
+    before = json.loads((tmp_path / "state.json").read_text())
+    # a notice first seen after the morning email, the same day
+    monkeypatch.setattr(FakeReader, "NOTICES", FakeReader.NOTICES + [
+        notice("n2", "2026-10-21T13:00:00+00:00", "2026-10-21 09:00:00")])
+    assert run(tmp_path, args(tmp_path, "--send"), send_fn=ok) == 0
+    assert len(sent) == 1
+    rep = json.loads((tmp_path / "out" / "picks.json").read_text())
+    assert rep["skipped"].startswith("a digest was already sent today; 1 new notice")
+    # state untouched, so n2 is still after the watermark for tomorrow
+    assert json.loads((tmp_path / "state.json").read_text()) == before
+    assert before["watermark_first_seen_at"] < "2026-10-21T13:00:00+00:00"
+
+
 def test_zero_picks_email_and_skip_option(tmp_path):
     sent = []
 

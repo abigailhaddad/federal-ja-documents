@@ -141,8 +141,10 @@ Everything dropped is listed with its reason in `picks.json`
   the same notices again.
 * **Zero picks:** the email is the one line "Nothing WOAH-worthy today (N new
   notices reviewed)." so it is clear the job ran (`--zero-picks skip` sends
-  nothing instead). With no new notices at all and an email already sent
-  that day, nothing is sent.
+  nothing instead).
+* **One email a day:** once a digest has been sent on an Eastern-time day,
+  every later run that day sends nothing, even if it finds new notices; they
+  stay after the watermark and go in the next day's digest (2026-10-22).
 
 ## Web archive and RSS feed
 
