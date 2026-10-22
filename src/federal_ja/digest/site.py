@@ -98,8 +98,11 @@ def _sent_label(entry: dict) -> str:
     return f"{d:%b} {d.day}, {d.year}, {d:%H:%M} ET"
 
 
-def page(title: str, body: str, *, root: str = "", description: str = "") -> str:
-    """``root``: the relative path back to the site root ('' or '../')."""
+def page(title: str, body: str, *, root: str = "", description: str = "", home: bool = False) -> str:
+    """``root``: the relative path back to the site root ('' or '../'). ``home``:
+    this is the list of past emails, so no link to itself (2026-10-22)."""
+    past = "" if home else f'<a href="{root}index.html">Past emails</a> '
+    past_footer = "" if home else f'<a href="{root}index.html">Past emails</a> · '
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -113,14 +116,14 @@ def page(title: str, body: str, *, root: str = "", description: str = "") -> str
 </head>
 <body>
 <header class="site"><a class="brand" href="{root}index.html">{e(TITLE)}</a>
-<nav><a href="{root}index.html">All issues</a> <a href="{root}about.html">About</a> <a href="{root}feed.xml">RSS</a> <a href="{SUBSCRIBE_URL}">Subscribe by email</a></nav>
+<nav>{past}<a href="{root}about.html">About</a> <a href="{root}feed.xml">RSS</a> <a href="{SUBSCRIBE_URL}">Subscribe by email</a></nav>
 </header>
 <main>
 {body}
 </main>
 <footer class="site"><p>Chosen and written up by Claude. Quotes are checked word for word against the documents,
 but check the source before relying on anything. <a href="{root}about.html">About</a> ·
-<a href="{root}index.html">All issues</a> · <a href="{root}feed.xml">RSS</a> ·
+{past_footer}<a href="{root}feed.xml">RSS</a> ·
 <a href="{ISSUE_URL}">Report a problem (GitHub issue)</a></p></footer>
 </body>
 </html>
@@ -129,7 +132,7 @@ but check the source before relying on anything. <a href="{root}about.html">Abou
 
 def signup_form() -> str:
     return (f'<form class="signup" action="{SUBSCRIBE_FORM_URL}" method="post">'
-            '<label for="bd-email">Get each issue by email</label> '
+            '<label for="bd-email">Get the daily email</label> '
             '<input type="email" name="email" id="bd-email" required autocomplete="email" '
             'placeholder="you@example.com"> '
             '<input type="hidden" name="embed" value="1">'
@@ -210,22 +213,22 @@ def index_page(items: list[tuple[str, dict]]) -> str:
         rows.append(f'<li><span class="date">{e(_date_label(entry))}</span> '
                     f'<a href="issues/{e(issue_slug(name))}.html">{e(entry.get("subject"))}</a> '
                     f'<span class="count">{n} pick{"s" if n != 1 else ""}</span></li>')
-    lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No issues yet.</p>"
+    lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No emails yet.</p>"
     body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, chosen and written up by Claude. "
             f'<a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{signup_form()}\n{lst}')
-    return page(TITLE, body)
+    return page(TITLE, body, home=True)
 
 
 def about_page() -> str:
     body = f"""<h1>About {e(TITLE)}</h1>
 <p>{e(TAGLINE)}, via the public <a href="{e(DATASET_URL)}">federal-ja-documents dataset</a>.
-Each issue has the few most remarkable new J&amp;A notices the collector picked up since the previous one
+Each email has the few most remarkable new J&amp;A notices the collector picked up since the previous one
 (at most five, sometimes none), each with verbatim quotes from the documents and links to SAM.gov,
 then every new notice it reviewed, one line each.</p>
 <p><strong>Chosen and written up by Claude.</strong> Quotes are checked word for word against the documents,
 and dollar figures come from those quotes or from quote-checked extraction fields,
 but AI can still misread a document: check the source before relying on anything.</p>
-<p>This site shows the issues exactly as they were sent by email. Code, rules and checks:
+<p>This site shows each email exactly as it was sent. Code, rules and checks:
 <a href="{e(PROJECT_URL)}">github.com/abigailhaddad/federal-ja-documents</a>
 (<a href="{e(PROJECT_URL)}/blob/main/docs/digest.md">how the digest works</a>).
 Data: <a href="{e(DATASET_URL)}">huggingface.co/datasets/abigailhaddad/federal-ja-documents</a>.</p>
@@ -239,7 +242,7 @@ Data: <a href="{e(DATASET_URL)}">huggingface.co/datasets/abigailhaddad/federal-j
 
 def not_found_page() -> str:
     # served at any depth, so root-absolute links
-    return page(f"Not found · {TITLE}", '<h1>Not found</h1><p><a href="/index.html">All issues</a></p>',
+    return page(f"Not found · {TITLE}", '<h1>Not found</h1><p><a href="/index.html">Past emails</a></p>',
                 root="/")
 
 

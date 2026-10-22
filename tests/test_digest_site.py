@@ -199,3 +199,14 @@ def test_report_a_problem_link_on_every_page(tmp_path):
     site.build([("2026-10-21.json", entry)], out)
     for rel in ("index.html", "about.html", "404.html", "issues/2026-10-21.html"):
         assert 'href="https://github.com/abigailhaddad/federal-ja-documents/issues/new"' in (out / rel).read_text(), rel
+
+
+def test_past_emails_link_everywhere_but_the_list_itself(tmp_path):
+    from federal_ja.digest import site
+    out = tmp_path / "dist"
+    entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
+    site.build([("2026-10-21.json", entry)], out)
+    for rel in ("index.html", "about.html", "404.html", "issues/2026-10-21.html"):
+        t = (out / rel).read_text()
+        assert "All issues" not in t, rel
+        assert ("Past emails" in t) == (rel != "index.html"), rel
