@@ -177,3 +177,16 @@ def test_rss_feed_is_valid_rss2_with_the_last_30_issues():
 
 def test_email_footer_links_the_archive():
     assert f"Archive & RSS: [{render.SITE_URL}]({render.SITE_URL})" in render.footer(1, {})
+
+
+def test_signup_form_on_index_about_and_issues(tmp_path):
+    # 2026-10-22: Buttondown's plain-POST embed form, no JavaScript
+    from federal_ja.digest import site
+    out = tmp_path / "dist"
+    entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
+    site.build([("2026-10-21.json", entry)], out)
+    for rel in ("index.html", "about.html", "issues/2026-10-21.html"):
+        t = (out / rel).read_text()
+        assert '<form class="signup" action="https://buttondown.com/api/emails/embed-subscribe/abigailhaddad" ' \
+               'method="post">' in t, rel
+        assert 'type="email" name="email"' in t, rel

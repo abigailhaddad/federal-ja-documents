@@ -43,6 +43,9 @@ from .render import DATASET_URL, ET, FIELDS_NOTE, FIGURE_SOURCE_NOTE, GISTS_NOTE
 
 TITLE = "WOAH! J&As"
 SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
+# Buttondown's no-JavaScript embed form: a plain POST; Buttondown shows its own
+# confirmation page and sends the double-opt-in email (2026-10-22)
+SUBSCRIBE_FORM_URL = "https://buttondown.com/api/emails/embed-subscribe/abigailhaddad"
 TAGLINE = "A daily pick of new federal sole-source justifications (J&As) from SAM.gov"
 FEED_ITEMS = 30
 # the only files the builder writes (issue pages aside); test_site_dist.py checks the tree independently
@@ -121,6 +124,15 @@ but check the source before relying on anything. <a href="{root}about.html">Abou
 """
 
 
+def signup_form() -> str:
+    return (f'<form class="signup" action="{SUBSCRIBE_FORM_URL}" method="post">'
+            '<label for="bd-email">Get each issue by email</label> '
+            '<input type="email" name="email" id="bd-email" required autocomplete="email" '
+            'placeholder="you@example.com"> '
+            '<input type="hidden" name="embed" value="1">'
+            '<button type="submit">Subscribe</button></form>')
+
+
 def _pick_html(p: dict) -> str:
     line = " · ".join(x for x in (p.get("org"), p.get("vendor"), p.get("value"), p.get("authority")) if x)
     bits = [f"Posted {e(p.get('posted_date'))}"]
@@ -183,7 +195,8 @@ def issue_page(name: str, entry: dict, prev_name: str | None, next_name: str | N
     sent = _sent_label(entry)
     head = (f'<p class="dateline">{e(_date_label(entry))}' + (f" · sent {e(sent)}" if sent else "") + "</p>"
             f"<h1>{e(entry.get('subject'))}</h1>")
-    body = head + "\n" + issue_content(entry) + (f'\n<p class="pager">{" · ".join(nav)}</p>' if nav else "")
+    body = (head + "\n" + issue_content(entry) + (f'\n<p class="pager">{" · ".join(nav)}</p>' if nav else "")
+            + "\n" + signup_form())
     return page(entry.get("subject") or TITLE, body, root="../")
 
 
@@ -196,7 +209,7 @@ def index_page(items: list[tuple[str, dict]]) -> str:
                     f'<span class="count">{n} pick{"s" if n != 1 else ""}</span></li>')
     lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No issues yet.</p>"
     body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, chosen and written up by Claude. "
-            f'<a href="{SUBSCRIBE_URL}">Subscribe by email</a> · <a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{lst}')
+            f'<a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{signup_form()}\n{lst}')
     return page(TITLE, body)
 
 
@@ -213,8 +226,9 @@ but AI can still misread a document: check the source before relying on anything
 <a href="{e(PROJECT_URL)}">github.com/abigailhaddad/federal-ja-documents</a>
 (<a href="{e(PROJECT_URL)}/blob/main/docs/digest.md">how the digest works</a>).
 Data: <a href="{e(DATASET_URL)}">huggingface.co/datasets/abigailhaddad/federal-ja-documents</a>.</p>
-<p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>.
-No JavaScript, no cookies, no trackers.</p>"""
+<p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>, or by email (sent through Buttondown):</p>
+{signup_form()}
+<p>No JavaScript, no cookies, no trackers on this site.</p>"""
     return page(f"About · {TITLE}", body)
 
 
@@ -281,6 +295,10 @@ blockquote footer{color:var(--muted);font-size:.9rem;margin-top:.25rem;overflow-
 .note{font-size:.9rem}
 .star{color:var(--accent)}
 .pager{margin:2rem 0}
+.signup{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0 1.5rem;padding:.75rem 1rem;background:var(--quote);border:1px solid var(--line)}
+.signup label{font-weight:600;flex-basis:100%}
+.signup input[type=email]{flex:1 1 14rem;min-width:0;font:inherit;padding:.4rem .6rem;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.signup button{font:inherit;font-weight:600;padding:.4rem 1rem;border:0;background:var(--accent);color:var(--bg);cursor:pointer}
 footer.site{margin-top:3rem;padding-top:1rem;padding-bottom:2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
 """
 
