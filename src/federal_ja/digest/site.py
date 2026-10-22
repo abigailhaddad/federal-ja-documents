@@ -48,7 +48,11 @@ SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
 # readers report a wrong pick, quote or figure here (2026-10-22)
 ISSUE_URL = "https://github.com/abigailhaddad/federal-ja-documents/issues/new"
 SUBSCRIBE_FORM_URL = "https://buttondown.com/api/emails/embed-subscribe/abigailhaddad"
-TAGLINE = "A daily pick of new federal sole-source justifications (J&As) from SAM.gov"
+# 2026-10-22: not "a daily pick of sole-source justifications": every email lists all the
+# new J&As (not all sole-source), and Claude only picks out a few of them
+TAGLINE = ("New federal J&As (justifications for contracts awarded without full and open competition) "
+           "posted on SAM.gov, all listed each morning, with the most remarkable few picked out "
+           "and summarized by Claude")
 FEED_ITEMS = 30
 # the only files the builder writes (issue pages aside); test_site_dist.py checks the tree independently
 FIXED_FILES = ("index.html", "about.html", "feed.xml", "style.css", "404.html")
@@ -214,14 +218,14 @@ def index_page(items: list[tuple[str, dict]]) -> str:
                     f'<a href="issues/{e(issue_slug(name))}.html">{e(entry.get("subject"))}</a> '
                     f'<span class="count">{n} pick{"s" if n != 1 else ""}</span></li>')
     lst = "<ul class=\"issues\">\n" + "\n".join(rows) + "\n</ul>" if rows else "<p>No emails yet.</p>"
-    body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}, chosen and written up by Claude. "
+    body = (f"<h1>{e(TITLE)}</h1>\n<p class=\"lede\">{e(TAGLINE)}. "
             f'<a href="about.html">About</a> · <a href="feed.xml">RSS feed</a></p>\n{signup_form()}\n{lst}')
     return page(TITLE, body, home=True)
 
 
 def about_page() -> str:
     body = f"""<h1>About {e(TITLE)}</h1>
-<p>{e(TAGLINE)}, via the public <a href="{e(DATASET_URL)}">federal-ja-documents dataset</a>.
+<p>{e(TAGLINE)}. The notices come from the public <a href="{e(DATASET_URL)}">federal-ja-documents dataset</a>.
 Each email has the few most remarkable new J&amp;A notices the collector picked up since the previous one
 (at most five, sometimes none), each with verbatim quotes from the documents and links to SAM.gov,
 then every new notice it reviewed, one line each.</p>
@@ -254,7 +258,7 @@ def feed_xml(items: list[tuple[str, dict]], now: datetime | None = None) -> str:
     out = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">', "<channel>",
            f"<title>{x(TITLE)}</title>", f"<link>{SITE_URL}/</link>",
-           f"<description>{x(TAGLINE)}. Chosen and written up by Claude; check the source.</description>",
+           f"<description>{x(TAGLINE)}. Check the source before relying on anything.</description>",
            "<language>en-us</language>",
            f'<atom:link href="{SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>',
            f"<lastBuildDate>{format_datetime(built.astimezone(timezone.utc), usegmt=True)}</lastBuildDate>"]
