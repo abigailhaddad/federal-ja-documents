@@ -1,0 +1,8 @@
+# Deploy: cd cron-trigger && npx wrangler deploy  (CLOUDFLARE_API_TOKEN/ACCOUNT_ID in the environment)
+name = "federal-ja-cron-trigger"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[triggers]
+crons = ["15 6 * * *"]
