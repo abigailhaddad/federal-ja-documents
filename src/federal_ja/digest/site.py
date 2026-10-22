@@ -45,6 +45,8 @@ TITLE = "WOAH! J&As"
 SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
 # Buttondown's no-JavaScript embed form: a plain POST; Buttondown shows its own
 # confirmation page and sends the double-opt-in email (2026-10-22)
+# readers report a wrong pick, quote or figure here (2026-10-22)
+ISSUE_URL = "https://github.com/abigailhaddad/federal-ja-documents/issues/new"
 SUBSCRIBE_FORM_URL = "https://buttondown.com/api/emails/embed-subscribe/abigailhaddad"
 TAGLINE = "A daily pick of new federal sole-source justifications (J&As) from SAM.gov"
 FEED_ITEMS = 30
@@ -118,7 +120,8 @@ def page(title: str, body: str, *, root: str = "", description: str = "") -> str
 </main>
 <footer class="site"><p>Chosen and written up by Claude. Quotes are checked word for word against the documents,
 but check the source before relying on anything. <a href="{root}about.html">About</a> ·
-<a href="{root}index.html">All issues</a> · <a href="{root}feed.xml">RSS</a></p></footer>
+<a href="{root}index.html">All issues</a> · <a href="{root}feed.xml">RSS</a> ·
+<a href="{ISSUE_URL}">Report a problem (GitHub issue)</a></p></footer>
 </body>
 </html>
 """
@@ -226,6 +229,8 @@ but AI can still misread a document: check the source before relying on anything
 <a href="{e(PROJECT_URL)}">github.com/abigailhaddad/federal-ja-documents</a>
 (<a href="{e(PROJECT_URL)}/blob/main/docs/digest.md">how the digest works</a>).
 Data: <a href="{e(DATASET_URL)}">huggingface.co/datasets/abigailhaddad/federal-ja-documents</a>.</p>
+<p>Spotted a wrong pick, quote or figure, or have a suggestion?
+<a href="{ISSUE_URL}">Open an issue on GitHub</a>.</p>
 <p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>, or by email (sent through Buttondown):</p>
 {signup_form()}
 <p>No JavaScript, no cookies, no trackers on this site.</p>"""

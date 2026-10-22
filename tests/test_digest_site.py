@@ -190,3 +190,12 @@ def test_signup_form_on_index_about_and_issues(tmp_path):
         assert '<form class="signup" action="https://buttondown.com/api/emails/embed-subscribe/abigailhaddad" ' \
                'method="post">' in t, rel
         assert 'type="email" name="email"' in t, rel
+
+
+def test_report_a_problem_link_on_every_page(tmp_path):
+    from federal_ja.digest import site
+    out = tmp_path / "dist"
+    entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
+    site.build([("2026-10-21.json", entry)], out)
+    for rel in ("index.html", "about.html", "404.html", "issues/2026-10-21.html"):
+        assert 'href="https://github.com/abigailhaddad/federal-ja-documents/issues/new"' in (out / rel).read_text(), rel
