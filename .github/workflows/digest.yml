@@ -11,12 +11,12 @@ name: Daily J&A digest email
 #   off (EXTRACT_DAILY_ENABLED != 'true'); otherwise the extraction run above
 #   follows and triggers this;
 # * a fallback schedule (22:30 UTC) for days when neither of the above fired.
-#   With no new notices it does nothing if a digest already went out that day
-#   (Eastern time); otherwise it sends the short "nothing whoa-worthy (0 new
-#   notices)" email, which says the collection did not bring anything new.
-# Every trigger uses the same saved watermark (analysis/digest_state.json in the
-# dataset), so a notice is covered once: a second run on the same day only sees
-# notices collected after the first one's email.
+#   If no digest went out that day it sends one (with no new notices, the
+#   short "nothing whoa-worthy (0 new notices)" email).
+# One email a day (2026-10-22): once a digest has been sent on an Eastern-time
+# day, every later run that day sends nothing, even with new notices; they go
+# in the next day's digest. Every trigger uses the same saved watermark
+# (analysis/digest_state.json in the dataset), so a notice is covered once.
 #
 # Sending: automatic runs send only when the repository variable
 # DIGEST_ENABLED is 'true'; otherwise the workflow_run triggers build a dry run

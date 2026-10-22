@@ -171,8 +171,13 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
     print(json.dumps({"dataset_revision": rev, "window": report["window"], "candidates": len(rows),
                       "excluded": info["excluded"]}, default=str), file=sys.stderr)
 
-    if a.send and not rows and state.get("last_sent_date_et") == today_et:
-        report["skipped"] = "no new notices and a digest was already sent today"
+    # One email a day, at most (2026-10-22): a later run the same Eastern day
+    # (GitHub's late cron, the 22:30 UTC fallback, a rerun) sends nothing, even
+    # with new notices. The state is not touched, so those notices stay after
+    # the watermark and go in the next day's digest.
+    if a.send and state.get("last_sent_date_et") == today_et:
+        report["skipped"] = ("a digest was already sent today; "
+                             + (f"{len(rows)} new notice(s) wait for tomorrow's" if rows else "no new notices"))
         (a.out / "digest.md").write_text(f"(skipped: {report['skipped']})\n")
         print(report["skipped"], file=sys.stderr)
         return 0
