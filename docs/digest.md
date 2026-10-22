@@ -251,4 +251,4 @@ See [`digest_samples/README.md`](digest_samples/README.md).
 
 ### Delivery time (2026-10-21)
 
-The run finishes around 3am ET (after the daily collection), but the email is created as a Buttondown **scheduled** email for **7:00 AM ET** (`--send-at`, default `07:00`). A run that finishes after 7am (the 22:30 UTC fallback) sends at once. Collecting later would not catch more notices: SAM.gov refreshes its active-notices file once a night (~03:30 UTC), and about 1% of J&As are posted between midnight and 6am ET.
+The run finishes around 3am ET (after the daily collection), but the email is created as a Buttondown **scheduled** email for **7:00 AM ET** (`--send-at`, default `07:00`). A run that finishes after 7am (the 22:30 UTC fallback) sends at once. The daily collection is started at 06:15 UTC by a Cloudflare Worker cron (`cron-trigger/`), because GitHub's own schedule fired 5–7 hours late every day of the week of 2026-10-19; the GitHub schedule stays as a backup. Collecting later would not catch more notices: SAM.gov refreshes its active-notices file once a night (~03:30 UTC), and about 1% of J&As are posted between midnight and 6am ET.

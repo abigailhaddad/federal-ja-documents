@@ -4,6 +4,11 @@ name: Daily J&A collection
 # The scheduled run is OFF until the repository variable DAILY_ENABLED is set
 # to "true" (Settings -> Secrets and variables -> Actions -> Variables).
 # Manual runs (workflow_dispatch) always work.
+# 2026-10-22: GitHub fired this schedule 5-7 hours late all week, so the daily
+# run is now started at 06:15 UTC by a Cloudflare Worker cron calling
+# workflow_dispatch (cron-trigger/). This schedule stays as a backup: if the
+# Worker's run already collected everything, a late scheduled run finds nothing
+# new and the digest it triggers sends nothing.
 on:
   schedule:
     - cron: "15 6 * * *"
