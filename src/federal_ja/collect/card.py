@@ -55,7 +55,7 @@ Code and issue tracker: {project_url}
 
 | Path | What |
 |---|---|
-| `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, and the matching USAspending award (`usaspending_*` columns, below) |
+| `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, SAM's award block with the order number (`sam_award_*` columns, below), and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
 | `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
@@ -78,6 +78,8 @@ made when the tables are published; `notices` is the source.
 * Downloaded files by kind: {by_kind}
 * Text source of downloaded files: {by_text}
 * PDFs with at least one image-only page: {n_scanned:,} of {n_pdfs:,} ({n_pages_scanned:,} such pages)
+
+{sam_award_section}
 
 {usaspending_section}
 
@@ -408,10 +410,60 @@ def render_card(store: Store, start_date: str, built_at: str,
         model=config.TRANSCRIBE_MODEL, not_downloaded_lines=not_downloaded_lines,
         n_res_error=res_status.get("error", 0), n_no_att=res_status.get("no_attachments", 0),
         n_multi_groups=len(multi), n_multi_notices=sum(multi), n_tx_pages=n_tx_pages,
+        sam_award_section=sam_award_section(store),
         usaspending_section=usaspending_section(store, us_cols),
         experimental_section=EXPERIMENTAL_SECTION,
         n_tx_failed_pages=len(failed), link_lines=link_lines, n_tx_failed_docs=len({k for k, _ in failed}),
     )
+
+
+SAM_AWARD_TEMPLATE = """## Award and order number from the SAM notice record (`sam_award_*` columns in `notices`)
+
+The CSV extracts give one award number (`award_number`). SAM's notice form
+has a second box, the delivery or task **order** number, which the CSVs do
+not carry. For a J&A that justifies one order, the award-number box usually
+holds the vehicle the order is placed under (a GSA schedule, NASA SEWP, an
+agency IDIQ), and only the order number says which order the J&A is for.
+Joining J&As to contracts on `award_number` alone attaches such a J&A to
+every order under that vehicle, including other agencies' orders.
+
+These columns are read from the notice record the SAM.gov notice page itself
+loads, `https://sam.gov/api/prod/opps/v2/opportunities/<notice_id>`
+(`data2.award`), one request per notice, copied as the posting office typed
+them (surrounding whitespace removed, nothing else changed):
+
+| Column | SAM field |
+|---|---|
+| `sam_award_status` | `ok` (award block read), `no_award` (record read, no award block; usual for Special Notices), `not_found` (SAM answered 404), `error: ...`, `pending` (new or edited, not yet fetched); empty: not fetched yet |
+| `sam_award_checked_at` | when the record was read (UTC) |
+| `sam_award_number` | `award.number` (normally the same as the CSV's `award_number`) |
+| `sam_award_order_number` | `award.deliveryOrderNumber`: the order the J&A is for, when it is for an order |
+| `sam_award_date`, `sam_award_amount` | `award.date`, `award.amount` |
+| `sam_awardee_name`, `sam_awardee_uei` | `award.awardee.name`, `award.awardee.ueiSAM` (often empty on J&As) |
+| `sam_award_modification_number` | `award.justificationAuthority.modificationNumber` |
+| `sam_justification_authority` | `award.justificationAuthority.authority`, SAM's code for the authority selected on the form, as stored (seen: `brand`, `far1`, `far13`, `FAR13`, `FAR5`, `2`, `3`, `5`) |
+| `sam_organization_id` | `data2.organizationId`, the posting office's SAM Federal Hierarchy key; `agency`, `sub_tier`, `office` and `aac_code` are the same office's names and code from the CSV |
+
+Caveats:
+
+* `sam_award_order_number` is free text. Seen on 2026-10-23: the award
+  number repeated, a solicitation number (e.g. a `Q` in the 9th character),
+  and a number with a modification suffix (`..._P00020`). It is not
+  validated or normalised here.
+* Edits made on SAM after a notice was read are picked up only when the
+  notice's CSV row changes (the same signal that re-checks the attachment
+  list).
+* Notices collected before these columns existed are filled by a one-time
+  backfill (`ja-collect sam-awards --backfill`); until it has run, their
+  `sam_award_status` is empty, which means unknown, not "no order".
+
+Coverage at build time, notices by `sam_award_status`: {coverage}
+"""
+
+
+def sam_award_section(store: Store) -> str:
+    from .sam_award import coverage
+    return SAM_AWARD_TEMPLATE.format(coverage=coverage(store))
 
 
 USASPENDING_TEMPLATE = """## Vendor and amount from USAspending (`usaspending_*` columns in `notices`)

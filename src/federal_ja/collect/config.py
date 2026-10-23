@@ -40,6 +40,9 @@ def archive_fiscal_years(start: dt.date, today: dt.date | None = None) -> list[i
 
 # sam.gov endpoints used by the sam.gov website itself (public, undocumented).
 RESOURCES_URL = "https://sam.gov/api/prod/opps/v3/opportunities/{notice_id}/resources"
+# The notice record the SAM.gov notice page reads; used for its award block
+# (sam_award.py).
+NOTICE_URL = "https://sam.gov/api/prod/opps/v2/opportunities/{notice_id}"
 DOWNLOAD_URL = (
     "https://sam.gov/api/prod/opps/v3/opportunities/resources/files/{resource_id}"
     "/download?api_key=null&token="

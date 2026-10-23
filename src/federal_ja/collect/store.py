@@ -28,6 +28,11 @@ NOTICE_COLUMNS = [
     "award_amount", "awardee", "description", "csv_link", "source_file",
     "source_files", "row_fingerprint", "first_seen_at", "resources_status",
     "resources_checked_at", "attachment_count",
+    # SAM's award block from the notice record (sam_award.py, 2026-10-23)
+    "sam_award_status", "sam_award_checked_at", "sam_award_number",
+    "sam_award_order_number", "sam_award_date", "sam_award_amount",
+    "sam_awardee_name", "sam_awardee_uei", "sam_award_modification_number",
+    "sam_justification_authority", "sam_organization_id",
 ]
 
 ATTACHMENT_COLUMNS = [

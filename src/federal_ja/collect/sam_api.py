@@ -1,6 +1,8 @@
-"""Polite client for the two keyless sam.gov endpoints the sam.gov website uses.
+"""Polite client for the keyless sam.gov endpoints the sam.gov website uses.
 
 * GET /api/prod/opps/v3/opportunities/{noticeId}/resources -> attachment list
+* GET /api/prod/opps/v2/opportunities/{noticeId} -> the notice record (its
+  award block, see sam_award.py)
 * GET /api/prod/opps/v3/opportunities/resources/files/{resourceId}/download
   -> 303 redirect to a signed S3 URL
 
@@ -150,6 +152,20 @@ class SamClient:
         if r.status_code != 200:
             raise SamError(f"resources HTTP {r.status_code}", r.status_code)
         return parse_resources(r.json())
+
+    def get_notice(self, notice_id: str) -> dict:
+        """The v2 notice record. 404 (SAM no longer serves the notice, empty
+        body) raises SamError with status 404."""
+        r = self._sam_get(config.NOTICE_URL.format(notice_id=notice_id))
+        if r.status_code != 200:
+            raise SamError(f"notice HTTP {r.status_code}", r.status_code)
+        try:
+            body = r.json()
+        except ValueError as e:
+            raise SamError("notice: response is not JSON") from e
+        if not isinstance(body, dict):
+            raise SamError("notice: response is not a JSON object")
+        return body
 
     def download(self, resource_id: str, dest: str,
                  max_bytes: int = config.MAX_FILE_BYTES) -> DownloadResult:
