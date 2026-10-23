@@ -3,6 +3,7 @@
 Backfill (local):
   ja-collect scan --workdir W --csv active.csv --csv FY2026.csv --csv FY2025.csv
   ja-collect resources --workdir W
+  ja-collect sam-awards --workdir W --backfill
   ja-collect download --workdir W
   ja-collect transcribe --workdir W --max-usd 5
   ja-collect report --workdir W
@@ -105,6 +106,28 @@ def cmd_resources(args, store: Store) -> dict:
     out["sam_retries"] = client.retry_count
     out["sam_status_counts"] = client.status_counts
     _record_run(store, "resources", out)
+    store.save()
+    return out
+
+
+def cmd_sam_awards(args, store: Store) -> dict:
+    """SAM's award block (award and order number, awardee) per notice; see
+    sam_award.py. Default: new and edited notices only ('pending').
+    --backfill: also every notice that has never been fetched."""
+    from . import sam_award
+
+    client = SamClient(requests_per_second=args.rps)
+    ids = None
+    if getattr(args, "ids", None):
+        ids = [line.strip() for line in open(args.ids) if line.strip()]
+    out = sam_award.fetch_sam_awards(
+        store, client, backfill=getattr(args, "backfill", False),
+        retry_errors=args.retry_errors, notice_ids=ids, limit=getattr(args, "limit", None),
+        workers=args.workers, checkpoint=store.save)
+    out["coverage"] = sam_award.coverage(store)
+    out["sam_retries"] = client.retry_count
+    out["sam_status_counts"] = client.status_counts
+    _record_run(store, "sam_awards", out)
     store.save()
     return out
 
@@ -384,6 +407,10 @@ def cmd_daily(args, store: Store) -> dict:
     store = Store(args.workdir).load()
     out = {"scan": cmd_scan(args, store)}
     out["resources"] = cmd_resources(args, store)
+    # new and edited notices only; the daily job never backfills
+    out["sam_awards"] = cmd_sam_awards(argparse.Namespace(
+        rps=args.rps, workers=args.workers, retry_errors=False, backfill=False,
+        ids=None, limit=None), store)
     out["download"] = cmd_download(args, store)
     if args.links:
         args.batch_files, args.min_free_gb, args.upload = 100, 1.0, False
@@ -413,6 +440,13 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--archives", choices=["auto", "always", "never"], default="auto")
     s = sub.add_parser("resources", help="fetch attachment lists for pending notices"); net(s)
     s.add_argument("--all", action="store_true", help="re-check every notice, not just pending ones")
+    s = sub.add_parser("sam-awards", help="fetch SAM's award block (award/order number, awardee) "
+                                          "for new and edited notices; --backfill for all unfetched")
+    net(s)
+    s.add_argument("--backfill", action="store_true",
+                   help="also every notice that has never been fetched (one request each)")
+    s.add_argument("--limit", type=int, help="ask SAM about at most N notices this run")
+    s.add_argument("--ids", help="file of notice_ids to (re)fetch, whatever their status")
     s = sub.add_parser("download", help="download pending files and extract text"); net(s)
     s.add_argument("--limit", type=int)
     s = sub.add_parser("stream", help="backfill in batches: download, upload to HF, verify, delete local"); net(s)
@@ -467,7 +501,7 @@ def main(argv: list[str] | None = None) -> None:
         logging.getLogger(noisy).setLevel(logging.ERROR if noisy == "pypdf" else logging.WARNING)
     os.makedirs(args.workdir, exist_ok=True)
     store = Store(args.workdir).load()
-    fn = globals()[f"cmd_{args.cmd}"]
+    fn = globals()[f"cmd_{args.cmd.replace('-', '_')}"]
     out = fn(args, store)
     json.dump(out, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")

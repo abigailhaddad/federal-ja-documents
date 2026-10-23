@@ -38,24 +38,35 @@ def merge_notices(store: Store, result: CollectResult, now: str | None = None) -
     New notice ids get resources_status='pending'. A known notice whose row
     fingerprint changed (edited on SAM) is also set back to 'pending' so its
     attachment list is re-checked. Returns {'new': [...], 'changed': [...]}.
+
+    The SAM award columns (sam_award.COLUMNS) work the same way: a new or
+    edited notice gets sam_award_status 'pending'; everything else keeps
+    what it had (a notice from before those columns keeps null until the
+    backfill reaches it).
     """
+    from .sam_award import COLUMNS as SAM_AWARD_COLUMNS, STATUS_PENDING
+
     now = now or now_iso()
     new, changed = [], []
     for nid, rec in result.notices.items():
         old = store.notices.get(nid)
         if old is None:
             rec = dict(rec, first_seen_at=now, resources_status="pending",
-                       resources_checked_at=None, attachment_count=None)
+                       resources_checked_at=None, attachment_count=None,
+                       sam_award_status=STATUS_PENDING)
             store.notices[nid] = rec
             new.append(nid)
             continue
         merged_sources = list(dict.fromkeys(list(old.get("source_files") or []) + list(rec["source_files"])))
         keep = {k: old.get(k) for k in ("first_seen_at", "resources_status",
-                                        "resources_checked_at", "attachment_count")}
+                                        "resources_checked_at", "attachment_count",
+                                        *SAM_AWARD_COLUMNS)}
         if old.get("row_fingerprint") != rec["row_fingerprint"]:
             # Only adopt the new row if it is not older than what we have.
             if (rec.get("posted_date") or "") >= (old.get("posted_date") or ""):
                 keep["resources_status"] = "pending"
+                # the old answer stays until the new one arrives
+                keep["sam_award_status"] = STATUS_PENDING
                 changed.append(nid)
                 store.notices[nid] = dict(rec, **keep, source_files=merged_sources)
             else:

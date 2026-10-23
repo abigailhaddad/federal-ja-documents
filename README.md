@@ -36,8 +36,9 @@ Everything comes from SAM.gov; no API key is needed.
 | Which J&As (and J&A candidates) exist + metadata | Daily active-notices CSV `ContractOpportunitiesFullCSV.csv` and yearly archive CSVs `FY<YYYY>_archived_opportunities.csv` (refreshed weekly) from `s3.amazonaws.com/falextracts/Contract Opportunities/` |
 | Attachment list per notice | `https://sam.gov/api/prod/opps/v3/opportunities/<noticeId>/resources` |
 | File download | `https://sam.gov/api/prod/opps/v3/opportunities/resources/files/<resourceId>/download?api_key=null&token=` (redirects to a signed S3 URL) |
+| Award block per notice (award number, **order number**, awardee) | `https://sam.gov/api/prod/opps/v2/opportunities/<noticeId>` (`data2.award`) |
 
-The two `sam.gov/api/prod` endpoints are the ones the SAM.gov website itself
+The `sam.gov/api/prod` endpoints are the ones the SAM.gov website itself
 uses. They are public but undocumented, so the client is deliberately polite:
 at most 3 requests/second to sam.gov (`JA_SAM_RPS`), retries with exponential
 backoff on 429/5xx/connection errors (honouring `Retry-After`), and a
@@ -105,7 +106,9 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
 ## Dataset layout (Hugging Face)
 
 ```
-data/notices.parquet          one row per notice (collection_reason says why), plus usaspending_* columns (vendor, amounts)
+data/notices.parquet          one row per notice (collection_reason says why), plus sam_award_* columns
+                              (SAM's award block: award and order number, awardee) and
+                              usaspending_* columns (vendor, amounts)
 data/attachments.parquet      one row per attachment, with whole-document text
 data/pages.parquet            one row per PDF page / image attachment: page_number,
                               text_layer_chars, text, text_source (native|transcription|none),
@@ -122,6 +125,57 @@ notice fields (`agency`, `sub_tier`, `office`, `notice_title`, `posted_date`,
 `notice_type`, `award_number`, `sam_link`) right after `notice_id`. They are
 added at publish time by `collect/published.py`; `notices` is the source and
 the working tables in `<workdir>/data/` do not have them.
+
+## SAM award block (`sam_award_*` columns)
+
+The CSV extracts carry one award number. SAM's notice form also has an
+**order number** box (`award.deliveryOrderNumber`), and for a J&A that
+justifies a single task or delivery order, the award-number box usually holds
+the vehicle (a GSA schedule, NASA SEWP, an agency IDIQ) while the order
+number says which order the J&A is for. Joining on `award_number` alone
+attaches such a J&A to every order under the vehicle, including other
+agencies' orders; a downstream site did exactly that. So `notices` also
+carries the notice record's award block, read from
+`https://sam.gov/api/prod/opps/v2/opportunities/<noticeId>` (no API key, the
+same polite client and rate limit as the attachment lists):
+
+| Column | SAM field |
+|---|---|
+| `sam_award_status` | `ok`, `no_award` (record has no award block), `not_found` (404), `error: ...`, `pending`; empty = not fetched yet |
+| `sam_award_checked_at` | when it was read (UTC) |
+| `sam_award_number` | `award.number` |
+| `sam_award_order_number` | `award.deliveryOrderNumber` |
+| `sam_award_date`, `sam_award_amount` | `award.date`, `award.amount` |
+| `sam_awardee_name`, `sam_awardee_uei` | `award.awardee.name`, `award.awardee.ueiSAM` |
+| `sam_award_modification_number` | `award.justificationAuthority.modificationNumber` |
+| `sam_justification_authority` | `award.justificationAuthority.authority` (SAM's code, as stored) |
+| `sam_organization_id` | `data2.organizationId` (Federal Hierarchy key of the posting office; `agency`/`sub_tier`/`office` are its names from the CSV) |
+
+Values are copied as typed (whitespace stripped). The order-number box is
+free text: it sometimes repeats the award number, holds a solicitation
+number, or has a modification suffix.
+
+New and edited notices (CSV row fingerprint changed) are set to `pending`
+by `scan` and fetched by `ja-collect sam-awards`, which the daily job runs
+after `resources`. Notices collected before these columns existed stay
+empty until a one-time backfill, run by hand:
+
+```sh
+uv run ja-collect --workdir $W pull                       # current tables from HF
+uv run ja-collect --workdir $W sam-awards --backfill      # one request per unfetched notice
+uv run ja-collect --workdir $W sam-awards --retry-errors  # optional: retry error / not_found rows
+uv run ja-collect --workdir $W publish --mode tables      # needs HF auth
+```
+
+`--limit N` caps the requests in one run; `--rps` sets the rate (default 3
+per second, `JA_SAM_RPS`). Every answer is appended to
+`<workdir>/cache/sam_award.jsonl` (not published) as it arrives, and a rerun
+applies cached answers instead of asking SAM again, so an interrupted
+backfill resumes even after `pull` has replaced the tables. At 3 requests a
+second, ~11,000 notices take about an hour (plus the ~10-minute USAspending
+join at publish). Do it between daily runs: the daily job publishes the
+tables it pulled at its start, so a backfill published while it is running
+would be overwritten.
 
 ## USAspending join (vendor and amount)
 
@@ -196,8 +250,9 @@ uv run ja-collect --workdir $W stream
 2. streams today's active CSV, plus any yearly archive whose ETag changed
    since the last run (so archives are picked up once a week, after SAM
    refreshes them);
-3. fetches attachment lists for new notices and for notices whose CSV row
-   changed (a cheap signal that the notice was edited);
+3. fetches attachment lists, and SAM's award block (`sam_award_*`), for new
+   notices and for notices whose CSV row changed (a cheap signal that the
+   notice was edited);
 4. downloads new files, extracts text, transcribes new scanned PDFs within the
    day's spend cap;
 5. commits the new files and updated tables to Hugging Face.

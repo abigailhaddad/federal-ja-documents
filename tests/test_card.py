@@ -96,3 +96,15 @@ def test_readme_shows_the_same_gate():
     from federal_ja.collect.sources import JA_TITLE_PATTERN
     readme = (Path(__file__).resolve().parents[1] / "README.md").read_text()
     assert JA_TITLE_PATTERN.pattern in readme
+
+
+def test_card_documents_sam_award_columns(tmp_path):
+    from federal_ja.collect import sam_award
+    s = Store(str(tmp_path))
+    s.notices["a"] = {"notice_id": "a", "posted_date": "2025-03-01", "sam_award_status": "ok"}
+    s.notices["b"] = {"notice_id": "b", "posted_date": "2025-03-01"}
+    card = render_card(s, "2025-01-20", "2026-10-23T00:00:00")
+    for c in sam_award.COLUMNS:
+        assert f"`{c}`" in card, c
+    assert "deliveryOrderNumber" in card
+    assert "{'ok': 1, 'unfetched': 1}" in card
