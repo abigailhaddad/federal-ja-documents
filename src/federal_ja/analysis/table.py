@@ -13,8 +13,10 @@ Used by the daily incremental run (``.github/workflows/extract-daily.yml``):
    notices.
 4. ``upload_table`` commits that one file to the dataset, and refuses to
    publish a table with fewer rows than the published one (a failed seed
-   must never replace the table with a near-empty one). Nothing else in the
-   dataset is touched.
+   must never replace the table with a near-empty one). Rows left out on
+   purpose go to ``analysis/extractions_excluded.parquet`` (EXCLUDED_PATH)
+   in the same commit, and the guard counts the two files together. Nothing
+   else in the dataset is touched.
 """
 
 from __future__ import annotations
@@ -26,6 +28,13 @@ from . import extract
 from .data import HF_DATASET
 
 TABLE_PATH = "analysis/extractions.parquet"
+# Rows left out of the table on purpose (2026-10-26): Special Notices that
+# don't look like a J&A (ja_check.py) and notices whose document the model
+# says is not a J&A. Kept here, with the reason and the full record, so the
+# next run's seed counts them as done instead of paying to extract them again.
+EXCLUDED_PATH = "analysis/extractions_excluded.parquet"
+REASON_SPECIAL_NOTICE = "special_notice_not_ja"
+REASON_MODEL_NO = "model_says_not_ja"
 _META = ("sam_link", "title", "agency", "sub_tier", "posted_date")
 
 
@@ -47,11 +56,19 @@ def seed_rows(table) -> tuple[list[dict], list[dict]]:
     return recs, skipped
 
 
-def _download_published(revision: str | None = None):
+def _download_published(revision: str | None = None, path: str = TABLE_PATH):
+    """The published table at ``path``; an empty DataFrame if there is none
+    yet (the excluded table before its first publish)."""
     import pandas as pd
     from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import EntryNotFoundError
 
-    return pd.read_parquet(hf_hub_download(HF_DATASET, TABLE_PATH, repo_type="dataset", revision=revision))
+    try:
+        return pd.read_parquet(hf_hub_download(HF_DATASET, path, repo_type="dataset", revision=revision))
+    except EntryNotFoundError:
+        if path == TABLE_PATH:
+            raise
+        return pd.DataFrame(columns=["notice_id", "status", "record_json"])
 
 
 def seed_from_hf(out: Path, *, revision: str | None = None, table=None) -> dict:
@@ -63,29 +80,80 @@ def seed_from_hf(out: Path, *, revision: str | None = None, table=None) -> dict:
     ext_p, skip_p = out / "extractions.jsonl", out / "skipped.jsonl"
     if ext_p.exists():
         return {"seeded": False, "reason": f"{ext_p} exists"}
-    recs, skipped = seed_rows(table if table is not None else _download_published(revision))
+    if table is None:
+        import pandas as pd
+        table = pd.concat([_download_published(revision), _download_published(revision, EXCLUDED_PATH)],
+                          ignore_index=True)
+    recs, skipped = seed_rows(table)
     ext_p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs))
     skip_p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in skipped))
     return {"seeded": True, "extracted_rows": len(recs), "skipped_rows": len(skipped)}
 
 
-def build_table(out: Path, docs_meta: dict[str, dict]):
+def notice_ids(out: Path) -> set[str]:
+    """Every notice with a record (extracted or skipped) in out/."""
+    out = Path(out)
+    return {r["notice_id"] for r in _jsonl(out / "extractions.jsonl") + _jsonl(out / "skipped.jsonl")}
+
+
+def model_says_not_ja(out: Path) -> set[str]:
+    """Notices whose latest extraction record has is_ja "no". Read by hand on
+    2026-10-26: of the 117 Justification-type notices the model called "no",
+    116 had no J&A document (a SAM form, an award, a notice of intent, ...)
+    and the other was a blank J&A template. ("unclear" is not used: 65 of 77
+    were real J&As, mostly unreadable PDFs.)"""
+    latest: dict[str, dict] = {}
+    for r in _jsonl(Path(out) / "extractions.jsonl"):
+        latest[r["notice_id"]] = r
+    return {nid for nid, r in latest.items() if (r.get("fields") or {}).get("is_ja") == "no"}
+
+
+def build_excluded(out: Path, docs_meta: dict[str, dict], reasons: dict[str, str]):
+    """The left-out rows: notice_id, exclude_reason, status (extracted or
+    skipped), title/agency/... and the full record_json, the latest record
+    per notice as build_table would have used it."""
+    import pandas as pd
+
+    out = Path(out)
+    latest: dict[str, tuple[str, dict]] = {}
+    for s in _jsonl(out / "skipped.jsonl"):
+        if s["notice_id"] in reasons:
+            latest.setdefault(s["notice_id"], ("skipped", s))
+    for r in _jsonl(out / "extractions.jsonl"):
+        if r["notice_id"] in reasons:
+            latest[r["notice_id"]] = ("extracted", r)
+    rows = []
+    for nid, (status, rec) in latest.items():
+        meta = docs_meta.get(nid) or {}
+        rows.append({"notice_id": nid, "exclude_reason": reasons[nid], "status": status,
+                     **{k: meta.get(k) for k in _META},
+                     "sam_link": meta.get("sam_link") or f"https://sam.gov/opp/{nid}/view",
+                     "is_ja": (rec.get("fields") or {}).get("is_ja"), "experimental": True,
+                     "record_json": json.dumps(rec, ensure_ascii=False)})
+    df = pd.DataFrame(rows, columns=["notice_id", "exclude_reason", "status", *_META, "is_ja", "experimental",
+                                     "record_json"])
+    return df.sort_values("notice_id").reset_index(drop=True)
+
+
+def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = frozenset()):
     """One row per notice: the latest extraction record (any version), or
     the skip record for a notice with no extraction. A notice that is skipped
-    and also has an extraction keeps the extraction."""
+    and also has an extraction keeps the extraction. Notices in ``exclude``
+    (Special Notices that don't look like a J&A, ja_check.py) get no row."""
     import pandas as pd
 
     out = Path(out)
     latest: dict[str, dict] = {}
     for r in _jsonl(out / "extractions.jsonl"):
-        latest[r["notice_id"]] = r
+        if r["notice_id"] not in exclude:
+            latest[r["notice_id"]] = r
     rows = []
     for nid, r in latest.items():
         rows.append({"notice_id": nid, "status": "extracted", "skip_reason": None,
                      **extract.flat_row(r, docs_meta.get(nid) or {}), "effort": r.get("effort"),
                      "run_at": r.get("run_at"), "experimental": True,
                      "record_json": json.dumps(r, ensure_ascii=False)})
-    seen = set(latest)
+    seen = set(latest) | set(exclude)
     for s in _jsonl(out / "skipped.jsonl"):
         nid = s["notice_id"]
         if nid in seen:
@@ -104,15 +172,23 @@ def build_table(out: Path, docs_meta: dict[str, dict]):
 
 
 def check_not_shrinking(new_rows: int, published_rows: int) -> None:
+    """Rows counted across the table and the excluded table together: a row
+    may move from one to the other, but none may disappear."""
     if new_rows < published_rows:
-        raise ShrinkError(f"new table has {new_rows} rows, the published one {published_rows}; not publishing")
+        raise ShrinkError(f"new tables have {new_rows} rows, the published ones {published_rows}; not publishing")
 
 
-def upload_table(path: Path, message: str, *, new_rows: int) -> str:
-    """Commit the table to the dataset (needs HF_TOKEN). Returns the commit URL."""
-    from huggingface_hub import HfApi
+def upload_table(path: Path, message: str, *, new_rows: int, excluded_path: Path | None = None,
+                 excluded_rows: int = 0) -> str:
+    """Commit the table, and the excluded table if given, to the dataset in
+    one commit (needs HF_TOKEN). Returns the commit URL."""
+    from huggingface_hub import CommitOperationAdd, HfApi
 
-    check_not_shrinking(new_rows, len(_download_published()))
-    info = HfApi().upload_file(path_or_fileobj=str(path), path_in_repo=TABLE_PATH, repo_id=HF_DATASET,
-                               repo_type="dataset", commit_message=message)
+    published = len(_download_published()) + len(_download_published(path=EXCLUDED_PATH))
+    check_not_shrinking(new_rows + excluded_rows, published)
+    ops = [CommitOperationAdd(path_in_repo=TABLE_PATH, path_or_fileobj=str(path))]
+    if excluded_path is not None:
+        ops.append(CommitOperationAdd(path_in_repo=EXCLUDED_PATH, path_or_fileobj=str(excluded_path)))
+    info = HfApi().create_commit(repo_id=HF_DATASET, repo_type="dataset", operations=ops,
+                                 commit_message=message)
     return str(getattr(info, "commit_url", info))

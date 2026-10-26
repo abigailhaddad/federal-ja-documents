@@ -67,7 +67,8 @@ def test_incremental_cli_extracts_only_notices_without_a_current_row(tmp_path, m
     old = {**_record(docs[nid2]), "extract_version": "2026-10-17.extract2"}
     monkeypatch.setattr(data, "download_tables", lambda *a, **k: {"sha": "rev2"})
     monkeypatch.setattr(data, "load_tables", lambda *a, **k: (n2, a2, p2))
-    monkeypatch.setattr(table, "_download_published", lambda revision=None: _published([current, old]))
+    monkeypatch.setattr(table, "_download_published", lambda revision=None, path=table.TABLE_PATH:
+                        _published([current, old]) if path == table.TABLE_PATH else _published([]))
     call = fake(answer())
     monkeypatch.setattr(extract.llm, "call", call)
     out = tmp_path / "x"

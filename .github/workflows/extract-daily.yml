@@ -36,8 +36,17 @@ on:
         # notices a minute (extract6 trial runs), so the 240-minute job
         # timeout caps one run at about 1,450 notices; more workers finish a
         # backfill in fewer runs if the API rate limit allows (429s retry).
-        description: "Parallel model calls"
+        description: "Parallel model calls (one-at-a-time mode only)"
         default: "4"
+      batch:
+        # 2026-10-26: the Message Batches API bills every token at half price.
+        # One batch per run (plus a retry batch), canceled after 200 minutes
+        # with what came back kept. The spend cap picks how many notices go in
+        # from a per-notice estimate (extract.estimate_batch_cost), so $2 is
+        # about 500 notices. The automatic run always uses batch mode.
+        description: "Use the Message Batches API (half price, slower)"
+        type: boolean
+        default: true
 
 concurrency:
   group: analysis-extraction
@@ -64,9 +73,15 @@ jobs:
         shell: bash
         run: |
           # exit 1 means some notices' model calls failed: they are retried on
-          # the next run and the rest are still published. Anything else stops.
+          # the next run and the rest are still published. Anything else stops
+          # (exit 2 in batch mode: the batch could not be created at all, e.g.
+          # no API credit).
+          BATCH_FLAG=""
+          if [ "${{ github.event_name }}" = "workflow_run" ] || [ "${{ inputs.batch }}" = "true" ]; then
+            BATCH_FLAG="--batch"
+          fi
           set +e
-          uv run python -m federal_ja.analysis extract --seed-from-hf --out work/extract \
+          uv run python -m federal_ja.analysis extract --seed-from-hf --out work/extract $BATCH_FLAG \
             --max-usd "${{ inputs.max_usd || '2' }}" --workers "${{ inputs.workers || '4' }}" 2> >(tee extract.log >&2)
           rc=$?
           set -e

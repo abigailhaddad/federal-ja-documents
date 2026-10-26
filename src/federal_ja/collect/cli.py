@@ -285,6 +285,35 @@ def cmd_reextract_remote(args, store: Store) -> dict:
     return {"reextracted": n, "still_failing": sum(1 for a in rows if a.get("extract_error"))}
 
 
+def cmd_xfa_forms(args, store: Store) -> dict:
+    """Re-extract, from their HF copies, downloaded PDFs whose stored text is
+    only an XFA "Please wait..." placeholder (xfa.py, 2026-10-26). Once one
+    is read it no longer matches, so the daily run's call is a no-op after
+    the first."""
+    from . import hf_sync
+    rows = pipeline.xfa_placeholders(store)
+    failed = []
+
+    for a in rows:
+        p = store.path(a["file_path"])
+        fetched = not os.path.exists(p)
+        try:
+            if fetched:
+                p = hf_sync.fetch_file(store, a)
+        except Exception as e:  # noqa: BLE001 - one missing copy shouldn't stop the run
+            failed.append({"resource_id": a["resource_id"], "error": f"{type(e).__name__}: {e}"[:200]})
+            continue
+        try:
+            pipeline.apply_extraction(a, pipeline.ex.extract_file(p, a.get("filename") or ""), store)
+        finally:
+            if fetched:
+                os.remove(p)
+    store.save()
+    read = sum(1 for a in rows if a.get("text_source") == "pdf_xfa")
+    return {"placeholders": len(rows), "read": read, "still_placeholder": len(rows) - read - len(failed),
+            "fetch_failed": failed}
+
+
 def cmd_recheck_pages(args, store: Store) -> dict:
     out = pipeline.recheck_page_rule(store)
     store.save()
@@ -415,6 +444,7 @@ def cmd_daily(args, store: Store) -> dict:
     if args.links:
         args.batch_files, args.min_free_gb, args.upload = 100, 1.0, False
         out["links"] = cmd_links(args, store)
+    out["xfa_forms"] = cmd_xfa_forms(args, store)
     if args.max_usd > 0:
         out["transcribe"] = cmd_transcribe(args, store)
     if args.publish:
@@ -463,6 +493,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--min-free-gb", type=float, default=3.0)
     s.add_argument("--upload", action="store_true", help="upload, verify and delete each batch")
     sub.add_parser("reextract_remote", help="re-extract failed/unknown files from their HF copies")
+    sub.add_parser("xfa_forms", help="read XFA PDF forms stored as a 'Please wait...' placeholder")
     s = sub.add_parser("transcribe", help="transcribe scanned PDFs")
     s.add_argument("--max-usd", type=float, required=True)
     s.add_argument("--limit", type=int)

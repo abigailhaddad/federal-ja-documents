@@ -513,6 +513,110 @@ ticked.
   them have usable text, about $0.70.
 - **Every later prompt-version bump** starts another backfill.
 
+### Batch mode (2026-10-26)
+
+The automatic run now sends its notices through the Message Batches API
+(`extract --batch`), which bills every token at half the list price. The
+request is the same as the one-at-a-time call, and so are the answer checks.
+
+- **One batch per run.** If any factual value fails its check, a second
+  batch goes out for those notices. Each notice keeps its better attempt,
+  the same rule as before. If the retry request itself fails, the notice
+  keeps its first answer. One-at-a-time mode fails the whole notice in
+  that case.
+- **The spend cap picks the batch size up front.** A batch can't be
+  stopped part way, so notices go in, newest first, while their estimated
+  cost fits under `--max-usd` (`extract.estimate_batch_cost`). The estimate
+  is set near the 90th percentile of the extract6 validation runs. On the
+  4,753 notices waiting on 2026-10-26 it averaged $0.0040 a notice ($18.97
+  in all), so $2 is about 500 notices. The actual cost should be about half
+  that. At list price, the 323 notices extracted on 2026-10-26 averaged
+  $0.0034; halved, that is $0.0017. `extract --batch --dry-run` prints the
+  estimate for everything still to do (`batch_estimated_usd_all`).
+- **Waiting.** Most batches finish within an hour, and the API allows up to
+  24. After 200 minutes (`--batch-max-wait-min`) the batch is canceled. Any
+  answers already back are kept and billed. The rest are retried on the
+  next run. The digest email is scheduled for 07:00 Eastern, after even a
+  full 200-minute wait on a normal day.
+- **No credit or a bad key.** If the batch can't be created, the run exits
+  2 and the workflow fails, rather than reporting success with every
+  notice failed. That was what happened on 2026-10-26, when the balance
+  ran out partway through a run.
+- **Cache hits are best-effort in a batch.** The cached instructions are
+  about 7,900 of a notice's 13,000 prompt tokens. Output (thinking
+  included) is about 87% of the cost. A missed cache adds at most about
+  $0.0004 a notice at batch prices.
+
+### Special Notices: only actual J&As (2026-10-26)
+
+Special Notices are collected when their title matches the J&A title
+pattern ("sole source", "justification", ...). Most such notices are
+notices of intent to sole source: announcements made before award, not
+justifications. Since 2026-10-26 a Special Notice is extracted and kept in
+the table only when one of its attachments is titled as a justification
+(`analysis/ja_check.py`, a text rule with no model call). Justification-type
+notices are not checked.
+
+- **How the rule was checked.** A random sample of the 4,752 Special Notices
+  waiting on 2026-10-26 was read by hand. All 20 the rule kept were
+  justifications. Of the 20 it dropped, 18 were not justifications. The 2
+  misses (an `SSJ_` filename and a single-source determination stapled
+  behind a statement of need) were fixed. The samples are in the 2026-10-26
+  work notes, not in the repo.
+- **The model's `is_ja` label is not used.** Of the 501 Special Notices
+  already extracted, the model called 236 "yes". About 40 of those were plain
+  notices of intent ("THIS IS A NOTICE OF INTENT ... NOT A REQUEST FOR
+  COMPETITIVE PROPOSALS"). The rule keeps 198 of the 501.
+- **Effect on the table.** Rebuilding it from the published table removed
+  406 rows, all Special Notices: 303 extracted and 103 skipped for having no
+  text. That left 10,208 rows, each identical to its published version.
+  `upload_table`'s shrink guard counts only these deliberately dropped rows
+  as an allowed difference.
+- **Effect on the backlog.** Of the 4,752 waiting, 2,052 pass the rule.
+  Extracting them is about $4 at batch prices, against $8-10 for all 4,752.
+- **Known gaps.**
+  - Some real J&As are unreadable PDF forms whose text is only
+    "Please wait...". The rule keeps them by filename, but extraction finds
+    nothing in them.
+  - The word "justification" in passing in the first 400 characters keeps a
+    notice. On the real data that is about 1 notice; see the module
+    docstring.
+- **Rebuilding the table only.** Run the workflow by hand with `max_usd` 0
+  and "publish" ticked. Batch mode sends nothing under a cap smaller than
+  one notice.
+
+### Notices with no J&A document (2026-10-26)
+
+Rows are also left out when the model's `is_ja` answer is "no". On
+2026-10-26 I read every Justification-type notice the model had called
+"no" or "unclear" (194 of 9,932):
+
+| What the document is | "no" | "unclear" |
+|---|---|---|
+| A real J&A, readable | 0 | 18 |
+| A real J&A we can't read (PDF form, encrypted), or a blank J&A form | 1 | 47 |
+| A J&A notice with the J&A not attached (SAM form, award, SOW, ...) | 91 | 11 |
+| A notice of intent, synopsis, or another kind of determination | 25 | 0 |
+| Can't tell | 0 | 1 |
+
+- **"no" is used, "unclear" is not.** The 117 "no" rows are left out;
+  116 of them have no J&A document and the other is a blank J&A form.
+  "unclear" is mostly real J&As, so those rows stay.
+- **Exception.** When an attachment is named as a J&A but its text could
+  not be read, the model never saw the J&A, so its "no" is ignored. One
+  such notice on 2026-10-26: `faa1cd84`, whose "Redacted JA.pdf" is an
+  unreadable PDF form.
+- **Where the left-out rows go.** They go to
+  `analysis/extractions_excluded.parquet`, with an `exclude_reason`
+  (`special_notice_not_ja` or `model_says_not_ja`) and the full record.
+  The next run's seed reads both files, so a left-out notice is not
+  extracted again. Both files are published in one commit. The shrink
+  guard counts the two together.
+- **Effect on the table.** The 10,614 published rows split into 10,091 in
+  the table and 523 excluded (406 + 117). Every record is identical to its
+  published version.
+- **The model's "yes" answers were not checked** the same way.
+
 ## One call, three fixes (prompt `2026-10-21.extract6`)
 
 **Status: validated on a sample; not yet run on the dataset.** extract6 is

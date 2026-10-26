@@ -64,10 +64,16 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
     (`JA_TITLE_PATTERN` in `collect/sources.py`.) Agencies sometimes post a
     real J&A as a Special Notice, e.g. a "Notice of Intent to Sole Source"
     with the justification attached, which the Type rule alone misses. These
-    rows are **candidates**: some may be notices of intent with no J&A
+    rows are **candidates**: many are notices of intent with no J&A
     attached, and a few are unrelated (e.g. "Fair Opportunity" industry
-    updates). The analysis `is_ja` label says whether a notice's documents
-    actually are a J&A. In the active CSV of 2026-10-19 plus the FY2025-FY2027
+    updates). The extraction table (`analysis/extractions.parquet`) keeps a
+    Special Notice only when one of its attachments is titled as a
+    justification (`analysis/ja_check.py`, no model call). On 2026-10-26 that
+    kept 2,317 of the 5,423 Special Notices with a downloaded document. Do not
+    use the model's `is_ja` label for this: it called about 40 plain notices
+    of intent "yes". Rows left out of the table (these, and notices whose
+    document the model says is not a J&A) are in
+    `analysis/extractions_excluded.parquet`, with the reason. In the active CSV of 2026-10-19 plus the FY2025-FY2027
     archives of 2026-10-18, 9,024 Special Notices posted on or after
     2025-01-20 match, next to 10,594 Justification notices.
 
@@ -91,7 +97,10 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
 * **Text:** `text_source` is `pdf_text` (pypdf text layer), `docx`
   (python-docx), `xlsx` (openpyxl), `text`, `transcription` (every page of
   the PDF was image-only), `pdf_text+transcription` (native text for typed
-  pages, transcription for image-only pages), or `none`.
+  pages, transcription for image-only pages), `pdf_xfa` (an XFA PDF form
+  whose page only says "Please wait...": the text is the form's wording and
+  filled-in values, read from the XML inside the file; `collect/xfa.py`), or
+  `none`.
 * **Scanned pages:** the decision is per page. A PDF page whose text layer
   has fewer than 300 characters (after stripping whitespace), or is
   font-encoding garbage (glyph codes like `/0 /i255`), is listed in

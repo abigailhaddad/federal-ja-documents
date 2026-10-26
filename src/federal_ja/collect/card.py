@@ -57,7 +57,7 @@ Code and issue tracker: {project_url}
 |---|---|
 | `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, SAM's award block with the order number (`sam_award_*` columns, below), and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
-| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
+| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `xfa_form`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
@@ -109,12 +109,14 @@ made when the tables are published; `notices` is the source.
      Agencies sometimes post a J&A as a Special Notice, for example a
      "Notice of Intent to Sole Source" with the justification attached. These
      rows are **candidates**: the title only says the notice may carry a
-     justification. Some may be notices of intent with no J&A attached, and a
-     few are unrelated (e.g. "Fair Opportunity" industry updates). The
-     experimental `is_ja` field in `analysis/extractions.parquet` says
-     whether a notice's documents actually are a J&A, once the daily
-     extraction has reached it (newly collected notices get it after a later
-     run, within that run's spend cap).
+     justification. Many are notices of intent with no J&A attached, and a
+     few are unrelated (e.g. "Fair Opportunity" industry updates).
+     `analysis/extractions.parquet` keeps a Special Notice only when one of
+     its attachments is titled as a justification (a text rule, no model
+     call). On 2026-10-26 that kept 2,317 of the 5,423 Special Notices with a
+     downloaded document. Rows left out of that table (these, and
+     notices whose document the model says is not a J&A) are in
+     `analysis/extractions_excluded.parquet`, with the reason.
 
    `type` is kept as SAM gives it. When a notice appears in more than one
    file, the row with the latest `PostedDate` is kept (ties go to the active
@@ -181,6 +183,7 @@ pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
 | text_source | method |
 |---|---|
 | `pdf_text` | the PDF's own text layer, via `pypdf` |
+| `pdf_xfa` | an XFA PDF form whose page is only a "Please wait..." placeholder: the text is the form's own XML, its wording with the filled-in values (one page, `pages.text_source` `xfa_form`; never transcribed) |
 | `docx` | `python-docx` (paragraphs, then table rows) |
 | `xlsx` | `openpyxl`, every sheet, tab-separated |
 | `text` | plain-text attachment |

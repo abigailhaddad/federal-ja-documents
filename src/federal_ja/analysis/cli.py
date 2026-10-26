@@ -22,7 +22,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from . import data, extract, llm, prompts, spreadsheet, table, tagger
+from . import data, extract, ja_check, llm, prompts, spreadsheet, table, tagger
 from .promptfile import CONFIG
 
 EXPERIMENTAL_BANNER = (
@@ -86,6 +86,13 @@ def build_parser() -> argparse.ArgumentParser:
     x.add_argument("--max-usd", type=float, default=5.0, help="stop once this much has been spent (default 5)")
     x.add_argument("--dry-run", action="store_true", help="count notices in scope; make no model calls")
     x.add_argument("--workers", type=int, default=1, help="notices extracted in parallel (default 1)")
+    x.add_argument("--batch", action="store_true",
+                   help="send the notices through the Message Batches API (half price; results within 24 "
+                        "hours, usually one). The spend cap picks how many notices to send from an "
+                        "estimate, since a batch can't be stopped part way; --workers is ignored")
+    x.add_argument("--batch-max-wait-min", type=float, default=200,
+                   help="with --batch: cancel the batch after this many minutes and keep what came "
+                        "back (default 200, under the workflow's 240-minute job limit)")
     x.add_argument("--csv-only", action="store_true",
                    help="make no model calls; rebuild extractions.csv from extractions.jsonl")
     x.add_argument("--reverify", action="store_true",
@@ -266,6 +273,12 @@ def cmd_extract(a) -> int:
         notices = notices[notices.posted_date.fillna("") >= a.since]
     notices = notices.sort_values(["posted_date", "notice_id"], ascending=[False, True])
     docs = data.build_documents(notices, attachments, pages, notices.notice_id.tolist())
+    # Special Notices whose documents don't look like a J&A (mostly notices of
+    # intent to sole source) are out of scope: never sent to the model, and
+    # extract-table leaves them out of the table (ja_check.py, 2026-10-26).
+    not_ja = ja_check.not_ja_special_notices(notices, docs)
+    notices = notices[~notices.notice_id.isin(not_ja)]
+    docs = {nid: d for nid, d in docs.items() if nid not in not_ja}
     meta = {nid: {**d.meta} for nid, d in docs.items()}
 
     a.out.mkdir(parents=True, exist_ok=True)
@@ -292,7 +305,10 @@ def cmd_extract(a) -> int:
             if r["model"] == a.model and r["extract_version"] == extract.EXTRACT_VERSION
             and r.get("effort") == a.effort
             # a cut document is redone when the cutting rule changes
-            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)}
+            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)
+            # and a document whose text changed since (2026-10-26: XFA forms
+            # first stored as a "Please wait..." placeholder, now read)
+            and (r["notice_id"] not in docs or r.get("chars_total") in (None, len(docs[r["notice_id"]].model_text())))}
     skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
     todo, skipped = [], {}
     for nid in notices.notice_id.tolist():
@@ -307,8 +323,12 @@ def cmd_extract(a) -> int:
     summary = {"experimental": True, "dataset_revision": rev.get("sha"), "model": a.model,
                "extract_version": extract.EXTRACT_VERSION, "in_scope": len(notices),
                "already_done": len(done & set(notices.notice_id)),
+               "special_notices_not_ja": len(not_ja),
                "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
                "to_extract": len(todo)}
+    if a.batch and a.dry_run:
+        # what sending every notice left would cost at batch prices (estimate)
+        summary["batch_estimated_usd_all"] = round(sum(extract.estimate_batch_cost(d, a.model) for d in todo), 2)
     print(json.dumps(summary), file=sys.stderr)
     with open(skipped_p, "a") as f:
         for nid, why in skipped.items():
@@ -316,6 +336,8 @@ def cmd_extract(a) -> int:
                 f.write(json.dumps({"notice_id": nid, "reason": why, "dataset_revision": rev.get("sha")}) + "\n")
     if a.dry_run:
         return 0
+    if a.batch:
+        return _extract_batch(a, todo, rev, ext_p, fail_p, meta)
 
     spent, failed, n_done = 0.0, 0, 0
     lock = threading.Lock()
@@ -356,21 +378,89 @@ def cmd_extract(a) -> int:
     return 1 if failed else 0
 
 
+def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
+    """cmd_extract through the Message Batches API. Takes notices in order
+    while their estimated cost fits under --max-usd, sends them as one batch
+    (plus a retry batch), and stores records and failures as the loop does.
+    Returns 2 if the batch could not be created at all (no credit, bad key),
+    so the workflow fails loudly instead of publishing an unchanged table."""
+    picked, est = [], 0.0
+    for doc in todo:
+        c = extract.estimate_batch_cost(doc, a.model)
+        if est + c > a.max_usd:      # so --max-usd 0 sends nothing (rebuild the table only)
+            break
+        picked.append(doc)
+        est += c
+    print(json.dumps({"batch": True, "sending": len(picked), "of": len(todo),
+                      "estimated_usd": round(est, 4)}), file=sys.stderr, flush=True)
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+    def fail(nid, err):
+        with open(fail_p, "a") as f:
+            f.write(json.dumps({"notice_id": nid, "model": a.model, "error": err[:500], "at": stamp}) + "\n")
+
+    try:
+        results = extract.extract_documents_batch(picked, model=a.model, retries=a.retries, effort=a.effort,
+                                                  max_wait_s=a.batch_max_wait_min * 60)
+    except llm.ModelError as exc:
+        for doc in picked:
+            fail(doc.notice_id, f"ModelError: {exc}")
+        print(f"batch not sent: {exc}", file=sys.stderr)
+        return 2
+    spent, n_done, failed = 0.0, 0, 0
+    with open(ext_p, "a") as f:
+        for nid, rec in results.items():
+            if isinstance(rec, Exception):
+                failed += 1
+                fail(nid, f"{type(rec).__name__}: {rec}")
+                print(f"{nid}: {rec}", file=sys.stderr)
+                continue
+            rec["dataset_revision"] = rev.get("sha")
+            spent += rec["usage"]["cost_usd"] or 0
+            n_done += 1
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    n = write_extract_csv(a.out, meta, a.model)
+    print(json.dumps({"spent_usd": round(spent, 4), "estimated_usd": round(est, 4), "extracted": n_done,
+                      "failed": failed, "not_sent": len(todo) - len(picked), "csv_rows": n}), file=sys.stderr)
+    return 1 if failed else 0
+
+
 def cmd_extract_table(a) -> int:
     rev = data.download_tables(a.data_dir, revision=a.revision)
-    notices, _, _ = data.load_tables(a.data_dir)
+    notices, attachments, pages = data.load_tables(a.data_dir)
     meta = {n["notice_id"]: data._notice_meta(n) for n in notices.to_dict("records")}
-    df = table.build_table(a.out, meta)
+    # Left out of the table (2026-10-26), including rows already published:
+    # Special Notices that don't look like a J&A (ja_check.py), and notices
+    # whose document the model says is not a J&A. They go to the excluded
+    # table instead, so the next run doesn't extract them again.
+    ids = table.notice_ids(a.out)
+    sn = notices[notices.notice_id.isin(ids)]
+    not_ja = ja_check.not_ja_special_notices(sn, data.build_documents(sn, attachments, pages, sn.notice_id.tolist()))
+    # ...except where a J&A-named attachment couldn't be read: the model's "no"
+    # then only describes the other attachments (2026-10-26, faa1cd84)
+    model_no = table.model_says_not_ja(a.out)
+    mn = notices[notices.notice_id.isin(model_no)]
+    mn_docs = data.build_documents(mn, attachments, pages, mn.notice_id.tolist())
+    unread = {nid for nid, d in mn_docs.items() if ja_check.unreadable_ja_attachment(d)}
+    reasons = {nid: table.REASON_MODEL_NO for nid in model_no - unread}
+    reasons.update({nid: table.REASON_SPECIAL_NOTICE for nid in not_ja})
+    df = table.build_table(a.out, meta, exclude=set(reasons))
+    ex = table.build_excluded(a.out, meta, reasons)
+    excluded_path = a.table.with_name(a.table.stem + "_excluded.parquet")
     a.table.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(a.table, index=False)
+    ex.to_parquet(excluded_path, index=False)
     summary = {"rows": len(df), "dataset_revision": rev.get("sha"),
                "by_status": df["status"].value_counts().to_dict() if len(df) else {},
                "by_extract_version": df["extract_version"].fillna("none").value_counts().to_dict()
-               if len(df) and "extract_version" in df else {}}
+               if len(df) and "extract_version" in df else {},
+               "excluded_rows": len(ex),
+               "model_no_kept_unreadable_ja": len(unread),
+               "excluded_by_reason": ex["exclude_reason"].value_counts().to_dict() if len(ex) else {}}
     if a.publish:
         summary["commit"] = table.upload_table(
             a.table, f"analysis/extractions.parquet: {len(df)} rows (dataset {str(rev.get('sha'))[:12]})",
-            new_rows=len(df))
+            new_rows=len(df), excluded_path=excluded_path, excluded_rows=len(ex))
     print(json.dumps(summary, default=str), file=sys.stderr)
     return 0
 
