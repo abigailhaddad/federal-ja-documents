@@ -513,6 +513,40 @@ ticked.
   them have usable text, about $0.70.
 - **Every later prompt-version bump** starts another backfill.
 
+### Batch mode (2026-10-26)
+
+The automatic run now sends its notices through the Message Batches API
+(`extract --batch`), which bills every token at half the list price. The
+request is the same as the one-at-a-time call, and so are the answer checks.
+
+- **One batch per run.** If any factual value fails its check, a second
+  batch goes out for those notices. Each notice keeps its better attempt,
+  the same rule as before. If the retry request itself fails, the notice
+  keeps its first answer. One-at-a-time mode fails the whole notice in
+  that case.
+- **The spend cap picks the batch size up front.** A batch can't be
+  stopped part way, so notices go in, newest first, while their estimated
+  cost fits under `--max-usd` (`extract.estimate_batch_cost`). The estimate
+  is set near the 90th percentile of the extract6 validation runs. On the
+  4,753 notices waiting on 2026-10-26 it averaged $0.0040 a notice ($18.97
+  in all), so $2 is about 500 notices. The actual cost should be about half
+  that. At list price, the 323 notices extracted on 2026-10-26 averaged
+  $0.0034; halved, that is $0.0017. `extract --batch --dry-run` prints the
+  estimate for everything still to do (`batch_estimated_usd_all`).
+- **Waiting.** Most batches finish within an hour, and the API allows up to
+  24. After 200 minutes (`--batch-max-wait-min`) the batch is canceled. Any
+  answers already back are kept and billed. The rest are retried on the
+  next run. The digest email is scheduled for 07:00 Eastern, after even a
+  full 200-minute wait on a normal day.
+- **No credit or a bad key.** If the batch can't be created, the run exits
+  2 and the workflow fails, rather than reporting success with every
+  notice failed. That was what happened on 2026-10-26, when the balance
+  ran out partway through a run.
+- **Cache hits are best-effort in a batch.** The cached instructions are
+  about 7,900 of a notice's 13,000 prompt tokens. Output (thinking
+  included) is about 87% of the cost. A missed cache adds at most about
+  $0.0004 a notice at batch prices.
+
 ## One call, three fixes (prompt `2026-10-21.extract6`)
 
 **Status: validated on a sample; not yet run on the dataset.** extract6 is

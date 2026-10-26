@@ -86,6 +86,13 @@ def build_parser() -> argparse.ArgumentParser:
     x.add_argument("--max-usd", type=float, default=5.0, help="stop once this much has been spent (default 5)")
     x.add_argument("--dry-run", action="store_true", help="count notices in scope; make no model calls")
     x.add_argument("--workers", type=int, default=1, help="notices extracted in parallel (default 1)")
+    x.add_argument("--batch", action="store_true",
+                   help="send the notices through the Message Batches API (half price; results within 24 "
+                        "hours, usually one). The spend cap picks how many notices to send from an "
+                        "estimate, since a batch can't be stopped part way; --workers is ignored")
+    x.add_argument("--batch-max-wait-min", type=float, default=200,
+                   help="with --batch: cancel the batch after this many minutes and keep what came "
+                        "back (default 200, under the workflow's 240-minute job limit)")
     x.add_argument("--csv-only", action="store_true",
                    help="make no model calls; rebuild extractions.csv from extractions.jsonl")
     x.add_argument("--reverify", action="store_true",
@@ -309,6 +316,9 @@ def cmd_extract(a) -> int:
                "already_done": len(done & set(notices.notice_id)),
                "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
                "to_extract": len(todo)}
+    if a.batch and a.dry_run:
+        # what sending every notice left would cost at batch prices (estimate)
+        summary["batch_estimated_usd_all"] = round(sum(extract.estimate_batch_cost(d, a.model) for d in todo), 2)
     print(json.dumps(summary), file=sys.stderr)
     with open(skipped_p, "a") as f:
         for nid, why in skipped.items():
@@ -316,6 +326,8 @@ def cmd_extract(a) -> int:
                 f.write(json.dumps({"notice_id": nid, "reason": why, "dataset_revision": rev.get("sha")}) + "\n")
     if a.dry_run:
         return 0
+    if a.batch:
+        return _extract_batch(a, todo, rev, ext_p, fail_p, meta)
 
     spent, failed, n_done = 0.0, 0, 0
     lock = threading.Lock()
@@ -353,6 +365,53 @@ def cmd_extract(a) -> int:
     n = write_extract_csv(a.out, meta, a.model)
     print(json.dumps({"spent_usd": round(spent, 4), "extracted": n_done, "failed": failed,
                       "csv_rows": n}), file=sys.stderr)
+    return 1 if failed else 0
+
+
+def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
+    """cmd_extract through the Message Batches API. Takes notices in order
+    while their estimated cost fits under --max-usd, sends them as one batch
+    (plus a retry batch), and stores records and failures as the loop does.
+    Returns 2 if the batch could not be created at all (no credit, bad key),
+    so the workflow fails loudly instead of publishing an unchanged table."""
+    picked, est = [], 0.0
+    for doc in todo:
+        c = extract.estimate_batch_cost(doc, a.model)
+        if picked and est + c > a.max_usd:
+            break
+        picked.append(doc)
+        est += c
+    print(json.dumps({"batch": True, "sending": len(picked), "of": len(todo),
+                      "estimated_usd": round(est, 4)}), file=sys.stderr, flush=True)
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+    def fail(nid, err):
+        with open(fail_p, "a") as f:
+            f.write(json.dumps({"notice_id": nid, "model": a.model, "error": err[:500], "at": stamp}) + "\n")
+
+    try:
+        results = extract.extract_documents_batch(picked, model=a.model, retries=a.retries, effort=a.effort,
+                                                  max_wait_s=a.batch_max_wait_min * 60)
+    except llm.ModelError as exc:
+        for doc in picked:
+            fail(doc.notice_id, f"ModelError: {exc}")
+        print(f"batch not sent: {exc}", file=sys.stderr)
+        return 2
+    spent, n_done, failed = 0.0, 0, 0
+    with open(ext_p, "a") as f:
+        for nid, rec in results.items():
+            if isinstance(rec, Exception):
+                failed += 1
+                fail(nid, f"{type(rec).__name__}: {rec}")
+                print(f"{nid}: {rec}", file=sys.stderr)
+                continue
+            rec["dataset_revision"] = rev.get("sha")
+            spent += rec["usage"]["cost_usd"] or 0
+            n_done += 1
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    n = write_extract_csv(a.out, meta, a.model)
+    print(json.dumps({"spent_usd": round(spent, 4), "estimated_usd": round(est, 4), "extracted": n_done,
+                      "failed": failed, "not_sent": len(todo) - len(picked), "csv_rows": n}), file=sys.stderr)
     return 1 if failed else 0
 
 

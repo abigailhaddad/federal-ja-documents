@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from datetime import date, datetime, timezone
 
 from . import llm
@@ -1000,6 +1001,71 @@ def garbled_text_layer(doc: Document) -> bool:
     return len(_SHIFTED.findall(doc.verification_text())) >= GARBLED_MIN_HITS
 
 
+class _Attempts:
+    """The model answers for one document: usage summed over every attempt,
+    and the attempt with the fewest dropped factual values kept."""
+
+    def __init__(self, doc: Document):
+        self.doc = doc
+        self.text, self.truncated = model_text(doc)
+        self.prompt = build_prompt(doc, self.text)
+        self.usage = {"input_tokens": 0, "output_tokens": 0, "cache_creation_input_tokens": 0,
+                      "cache_read_input_tokens": 0, "cost_usd": 0.0, "calls": 0}
+        self.best = None
+
+    def add(self, raw, u: dict) -> bool:
+        """Record one answer. True when nothing factual was dropped (no retry
+        needed). Raises llm.ModelError for an answer of the wrong shape."""
+        if not isinstance(raw, dict):
+            raise llm.ModelError(f"model returned {type(raw).__name__}, not an object")
+        bad = shape_errors(raw)
+        if bad:
+            raise llm.ModelError(f"model answer does not match the schema: {bad}")
+        usage = self.usage
+        usage["calls"] += 1
+        usage["input_tokens"] += int(u.get("input_tokens") or 0)
+        usage["output_tokens"] += int(u.get("output_tokens") or 0)
+        usage["cache_creation_input_tokens"] += int(u.get("cache_creation_input_tokens") or 0)
+        usage["cache_read_input_tokens"] += int(u.get("cache_read_input_tokens") or 0)
+        usage["cost_usd"] += float(u.get("cost_usd") or 0)
+        if u.get("price_mult"):
+            usage["price_mult"] = u["price_mult"]
+        fields, dropped = verify(raw, self.doc)
+        if self.best is None or _n_dropped_factual(dropped) < _n_dropped_factual(self.best[2]):
+            self.best = (raw, fields, dropped, usage["calls"])
+        return not _n_dropped_factual(dropped)
+
+    def record(self, model: str, effort: str | None) -> dict:
+        doc = self.doc
+        raw, fields, dropped, used = self.best
+        self.usage["cost_usd"] = round(self.usage["cost_usd"], 6)
+        full_len = len(doc.model_text())
+        return {
+            "experimental": True,
+            "notice_id": doc.notice_id,
+            "model": model,
+            "extract_version": EXTRACT_VERSION,
+            "effort": effort,
+            "checks_version": CHECKS_VERSION,
+            "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "attempt_kept": used,
+            "attachments": len(doc.attachments()),
+            "pages": len(doc.pages),
+            "transcribed_pages": sum(1 for p in doc.pages if p.text_source == "transcription"),
+            "chars_total": full_len,
+            "chars_sent": len(self.text),
+            "truncated": self.truncated,
+            "truncation_version": TRUNCATION_VERSION if self.truncated else None,
+            "redaction_marker_in_text": "[REDACTED" in doc.verification_text(),
+            "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments()),
+            "garbled_text_layer": garbled_text_layer(doc),
+            "fields": fields,
+            "dropped": dropped,
+            "raw": raw,
+            "usage": self.usage,
+        }
+
+
 def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=None,
                      retries: int = 1, effort: str | None = None) -> dict:
     """Extract one record. Raises llm.ModelError if the model call fails, so
@@ -1009,58 +1075,82 @@ def extract_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=N
     ``retries`` times and the attempt with the fewest dropped values is kept
     (output varies between identical calls); every attempt's cost is counted."""
     call_fn = call_fn or llm.call
-    text, truncated = model_text(doc)
-    prompt = build_prompt(doc, text)
-    usage = {"input_tokens": 0, "output_tokens": 0, "cache_creation_input_tokens": 0,
-             "cache_read_input_tokens": 0, "cost_usd": 0.0, "calls": 0}
-    best = None
-    for attempt in range(1 + max(0, retries)):
+    att = _Attempts(doc)
+    for _ in range(1 + max(0, retries)):
         kw = {"effort": effort} if effort else {}
-        raw, u = call_fn(prompt, schema=SCHEMA, tool_name=TOOL_NAME, model=model,
+        raw, u = call_fn(att.prompt, schema=SCHEMA, tool_name=TOOL_NAME, model=model,
                          max_tokens=MAX_OUTPUT_TOKENS, timeout=EXTRACT_TIMEOUT_S, **kw)
-        if not isinstance(raw, dict):
-            raise llm.ModelError(f"model returned {type(raw).__name__}, not an object")
-        bad = shape_errors(raw)
-        if bad:
-            raise llm.ModelError(f"model answer does not match the schema: {bad}")
-        usage["calls"] += 1
-        usage["input_tokens"] += int(u.get("input_tokens") or 0)
-        usage["output_tokens"] += int(u.get("output_tokens") or 0)
-        usage["cache_creation_input_tokens"] += int(u.get("cache_creation_input_tokens") or 0)
-        usage["cache_read_input_tokens"] += int(u.get("cache_read_input_tokens") or 0)
-        usage["cost_usd"] += float(u.get("cost_usd") or 0)
-        fields, dropped = verify(raw, doc)
-        if best is None or _n_dropped_factual(dropped) < _n_dropped_factual(best[2]):
-            best = (raw, fields, dropped, attempt + 1)
-        if not _n_dropped_factual(dropped):
+        if att.add(raw, u):
             break
-    raw, fields, dropped, used = best
-    usage["cost_usd"] = round(usage["cost_usd"], 6)
-    full_len = len(doc.model_text())
-    return {
-        "experimental": True,
-        "notice_id": doc.notice_id,
-        "model": model,
-        "extract_version": EXTRACT_VERSION,
-        "effort": effort,
-        "checks_version": CHECKS_VERSION,
-        "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "attempt_kept": used,
-        "attachments": len(doc.attachments()),
-        "pages": len(doc.pages),
-        "transcribed_pages": sum(1 for p in doc.pages if p.text_source == "transcription"),
-        "chars_total": full_len,
-        "chars_sent": len(text),
-        "truncated": truncated,
-        "truncation_version": TRUNCATION_VERSION if truncated else None,
-        "redaction_marker_in_text": "[REDACTED" in doc.verification_text(),
-        "filename_says_redacted": any(_REDACTED_NAME.search(fn or "") for fn, _ in doc.attachments()),
-        "garbled_text_layer": garbled_text_layer(doc),
-        "fields": fields,
-        "dropped": dropped,
-        "raw": raw,
-        "usage": usage,
-    }
+    return att.record(model, effort)
+
+
+# Spend estimate for one notice in a batch (2026-10-26), used to choose how
+# many notices fit under a run's spend cap before anything is sent: a batch
+# can't be stopped part way the way the one-at-a-time loop stops. Set near
+# the 90th percentile of the extract6 validation runs (98 answers, effort
+# high): about 0.45 prompt tokens per character of document text on top of
+# the ~7,900-token instructions, and 12,600 output tokens (thinking included).
+EST_TOKENS_PER_CHAR = 0.45
+EST_INSTRUCTION_TOKENS = 7_900
+EST_OUTPUT_TOKENS = 12_600
+
+
+def estimate_batch_cost(doc: Document, model: str = llm.DEFAULT_MODEL) -> float:
+    text, _ = model_text(doc)
+    tokens_in = EST_INSTRUCTION_TOKENS + int(len(text) * EST_TOKENS_PER_CHAR)
+    return llm.cost_usd(model, tokens_in, EST_OUTPUT_TOKENS, price_mult=llm.BATCH_PRICE_MULT) or 0.0
+
+
+def extract_documents_batch(docs: list[Document], *, model: str = llm.DEFAULT_MODEL, batch_fn=None,
+                            retries: int = 1, effort: str | None = None, max_wait_s: float = 12_000,
+                            clock=time.monotonic) -> dict:
+    """Extract many documents through the Message Batches API (half price).
+
+    Same answers and checks as extract_document: one batch with every
+    document, then, up to ``retries`` times, one more batch with the
+    documents that had a factual value dropped, keeping each document's best
+    attempt. Returns {notice_id: record or llm.ModelError}. A document whose
+    first request failed gets the ModelError (nothing stored, retried on the
+    next run). A failed retry keeps the first answer, unlike
+    extract_document, where the whole notice fails: here the first answer is
+    already paid for. ``max_wait_s`` is shared by all rounds; a retry round
+    is skipped when less than 10 minutes are left.
+
+    Raises llm.ModelError if the first batch can't be created."""
+    batch_fn = batch_fn or llm.batch_call
+    deadline = clock() + max_wait_s
+    att = {d.notice_id: _Attempts(d) for d in docs}
+    out: dict = {}
+    pending = list(att)
+    for round_no in range(1 + max(0, retries)):
+        left = deadline - clock()
+        if not pending or (round_no and left < 600):
+            break
+        kw = {"effort": effort} if effort else {}
+        try:
+            res = batch_fn({nid: att[nid].prompt for nid in pending}, schema=SCHEMA, tool_name=TOOL_NAME,
+                           model=model, max_tokens=MAX_OUTPUT_TOKENS, max_wait_s=max(60, left), **kw)
+        except llm.ModelError:
+            if round_no == 0:
+                raise
+            break
+        retry = []
+        for nid in pending:
+            r = res.get(nid) or llm.ModelError("no result in the batch")
+            try:
+                if isinstance(r, Exception):
+                    raise r
+                if not att[nid].add(*r):
+                    retry.append(nid)
+            except llm.ModelError as exc:
+                if att[nid].best is None:
+                    out[nid] = exc
+        pending = retry
+    for nid, a in att.items():
+        if nid not in out:
+            out[nid] = a.record(model, effort)
+    return out
 
 
 def reverify(rec: dict, doc: Document) -> dict:

@@ -25,6 +25,12 @@ cached prefix too. Nothing volatile may go in the first part, or every call
 writes a new cache entry instead of reading one. OpenAI gets the joined
 string, exactly as before. Usage records cache writes and reads separately and
 prices them at CACHE_WRITE_MULT / CACHE_READ_MULT times the input price.
+
+Message Batches (Anthropic only, 2026-10-26). ``batch_call`` sends the same
+requests as ``call`` through the Message Batches API, which bills every token
+(cache writes and reads included) at BATCH_PRICE_MULT of the list price.
+Results come back within 24 hours, usually within one. Cache hits inside a
+batch are best-effort.
 """
 
 from __future__ import annotations
@@ -32,6 +38,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import time
 from typing import Any, Union
 
@@ -59,6 +66,9 @@ LONG_PRICES_PER_M: dict[str, tuple[float, float]] = {
 CACHE_WRITE_MULT = 1.25
 CACHE_READ_MULT = 0.10
 
+# The Message Batches API bills all tokens at half the list price.
+BATCH_PRICE_MULT = 0.5
+
 # A prompt: one string, or (cached instructions, per-document rest).
 Prompt = Union[str, tuple[str, str]]
 
@@ -79,10 +89,12 @@ def provider_for(model: str) -> str:
 
 
 def cost_usd(model: str, input_tokens: int, output_tokens: int, *,
-             cache_creation_tokens: int = 0, cache_read_tokens: int = 0) -> float | None:
+             cache_creation_tokens: int = 0, cache_read_tokens: int = 0,
+             price_mult: float = 1.0) -> float | None:
     """input_tokens is the whole prompt, INCLUDING any cache write and cache
     read tokens (the total the usage records keep as input_tokens); those two
-    parts are priced at CACHE_WRITE_MULT and CACHE_READ_MULT."""
+    parts are priced at CACHE_WRITE_MULT and CACHE_READ_MULT. price_mult
+    scales the whole cost (BATCH_PRICE_MULT for a batch request)."""
     pr = PRICES_PER_M.get(model)
     if pr and input_tokens > LONG_PROMPT_TOKENS and model in LONG_PRICES_PER_M:
         pr = LONG_PRICES_PER_M[model]
@@ -90,7 +102,7 @@ def cost_usd(model: str, input_tokens: int, output_tokens: int, *,
         return None
     uncached = input_tokens - cache_creation_tokens - cache_read_tokens
     inp = uncached + cache_creation_tokens * CACHE_WRITE_MULT + cache_read_tokens * CACHE_READ_MULT
-    return round(inp / 1e6 * pr[0] + output_tokens / 1e6 * pr[1], 6)
+    return round((inp / 1e6 * pr[0] + output_tokens / 1e6 * pr[1]) * price_mult, 6)
 
 
 def prompt_text(prompt: Prompt) -> str:
@@ -134,28 +146,55 @@ def call(prompt: Prompt, *, schema: dict, tool_name: str, model: str = DEFAULT_M
                         timeout=timeout, max_attempts=max_attempts)
 
 
-def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts, max_tokens=8192,
-                    effort=None):
+def _anthropic_client(timeout):
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         raise ModelError("ANTHROPIC_API_KEY not set")
     import anthropic
 
     ws = os.environ.get("ANTHROPIC_WORKSPACE_ID")
-    client = anthropic.Anthropic(api_key=key, timeout=timeout, max_retries=0,
-                                 default_headers={"anthropic-workspace-id": ws} if ws else None)
+    return anthropic.Anthropic(api_key=key, timeout=timeout, max_retries=0,
+                               default_headers={"anthropic-workspace-id": ws} if ws else None)
+
+
+def anthropic_params(prompt, *, schema, tool_name, model, max_tokens=8192, effort=None) -> dict:
+    """The Messages request body, the same for a direct call and a batch."""
+    return dict(
+        model=model, max_tokens=max_tokens,
+        messages=[{"role": "user", "content": anthropic_content(prompt)}],
+        tools=[{"name": tool_name, "description": "Record the result of reviewing this document.",
+                "input_schema": schema, "strict": True}],
+        tool_choice=({"type": "auto"} if model in NO_FORCED_TOOL_CHOICE or effort
+                     else {"type": "tool", "name": tool_name}),
+        **({"output_config": {"effort": effort}} if effort else {}),
+    )
+
+
+def anthropic_result(resp, *, tool_name, model, price_mult=1.0) -> tuple[dict, dict]:
+    """(parsed tool input, usage) from a Message, or ModelError."""
+    if resp.stop_reason == "refusal":
+        raise ModelError("model refused")
+    if resp.stop_reason == "max_tokens":
+        raise ModelError("incomplete response (max_tokens)")
+    block = next((b for b in resp.content if b.type == "tool_use" and b.name == tool_name), None)
+    if block is None:
+        raise ModelError(f"no {tool_name} tool call (stop_reason={resp.stop_reason})")
+    usage = anthropic_usage(resp, model, price_mult=price_mult)
+    parsed = block.input if isinstance(block.input, dict) else _parse_json(str(block.input))
+    return parsed, usage
+
+
+def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts, max_tokens=8192,
+                    effort=None):
+    client = _anthropic_client(timeout)
+    import anthropic
+
+    params = anthropic_params(prompt, schema=schema, tool_name=tool_name, model=model,
+                              max_tokens=max_tokens, effort=effort)
     last = ""
     for attempt in range(max_attempts):
         try:
-            resp = client.messages.create(
-                model=model, max_tokens=max_tokens,
-                messages=[{"role": "user", "content": anthropic_content(prompt)}],
-                tools=[{"name": tool_name, "description": "Record the result of reviewing this document.",
-                        "input_schema": schema, "strict": True}],
-                tool_choice=({"type": "auto"} if model in NO_FORCED_TOOL_CHOICE or effort
-                             else {"type": "tool", "name": tool_name}),
-                **({"output_config": {"effort": effort}} if effort else {}),
-            )
+            resp = client.messages.create(**params)
         except (anthropic.RateLimitError, anthropic.APIConnectionError, anthropic.InternalServerError) as exc:
             last = str(exc)[:200]
             time.sleep(10 * (attempt + 1))
@@ -166,20 +205,74 @@ def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts, 
                 time.sleep(10 * (attempt + 1))
                 continue
             raise ModelError(f"Anthropic call failed ({exc.status_code}): {str(exc)[:200]}") from exc
-        if resp.stop_reason == "refusal":
-            raise ModelError("model refused")
-        if resp.stop_reason == "max_tokens":
-            raise ModelError("incomplete response (max_tokens)")
-        block = next((b for b in resp.content if b.type == "tool_use" and b.name == tool_name), None)
-        if block is None:
-            raise ModelError(f"no {tool_name} tool call (stop_reason={resp.stop_reason})")
-        usage = anthropic_usage(resp, model)
-        parsed = block.input if isinstance(block.input, dict) else _parse_json(str(block.input))
-        return parsed, usage
+        return anthropic_result(resp, tool_name=tool_name, model=model)
     raise ModelError(f"Anthropic call failed after {max_attempts} attempts: {last}")
 
 
-def anthropic_usage(resp, model: str) -> dict:
+def batch_call(prompts: dict[str, Prompt], *, schema: dict, tool_name: str, model: str = DEFAULT_MODEL,
+               max_tokens: int = 8192, effort: str | None = None, max_wait_s: float = 12_000,
+               poll_s: float = 60, client=None, sleep=time.sleep, clock=time.monotonic) -> dict:
+    """Send every prompt as one Message Batch and wait for it.
+
+    ``prompts`` maps a custom_id (1-64 of [A-Za-z0-9_-]; a notice id) to a
+    prompt. Returns {custom_id: (parsed, usage)} for each answer, or
+    {custom_id: ModelError} for each request that errored, expired, was
+    canceled or had no usable answer. If the batch has not ended after
+    ``max_wait_s`` it is canceled: requests already answered keep their
+    answers (and are billed), the rest come back as ModelErrors.
+
+    Raises ModelError if the batch can't be created (no credit, bad key):
+    nothing was sent, so nothing is billed."""
+    if provider_for(model) != "anthropic":
+        raise ModelError(f"{model}: the batch API is Anthropic-only")
+    if not prompts:
+        return {}
+    client = client or _anthropic_client(600)
+    import anthropic
+
+    requests = [{"custom_id": cid, "params": anthropic_params(p, schema=schema, tool_name=tool_name, model=model,
+                                                             max_tokens=max_tokens, effort=effort)}
+                for cid, p in prompts.items()]
+    try:
+        batch = client.messages.batches.create(requests=requests)
+    except anthropic.APIStatusError as exc:
+        raise ModelError(f"batch not created ({exc.status_code}): {str(exc)[:200]}") from exc
+    except anthropic.APIConnectionError as exc:
+        raise ModelError(f"batch not created: {str(exc)[:200]}") from exc
+    print(json.dumps({"batch_id": batch.id, "requests": len(requests)}), file=sys.stderr, flush=True)
+    deadline = clock() + max_wait_s
+    canceled = False
+    while batch.processing_status != "ended":
+        if not canceled and clock() >= deadline:
+            print(f"batch {batch.id} still running after {max_wait_s:.0f}s; canceling", file=sys.stderr)
+            client.messages.batches.cancel(batch.id)
+            canceled = True
+        sleep(poll_s)
+        try:
+            batch = client.messages.batches.retrieve(batch.id)
+        except (anthropic.APIConnectionError, anthropic.InternalServerError, anthropic.RateLimitError):
+            continue
+    out: dict = {}
+    for r in client.messages.batches.results(batch.id):
+        res = r.result
+        if res.type == "succeeded":
+            try:
+                out[r.custom_id] = anthropic_result(res.message, tool_name=tool_name, model=model,
+                                                    price_mult=BATCH_PRICE_MULT)
+            except (ModelError, ValueError) as exc:
+                out[r.custom_id] = exc if isinstance(exc, ModelError) else ModelError(f"unparseable answer: {exc}")
+        elif res.type == "errored":
+            err = getattr(res.error, "error", res.error)
+            out[r.custom_id] = ModelError(f"batch request errored: {getattr(err, 'type', '?')}: "
+                                          f"{str(getattr(err, 'message', err))[:200]}")
+        else:
+            out[r.custom_id] = ModelError(f"batch request {res.type}")
+    for cid in prompts:
+        out.setdefault(cid, ModelError("no result in the batch"))
+    return out
+
+
+def anthropic_usage(resp, model: str, price_mult: float = 1.0) -> dict:
     """input_tokens is the whole prompt (uncached + cache write + cache read),
     as before caching; the two cache parts are also recorded on their own."""
     u = resp.usage
@@ -189,7 +282,9 @@ def anthropic_usage(resp, model: str) -> dict:
     usage = {"model": resp.model or model, "input_tokens": inp, "output_tokens": u.output_tokens or 0,
              "cache_creation_input_tokens": write, "cache_read_input_tokens": read}
     usage["cost_usd"] = cost_usd(model, inp, usage["output_tokens"],
-                                 cache_creation_tokens=write, cache_read_tokens=read)
+                                 cache_creation_tokens=write, cache_read_tokens=read, price_mult=price_mult)
+    if price_mult != 1.0:
+        usage["price_mult"] = price_mult
     return usage
 
 
