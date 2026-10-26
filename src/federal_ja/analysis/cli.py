@@ -309,14 +309,19 @@ def cmd_extract(a) -> int:
             # and a document whose text changed since (2026-10-26: XFA forms
             # first stored as a "Please wait..." placeholder, now read)
             and (r["notice_id"] not in docs or r.get("chars_total") in (None, len(docs[r["notice_id"]].model_text())))}
-    skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
+    skip_recs = _load_jsonl(skipped_p)
+    skipped_ids = {r["notice_id"] for r in skip_recs}
+    # a notice the model refused is not sent again until the model or the
+    # prompt version changes (2026-10-26: two notices were refused every run)
+    refused = {r["notice_id"] for r in skip_recs if r.get("reason") == REASON_REFUSED
+               and r.get("model") == a.model and r.get("extract_version") == extract.EXTRACT_VERSION}
     todo, skipped = [], {}
     for nid in notices.notice_id.tolist():
         doc = docs[nid]
         if not any(p.text.strip() for p in doc.pages) or len(doc.model_text()) < extract_min_chars():
             skipped[nid] = "no_text" if not doc.pages else "no_usable_text"
             continue
-        if nid not in done:
+        if nid not in done and nid not in refused:
             todo.append(doc)
     if a.limit is not None:
         todo = todo[:a.limit]
@@ -324,6 +329,7 @@ def cmd_extract(a) -> int:
                "extract_version": extract.EXTRACT_VERSION, "in_scope": len(notices),
                "already_done": len(done & set(notices.notice_id)),
                "special_notices_not_ja": len(not_ja),
+               "refused_before": len(refused & set(notices.notice_id)),
                "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
                "to_extract": len(todo)}
     if a.batch and a.dry_run:
@@ -337,7 +343,7 @@ def cmd_extract(a) -> int:
     if a.dry_run:
         return 0
     if a.batch:
-        return _extract_batch(a, todo, rev, ext_p, fail_p, meta)
+        return _extract_batch(a, todo, rev, ext_p, fail_p, meta, skipped_p)
 
     spent, failed, n_done = 0.0, 0, 0
     lock = threading.Lock()
@@ -355,6 +361,8 @@ def cmd_extract(a) -> int:
                 with open(fail_p, "a") as f:
                     f.write(json.dumps({"notice_id": doc.notice_id, "model": a.model, "error": f"{type(exc).__name__}: {exc}"[:500],
                                         "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
+                if str(exc) == llm.REFUSED:
+                    _record_refusal(skipped_p, doc.notice_id, a, rev)
                 print(f"{doc.notice_id}: {exc}", file=sys.stderr)
             return
         rec["dataset_revision"] = rev.get("sha")
@@ -378,7 +386,20 @@ def cmd_extract(a) -> int:
     return 1 if failed else 0
 
 
-def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
+REASON_REFUSED = "model_refused"
+
+
+def _record_refusal(skipped_p, nid, a, rev) -> None:
+    """A skip record that keeps the notice from being sent again for this
+    model and prompt version. It shows in the table as a skipped row unless
+    the notice already has an extraction (an older version's is kept)."""
+    with open(skipped_p, "a") as f:
+        f.write(json.dumps({"notice_id": nid, "reason": REASON_REFUSED, "model": a.model,
+                            "extract_version": extract.EXTRACT_VERSION, "dataset_revision": rev.get("sha"),
+                            "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
+
+
+def _extract_batch(a, todo, rev, ext_p, fail_p, meta, skipped_p) -> int:
     """cmd_extract through the Message Batches API. Takes notices in order
     while their estimated cost fits under --max-usd, sends them as one batch
     (plus a retry batch), and stores records and failures as the loop does.
@@ -413,6 +434,8 @@ def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
             if isinstance(rec, Exception):
                 failed += 1
                 fail(nid, f"{type(rec).__name__}: {rec}")
+                if str(rec) == llm.REFUSED:
+                    _record_refusal(skipped_p, nid, a, rev)
                 print(f"{nid}: {rec}", file=sys.stderr)
                 continue
             rec["dataset_revision"] = rev.get("sha")
