@@ -13,8 +13,10 @@ Used by the daily incremental run (``.github/workflows/extract-daily.yml``):
    notices.
 4. ``upload_table`` commits that one file to the dataset, and refuses to
    publish a table with fewer rows than the published one (a failed seed
-   must never replace the table with a near-empty one). Nothing else in the
-   dataset is touched.
+   must never replace the table with a near-empty one), counting only the
+   rows left out on purpose (Special Notices that don't look like a J&A,
+   ja_check.py) as an allowed difference. Nothing else in the dataset is
+   touched.
 """
 
 from __future__ import annotations
@@ -69,23 +71,31 @@ def seed_from_hf(out: Path, *, revision: str | None = None, table=None) -> dict:
     return {"seeded": True, "extracted_rows": len(recs), "skipped_rows": len(skipped)}
 
 
-def build_table(out: Path, docs_meta: dict[str, dict]):
+def notice_ids(out: Path) -> set[str]:
+    """Every notice with a record (extracted or skipped) in out/."""
+    out = Path(out)
+    return {r["notice_id"] for r in _jsonl(out / "extractions.jsonl") + _jsonl(out / "skipped.jsonl")}
+
+
+def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = frozenset()):
     """One row per notice: the latest extraction record (any version), or
     the skip record for a notice with no extraction. A notice that is skipped
-    and also has an extraction keeps the extraction."""
+    and also has an extraction keeps the extraction. Notices in ``exclude``
+    (Special Notices that don't look like a J&A, ja_check.py) get no row."""
     import pandas as pd
 
     out = Path(out)
     latest: dict[str, dict] = {}
     for r in _jsonl(out / "extractions.jsonl"):
-        latest[r["notice_id"]] = r
+        if r["notice_id"] not in exclude:
+            latest[r["notice_id"]] = r
     rows = []
     for nid, r in latest.items():
         rows.append({"notice_id": nid, "status": "extracted", "skip_reason": None,
                      **extract.flat_row(r, docs_meta.get(nid) or {}), "effort": r.get("effort"),
                      "run_at": r.get("run_at"), "experimental": True,
                      "record_json": json.dumps(r, ensure_ascii=False)})
-    seen = set(latest)
+    seen = set(latest) | set(exclude)
     for s in _jsonl(out / "skipped.jsonl"):
         nid = s["notice_id"]
         if nid in seen:
@@ -103,16 +113,19 @@ def build_table(out: Path, docs_meta: dict[str, dict]):
     return df.reset_index(drop=True)
 
 
-def check_not_shrinking(new_rows: int, published_rows: int) -> None:
-    if new_rows < published_rows:
-        raise ShrinkError(f"new table has {new_rows} rows, the published one {published_rows}; not publishing")
+def check_not_shrinking(new_rows: int, published_rows: int, excluded_rows: int = 0) -> None:
+    """``excluded_rows``: rows left out on purpose (build_table's exclude);
+    only those may account for a smaller table."""
+    if new_rows + excluded_rows < published_rows:
+        raise ShrinkError(f"new table has {new_rows} rows (+{excluded_rows} left out on purpose), "
+                          f"the published one {published_rows}; not publishing")
 
 
-def upload_table(path: Path, message: str, *, new_rows: int) -> str:
+def upload_table(path: Path, message: str, *, new_rows: int, excluded_rows: int = 0) -> str:
     """Commit the table to the dataset (needs HF_TOKEN). Returns the commit URL."""
     from huggingface_hub import HfApi
 
-    check_not_shrinking(new_rows, len(_download_published()))
+    check_not_shrinking(new_rows, len(_download_published()), excluded_rows)
     info = HfApi().upload_file(path_or_fileobj=str(path), path_in_repo=TABLE_PATH, repo_id=HF_DATASET,
                                repo_type="dataset", commit_message=message)
     return str(getattr(info, "commit_url", info))

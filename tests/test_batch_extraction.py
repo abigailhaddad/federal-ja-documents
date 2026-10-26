@@ -254,3 +254,13 @@ def test_cli_batch_not_created_exits_2(tmp_path, monkeypatch):
     assert cli.main(["extract", "--batch", "--out", str(out), "--data-dir", str(dd), "--max-usd", "5"]) == 2
     assert (out / "failures.jsonl").read_text().count("credit balance") == 2
     assert not (out / "extractions.jsonl").exists() or not (out / "extractions.jsonl").read_text()
+
+
+def test_cli_batch_zero_cap_sends_nothing(tmp_path, monkeypatch):
+    dd, ids = write_tables(tmp_path, 2)
+
+    def batch_call(prompts, **kw):
+        raise AssertionError("no batch should be sent")
+    monkeypatch.setattr(llm, "batch_call", batch_call)
+    out = tmp_path / "out"
+    assert cli.main(["extract", "--batch", "--out", str(out), "--data-dir", str(dd), "--max-usd", "0"]) == 0

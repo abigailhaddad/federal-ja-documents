@@ -547,6 +547,44 @@ request is the same as the one-at-a-time call, and so are the answer checks.
   included) is about 87% of the cost. A missed cache adds at most about
   $0.0004 a notice at batch prices.
 
+### Special Notices: only actual J&As (2026-10-26)
+
+Special Notices are collected when their title matches the J&A title
+pattern ("sole source", "justification", ...). Most such notices are
+notices of intent to sole source: announcements made before award, not
+justifications. Since 2026-10-26 a Special Notice is extracted and kept in
+the table only when one of its attachments is titled as a justification
+(`analysis/ja_check.py`, a text rule with no model call). Justification-type
+notices are not checked.
+
+- **How the rule was checked.** A random sample of the 4,752 Special Notices
+  waiting on 2026-10-26 was read by hand. All 20 the rule kept were
+  justifications. Of the 20 it dropped, 18 were not justifications. The 2
+  misses (an `SSJ_` filename and a single-source determination stapled
+  behind a statement of need) were fixed. The samples are in the 2026-10-26
+  work notes, not in the repo.
+- **The model's `is_ja` label is not used.** Of the 501 Special Notices
+  already extracted, the model called 236 "yes". About 40 of those were plain
+  notices of intent ("THIS IS A NOTICE OF INTENT ... NOT A REQUEST FOR
+  COMPETITIVE PROPOSALS"). The rule keeps 198 of the 501.
+- **Effect on the table.** Rebuilding it from the published table removed
+  406 rows, all Special Notices: 303 extracted and 103 skipped for having no
+  text. That left 10,208 rows, each identical to its published version.
+  `upload_table`'s shrink guard counts only these deliberately dropped rows
+  as an allowed difference.
+- **Effect on the backlog.** Of the 4,752 waiting, 2,052 pass the rule.
+  Extracting them is about $4 at batch prices, against $8-10 for all 4,752.
+- **Known gaps.**
+  - Some real J&As are unreadable PDF forms whose text is only
+    "Please wait...". The rule keeps them by filename, but extraction finds
+    nothing in them.
+  - The word "justification" in passing in the first 400 characters keeps a
+    notice. On the real data that is about 1 notice; see the module
+    docstring.
+- **Rebuilding the table only.** Run the workflow by hand with `max_usd` 0
+  and "publish" ticked. Batch mode sends nothing under a cap smaller than
+  one notice.
+
 ## One call, three fixes (prompt `2026-10-21.extract6`)
 
 **Status: validated on a sample; not yet run on the dataset.** extract6 is

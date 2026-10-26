@@ -22,7 +22,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from . import data, extract, llm, prompts, spreadsheet, table, tagger
+from . import data, extract, ja_check, llm, prompts, spreadsheet, table, tagger
 from .promptfile import CONFIG
 
 EXPERIMENTAL_BANNER = (
@@ -273,6 +273,12 @@ def cmd_extract(a) -> int:
         notices = notices[notices.posted_date.fillna("") >= a.since]
     notices = notices.sort_values(["posted_date", "notice_id"], ascending=[False, True])
     docs = data.build_documents(notices, attachments, pages, notices.notice_id.tolist())
+    # Special Notices whose documents don't look like a J&A (mostly notices of
+    # intent to sole source) are out of scope: never sent to the model, and
+    # extract-table leaves them out of the table (ja_check.py, 2026-10-26).
+    not_ja = ja_check.not_ja_special_notices(notices, docs)
+    notices = notices[~notices.notice_id.isin(not_ja)]
+    docs = {nid: d for nid, d in docs.items() if nid not in not_ja}
     meta = {nid: {**d.meta} for nid, d in docs.items()}
 
     a.out.mkdir(parents=True, exist_ok=True)
@@ -314,6 +320,7 @@ def cmd_extract(a) -> int:
     summary = {"experimental": True, "dataset_revision": rev.get("sha"), "model": a.model,
                "extract_version": extract.EXTRACT_VERSION, "in_scope": len(notices),
                "already_done": len(done & set(notices.notice_id)),
+               "special_notices_not_ja": len(not_ja),
                "skipped": {k: list(skipped.values()).count(k) for k in set(skipped.values())},
                "to_extract": len(todo)}
     if a.batch and a.dry_run:
@@ -377,7 +384,7 @@ def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
     picked, est = [], 0.0
     for doc in todo:
         c = extract.estimate_batch_cost(doc, a.model)
-        if picked and est + c > a.max_usd:
+        if est + c > a.max_usd:      # so --max-usd 0 sends nothing (rebuild the table only)
             break
         picked.append(doc)
         est += c
@@ -417,19 +424,25 @@ def _extract_batch(a, todo, rev, ext_p, fail_p, meta) -> int:
 
 def cmd_extract_table(a) -> int:
     rev = data.download_tables(a.data_dir, revision=a.revision)
-    notices, _, _ = data.load_tables(a.data_dir)
+    notices, attachments, pages = data.load_tables(a.data_dir)
     meta = {n["notice_id"]: data._notice_meta(n) for n in notices.to_dict("records")}
-    df = table.build_table(a.out, meta)
+    # rows already published for Special Notices that don't look like a J&A
+    # are dropped too, not only new ones (ja_check.py)
+    ids = table.notice_ids(a.out)
+    sn = notices[notices.notice_id.isin(ids)]
+    not_ja = ja_check.not_ja_special_notices(sn, data.build_documents(sn, attachments, pages, sn.notice_id.tolist()))
+    df = table.build_table(a.out, meta, exclude=not_ja)
     a.table.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(a.table, index=False)
     summary = {"rows": len(df), "dataset_revision": rev.get("sha"),
                "by_status": df["status"].value_counts().to_dict() if len(df) else {},
                "by_extract_version": df["extract_version"].fillna("none").value_counts().to_dict()
-               if len(df) and "extract_version" in df else {}}
+               if len(df) and "extract_version" in df else {},
+               "dropped_special_notices_not_ja": len(not_ja)}
     if a.publish:
         summary["commit"] = table.upload_table(
             a.table, f"analysis/extractions.parquet: {len(df)} rows (dataset {str(rev.get('sha'))[:12]})",
-            new_rows=len(df))
+            new_rows=len(df), excluded_rows=len(not_ja))
     print(json.dumps(summary, default=str), file=sys.stderr)
     return 0
 

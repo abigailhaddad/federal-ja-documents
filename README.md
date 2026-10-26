@@ -64,10 +64,14 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
     (`JA_TITLE_PATTERN` in `collect/sources.py`.) Agencies sometimes post a
     real J&A as a Special Notice, e.g. a "Notice of Intent to Sole Source"
     with the justification attached, which the Type rule alone misses. These
-    rows are **candidates**: some may be notices of intent with no J&A
+    rows are **candidates**: many are notices of intent with no J&A
     attached, and a few are unrelated (e.g. "Fair Opportunity" industry
-    updates). The analysis `is_ja` label says whether a notice's documents
-    actually are a J&A. In the active CSV of 2026-10-19 plus the FY2025-FY2027
+    updates). The extraction table (`analysis/extractions.parquet`) keeps a
+    Special Notice only when one of its attachments is titled as a
+    justification (`analysis/ja_check.py`, no model call). On 2026-10-26 that
+    kept 2,317 of the 5,423 Special Notices with a downloaded document. Do not
+    use the model's `is_ja` label for this: it called about 40 plain notices
+    of intent "yes". In the active CSV of 2026-10-19 plus the FY2025-FY2027
     archives of 2026-10-18, 9,024 Special Notices posted on or after
     2025-01-20 match, next to 10,594 Justification notices.
 

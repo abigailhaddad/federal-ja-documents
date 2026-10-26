@@ -109,12 +109,12 @@ made when the tables are published; `notices` is the source.
      Agencies sometimes post a J&A as a Special Notice, for example a
      "Notice of Intent to Sole Source" with the justification attached. These
      rows are **candidates**: the title only says the notice may carry a
-     justification. Some may be notices of intent with no J&A attached, and a
-     few are unrelated (e.g. "Fair Opportunity" industry updates). The
-     experimental `is_ja` field in `analysis/extractions.parquet` says
-     whether a notice's documents actually are a J&A, once the daily
-     extraction has reached it (newly collected notices get it after a later
-     run, within that run's spend cap).
+     justification. Many are notices of intent with no J&A attached, and a
+     few are unrelated (e.g. "Fair Opportunity" industry updates).
+     `analysis/extractions.parquet` keeps a Special Notice only when one of
+     its attachments is titled as a justification (a text rule, no model
+     call). On 2026-10-26 that kept 2,317 of the 5,423 Special Notices with a
+     downloaded document.
 
    `type` is kept as SAM gives it. When a notice appears in more than one
    file, the row with the latest `PostedDate` is kept (ties go to the active
