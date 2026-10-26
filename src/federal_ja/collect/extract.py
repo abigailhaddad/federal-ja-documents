@@ -5,6 +5,8 @@ text_source values written to the dataset:
   docx           python-docx (paragraphs, then tables)
   xlsx           openpyxl (every sheet, tab-separated cells)
   text           plain-text attachment (.txt/.csv), decoded as UTF-8/latin-1
+  pdf_xfa        an XFA PDF form: the page is only a "Please wait..."
+                 placeholder, so the text is the form's own XML (xfa.py)
   transcription  machine transcription of page images (every page of the
                  PDF lacked a text layer)
   pdf_text+transcription
@@ -28,6 +30,8 @@ import logging
 import re
 import zipfile
 from dataclasses import dataclass, field
+
+from . import xfa
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +58,7 @@ class ExtractResult:
     needs_transcription: bool = False
     extract_error: str = ""
     page_texts: list[str] = field(default_factory=list, repr=False)
+    xfa_form: bool = False      # page_texts is the one-"page" XFA form text
 
 
 def detect_kind(data_head: bytes, filename: str = "") -> str:
@@ -176,19 +181,28 @@ def extract_pdf(path: str) -> ExtractResult:
             except Exception as e:  # noqa: BLE001 - one bad page shouldn't sink the file
                 log.warning("page extract failed in %s: %s", path, e)
                 texts.append("")
+        if texts and xfa.is_placeholder(texts[0]):
+            try:
+                form = clean_text(xfa.form_text(reader))
+            except Exception as e:  # noqa: BLE001 - keep the placeholder text
+                log.warning("XFA form text failed in %s: %s", path, e)
+                form = ""
+            if form.strip():
+                texts, res.xfa_form = [form], True
     except Exception as e:  # noqa: BLE001
         res.extract_error = f"pypdf: {type(e).__name__}: {e}"[:500]
         return res
     res.page_texts = texts
     res.page_count = len(texts)
-    res.textless_pages = textless_pages(texts)
+    # an XFA form is never transcribed: a picture of it is the placeholder
+    res.textless_pages = [] if res.xfa_form else textless_pages(texts)
     res.pages_with_text = len(texts) - len(res.textless_pages)
     res.native_text_chars = sum(len(t) for t in texts)
-    res.needs_transcription = pdf_needs_transcription(texts)
+    res.needs_transcription = not res.xfa_form and pdf_needs_transcription(texts)
     if res.pages_with_text:
         # Native text of every page (empty pages keep their marker) until a
         # transcription fills the textless pages in.
-        res.text, res.text_source = join_pages(texts), "pdf_text"
+        res.text, res.text_source = join_pages(texts), ("pdf_xfa" if res.xfa_form else "pdf_text")
     else:
         res.text, res.text_source = "", "none"
     return res

@@ -97,7 +97,10 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
 * **Text:** `text_source` is `pdf_text` (pypdf text layer), `docx`
   (python-docx), `xlsx` (openpyxl), `text`, `transcription` (every page of
   the PDF was image-only), `pdf_text+transcription` (native text for typed
-  pages, transcription for image-only pages), or `none`.
+  pages, transcription for image-only pages), `pdf_xfa` (an XFA PDF form
+  whose page only says "Please wait...": the text is the form's wording and
+  filled-in values, read from the XML inside the file; `collect/xfa.py`), or
+  `none`.
 * **Scanned pages:** the decision is per page. A PDF page whose text layer
   has fewer than 300 characters (after stripping whitespace), or is
   font-encoding garbage (glyph codes like `/0 /i255`), is listed in

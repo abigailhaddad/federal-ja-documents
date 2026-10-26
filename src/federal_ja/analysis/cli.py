@@ -305,7 +305,10 @@ def cmd_extract(a) -> int:
             if r["model"] == a.model and r["extract_version"] == extract.EXTRACT_VERSION
             and r.get("effort") == a.effort
             # a cut document is redone when the cutting rule changes
-            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)}
+            and (not r.get("truncated") or r.get("truncation_version") == extract.TRUNCATION_VERSION)
+            # and a document whose text changed since (2026-10-26: XFA forms
+            # first stored as a "Please wait..." placeholder, now read)
+            and (r["notice_id"] not in docs or r.get("chars_total") in (None, len(docs[r["notice_id"]].model_text())))}
     skipped_ids = {r["notice_id"] for r in _load_jsonl(skipped_p)}
     todo, skipped = [], {}
     for nid in notices.notice_id.tolist():

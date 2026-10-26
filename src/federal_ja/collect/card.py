@@ -57,7 +57,7 @@ Code and issue tracker: {project_url}
 |---|---|
 | `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, SAM's award block with the order number (`sam_award_*` columns, below), and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
-| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
+| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `xfa_form`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
@@ -183,6 +183,7 @@ pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
 | text_source | method |
 |---|---|
 | `pdf_text` | the PDF's own text layer, via `pypdf` |
+| `pdf_xfa` | an XFA PDF form whose page is only a "Please wait..." placeholder: the text is the form's own XML, its wording with the filled-in values (one page, `pages.text_source` `xfa_form`; never transcribed) |
 | `docx` | `python-docx` (paragraphs, then table rows) |
 | `xlsx` | `openpyxl`, every sheet, tab-separated |
 | `text` | plain-text attachment |

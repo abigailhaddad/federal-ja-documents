@@ -19,6 +19,7 @@ from typing import Callable, Iterable
 
 from . import extract as ex
 from . import transcribe as transcribe_mod
+from . import xfa
 from .sam_api import FileTooLarge, SamClient, SamError
 from .sources import CollectResult
 from .store import Store, file_rel_path
@@ -170,19 +171,20 @@ def fetch_resources(store: Store, client: SamClient, notice_ids: Iterable[str] |
 
 TRANSCRIBED_SOURCES = ("transcription", "pdf_text+transcription")
 
-def set_pdf_pages(store: Store, a: dict, page_texts: list[str]) -> None:
+def set_pdf_pages(store: Store, a: dict, page_texts: list[str], source: str = "native") -> None:
     """(Re)build the per-page rows of a PDF from its native page texts.
-    Existing transcriptions of pages that still need one are kept."""
+    Existing transcriptions of pages that still need one are kept. source:
+    the text_source of a page with text ("xfa_form" for an XFA form)."""
     key = (a["notice_id"], a["resource_id"])
     old = {r["page_number"]: r for r in store.pages.get(key, [])}
     rows = []
     for i, t in enumerate(page_texts, 1):
         t = (t or "").strip()
-        needs = not ex.page_has_text(t)
+        needs = source != "xfa_form" and not ex.page_has_text(t)
         row = {"notice_id": a["notice_id"], "resource_id": a["resource_id"],
                "sha256": a.get("sha256"), "page_number": i, "page_count": len(page_texts),
                "text_layer_chars": len(t), "needs_transcription": needs,
-               "text": t, "text_source": "native" if t else "none", "text_layer_text": None,
+               "text": t, "text_source": source if t else "none", "text_layer_text": None,
                "transcription_model": None, "transcription_prompt_version": None,
                "transcribed_at": None}
         prev = old.get(i)
@@ -202,6 +204,8 @@ def doc_text_from_pages(rows: list[dict]) -> tuple[str, str]:
     text = "\n\n".join(f"--- page {r['page_number']} ---\n{r['text'] or ''}" for r in rows)
     if "transcription" in sources:
         return text, ("pdf_text+transcription" if "native" in sources else "transcription")
+    if sources == {"xfa_form"}:
+        return text, "pdf_xfa"
     return text, "pdf_text"
 
 
@@ -211,7 +215,7 @@ def apply_extraction(a: dict, r: ex.ExtractResult, store: Store | None = None) -
              native_text_chars=r.native_text_chars,
              needs_transcription=r.needs_transcription, extract_error=r.extract_error)
     if store is not None and r.file_kind in ("pdf", "image") and r.page_count:
-        set_pdf_pages(store, a, r.page_texts)
+        set_pdf_pages(store, a, r.page_texts, "xfa_form" if r.xfa_form else "native")
         a["text"], a["text_source"] = doc_text_from_pages(store.pages[(a["notice_id"], a["resource_id"])])
         return
     # never overwrite a transcription with an empty native result
@@ -397,6 +401,22 @@ def reextract_remote(store: Store, rows: list[dict], fetch: Callable[[dict], str
     return n
 
 
+def xfa_placeholders(store: Store) -> list[dict]:
+    """Downloaded PDFs whose stored text is only an XFA "Please wait..."
+    placeholder (extracted before xfa.py existed)."""
+    out = []
+    for a in store.attachments.values():
+        if a.get("download_status") != "ok" or a.get("file_kind") != "pdf" or not a.get("file_path"):
+            continue
+        pages = store.pages.get((a["notice_id"], a["resource_id"])) or []
+        first = pages[0].get("text") if pages else a.get("text")   # starts "--- page 1 ---"
+        if pages and pages[0].get("text_source") == "xfa_form":
+            continue
+        if xfa.is_placeholder(first or ""):
+            out.append(a)
+    return out
+
+
 def reextract(store: Store, only_old_rule: bool = False) -> int:
     """Re-run native extraction on downloaded files still on disk (after rule
     changes). only_old_rule: just PDFs extracted before textless_pages existed."""
@@ -422,6 +442,8 @@ def pages_from_stored_text(store: Store) -> dict:
     counts = {"pdfs": 0, "pages": 0, "no_text_pdfs": 0, "marker_mismatch": 0}
     for a in store.attachments.values():
         if a.get("download_status") != "ok" or a.get("file_kind") != "pdf" or not a.get("page_count"):
+            continue
+        if a.get("text_source") == "pdf_xfa":      # one form "page", not a text layer to re-split
             continue
         n = a["page_count"]
         parts = transcribe_mod.split_by_markers(a.get("text") or "")
@@ -481,7 +503,7 @@ def recheck_page_rule(store: Store) -> dict:
     for key, rows in store.pages.items():
         changed = False
         for r in rows:
-            if r["text_source"] == "transcription" or r["needs_transcription"]:
+            if r["text_source"] in ("transcription", "xfa_form") or r["needs_transcription"]:
                 continue
             if not ex.page_has_text(r["text"] or ""):
                 r["needs_transcription"] = True
