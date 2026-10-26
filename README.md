@@ -71,7 +71,9 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
     justification (`analysis/ja_check.py`, no model call). On 2026-10-26 that
     kept 2,317 of the 5,423 Special Notices with a downloaded document. Do not
     use the model's `is_ja` label for this: it called about 40 plain notices
-    of intent "yes". In the active CSV of 2026-10-19 plus the FY2025-FY2027
+    of intent "yes". Rows left out of the table (these, and notices whose
+    document the model says is not a J&A) are in
+    `analysis/extractions_excluded.parquet`, with the reason. In the active CSV of 2026-10-19 plus the FY2025-FY2027
     archives of 2026-10-18, 9,024 Special Notices posted on or after
     2025-01-20 match, next to 10,594 Justification notices.
 

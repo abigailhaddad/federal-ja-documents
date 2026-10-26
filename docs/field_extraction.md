@@ -585,6 +585,38 @@ notices are not checked.
   and "publish" ticked. Batch mode sends nothing under a cap smaller than
   one notice.
 
+### Notices with no J&A document (2026-10-26)
+
+Rows are also left out when the model's `is_ja` answer is "no". On
+2026-10-26 I read every Justification-type notice the model had called
+"no" or "unclear" (194 of 9,932):
+
+| What the document is | "no" | "unclear" |
+|---|---|---|
+| A real J&A, readable | 0 | 18 |
+| A real J&A we can't read (PDF form, encrypted), or a blank J&A form | 1 | 47 |
+| A J&A notice with the J&A not attached (SAM form, award, SOW, ...) | 91 | 11 |
+| A notice of intent, synopsis, or another kind of determination | 25 | 0 |
+| Can't tell | 0 | 1 |
+
+- **"no" is used, "unclear" is not.** The 117 "no" rows are left out;
+  116 of them have no J&A document and the other is a blank J&A form.
+  "unclear" is mostly real J&As, so those rows stay.
+- **Exception.** When an attachment is named as a J&A but its text could
+  not be read, the model never saw the J&A, so its "no" is ignored. One
+  such notice on 2026-10-26: `faa1cd84`, whose "Redacted JA.pdf" is an
+  unreadable PDF form.
+- **Where the left-out rows go.** They go to
+  `analysis/extractions_excluded.parquet`, with an `exclude_reason`
+  (`special_notice_not_ja` or `model_says_not_ja`) and the full record.
+  The next run's seed reads both files, so a left-out notice is not
+  extracted again. Both files are published in one commit. The shrink
+  guard counts the two together.
+- **Effect on the table.** The 10,614 published rows split into 10,091 in
+  the table and 523 excluded (406 + 117). Every record is identical to its
+  published version.
+- **The model's "yes" answers were not checked** the same way.
+
 ## One call, three fixes (prompt `2026-10-21.extract6`)
 
 **Status: validated on a sample; not yet run on the dataset.** extract6 is

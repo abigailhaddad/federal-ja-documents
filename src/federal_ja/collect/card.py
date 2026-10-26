@@ -114,7 +114,9 @@ made when the tables are published; `notices` is the source.
      `analysis/extractions.parquet` keeps a Special Notice only when one of
      its attachments is titled as a justification (a text rule, no model
      call). On 2026-10-26 that kept 2,317 of the 5,423 Special Notices with a
-     downloaded document.
+     downloaded document. Rows left out of that table (these, and
+     notices whose document the model says is not a J&A) are in
+     `analysis/extractions_excluded.parquet`, with the reason.
 
    `type` is kept as SAM gives it. When a notice appears in more than one
    file, the row with the latest `PostedDate` is kept (ties go to the active

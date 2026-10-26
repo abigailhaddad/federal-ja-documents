@@ -55,6 +55,24 @@ CAPS_HEADING = re.compile(
     r"|SINGLE SOURCE DETERMINATION|EXCEPTION TO FAIR OPPORTUNITY")
 
 
+# Text that stands in for a document we could not read: an XFA PDF form
+# ("Please wait... If this message is not eventually replaced ..."), or a
+# file encrypted with Microsoft Information Protection.
+UNREADABLE = re.compile(r"Please\s+wait\.*\s*If\s+this\s+message\s+is\s+not\s+eventually\s+replaced"
+                        r"|Microsoft\s+Information\s+Protection", re.I)
+
+
+def unreadable_ja_attachment(doc: Document) -> bool:
+    """An attachment named as a justification whose text is empty or an
+    unreadable-document placeholder: the model never saw the J&A, so its
+    "not a J&A" answer is about the other attachments only."""
+    for fn, pages in doc.attachments():
+        text = "\n\n".join(p.text for p in pages)
+        if HEADING.search((fn or "").replace("_", " ")) and (not text.strip() or UNREADABLE.search(text[:600])):
+            return True
+    return False
+
+
 def ja_evidence(doc: Document) -> str | None:
     """'filename', 'opening' or 'heading' (the first test passed), or None
     when no attachment looks like a justification."""

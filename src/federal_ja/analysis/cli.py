@@ -426,23 +426,38 @@ def cmd_extract_table(a) -> int:
     rev = data.download_tables(a.data_dir, revision=a.revision)
     notices, attachments, pages = data.load_tables(a.data_dir)
     meta = {n["notice_id"]: data._notice_meta(n) for n in notices.to_dict("records")}
-    # rows already published for Special Notices that don't look like a J&A
-    # are dropped too, not only new ones (ja_check.py)
+    # Left out of the table (2026-10-26), including rows already published:
+    # Special Notices that don't look like a J&A (ja_check.py), and notices
+    # whose document the model says is not a J&A. They go to the excluded
+    # table instead, so the next run doesn't extract them again.
     ids = table.notice_ids(a.out)
     sn = notices[notices.notice_id.isin(ids)]
     not_ja = ja_check.not_ja_special_notices(sn, data.build_documents(sn, attachments, pages, sn.notice_id.tolist()))
-    df = table.build_table(a.out, meta, exclude=not_ja)
+    # ...except where a J&A-named attachment couldn't be read: the model's "no"
+    # then only describes the other attachments (2026-10-26, faa1cd84)
+    model_no = table.model_says_not_ja(a.out)
+    mn = notices[notices.notice_id.isin(model_no)]
+    mn_docs = data.build_documents(mn, attachments, pages, mn.notice_id.tolist())
+    unread = {nid for nid, d in mn_docs.items() if ja_check.unreadable_ja_attachment(d)}
+    reasons = {nid: table.REASON_MODEL_NO for nid in model_no - unread}
+    reasons.update({nid: table.REASON_SPECIAL_NOTICE for nid in not_ja})
+    df = table.build_table(a.out, meta, exclude=set(reasons))
+    ex = table.build_excluded(a.out, meta, reasons)
+    excluded_path = a.table.with_name(a.table.stem + "_excluded.parquet")
     a.table.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(a.table, index=False)
+    ex.to_parquet(excluded_path, index=False)
     summary = {"rows": len(df), "dataset_revision": rev.get("sha"),
                "by_status": df["status"].value_counts().to_dict() if len(df) else {},
                "by_extract_version": df["extract_version"].fillna("none").value_counts().to_dict()
                if len(df) and "extract_version" in df else {},
-               "dropped_special_notices_not_ja": len(not_ja)}
+               "excluded_rows": len(ex),
+               "model_no_kept_unreadable_ja": len(unread),
+               "excluded_by_reason": ex["exclude_reason"].value_counts().to_dict() if len(ex) else {}}
     if a.publish:
         summary["commit"] = table.upload_table(
             a.table, f"analysis/extractions.parquet: {len(df)} rows (dataset {str(rev.get('sha'))[:12]})",
-            new_rows=len(df), excluded_rows=len(not_ja))
+            new_rows=len(df), excluded_path=excluded_path, excluded_rows=len(ex))
     print(json.dumps(summary, default=str), file=sys.stderr)
     return 0
 

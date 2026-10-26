@@ -86,10 +86,35 @@ def test_build_table_leaves_excluded_out(tmp_path):
     assert df.notice_id.tolist() == ["a"]
 
 
-def test_shrink_guard_counts_only_rows_left_out_on_purpose():
-    table.check_not_shrinking(90, 100, excluded_rows=10)
+def test_shrink_guard_counts_both_tables_together():
+    table.check_not_shrinking(90 + 10, 100)
     with pytest.raises(table.ShrinkError):
-        table.check_not_shrinking(89, 100, excluded_rows=10)
+        table.check_not_shrinking(89 + 10, 100)
+
+
+def test_model_no_rows_move_to_the_excluded_table(tmp_path):
+    no = record("n")
+    no["fields"]["is_ja"] = "no"
+    unclear = record("u")
+    unclear["fields"]["is_ja"] = "unclear"
+    (tmp_path / "extractions.jsonl").write_text("".join(json.dumps(r) + "\n" for r in (record("y"), no, unclear)))
+    assert table.model_says_not_ja(tmp_path) == {"n"}
+    reasons = {"n": table.REASON_MODEL_NO}
+    assert sorted(table.build_table(tmp_path, {}, exclude=set(reasons)).notice_id) == ["u", "y"]
+    ex = table.build_excluded(tmp_path, {}, reasons)
+    assert ex.notice_id.tolist() == ["n"] and ex.exclude_reason[0] == "model_says_not_ja"
+    assert ex.status[0] == "extracted" and json.loads(ex.record_json[0])["fields"]["is_ja"] == "no"
+
+
+def test_excluded_rows_are_seeded_back_so_they_are_not_extracted_again(tmp_path, monkeypatch):
+    no = record("n")
+    no["fields"]["is_ja"] = "no"
+    main = pd.DataFrame([{"notice_id": "y", "status": "extracted", "record_json": json.dumps(record("y"))}])
+    excl = pd.DataFrame([{"notice_id": "n", "status": "extracted", "record_json": json.dumps(no)}])
+    monkeypatch.setattr(table, "_download_published",
+                        lambda revision=None, path=table.TABLE_PATH: main if path == table.TABLE_PATH else excl)
+    assert table.seed_from_hf(tmp_path)["extracted_rows"] == 2
+    assert table.notice_ids(tmp_path) == {"y", "n"}
 
 
 # ── extract and extract-table ──────────────────────────────────────────────
@@ -147,3 +172,14 @@ def test_extract_table_drops_published_non_ja_rows(tmp_path, monkeypatch):
     t = tmp_path / "t.parquet"
     assert cli.main(["extract-table", "--out", str(out), "--data-dir", str(dd), "--table", str(t)]) == 0
     assert sorted(pd.read_parquet(t).notice_id) == sorted([ja, jtype])
+    ex = pd.read_parquet(tmp_path / "t_excluded.parquet")
+    assert ex.notice_id.tolist() == [noi] and ex.exclude_reason.tolist() == ["special_notice_not_ja"]
+
+
+def test_unreadable_ja_attachment():
+    assert ja_check.unreadable_ja_attachment(doc(("NOTICE OF INTENT.pdf", NOI), ("Redacted JA.pdf",
+        "Please wait... \n  \nIf this message is not eventually replaced by the proper contents")))
+    assert ja_check.unreadable_ja_attachment(doc(("SSJ_signed.pdf", "")))
+    assert not ja_check.unreadable_ja_attachment(doc(("J&A.pdf", PAGE1)))
+    assert not ja_check.unreadable_ja_attachment(doc(("form.pdf", "Please wait... If this message is not "
+                                                                  "eventually replaced")))
