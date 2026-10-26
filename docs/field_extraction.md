@@ -547,6 +547,15 @@ request is the same as the one-at-a-time call, and so are the answer checks.
   included) is about 87% of the cost. A missed cache adds at most about
   $0.0004 a notice at batch prices.
 
+### Refusals are not retried (2026-10-26)
+
+When the model refuses a notice, the run writes a skip record
+(`reason` `model_refused`, with the model and `extract_version`). Later runs
+don't send that notice again until the model or the prompt version changes.
+It shows in the table as a skipped row, unless the notice already has an
+extraction from an older version, which is kept. On 2026-10-26 two notices
+(`3debbd2c`, `35dfc11a`) had been refused on every run.
+
 ### Special Notices: only actual J&As (2026-10-26)
 
 Special Notices are collected when their title matches the J&A title

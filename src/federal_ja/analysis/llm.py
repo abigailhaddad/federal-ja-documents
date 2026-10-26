@@ -79,6 +79,9 @@ Prompt = Union[str, tuple[str, str]]
 NO_FORCED_TOOL_CHOICE = frozenset({"claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"})
 
 
+REFUSED = "model refused"
+
+
 class ModelError(RuntimeError):
     """A model call failed. The caller records nothing for the document, so a
     rerun retries it; a partial (one-pass) result is never stored as done."""
@@ -173,7 +176,7 @@ def anthropic_params(prompt, *, schema, tool_name, model, max_tokens=8192, effor
 def anthropic_result(resp, *, tool_name, model, price_mult=1.0) -> tuple[dict, dict]:
     """(parsed tool input, usage) from a Message, or ModelError."""
     if resp.stop_reason == "refusal":
-        raise ModelError("model refused")
+        raise ModelError(REFUSED)
     if resp.stop_reason == "max_tokens":
         raise ModelError("incomplete response (max_tokens)")
     block = next((b for b in resp.content if b.type == "tool_use" and b.name == tool_name), None)
@@ -315,7 +318,7 @@ def _call_openai(prompt, *, schema, tool_name, model, timeout, max_attempts):
             raise ModelError(f"OpenAI call failed: {str(exc)[:200]}") from exc
         choice = resp.choices[0]
         if getattr(choice.message, "refusal", None):
-            raise ModelError("model refused")
+            raise ModelError(REFUSED)
         if choice.finish_reason != "stop":
             raise ModelError(f"incomplete response (finish_reason={choice.finish_reason})")
         u = resp.usage

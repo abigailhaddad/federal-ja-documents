@@ -264,3 +264,31 @@ def test_cli_batch_zero_cap_sends_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(llm, "batch_call", batch_call)
     out = tmp_path / "out"
     assert cli.main(["extract", "--batch", "--out", str(out), "--data-dir", str(dd), "--max-usd", "0"]) == 0
+
+
+def test_refused_notices_are_not_sent_again(tmp_path, monkeypatch):
+    dd, ids = write_tables(tmp_path, 2)
+    sent = []
+
+    def batch_call(prompts, **kw):
+        sent.append(sorted(prompts))
+        u = {"input_tokens": 1000, "output_tokens": 200, "cost_usd": 0.0001, "price_mult": 0.5}
+        return {nid: (llm.ModelError(llm.REFUSED) if nid == ids[0] else (answer(), u)) for nid in prompts}
+    monkeypatch.setattr(llm, "batch_call", batch_call)
+    out = tmp_path / "out"
+    args = ["extract", "--batch", "--out", str(out), "--data-dir", str(dd), "--max-usd", "5"]
+    assert cli.main(args) == 1                                   # the refusal is a failure this run
+    skips = [json.loads(ln) for ln in (out / "skipped.jsonl").read_text().splitlines()]
+    assert [(s["notice_id"], s["reason"]) for s in skips] == [(ids[0], "model_refused")]
+    assert cli.main(args) == 0 and len(sent) == 1                # next run: nothing left to send
+    # a new prompt version gives it another try
+    monkeypatch.setattr(extract, "EXTRACT_VERSION", "next-version")
+    cli.main(args)
+    assert ids[0] in sent[-1]
+
+
+def test_refused_notice_shows_as_skipped_in_the_table(tmp_path):
+    from federal_ja.analysis import table
+    (tmp_path / "skipped.jsonl").write_text(json.dumps({"notice_id": "r", "reason": "model_refused"}) + "\n")
+    df = table.build_table(tmp_path, {})
+    assert df.status.tolist() == ["skipped"] and df.skip_reason.tolist() == ["model_refused"]
