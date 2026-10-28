@@ -1,0 +1,62 @@
+name: SAM award backfill
+
+# One-time (resumable) fill of the sam_award_* columns for notices collected
+# before those columns existed: the README's "run by hand" sequence (pull ->
+# sam-awards --backfill -> publish --mode tables) as a manual workflow.
+# 2026-10-28: as of revision 33ca553, 10,679 Justification notices had never
+# been fetched (the daily job only fetches new and edited notices), so
+# sam_award_order_number was filled for 18 of 19,805 notices.
+# No SAM key: sam_award.py reads SAM's public opportunity endpoint.
+# Shares the daily job's concurrency group, so a daily run that pulled the
+# tables before this one published can't overwrite it (and vice versa).
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Ask SAM about at most N notices (blank = all unfetched)"
+        default: ""
+      retry_errors:
+        description: "Also retry error / not_found rows"
+        type: boolean
+        default: false
+      publish:
+        description: "Publish tables to Hugging Face"
+        type: boolean
+        default: true
+
+concurrency:
+  group: daily-collection
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest -q
+      - name: Pull current tables
+        run: uv run ja-collect --workdir work pull
+      - name: Fetch SAM award blocks
+        shell: bash  # bash -eo pipefail, so `| tee` cannot hide a failure
+        run: |
+          ARGS="--backfill"
+          if [ -n "${{ inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ inputs.limit }}"; fi
+          if [ "${{ inputs.retry_errors }}" = "true" ]; then ARGS="$ARGS --retry-errors"; fi
+          uv run ja-collect --workdir work sam-awards $ARGS | tee sam_awards_summary.json
+      - name: Publish tables
+        if: inputs.publish
+        run: uv run ja-collect --workdir work publish --mode tables
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sam-awards-summary
+          path: |
+            sam_awards_summary.json
+            work/cache/sam_award.jsonl
+          if-no-files-found: ignore
