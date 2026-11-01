@@ -142,10 +142,13 @@ Everything dropped is listed with its reason in `picks.json`
 * **Zero picks:** the email is the one line "Nothing WOAH-worthy today (N new
   notices reviewed)." so it is clear the job ran (`--zero-picks skip` sends
   nothing instead).
-* **Weekends:** on a Saturday or Sunday (US Eastern) with no picks, nothing
-  is sent and the state is left alone, so those notices go in the next day's
-  digest, normally Monday's (2026-11-01). A weekend day with a pick sends as
-  usual. `--weekend-zero-picks send` turns this off.
+* **Quiet days:** with nothing picked and fewer than 5 new notices (most
+  weekends and holidays), nothing is sent and the state is left alone, so
+  those notices go in the next digest, which goes out once there are 5 or
+  more or one is picked (2026-11-01). Never held when the last digest is 3 or
+  more Eastern days old, so there is an email at least every 3 days (a stalled
+  collection still shows up) and held notices stay far from the 14-day age
+  cutoff. `--hold-under 0` turns this off; `--max-gap-days` sets the 3.
 * **One email a day:** once a digest has been sent on an Eastern-time day,
   every later run that day sends nothing, even if it finds new notices; they
   stay after the watermark and go in the next day's digest (2026-10-22).

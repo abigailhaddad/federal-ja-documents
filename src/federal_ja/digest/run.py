@@ -18,7 +18,7 @@ import argparse
 import json
 import sys
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from . import archive as ar, buttondown, model, render, state as st, verify
@@ -56,10 +56,11 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
                    help="with no saved state, cover notices first seen in the last N hours (default 36)")
     p.add_argument("--zero-picks", choices=["send", "skip"], default="send",
                    help="when nothing is picked: send the one-line 'nothing WOAH-worthy' email (default) or skip")
-    p.add_argument("--weekend-zero-picks", choices=["hold", "send"], default="hold",
-                   help="on a Saturday or Sunday (US Eastern) with nothing picked: hold (default; send nothing and "
-                        "leave the state, so those notices go in the next day's digest) or send the "
-                        "'nothing WOAH-worthy' email")
+    p.add_argument("--hold-under", type=int, default=5,
+                   help="with nothing picked and fewer than N notices, send nothing and leave the state, so those "
+                        "notices go in the next digest (default 5; 0 turns holding off)")
+    p.add_argument("--max-gap-days", type=int, default=3,
+                   help="never hold when the last digest went out N or more Eastern days ago (default 3)")
     p.add_argument("--send-at", default="07:00",
                    help="deliver at this US Eastern time (HH:MM) via a Buttondown scheduled send when the run "
                         "finishes earlier that day; later runs send at once. 'now' always sends at once (default 07:00)")
@@ -231,12 +232,18 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
     if not picks and a.zero_picks == "skip":
         report["skipped"] = "no picks and --zero-picks skip"
         return 0
-    # Weekends (2026-11-01): almost nothing is posted, so a Saturday or Sunday
-    # with no picks sends nothing. The state is not touched, so those notices
-    # stay after the watermark and go in the next day's digest (normally
-    # Monday's). A weekend day with a pick sends as usual.
-    if not picks and a.weekend_zero_picks == "hold" and as_of.astimezone(render.ET).weekday() >= 5:
-        report["skipped"] = (f"weekend with no picks; {len(cands)} notice(s) held for the next day's digest")
+    # Quiet days (2026-11-01): nothing picked and fewer than --hold-under
+    # notices (most weekends and holidays) sends nothing. The state is not
+    # touched, so those notices stay after the watermark and go in the next
+    # digest, which sends once they reach --hold-under or one is picked. Never
+    # held when the last digest is --max-gap-days or more old (or there is
+    # none), so a stalled collection still produces an email and held notices
+    # never get near the --max-age-days cutoff.
+    last = state.get("last_sent_date_et")
+    gap = (date.fromisoformat(today_et) - date.fromisoformat(last)).days if last else None
+    if not picks and len(cands) < a.hold_under and gap is not None and gap < a.max_gap_days:
+        report["skipped"] = (f"quiet day: no picks and {len(cands)} notice(s), under {a.hold_under}; "
+                             f"held for the next digest (last sent {last})")
         print(report["skipped"], file=sys.stderr)
         return 0
     meta = {"from_watermark": st.watermark(state).isoformat() if st.watermark(state) else None,
