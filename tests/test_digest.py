@@ -330,6 +330,53 @@ def test_zero_picks_email_and_skip_option(tmp_path):
     assert sent[0][1].startswith("Nothing WOAH-worthy today (1 new notice reviewed).")
 
 
+def test_weekend_with_no_picks_holds_notices_for_the_next_day(tmp_path):
+    sent = []
+
+    def ok(subject, body, *, metadata, status):
+        sent.append((subject, body, metadata))
+        return {"id": f"em_{len(sent)}", "status": "about_to_send"}
+
+    def at(now, *extra, picks):
+        return digest_run.run(args(tmp_path, "--send", "--initial-lookback-hours", "240", *extra), reader_factory=FakeReader,
+                              revision_fn=lambda: "rev1", call_fn=fake_model(picks), send_fn=ok,
+                              recent_fn=lambda: [], now=now)
+    # Saturday and Sunday, 9 a.m. ET, nothing picked: nothing sent, no state
+    for day in ("2026-10-24T13:00:00", "2026-10-25T13:00:00"):
+        assert at(T(day), picks=[]) == 0
+        assert sent == [] and not (tmp_path / "state.json").exists()
+        rep = json.loads((tmp_path / "out" / "picks.json").read_text())
+        assert rep["skipped"] == "weekend with no picks; 1 notice(s) held for the next day's digest"
+        assert not rep.get("sent")
+    # Monday: the held notice goes out
+    assert at(T("2026-10-26T13:00:00"), picks=[]) == 0
+    assert len(sent) == 1 and sent[0][0] == "WOAH! J&As — Oct 26: nothing WOAH-worthy"
+    assert sent[0][2]["notices_reviewed"] == 1
+
+
+def test_weekend_still_sends_when_something_is_picked(tmp_path):
+    sent = []
+
+    def ok(subject, body, *, metadata, status):
+        sent.append(subject)
+        return {"id": "em_1", "status": "about_to_send"}
+    digest_run.run(args(tmp_path, "--send", "--initial-lookback-hours", "240"), reader_factory=FakeReader,
+                   revision_fn=lambda: "rev1", call_fn=fake_model([pick()]), send_fn=ok, recent_fn=lambda: [], now=T("2026-10-24T13:00:00"))
+    assert len(sent) == 1 and json.loads((tmp_path / "state.json").read_text())["last_sent_date_et"] == "2026-10-24"
+
+
+def test_weekend_hold_can_be_turned_off(tmp_path):
+    sent = []
+
+    def ok(subject, body, *, metadata, status):
+        sent.append(subject)
+        return {"id": "em_1", "status": "about_to_send"}
+    digest_run.run(args(tmp_path, "--send", "--weekend-zero-picks", "send", "--initial-lookback-hours", "240"), reader_factory=FakeReader,
+                   revision_fn=lambda: "rev1", call_fn=fake_model([]), send_fn=ok, recent_fn=lambda: [],
+                   now=T("2026-10-24T13:00:00"))
+    assert sent == ["WOAH! J&As — Oct 24: nothing WOAH-worthy"]
+
+
 def test_draft_does_not_move_the_state(tmp_path):
     def ok(subject, body, *, metadata, status):
         assert status == "draft"
