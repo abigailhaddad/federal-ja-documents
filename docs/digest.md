@@ -142,6 +142,10 @@ Everything dropped is listed with its reason in `picks.json`
 * **Zero picks:** the email is the one line "Nothing WOAH-worthy today (N new
   notices reviewed)." so it is clear the job ran (`--zero-picks skip` sends
   nothing instead).
+* **Weekends:** on a Saturday or Sunday (US Eastern) with no picks, nothing
+  is sent and the state is left alone, so those notices go in the next day's
+  digest, normally Monday's (2026-11-01). A weekend day with a pick sends as
+  usual. `--weekend-zero-picks send` turns this off.
 * **One email a day:** once a digest has been sent on an Eastern-time day,
   every later run that day sends nothing, even if it finds new notices; they
   stay after the watermark and go in the next day's digest (2026-10-22).

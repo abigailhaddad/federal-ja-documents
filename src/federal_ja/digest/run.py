@@ -56,6 +56,10 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
                    help="with no saved state, cover notices first seen in the last N hours (default 36)")
     p.add_argument("--zero-picks", choices=["send", "skip"], default="send",
                    help="when nothing is picked: send the one-line 'nothing WOAH-worthy' email (default) or skip")
+    p.add_argument("--weekend-zero-picks", choices=["hold", "send"], default="hold",
+                   help="on a Saturday or Sunday (US Eastern) with nothing picked: hold (default; send nothing and "
+                        "leave the state, so those notices go in the next day's digest) or send the "
+                        "'nothing WOAH-worthy' email")
     p.add_argument("--send-at", default="07:00",
                    help="deliver at this US Eastern time (HH:MM) via a Buttondown scheduled send when the run "
                         "finishes earlier that day; later runs send at once. 'now' always sends at once (default 07:00)")
@@ -226,6 +230,14 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
         return 0
     if not picks and a.zero_picks == "skip":
         report["skipped"] = "no picks and --zero-picks skip"
+        return 0
+    # Weekends (2026-11-01): almost nothing is posted, so a Saturday or Sunday
+    # with no picks sends nothing. The state is not touched, so those notices
+    # stay after the watermark and go in the next day's digest (normally
+    # Monday's). A weekend day with a pick sends as usual.
+    if not picks and a.weekend_zero_picks == "hold" and as_of.astimezone(render.ET).weekday() >= 5:
+        report["skipped"] = (f"weekend with no picks; {len(cands)} notice(s) held for the next day's digest")
+        print(report["skipped"], file=sys.stderr)
         return 0
     meta = {"from_watermark": st.watermark(state).isoformat() if st.watermark(state) else None,
             "to_watermark": new_wm.isoformat() if new_wm else None, "dataset_revision": rev,
