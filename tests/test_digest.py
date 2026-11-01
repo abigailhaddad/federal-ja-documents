@@ -330,51 +330,79 @@ def test_zero_picks_email_and_skip_option(tmp_path):
     assert sent[0][1].startswith("Nothing WOAH-worthy today (1 new notice reviewed).")
 
 
-def test_weekend_with_no_picks_holds_notices_for_the_next_day(tmp_path):
+def _sender():
     sent = []
 
     def ok(subject, body, *, metadata, status):
-        sent.append((subject, body, metadata))
+        sent.append((subject, metadata))
         return {"id": f"em_{len(sent)}", "status": "about_to_send"}
+    return sent, ok
 
-    def at(now, *extra, picks):
-        return digest_run.run(args(tmp_path, "--send", "--initial-lookback-hours", "240", *extra), reader_factory=FakeReader,
-                              revision_fn=lambda: "rev1", call_fn=fake_model(picks), send_fn=ok,
-                              recent_fn=lambda: [], now=now)
-    # Saturday and Sunday, 9 a.m. ET, nothing picked: nothing sent, no state
-    for day in ("2026-10-24T13:00:00", "2026-10-25T13:00:00"):
-        assert at(T(day), picks=[]) == 0
-        assert sent == [] and not (tmp_path / "state.json").exists()
-        rep = json.loads((tmp_path / "out" / "picks.json").read_text())
-        assert rep["skipped"] == "weekend with no picks; 1 notice(s) held for the next day's digest"
-        assert not rep.get("sent")
-    # Monday: the held notice goes out
-    assert at(T("2026-10-26T13:00:00"), picks=[]) == 0
+
+def _seed(tmp_path, last_sent_date_et):
+    """A state whose last digest went out on that Eastern date, before FakeReader's 1 notice."""
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    st = {"version": 1, "watermark_first_seen_at": "2026-10-20T00:00:00+00:00",
+          "last_sent_at": f"{last_sent_date_et}T11:00:00+00:00", "last_sent_date_et": last_sent_date_et, "runs": []}
+    (tmp_path / "state.json").write_text(json.dumps(st))
+    return st
+
+
+def _at(tmp_path, ok, day, *, picks, extra=()):
+    """One --send run at 9 a.m. ET on ``day``."""
+    return digest_run.run(args(tmp_path, "--send", *extra), reader_factory=FakeReader, revision_fn=lambda: "rev1",
+                          call_fn=fake_model(picks), send_fn=ok, recent_fn=lambda: [], now=T(f"{day}T13:00:00"))
+
+
+def _skipped(tmp_path):
+    return json.loads((tmp_path / "out" / "picks.json").read_text()).get("skipped")
+
+
+def test_quiet_days_hold_then_send_at_the_gap_limit(tmp_path):
+    sent, ok = _sender()
+    before = _seed(tmp_path, "2026-10-23")                    # last digest Friday
+    for day in ("2026-10-24", "2026-10-25"):                  # Saturday, Sunday: 1 notice, no pick: held
+        assert _at(tmp_path, ok, day, picks=[]) == 0
+        assert sent == []
+        assert _skipped(tmp_path) == ("quiet day: no picks and 1 notice(s), under 5; "
+                                      "held for the next digest (last sent 2026-10-23)")
+        assert json.loads((tmp_path / "state.json").read_text()) == before
+        assert not json.loads((tmp_path / "out" / "picks.json").read_text()).get("sent")
+    _at(tmp_path, ok, "2026-10-26", picks=[])                 # Monday: 3 days since the last, sends
     assert len(sent) == 1 and sent[0][0] == "WOAH! J&As — Oct 26: nothing WOAH-worthy"
-    assert sent[0][2]["notices_reviewed"] == 1
+    assert sent[0][1]["notices_reviewed"] == 1
+    assert json.loads((tmp_path / "state.json").read_text())["last_sent_date_et"] == "2026-10-26"
 
 
-def test_weekend_still_sends_when_something_is_picked(tmp_path):
-    sent = []
-
-    def ok(subject, body, *, metadata, status):
-        sent.append(subject)
-        return {"id": "em_1", "status": "about_to_send"}
-    digest_run.run(args(tmp_path, "--send", "--initial-lookback-hours", "240"), reader_factory=FakeReader,
-                   revision_fn=lambda: "rev1", call_fn=fake_model([pick()]), send_fn=ok, recent_fn=lambda: [], now=T("2026-10-24T13:00:00"))
-    assert len(sent) == 1 and json.loads((tmp_path / "state.json").read_text())["last_sent_date_et"] == "2026-10-24"
+def test_quiet_rule_applies_on_weekdays_too(tmp_path):
+    sent, ok = _sender()
+    _seed(tmp_path, "2026-10-26")                             # Monday
+    _at(tmp_path, ok, "2026-10-27", picks=[])                 # Tuesday
+    assert sent == [] and _skipped(tmp_path).startswith("quiet day")
 
 
-def test_weekend_hold_can_be_turned_off(tmp_path):
-    sent = []
+def test_enough_notices_send_even_with_no_picks(tmp_path):
+    sent, ok = _sender()
+    _seed(tmp_path, "2026-10-23")
+    _at(tmp_path, ok, "2026-10-24", picks=[], extra=("--hold-under", "1"))   # 1 notice is not under 1
+    assert len(sent) == 1
 
-    def ok(subject, body, *, metadata, status):
-        sent.append(subject)
-        return {"id": "em_1", "status": "about_to_send"}
-    digest_run.run(args(tmp_path, "--send", "--weekend-zero-picks", "send", "--initial-lookback-hours", "240"), reader_factory=FakeReader,
-                   revision_fn=lambda: "rev1", call_fn=fake_model([]), send_fn=ok, recent_fn=lambda: [],
-                   now=T("2026-10-24T13:00:00"))
-    assert sent == ["WOAH! J&As — Oct 24: nothing WOAH-worthy"]
+
+def test_quiet_day_with_a_pick_sends(tmp_path):
+    sent, ok = _sender()
+    _seed(tmp_path, "2026-10-23")
+    _at(tmp_path, ok, "2026-10-24", picks=[pick()])
+    assert len(sent) == 1
+
+
+def test_no_hold_without_a_previous_digest_or_when_turned_off(tmp_path):
+    sent, ok = _sender()
+    _at(tmp_path, ok, "2026-10-21", picks=[])                 # no state yet: sends
+    assert len(sent) == 1
+    sent2, ok2 = _sender()
+    _seed(tmp_path / "b", "2026-10-23")
+    _at(tmp_path / "b", ok2, "2026-10-24", picks=[], extra=("--hold-under", "0"))
+    assert len(sent2) == 1
 
 
 def test_draft_does_not_move_the_state(tmp_path):
