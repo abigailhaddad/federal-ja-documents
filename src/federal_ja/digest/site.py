@@ -38,16 +38,20 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 
+from ..collect import config
 from . import archive as ar
 from .render import DATASET_URL, ET, FIELDS_NOTE, FIGURE_SOURCE_NOTE, GISTS_NOTE, PROJECT_URL, SITE_URL
 
 TITLE = "WOAH! J&As"
-SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
+SUBSCRIBE_URL = config.SUBSCRIBE_URL
 # Buttondown's no-JavaScript embed form: a plain POST; Buttondown shows its own
 # confirmation page and sends the double-opt-in email (2026-10-22)
 # readers report a wrong pick, quote or figure here (2026-10-22)
-ISSUE_URL = "https://github.com/abigailhaddad/federal-ja-documents/issues/new"
-SUBSCRIBE_FORM_URL = "https://buttondown.com/api/emails/embed-subscribe/abigailhaddad"
+ISSUE_URL = config.ISSUE_URL
+SUBSCRIBE_FORM_URL = config.SUBSCRIBE_FORM_URL
+# the same links without the scheme, as shown on the about page
+PROJECT_LABEL = PROJECT_URL.removeprefix("https://")
+DATASET_LABEL = DATASET_URL.removeprefix("https://")
 # 2026-10-22: not "a daily pick of sole-source justifications": every email lists all the
 # new J&As (not all sole-source), and Claude only picks out a few of them
 TAGLINE = ("New federal J&As (justifications for contracts awarded without full and open competition) "
@@ -233,9 +237,9 @@ then every new notice it reviewed, one line each.</p>
 and dollar figures come from those quotes or from quote-checked extraction fields,
 but AI can still misread a document: check the source before relying on anything.</p>
 <p>This site shows each email exactly as it was sent. Code, rules and checks:
-<a href="{e(PROJECT_URL)}">github.com/abigailhaddad/federal-ja-documents</a>
+<a href="{e(PROJECT_URL)}">{e(PROJECT_LABEL)}</a>
 (<a href="{e(PROJECT_URL)}/blob/main/docs/digest.md">how the digest works</a>).
-Data: <a href="{e(DATASET_URL)}">huggingface.co/datasets/abigailhaddad/federal-ja-documents</a>.</p>
+Data: <a href="{e(DATASET_URL)}">{e(DATASET_LABEL)}</a>.</p>
 <p>Spotted a wrong pick, quote or figure, or have a suggestion?
 <a href="{ISSUE_URL}">Open an issue on GitHub</a>.</p>
 <p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>, or by email (sent through Buttondown):</p>

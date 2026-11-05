@@ -10,6 +10,7 @@ from email.utils import parsedate_to_datetime
 
 import pytest
 
+from federal_ja.collect import config
 from federal_ja.digest import archive as ar, buttondown, render, site
 
 from .test_digest import args, run as digest_run
@@ -187,7 +188,7 @@ def test_signup_form_on_index_about_and_issues(tmp_path):
     site.build([("2026-10-21.json", entry)], out)
     for rel in ("index.html", "about.html", "issues/2026-10-21.html"):
         t = (out / rel).read_text()
-        assert '<form class="signup" action="https://buttondown.com/api/emails/embed-subscribe/abigailhaddad" ' \
+        assert f'<form class="signup" action="{config.SUBSCRIBE_FORM_URL}" ' \
                'method="post">' in t, rel
         assert 'type="email" name="email"' in t, rel
 
@@ -198,7 +199,7 @@ def test_report_a_problem_link_on_every_page(tmp_path):
     entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
     site.build([("2026-10-21.json", entry)], out)
     for rel in ("index.html", "about.html", "404.html", "issues/2026-10-21.html"):
-        assert 'href="https://github.com/abigailhaddad/federal-ja-documents/issues/new"' in (out / rel).read_text(), rel
+        assert f'href="{config.ISSUE_URL}"' in (out / rel).read_text(), rel
 
 
 def test_past_emails_link_everywhere_but_the_list_itself(tmp_path):

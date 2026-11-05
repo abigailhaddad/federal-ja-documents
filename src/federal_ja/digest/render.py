@@ -6,16 +6,18 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from ..collect import config
 from .candidates import Candidate
 
 ET = ZoneInfo("America/New_York")
 PREFIX = "WOAH! J&As"
-DATASET_URL = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents"
-PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
+# Owner-specific links come from collect/config.py.
+DATASET_URL = config.DATASET_URL
+PROJECT_URL = config.PROJECT_URL
 # The public web archive + RSS feed of sent digests (site.py, Cloudflare Pages;
 # 2026-10-21).
-SITE_URL = "https://woah-jas.abigailhaddad.com"
-SUBSCRIBE_URL = "https://buttondown.com/abigailhaddad"
+SITE_URL = config.SITE_URL
+SUBSCRIBE_URL = config.SUBSCRIBE_URL
 MAX_DOC_LINKS = 3
 
 

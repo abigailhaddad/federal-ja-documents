@@ -308,7 +308,7 @@ prompt), `checks_version`, `model` and `dataset_revision`, and lists in
 `values_dropped_by_checks` anything the checks removed. Notices with no
 usable text have `status` `skipped` and a `skip_reason`.
 
-**Known weak spots** (validation numbers in [docs/field_extraction.md](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/field_extraction.md)):
+**Known weak spots** (validation numbers in [docs/field_extraction.md](@@PROJECT_URL@@/blob/main/docs/field_extraction.md)):
 
 * `contract_types` misses about a third of the types a document states (11
   of 18 found in the validation sample).
@@ -339,7 +339,7 @@ usable text have `status` `skipped` and a `skip_reason`.
   the document and that the value appears in its quote; anything that fails is
   removed and listed in `values_dropped_by_checks`. An approval ceiling
   ("not exceeding $15 million") is never reported as the value.
-* **Themes:** a [keyword screen](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/patterns.py) finds candidate passages
+* **Themes:** a [keyword screen](@@PROJECT_URL@@/blob/main/src/federal_ja/analysis/patterns.py) finds candidate passages
   (e.g. "shutdown", "staff losses", "delayed", "responded to the sources
   sought"). Documents with no hit are not sent to the model for that theme.
   The model sees only the passages around the hits and answers a yes/no
@@ -363,8 +363,9 @@ usable text have `status` `skipped` and a `skip_reason`.
   dataset revision `11a221ab5ae9583a95ae645883de75237a46d44d`, and notices collected after it have no theme
   status.
 
-The model name and every prompt are in [prompts.yaml](https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/prompts.yaml).
+The model name and every prompt are in [prompts.yaml](@@PROJECT_URL@@/blob/main/src/federal_ja/analysis/prompts.yaml).
 """
+EXPERIMENTAL_SECTION = EXPERIMENTAL_SECTION.replace("@@PROJECT_URL@@", config.PROJECT_URL)
 
 
 def render_card(store: Store, start_date: str, built_at: str,

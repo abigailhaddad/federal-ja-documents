@@ -5,10 +5,27 @@ from __future__ import annotations
 import datetime as dt
 import os
 
-PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
+# Who owns what. A new owner sets these (as environment variables or by editing the
+# defaults) and every link, dataset id and signup form below follows. HANDOFF.md
+# lists the places that cannot read this file (workflows, the cron worker, README).
+GITHUB_REPO = os.environ.get("JA_GITHUB_REPO", "abigailhaddad/federal-ja-documents")
+PROJECT_URL = f"https://github.com/{GITHUB_REPO}"
 USER_AGENT = f"federal-ja-documents/0.1 (+{PROJECT_URL})"
 
 HF_REPO_ID = os.environ.get("JA_HF_REPO", "abigailhaddad/federal-ja-documents")
+DATASET_URL = f"https://huggingface.co/datasets/{HF_REPO_ID}"
+
+# A separate Hugging Face dataset (a mirror of USAspending's award archive) that
+# the collector reads to match notices to awards. It is not part of this dataset.
+USASPENDING_HF_DATASET = os.environ.get("JA_USASPENDING_DATASET", "abigailhaddad/usaspending-bulk-awards")
+
+# The digest email's public web archive, its Buttondown account and the
+# "report a problem" link.
+SITE_URL = os.environ.get("JA_SITE_URL", "https://woah-jas.abigailhaddad.com")
+BUTTONDOWN_USER = os.environ.get("JA_BUTTONDOWN_USER", "abigailhaddad")
+SUBSCRIBE_URL = f"https://buttondown.com/{BUTTONDOWN_USER}"
+SUBSCRIBE_FORM_URL = f"https://buttondown.com/api/emails/embed-subscribe/{BUTTONDOWN_USER}"
+ISSUE_URL = f"{PROJECT_URL}/issues/new"
 
 # Earliest PostedDate (inclusive) of J&A notices we collect.
 DEFAULT_START_DATE = dt.date(2025, 1, 20)

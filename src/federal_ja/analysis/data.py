@@ -15,9 +15,10 @@ from typing import Any, Iterable
 
 import requests
 
+from ..collect import config
 from .text import Document, Page
 
-HF_DATASET = "abigailhaddad/federal-ja-documents"
+HF_DATASET = config.HF_REPO_ID
 HF_API_URL = f"https://huggingface.co/api/datasets/{HF_DATASET}"
 HF_FILE_URL = f"https://huggingface.co/datasets/{HF_DATASET}/resolve/{{rev}}/{{path}}"
 TABLES = ("notices", "attachments", "pages")
