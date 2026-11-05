@@ -9,10 +9,11 @@
 // Secret: GITHUB_TOKEN, a fine-grained token for this one repository with
 // "Actions: Read and write" and nothing else. Set it with
 //   npx wrangler secret put GITHUB_TOKEN
-const REPO = "abigailhaddad/federal-ja-documents";
 const WORKFLOW = "daily.yml";
 
 async function dispatch(env) {
+  const REPO = env.GITHUB_REPO; // "owner/name", set under [vars] in wrangler.toml
+  if (!REPO) throw new Error("GITHUB_REPO is not set in wrangler.toml [vars]");
   const r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
     method: "POST",
     headers: {

@@ -24,9 +24,11 @@ from pathlib import Path
 
 import pandas as pd
 
-HF_BASE = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents/resolve/"
-PROJECT_URL = "https://github.com/abigailhaddad/federal-ja-documents"
-DATASET_URL = "https://huggingface.co/datasets/abigailhaddad/federal-ja-documents"
+from ..collect import config
+
+HF_BASE = f"{config.DATASET_URL}/resolve/"
+PROJECT_URL = config.PROJECT_URL
+DATASET_URL = config.DATASET_URL
 
 THEMES = {
     "sources_rejected": "Theme: other firms responded but were rejected",

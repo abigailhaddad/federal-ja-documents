@@ -22,6 +22,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from ..collect import config
 from . import data, extract, ja_check, llm, prompts, spreadsheet, table, tagger
 from .promptfile import CONFIG
 
@@ -124,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     digest_run.add_arguments(d)
     from ..digest import site as digest_site
     ds = sub.add_parser("digest-site", help="build the static web archive + RSS feed of sent digests "
-                                            "(https://woah-jas.abigailhaddad.com; see docs/digest.md)")
+                                            f"({config.SITE_URL}; see docs/digest.md)")
     digest_site.add_arguments(ds)
     da = sub.add_parser("digest-archive-add", help="upload one archive_entry.json (written by a sent digest) to "
                                                    "the dataset's analysis/digest_archive/; never overwrites")

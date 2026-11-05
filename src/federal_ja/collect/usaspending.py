@@ -37,9 +37,11 @@ import re
 import time
 from collections import Counter, defaultdict
 
+from . import config
+
 log = logging.getLogger(__name__)
 
-HF_DATASET = "abigailhaddad/usaspending-bulk-awards"
+HF_DATASET = config.USASPENDING_HF_DATASET
 SERVE_URL = "hf://datasets/" + HF_DATASET + "/serve/contracts/{fy}.parquet"
 FIRST_FY = 2007  # first fiscal year in the source archive
 

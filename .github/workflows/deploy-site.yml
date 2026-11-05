@@ -77,4 +77,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.42.0"
-          command: pages deploy site/dist --project-name=woah-jas --branch=main
+          command: pages deploy site/dist --project-name=${{ vars.CLOUDFLARE_PROJECT || 'woah-jas' }} --branch=main
