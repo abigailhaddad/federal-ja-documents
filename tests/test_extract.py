@@ -1,4 +1,5 @@
 import io
+import textwrap
 
 import pytest
 
@@ -6,7 +7,9 @@ from federal_ja.collect import extract as ex
 
 
 def text_pdf(pages: list[str]) -> bytes:
-    """Minimal hand-built PDF with one Helvetica text line per page."""
+    """Minimal hand-built PDF with one Helvetica paragraph per page, wrapped to
+    fit the page (pdftotext leaves out text that runs off the page, as a
+    viewer would not show it; pypdf keeps it)."""
     objs = []
     n = len(pages)
     kids = " ".join(f"{3 + 2 * i} 0 R" for i in range(n))
@@ -14,7 +17,9 @@ def text_pdf(pages: list[str]) -> bytes:
     objs.append(f"<< /Type /Pages /Kids [{kids}] /Count {n} >>")
     font_id = 3 + 2 * n
     for i, t in enumerate(pages):
-        content = f"BT /F1 10 Tf 20 700 Td ({t}) Tj ET".encode()
+        lines = textwrap.wrap(t, 80) or [""]
+        shown = " T* ".join(f"({line}) Tj" for line in lines)
+        content = f"BT /F1 10 Tf 12 TL 20 700 Td {shown} ET".encode()
         objs.append(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
                     f"/Resources << /Font << /F1 {font_id} 0 R >> >> /Contents {4 + 2 * i} 0 R >>")
         objs.append(content)

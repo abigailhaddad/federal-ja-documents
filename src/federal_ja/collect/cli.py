@@ -314,6 +314,33 @@ def cmd_xfa_forms(args, store: Store) -> dict:
             "fetch_failed": failed}
 
 
+def cmd_reread_text(args, store: Store) -> dict:
+    """Re-read, from their HF copies, the PDFs whose page text pypdf produced
+    (before pages.text_engine existed), with pdftotext. Capped by --limit and
+    resumable: a re-read file has text_engine set and is not picked again. It
+    changes the local tables only; publishing them is the normal publish step.
+    --report PATH writes one CSV row per document whose text changed."""
+    import csv
+
+    from . import hf_sync
+    todo = pipeline.pypdf_era_pdfs(store)
+    left = len(todo)
+    if args.limit:
+        todo = todo[: args.limit]
+    out = pipeline.reread_pdf_text(store, todo, lambda a: hf_sync.fetch_file(store, a))
+    store.save()
+    changes = out.pop("changes")
+    if args.report and changes:
+        with open(args.report, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(changes[0]))
+            w.writeheader()
+            w.writerows(changes)
+    out.update(candidates_before=left, candidates_after=len(pipeline.pypdf_era_pdfs(store)),
+               skipped_count=len(out["skipped"]))
+    out["skipped"] = out["skipped"][:50]
+    return out
+
+
 def cmd_recheck_pages(args, store: Store) -> dict:
     out = pipeline.recheck_page_rule(store)
     store.save()
@@ -494,6 +521,9 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--upload", action="store_true", help="upload, verify and delete each batch")
     sub.add_parser("reextract_remote", help="re-extract failed/unknown files from their HF copies")
     sub.add_parser("xfa_forms", help="read XFA PDF forms stored as a 'Please wait...' placeholder")
+    s = sub.add_parser("reread_text", help="re-read pypdf-era PDF text layers with pdftotext (capped, resumable)")
+    s.add_argument("--limit", type=int, default=500)
+    s.add_argument("--report", help="CSV of the documents whose text changed")
     s = sub.add_parser("transcribe", help="transcribe scanned PDFs")
     s.add_argument("--max-usd", type=float, required=True)
     s.add_argument("--limit", type=int)

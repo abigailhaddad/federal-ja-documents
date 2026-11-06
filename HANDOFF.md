@@ -95,6 +95,8 @@ There's no alert system. A failed run shows as a red X in the Actions tab, and n
 
 ## Running it yourself
 
+PDF text is read with `pdftotext` from poppler (`brew install poppler`, or `apt-get install poppler-utils`). Without it the code falls back to `pypdf`, which splits a few words and drops some apostrophes, so install it. `daily.yml` and `tests.yml` install it on the runner. Set `JA_PDF_ENGINE=pypdf` to force the old reader. Each page row says which one read it (`pages.text_engine`).
+
 ```sh
 uv sync --frozen
 uv run pytest -q                      # the full test suite, no network, no API calls
@@ -109,3 +111,4 @@ All 406 tests passed on 2026-11-05 on this branch, including with `JA_GITHUB_REP
 * The `analysis/` tables are AI-generated and the dataset card says so. Don't remove that label.
 * The theme tables (`experimental_theme_tags`, `experimental_theme_status`) are a one-off snapshot and don't update.
 * SAM.gov's endpoints are undocumented and can change without notice.
+* Pages published before 2026-11-06 were read with `pypdf` and keep that text. Only new documents are read with `pdftotext`; `pages.text_engine` tells the two apart. `ja-collect reread_text` can re-read the old ones (`ja-collect --workdir work pull`, then `reread_text --limit 500 --report work/reread.csv`, then `publish`), but don't run it on its own: in a sample, about 9% of the existing extraction quotes stopped matching the re-read text (the quote had copied a `pypdf` split word, or the block moved). Re-read and re-extract together, and expect an Anthropic bill for the re-extraction.

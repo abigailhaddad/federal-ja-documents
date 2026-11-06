@@ -171,10 +171,13 @@ def fetch_resources(store: Store, client: SamClient, notice_ids: Iterable[str] |
 
 TRANSCRIBED_SOURCES = ("transcription", "pdf_text+transcription")
 
-def set_pdf_pages(store: Store, a: dict, page_texts: list[str], source: str = "native") -> None:
+def set_pdf_pages(store: Store, a: dict, page_texts: list[str], source: str = "native",
+                  engine: str | None = None) -> None:
     """(Re)build the per-page rows of a PDF from its native page texts.
     Existing transcriptions of pages that still need one are kept. source:
-    the text_source of a page with text ("xfa_form" for an XFA form)."""
+    the text_source of a page with text ("xfa_form" for an XFA form).
+    engine: the program that read the text layer ("pdftotext" or "pypdf"),
+    stored as text_engine; rows from before the column existed have none."""
     key = (a["notice_id"], a["resource_id"])
     old = {r["page_number"]: r for r in store.pages.get(key, [])}
     rows = []
@@ -186,7 +189,7 @@ def set_pdf_pages(store: Store, a: dict, page_texts: list[str], source: str = "n
                "text_layer_chars": len(t), "needs_transcription": needs,
                "text": t, "text_source": source if t else "none", "text_layer_text": None,
                "transcription_model": None, "transcription_prompt_version": None,
-               "transcribed_at": None}
+               "transcribed_at": None, "text_engine": engine}
         prev = old.get(i)
         if needs and prev and prev.get("text_source") == "transcription":
             row.update({k: prev[k] for k in ("text", "text_source", "transcription_model",
@@ -215,7 +218,8 @@ def apply_extraction(a: dict, r: ex.ExtractResult, store: Store | None = None) -
              native_text_chars=r.native_text_chars,
              needs_transcription=r.needs_transcription, extract_error=r.extract_error)
     if store is not None and r.file_kind in ("pdf", "image") and r.page_count:
-        set_pdf_pages(store, a, r.page_texts, "xfa_form" if r.xfa_form else "native")
+        set_pdf_pages(store, a, r.page_texts, "xfa_form" if r.xfa_form else "native",
+                      engine=r.text_engine or None)
         a["text"], a["text_source"] = doc_text_from_pages(store.pages[(a["notice_id"], a["resource_id"])])
         return
     # never overwrite a transcription with an empty native result
@@ -432,6 +436,74 @@ def reextract(store: Store, only_old_rule: bool = False) -> int:
     return n
 
 
+def pypdf_era_pdfs(store: Store) -> list[dict]:
+    """Downloaded PDFs whose text-layer pages were read before pages.text_engine
+    existed (so by pypdf) and that still have a text layer worth re-reading.
+    Scanned documents (every page transcribed) and XFA forms are left out: their
+    text does not come from a page text layer. Sorted, so a capped run is repeatable."""
+    out = []
+    for a in sorted(store.attachments.values(), key=lambda a: (a["notice_id"], a["resource_id"])):
+        if a.get("download_status") != "ok" or a.get("file_kind") != "pdf" or not a.get("file_path"):
+            continue
+        pages = store.pages.get((a["notice_id"], a["resource_id"])) or []
+        if not pages or any(r.get("text_engine") for r in pages):
+            continue
+        if any(r["text_source"] == "native" for r in pages):
+            out.append(a)
+    return out
+
+
+def reread_pdf_text(store: Store, rows: list[dict], fetch: Callable[[dict], str]) -> dict:
+    """Re-read the text layers of ``rows`` with pdftotext (fetch, extract, delete)
+    and replace their native page text. A file is left exactly as it was, and
+    listed under ``skipped`` with the reason, when pdftotext was not the engine
+    that read it, the page count changed, or the set of pages needing
+    transcription changed (those need a person to look). Transcribed pages are
+    never touched. Returns counts, per-document ``changes`` and ``skipped``."""
+    out = {"read": 0, "unchanged": 0, "changed_docs": 0, "changed_pages": 0, "skipped": [],
+           "fetch_failed": [], "changes": []}
+    for a in rows:
+        key = (a["notice_id"], a["resource_id"])
+        old_pages = [dict(r) for r in store.pages.get(key, [])]
+        try:
+            p = fetch(a)
+        except Exception as e:  # noqa: BLE001 - one missing copy should not stop the run
+            out["fetch_failed"].append({"resource_id": a["resource_id"], "error": f"{type(e).__name__}: {e}"[:200]})
+            continue
+        try:
+            r = ex.extract_file(p, a.get("filename") or "")
+        finally:
+            os.remove(p)
+        old_textless = sorted(x["page_number"] for x in old_pages if x["needs_transcription"])
+        if r.text_engine != ex.ENGINE_PDFTOTEXT:
+            reason = f"engine was {r.text_engine or 'none'}"
+        elif r.page_count != len(old_pages):
+            reason = f"page count {len(old_pages)} -> {r.page_count}"
+        elif sorted(r.textless_pages) != old_textless:
+            reason = f"textless pages {old_textless} -> {sorted(r.textless_pages)}"
+        else:
+            reason = ""
+        if reason:
+            out["skipped"].append({"notice_id": a["notice_id"], "resource_id": a["resource_id"], "reason": reason})
+            continue
+        before = {x["page_number"]: x["text"] or "" for x in old_pages if x["text_source"] == "native"}
+        apply_extraction(a, r, store)
+        after = {x["page_number"]: x["text"] or "" for x in store.pages[key] if x["text_source"] == "native"}
+        changed = [n for n in before if before[n] != after.get(n, "")]
+        out["read"] += 1
+        if changed:
+            out["changed_docs"] += 1
+            out["changed_pages"] += len(changed)
+            out["changes"].append({"notice_id": a["notice_id"], "resource_id": a["resource_id"],
+                                   "sha256": a.get("sha256"), "pages_changed": len(changed),
+                                   "pages_native": len(before),
+                                   "chars_before": sum(len(before[n]) for n in before),
+                                   "chars_after": sum(len(after.get(n, "")) for n in before)})
+        else:
+            out["unchanged"] += 1
+    return out
+
+
 def pages_from_stored_text(store: Store) -> dict:
     """Build page rows for downloaded PDFs from the stored attachment text
     (which carries our own '--- page N ---' markers), for files no longer on
@@ -581,26 +653,26 @@ def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None
         try:
             if not os.path.exists(path):
                 if fetch is None:
-                    return a, None, None, "file not available locally"
+                    return a, None, None, "file not available locally", None
                 path, fetched = fetch(a), True
             if a.get("file_kind") == "image":
-                return a, None, transcriber.transcribe_image(path), None
-            native = ex.pdf_page_texts(path)
+                return a, None, transcriber.transcribe_image(path), None, None
+            native, engine = ex.pdf_page_texts_with_engine(path)
             done_pages = {r["page_number"] for r in store.pages.get((a["notice_id"], a["resource_id"]), [])
                           if r["text_source"] == "transcription"}
             pages = [p for p in ex.textless_pages(native) if p not in done_pages]
             t = transcriber.transcribe_pdf(path, len(native), pages) if pages else None
-            return a, native, t, None
+            return a, native, t, None, engine
         except BudgetExceeded:
-            return a, None, None, "BUDGET"
+            return a, None, None, "BUDGET", None
         except Exception as e:  # noqa: BLE001
-            return a, None, None, f"{type(e).__name__}: {e}"[:300]
+            return a, None, None, f"{type(e).__name__}: {e}"[:300], None
         finally:
             if fetched and not keep_fetched and os.path.exists(path):
                 os.remove(path)
 
     def apply(res) -> bool:
-        a, native, t, err = res
+        a, native, t, err, engine = res
         if err == "BUDGET":
             stats["stopped_on_budget"] = True
             return False
@@ -609,7 +681,7 @@ def transcribe_pending(store: Store, transcriber, attachments: list[dict] | None
             stats["errors"] += 1
             return True
         if native is not None:
-            set_pdf_pages(store, a, native)
+            set_pdf_pages(store, a, native, engine=engine)
             tl = ex.textless_pages(native)
             a.update(textless_pages=tl, pages_with_text=len(native) - len(tl),
                      needs_transcription=bool(tl))
