@@ -240,6 +240,17 @@ uv run ja-collect --workdir $W publish --mode full --delete-stale
 Every step is resumable: it only works on rows still `pending` (add
 `--retry-errors` to retry failures).
 
+PDF text layers are read with `pdftotext` from poppler (`brew install poppler`, or
+`apt-get install poppler-utils`); without it the code falls back to `pypdf`, which
+splits some words and drops some apostrophes. `.github/workflows/daily.yml` and
+`tests.yml` install it on the runner.
+
+`ja-collect reread_text` re-reads pages that were extracted with `pypdf` (capped,
+resumable; run `ja-collect --workdir $W pull` first and `publish` after). Don't run
+it on its own: in a sample, about 9% of the stored extraction quotes stopped
+matching the re-read text. Re-read and re-extract together, and expect an
+Anthropic bill for the re-extraction.
+
 For a backfill on a machine with little disk, use `stream` instead of
 `download`: it works in batches (default 500 files or 1 GB), commits each
 batch's original files to the HF dataset, verifies every file there (size,
