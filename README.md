@@ -94,7 +94,8 @@ The CSVs are read as latin-1 with the csv field-size limit raised.
   `resources_status = "error: ..."`. Every attachment SAM lists gets a row,
   with `download_status` one of `ok`, `link` (off-site URL, recorded, not
   fetched), `deleted`, `not_public`, `too_large`, `error`.
-* **Text:** `text_source` is `pdf_text` (pypdf text layer), `docx`
+* **Text:** `text_source` is `pdf_text` (the PDF's text layer: `pdftotext`, or
+  `pypdf` as the fallback; `pages.text_engine` says which), `docx`
   (python-docx), `xlsx` (openpyxl), `text`, `transcription` (every page of
   the PDF was image-only), `pdf_text+transcription` (native text for typed
   pages, transcription for image-only pages), `pdf_xfa` (an XFA PDF form

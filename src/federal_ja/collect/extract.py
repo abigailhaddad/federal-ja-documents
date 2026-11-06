@@ -1,7 +1,8 @@
 """Native text extraction and the "does this need transcription?" decision.
 
 text_source values written to the dataset:
-  pdf_text       text layer of a PDF, via pypdf
+  pdf_text       text layer of a PDF, via pdftotext (poppler), or pypdf where
+                 pdftotext is missing or fails; pages.text_engine says which
   docx           python-docx (paragraphs, then tables)
   xlsx           openpyxl (every sheet, tab-separated cells)
   text           plain-text attachment (.txt/.csv), decoded as UTF-8/latin-1
@@ -27,7 +28,10 @@ from __future__ import annotations
 
 import io
 import logging
+import os
 import re
+import shutil
+import subprocess
 import zipfile
 from dataclasses import dataclass, field
 
@@ -58,6 +62,7 @@ class ExtractResult:
     needs_transcription: bool = False
     extract_error: str = ""
     page_texts: list[str] = field(default_factory=list, repr=False)
+    text_engine: str = ""  # who read the text layer: "pdftotext" or "pypdf"
     xfa_form: bool = False      # page_texts is the one-"page" XFA form text
 
 
@@ -147,10 +152,48 @@ def join_pages(page_texts: list[str]) -> str:
     return "\n\n".join(f"--- page {i} ---\n{t.strip()}" for i, t in enumerate(page_texts, 1))
 
 
-def pdf_page_texts(path: str) -> list[str]:
+ENGINE_PDFTOTEXT = "pdftotext"
+ENGINE_PYPDF = "pypdf"
+_PDFTOTEXT_TIMEOUT_S = 180
+
+
+def pdf_engine_preference() -> str:
+    """"pdftotext" (the default) or "pypdf". Set JA_PDF_ENGINE=pypdf to go back
+    to the old reader, e.g. to rebuild a page exactly as it was published
+    before 2026-11-06."""
+    return ENGINE_PYPDF if os.environ.get("JA_PDF_ENGINE", "").strip().lower() == ENGINE_PYPDF else ENGINE_PDFTOTEXT
+
+
+def pdftotext_page_texts(path: str) -> list[str] | None:
+    """Page texts from poppler's ``pdftotext`` in its default reading-order
+    mode (not -layout: that pads columns with spaces; not -raw: that follows
+    the content stream and scrambles tables). pdftotext ends every page with
+    a form feed, so splitting on it gives one text per page. None when
+    poppler is missing, times out, or refuses the file (for example a PDF
+    that forbids copying text), so the caller can fall back to pypdf."""
+    exe = shutil.which("pdftotext")
+    if not exe:
+        return None
+    try:
+        proc = subprocess.run([exe, "-enc", "UTF-8", path, "-"], capture_output=True,
+                              timeout=_PDFTOTEXT_TIMEOUT_S)
+    except (subprocess.TimeoutExpired, OSError) as e:
+        log.warning("pdftotext failed on %s: %s", path, e)
+        return None
+    if proc.returncode != 0:
+        log.warning("pdftotext exit %s on %s: %s", proc.returncode, path,
+                    proc.stderr.decode("utf-8", "replace")[:120])
+        return None
+    pages = proc.stdout.decode("utf-8", "replace").split("\f")
+    if pages and pages[-1] == "":
+        pages.pop()  # the form feed after the last page
+    return [clean_text(t) for t in pages]
+
+
+def pypdf_page_texts(path: str, reader=None) -> list[str]:
     from pypdf import PdfReader
 
-    reader = PdfReader(path)
+    reader = reader or PdfReader(path)
     if reader.is_encrypted:
         reader.decrypt("")
     out = []
@@ -160,6 +203,37 @@ def pdf_page_texts(path: str) -> list[str]:
         except Exception:  # noqa: BLE001
             out.append("")
     return out
+
+
+def native_pdf_texts(path: str, expected_pages: int | None = None, reader=None) -> tuple[list[str], str]:
+    """(page texts, engine). pdftotext first; pypdf when pdftotext is missing,
+    fails, or returns a different number of pages than pypdf counts (page
+    numbers must stay the same whichever engine read the file)."""
+    if pdf_engine_preference() == ENGINE_PDFTOTEXT:
+        pages = pdftotext_page_texts(path)
+        if pages is not None and (expected_pages is None or len(pages) == expected_pages):
+            return pages, ENGINE_PDFTOTEXT
+        if pages is not None:
+            log.warning("pdftotext found %d pages, pypdf %d, in %s: using pypdf",
+                        len(pages), expected_pages, path)
+    return pypdf_page_texts(path, reader), ENGINE_PYPDF
+
+
+def pdf_page_texts_with_engine(path: str) -> tuple[list[str], str]:
+    from pypdf import PdfReader
+
+    try:
+        reader = PdfReader(path)
+        if reader.is_encrypted:
+            reader.decrypt("")
+        expected = len(reader.pages)
+    except Exception:  # noqa: BLE001 - let pdftotext try a file pypdf cannot open
+        reader, expected = None, None
+    return native_pdf_texts(path, expected, reader)
+
+
+def pdf_page_texts(path: str) -> list[str]:
+    return pdf_page_texts_with_engine(path)[0]
 
 
 def extract_pdf(path: str) -> ExtractResult:
@@ -174,13 +248,7 @@ def extract_pdf(path: str) -> ExtractResult:
             except Exception as e:  # noqa: BLE001
                 res.extract_error = f"encrypted: {e}"
                 return res
-        texts = []
-        for page in reader.pages:
-            try:
-                texts.append(clean_text(page.extract_text()))
-            except Exception as e:  # noqa: BLE001 - one bad page shouldn't sink the file
-                log.warning("page extract failed in %s: %s", path, e)
-                texts.append("")
+        texts, engine = native_pdf_texts(path, len(reader.pages), reader)
         if texts and xfa.is_placeholder(texts[0]):
             try:
                 form = clean_text(xfa.form_text(reader))
@@ -188,11 +256,12 @@ def extract_pdf(path: str) -> ExtractResult:
                 log.warning("XFA form text failed in %s: %s", path, e)
                 form = ""
             if form.strip():
-                texts, res.xfa_form = [form], True
+                texts, res.xfa_form, engine = [form], True, ENGINE_PYPDF  # the form XML is read with pypdf
     except Exception as e:  # noqa: BLE001
         res.extract_error = f"pypdf: {type(e).__name__}: {e}"[:500]
         return res
     res.page_texts = texts
+    res.text_engine = engine
     res.page_count = len(texts)
     # an XFA form is never transcribed: a picture of it is the placeholder
     res.textless_pages = [] if res.xfa_form else textless_pages(texts)

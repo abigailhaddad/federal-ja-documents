@@ -3,6 +3,7 @@ placeholder, with the form in XML inside. Synthetic PDFs, no network."""
 
 import argparse
 import json
+import textwrap
 
 import pytest
 from pypdf import PdfWriter
@@ -53,7 +54,9 @@ def make_pdf(path, page_text=PLACEHOLDER, with_xfa=True):
     page[NameObject("/Resources")] = DictionaryObject(
         {NameObject("/Font"): DictionaryObject({NameObject("/F1"): w._add_object(font)})})
     content = DecodedStreamObject()
-    content.set_data(f"BT /F1 9 Tf 20 700 Td ({page_text}) Tj ET".encode())
+    # wrapped to fit the page: pdftotext leaves out text that runs off the page
+    shown = " T* ".join(f"({line}) Tj" for line in textwrap.wrap(page_text, 90))
+    content.set_data(f"BT /F1 9 Tf 11 TL 20 700 Td {shown} ET".encode())
     page[NameObject("/Contents")] = w._add_object(content)
     if with_xfa:
         parts = ArrayObject()

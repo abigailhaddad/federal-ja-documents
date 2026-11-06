@@ -57,7 +57,7 @@ Code and issue tracker: {project_url}
 |---|---|
 | `data/notices.parquet` | one row per notice ({n_notices:,} rows), with `collection_reason` saying why it is here: agency, sub-tier, office, dates, award number, SAM's award block with the order number (`sam_award_*` columns, below), and the matching USAspending award (`usaspending_*` columns, below) |
 | `data/attachments.parquet` | one row per attachment listed on a notice ({n_attachments:,} rows), including whole-document text |
-| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `xfa_form`, `none`), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
+| `data/pages.parquet` | one row per PDF page or image attachment ({n_pages:,} rows): `page_number`, `text_layer_chars`, `needs_transcription`, `text`, `text_source` (`native`, `transcription`, `xfa_form`, `none`), `text_engine` (the program that read the text layer), transcription model; join to attachments on `notice_id` + `resource_id` (`sha256` identifies the exact file) |
 | `data/exclusions.parquet` | rows the collection rules picked from the source CSVs that are not in `notices`, and why ({n_exclusions:,} rows; `collection_reason` as in `notices`) |
 | `data/collection_state.json` | source-file ETags and run history |
 | `files/<notice_id>/<resource_id>_<filename>` | the original files as downloaded from SAM.gov ({n_files:,} files, {gb:.2f} GB) |
@@ -182,7 +182,7 @@ pages, PIEE vendor guides on acq.osd.mil, training sites) are not fetched.
 
 | text_source | method |
 |---|---|
-| `pdf_text` | the PDF's own text layer, via `pypdf` |
+| `pdf_text` | the PDF's own text layer, read by `pdftotext` (poppler) from 2026-11-06 and by `pypdf` before that; `pages.text_engine` says which |
 | `pdf_xfa` | an XFA PDF form whose page is only a "Please wait..." placeholder: the text is the form's own XML, its wording with the filled-in values (one page, `pages.text_source` `xfa_form`; never transcribed) |
 | `docx` | `python-docx` (paragraphs, then table rows) |
 | `xlsx` | `openpyxl`, every sheet, tab-separated |
@@ -203,6 +203,14 @@ Many J&As are typed documents in which one or more pages (often the redacted
 or signed ones) were flattened to images, so these pages would otherwise have
 no text. A PDF whose text layer came from OCR before it was posted counts as
 typed, and its OCR text is kept as is, errors included.
+
+`pages.text_engine` is `pdftotext` or `pypdf`: the program that read the page's
+text layer (an XFA form's text is always read with `pypdf`). It is empty on
+rows published before 2026-11-06, which were all read with `pypdf`. `pypdf` splits
+some words and drops some apostrophes ("service s", "Th e", "on s" for "on's"),
+which `pdftotext` mostly does not. Older rows keep that text until they are
+re-read, so the two kinds sit side by side; filter on `text_engine` to separate
+them. Page numbers and the typed-or-scanned decision are the same under both.
 
 ### Machine transcriptions: read with care
 

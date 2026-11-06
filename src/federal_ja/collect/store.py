@@ -57,7 +57,7 @@ PAGE_COLUMNS = [
     "notice_id", "resource_id", "sha256", "page_number", "page_count",
     "text_layer_chars", "needs_transcription", "text", "text_source",
     "text_layer_text", "transcription_model", "transcription_prompt_version",
-    "transcribed_at",
+    "transcribed_at", "text_engine",
 ]
 
 EXCLUSION_COLUMNS = ["notice_id", "source_file", "posted_date", "type", "title",
