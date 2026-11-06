@@ -14,7 +14,7 @@ Triggers and schedules are at the top of each file in `.github/workflows/`.
 - `extract-daily.yml`: LLM field extraction after collection (experimental).
 - `digest.yml`: picks the day's notable notices and sends the email through Buttondown. See `docs/digest.md`.
 - `deploy-site.yml`: rebuilds the email archive site on Cloudflare Pages.
-- `tests.yml`: tests on every push.
+- `tests.yml`: tests on pull requests and pushes to `main`.
 - `analysis.yml`, `sam-awards-backfill.yml`: manual only.
 
 `daily.yml` is started by a Cloudflare Worker in `cron-trigger/` (deploy command at the top of `wrangler.toml`), because GitHub's own schedule fired hours late. `daily.yml` also has a GitHub schedule as a backup, which runs only when `DAILY_ENABLED` is `true`.
@@ -33,7 +33,7 @@ Variables: `DAILY_ENABLED`, `EXTRACT_DAILY_ENABLED`, `DIGEST_ENABLED` (each `tru
 
 ## When it breaks
 - Failed runs show in the Actions tab. Nothing sends alerts, so turn on GitHub notifications for the repo.
-- Rerun by hand from the Actions tab (every workflow here has "Run workflow").
+- Rerun by hand from the Actions tab (every workflow except `tests.yml` has "Run workflow"). Manual `digest.yml` runs are dry runs, and manual `extract-daily.yml` runs publish only if you tick the box.
 - Collection reads SAM.gov through `src/federal_ja/collect/sam_api.py`, `sam_award.py` and `sources.py`. The failed step's log says which call failed.
 - Email problems: `docs/digest.md`.
 
