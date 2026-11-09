@@ -171,6 +171,42 @@ def test_days_in_quote(text, days):
     assert extract.days_in_quote(days, text)
 
 
+@pytest.mark.parametrize("text,days", [
+    ("not to exceed twenty-five months", 760), ("sixty-five days", 65), ("seventy two days", 72),
+    ("fifty weeks", 350),
+])
+def test_days_in_quote_compound_number_words(text, days):
+    assert extract.days_in_quote(days, text)
+
+
+def test_compound_number_word_not_read_as_its_last_word():
+    # "twenty-five months" used to be read as "five months" (150 days)
+    assert not extract.days_in_quote(150, "not to exceed twenty-five months")
+    assert not extract.days_in_quote(5, "sixty-five days")
+
+
+@pytest.mark.parametrize("text,days", [
+    ("one hundred and eighty days", 180), ("one hundred twenty-five days", 125),
+    ("one hundred and twenty days", 120), ("two hundred and ten days", 210),
+    ("a hundred and eighty days", 180), ("thirty-six (36) months", 1080),
+])
+def test_days_in_quote_hundreds(text, days):
+    assert extract.days_in_quote(days, text)
+
+
+@pytest.mark.parametrize("text,wrong", [
+    ("one hundred and eighty days", 80), ("one hundred and twenty days", 20),
+    ("one hundred twenty-five days", 25), ("one hundred and eighty days", 180 - 100),
+])
+def test_hundreds_tail_not_read_alone(text, wrong):
+    assert not extract.days_in_quote(wrong, text)
+
+
+def test_unrecognised_hundred_lead_in_is_skipped():
+    # "several hundred" has no value: the tail must not be read as a duration
+    assert extract.durations_in("several hundred and eighty days") == []
+
+
 def test_days_not_in_quote():
     assert not extract.days_in_quote(90, "not to exceed six (6) months")
     assert not extract.days_in_quote(180, "estimated value of $180")

@@ -484,19 +484,43 @@ _NUM_WORDS = {w: i for i, w in enumerate(
     "sixteen seventeen eighteen nineteen twenty".split())}
 _NUM_WORDS.update({"thirty": 30, "forty-five": 45, "sixty": 60, "ninety": 90, "twenty-four": 24,
                    "thirty-six": 36, "one hundred twenty": 120, "one hundred eighty": 180})
+# Every tens word and every tens-units compound up to 99 ("twenty-five", "sixty five"),
+# so a compound is never read as its last word ("twenty-five months" as 5 months).
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70,
+         "eighty": 80, "ninety": 90}
+_NUM_WORDS.update(_TENS)
+for _t, _tv in _TENS.items():
+    for _u, _w in enumerate("one two three four five six seven eight nine".split(), 1):
+        _NUM_WORDS[f"{_t}-{_w}"] = _NUM_WORDS[f"{_t} {_w}"] = _tv + _u
 _UNIT_DAYS = {"day": (1,), "week": (7,), "month": (30, 30.44, 31), "year": (365, 366)}
 _DURATION = re.compile(
     r"(?<![\d.])(\d+(?:\.\d+)?|" + "|".join(sorted((re.escape(w) for w in _NUM_WORDS), key=len, reverse=True))
     + r")\s*(?:\(\s*\d+\s*\)\s*)?-?\s*(?:calendar\s+)?(day|week|month|year)s?\b", re.I)
 
 
+# "one hundred and eighty days": the number words after "hundred" are the tail of a
+# larger number, never a duration on their own (80 days). Hundreds are read as
+# multiplier * 100 + tail; a "hundred" with any other lead-in is skipped as unparseable.
+_HUNDRED_BEFORE = re.compile(r"(?:\b([a-z]+)[\s-]+)?hundred(?:\s+and)?\s*-?\s*$", re.I)
+_HUNDRED_MULT = {"a": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+                 "seven": 7, "eight": 8, "nine": 9}
+
+
 def durations_in(text: str) -> list[float]:
     """Durations written in text, in days ("six (6) months" -> 180, 182.6
-    and 186; "one year" -> 365, 366; "90 days" -> 90)."""
+    and 186; "one year" -> 365, 366; "90 days" -> 90; "one hundred and eighty
+    days" -> 180)."""
     out: list[float] = []
-    for m in _DURATION.finditer(normalize(text)):
+    norm = normalize(text)
+    for m in _DURATION.finditer(norm):
         n = m.group(1).lower()
         num = float(n) if n[0].isdigit() else _NUM_WORDS[n]
+        h = _HUNDRED_BEFORE.search(norm[:m.start(1)])
+        if h:
+            mult = _HUNDRED_MULT.get((h.group(1) or "").lower())
+            if mult is None or n[0].isdigit() or num >= 100:
+                continue
+            num += 100 * mult
         out.extend(num * f for f in _UNIT_DAYS[m.group(2).lower()])
     return out
 
