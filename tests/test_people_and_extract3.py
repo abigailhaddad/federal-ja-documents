@@ -171,6 +171,20 @@ def test_days_in_quote(text, days):
     assert extract.days_in_quote(days, text)
 
 
+@pytest.mark.parametrize("text,days", [
+    ("not to exceed twenty-five months", 760), ("sixty-five days", 65), ("seventy two days", 72),
+    ("fifty weeks", 350),
+])
+def test_days_in_quote_compound_number_words(text, days):
+    assert extract.days_in_quote(days, text)
+
+
+def test_compound_number_word_not_read_as_its_last_word():
+    # "twenty-five months" used to be read as "five months" (150 days)
+    assert not extract.days_in_quote(150, "not to exceed twenty-five months")
+    assert not extract.days_in_quote(5, "sixty-five days")
+
+
 def test_days_not_in_quote():
     assert not extract.days_in_quote(90, "not to exceed six (6) months")
     assert not extract.days_in_quote(180, "estimated value of $180")

@@ -484,6 +484,14 @@ _NUM_WORDS = {w: i for i, w in enumerate(
     "sixteen seventeen eighteen nineteen twenty".split())}
 _NUM_WORDS.update({"thirty": 30, "forty-five": 45, "sixty": 60, "ninety": 90, "twenty-four": 24,
                    "thirty-six": 36, "one hundred twenty": 120, "one hundred eighty": 180})
+# Every tens word and every tens-units compound up to 99 ("twenty-five", "sixty five"),
+# so a compound is never read as its last word ("twenty-five months" as 5 months).
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70,
+         "eighty": 80, "ninety": 90}
+_NUM_WORDS.update(_TENS)
+for _t, _tv in _TENS.items():
+    for _u, _w in enumerate("one two three four five six seven eight nine".split(), 1):
+        _NUM_WORDS[f"{_t}-{_w}"] = _NUM_WORDS[f"{_t} {_w}"] = _tv + _u
 _UNIT_DAYS = {"day": (1,), "week": (7,), "month": (30, 30.44, 31), "year": (365, 366)}
 _DURATION = re.compile(
     r"(?<![\d.])(\d+(?:\.\d+)?|" + "|".join(sorted((re.escape(w) for w in _NUM_WORDS), key=len, reverse=True))
