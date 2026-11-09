@@ -298,3 +298,34 @@ def test_workforce_quote_must_name_the_event(doc, shipped_all):
     review = tagger.tag_document(doc, ["workforce_cause"], call_fn=fake_call(responses))
     assert review["tags"] == [] and review["categories"]["workforce_cause"] == "not_tagged"
     assert review["prompt_versions"] == {"workforce_cause": prompts.WORKFORCE_CONFIRM_VERSION}
+
+
+# ── download_tables: a failed refresh must not leave a mixed cache ──────────
+
+def test_download_tables_failed_refresh_leaves_no_stale_revision(tmp_path, monkeypatch):
+    class Resp:
+        def __init__(self, fail): self.fail = fail
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def raise_for_status(self):
+            if self.fail: raise RuntimeError("HF 429")
+        def iter_content(self, n): yield b"new"
+
+    def get(url, **kw):
+        return Resp(fail="attachments" in url)
+
+    for t in data.TABLES:
+        (tmp_path / f"{t}.parquet").write_bytes(b"old")
+    (tmp_path / "revision.json").write_text(json.dumps({"dataset": "d", "sha": "old"}))
+    monkeypatch.setattr(data.requests, "get", get)
+    with pytest.raises(RuntimeError):
+        data.download_tables(tmp_path, revision="new")
+    # notices.parquet is now from "new", attachments.parquet still "old": the
+    # next call must not treat that as a complete cache at revision "old"
+    assert (tmp_path / "notices.parquet").read_bytes() == b"new"
+    assert not (tmp_path / "revision.json").exists()
+    monkeypatch.setattr(data.requests, "get", lambda url, **kw: Resp(False))
+    monkeypatch.setattr(data, "dataset_revision", lambda: {"dataset": "d", "sha": "latest"})
+    info = data.download_tables(tmp_path)          # no revision: must re-download, not return the cache
+    assert info["sha"] == "latest"
+    assert all((tmp_path / f"{t}.parquet").read_bytes() == b"new" for t in data.TABLES)

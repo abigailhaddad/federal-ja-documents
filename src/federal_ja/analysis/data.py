@@ -64,6 +64,10 @@ def download_tables(cache_dir: Path, *, revision: str | None = None, refresh: bo
             return info
     info = dataset_revision() if revision is None else {"dataset": HF_DATASET, "sha": revision,
                                                         "last_modified": None}
+    # The tables are replaced one at a time. Drop the old revision.json first, so
+    # a download that dies part way leaves "no cache" rather than tables from
+    # two commits under the old commit's revision.json.
+    meta_path.unlink(missing_ok=True)
     for t in TABLES:
         url = HF_FILE_URL.format(rev=info["sha"], path=f"data/{t}.parquet")
         tmp = cache_dir / f"{t}.parquet.part"
