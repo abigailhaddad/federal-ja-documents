@@ -34,7 +34,7 @@ import re
 
 from ..analysis.extract import amounts_in, looks_like_tier, name_in, value_in_quote
 from ..analysis.text import MIN_QUOTE_WORDS, Document, Page, clean_quote, display_quote, locate_quote, normalize
-from .candidates import DESCRIPTION_PAGE, Candidate, vendor_label
+from .candidates import DESCRIPTION_PAGE, Candidate, text_unreadable, value_label, vendor_label
 
 MAX_PICKS = 5
 MAX_QUOTES = 2
@@ -177,14 +177,6 @@ def _amount_sources(quotes: list[dict], ext: dict) -> list[float]:
     return src
 
 
-def _fmt_usd(v: float) -> str:
-    return f"${v:,.0f}" if v >= 1 else f"${v:,.2f}"
-
-
-_BASIS = {"total_including_options": "total incl. options", "base_only": "base period only",
-          "total_options_not_stated": "total", "modification_or_increase_amount": "modification/increase",
-          "ceiling_or_maximum": "ceiling", "annual_or_per_period": "per year/period"}
-
 
 def verify_picks(raw: dict, cands: dict[str, Candidate]) -> tuple[list[dict], list[dict]]:
     """(kept picks, dropped items with reasons)."""
@@ -270,13 +262,14 @@ def verify_picks(raw: dict, cands: dict[str, Candidate]) -> tuple[list[dict], li
         if vendor and vendor_src == "model" and not name_in(vendor, vt):
             dropped.append({"notice_id": nid, "what": "vendor", "value": vendor, "reason": "not in the text"})
             vendor = None
-        value = None
+        # The value slot is candidates.value_label, the same text the notice
+        # list shows. When the extraction has a figure it won't label (basis
+        # "other") or the text layer is unreadable, the slot stays empty: the
+        # model's own figure is not put there instead.
+        value = value_label(ext)
         ev = ext.get("estimated_value_usd")
-        if isinstance(ev, (int, float)) and ev == ev:
-            basis = _BASIS.get(ext.get("value_basis") or "")
-            value = _fmt_usd(float(ev)) + (f" ({basis})" if basis else "")
-        elif ext.get("value_redacted") is True:
-            value = "value redacted"
+        if value or text_unreadable(ext) or (isinstance(ev, (int, float)) and ev == ev):
+            pass
         elif (p.get("value") or "").strip():
             mv = p["value"].strip()
             qa = [a for q in quotes for a in amounts_in(q["text"])]
@@ -285,7 +278,10 @@ def verify_picks(raw: dict, cands: dict[str, Candidate]) -> tuple[list[dict], li
             else:
                 dropped.append({"notice_id": nid, "what": "value", "value": mv,
                                 "reason": "not an amount in a verified quote"})
-        authority = ext.get("authority_cited") or ((p.get("authority") or "").strip() or None)
+        if text_unreadable(ext):   # nothing read from a garbled text layer is shown
+            vendor = None
+        authority = None if text_unreadable(ext) else (
+            ext.get("authority_cited") or ((p.get("authority") or "").strip() or None))
         if authority and not ext.get("authority_cited"):
             if normalize(authority).casefold() not in normalize(vt).casefold():
                 dropped.append({"notice_id": nid, "what": "authority", "value": authority,
