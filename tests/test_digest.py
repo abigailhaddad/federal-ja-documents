@@ -10,7 +10,7 @@ import pytest
 from federal_ja.analysis import cli
 from federal_ja.analysis.text import Document, Page
 from federal_ja.digest import buttondown, model, render, run as digest_run, state as st, verify
-from federal_ja.digest.candidates import Candidate, build_candidates, select_candidates
+from federal_ja.digest.candidates import Candidate, build_candidates, select_candidates, vendor_label
 
 UTC = timezone.utc
 T = lambda s: datetime.fromisoformat(s).replace(tzinfo=UTC)  # noqa: E731
@@ -567,3 +567,56 @@ def test_send_email_schedules_when_publish_date_given(monkeypatch):
     monkeypatch.setattr(buttondown, "_headers", lambda live=False: {})
     buttondown.send_email("s", "b", metadata={}, publish_date="2026-10-22T11:00:00Z")
     assert sent["status"] == "scheduled" and sent["publish_date"] == "2026-10-22T11:00:00Z"
+
+
+# ── the vendor slot: every named firm, not only the first ──────────────────
+
+def test_vendor_label_shows_every_named_firm():
+    # 2026-11-10: SPE4A726R0767's DLA form lists three approved sources and
+    # the email showed only the first, as if it were a sole source.
+    e = {"vendor": "SKURKA AEROSPACE INC",
+         "additional_vendors": "HYDRO-AIRE AEROSPACE CORP; NEW PHOENIX AEROSPACE INC",
+         "vendor_quote": "95270 | SKURKA AEROSPACE INC 81982 | HYDRO-AIRE AEROSPACE CORP 3XMD9 | NEW PHOENIX AEROSPACE INC"}
+    assert vendor_label(e) == ("SKURKA AEROSPACE INC; HYDRO-AIRE AEROSPACE CORP; NEW PHOENIX AEROSPACE INC "
+                               "(3 firms named)")
+
+
+def test_vendor_label_one_firm_is_unchanged_and_none_stays_none():
+    assert vendor_label({"vendor": "Acme Corp"}) == "Acme Corp"
+    assert vendor_label({"vendor": "Acme Corp", "additional_vendors": None,
+                         "vendor_quote": "CAGE | COMPANY NAME 70628 | ACME CORP"}) == "Acme Corp"
+    assert vendor_label({"vendor": "Acme Corp", "additional_vendors": float("nan")}) == "Acme Corp"
+    assert vendor_label({}) is None and vendor_label({"additional_vendors": "B Corp"}) is None
+
+
+def test_vendor_label_long_lists_are_counted_not_cut_silently():
+    e = {"vendor": "A Co", "additional_vendors": "B Co; C Co; D Co; E Co"}
+    assert vendor_label(e) == "A Co; B Co; C Co and 2 more (5 firms named)"
+    assert vendor_label({"vendor": "A Co", "additional_vendors": ["B Co", "A Co", ""]}) == "A Co; B Co (2 firms named)"
+
+
+def test_vendor_label_flags_a_cage_table_whose_other_rows_were_not_captured():
+    e = {"vendor": "U D T, INC.", "vendor_quote": "57547 | U D T, INC. 82918 | THE BOEING COMPANY"}
+    assert vendor_label(e) == "U D T, INC. (one of several firms listed)"
+    # one firm under three CAGE codes is still one firm
+    same = {"vendor": "PARKER HANNIFIN",
+            "vendor_quote": "CAGE | COMPANY NAME 98441 | PARKER HANNIFIN 59211 | PARKER HANNIFIN 82271 | PARKER HANNIFIN"}
+    assert vendor_label(same) == "PARKER HANNIFIN"
+    # a single row followed by other text, and tables in other layouts, are not flagged
+    for vendor, quote in (("CORTRON, INC.", "CAGE | COMPANY NAME 6Z833 | CORTRON, INC. The use of authority 10 U.S.C. 3204(a)(1) is based on:"),
+                          ("L3 TECHNOLOGIES, INC.", "0B107 | L3 TECHNOLOGIES, INC. P/N LFG-094-A3"),
+                          ("PEERLESS MFG CO", "4730013209517 | TRAP,MOISTURE | PEERLESS MFG CO | 46219 | D251-10000-1"),
+                          ("Metrex Valve Corp.", "0001 | Metrex Valve Corp. | 21013 | EAOM-513-NF2-3W")):
+        assert vendor_label({"vendor": vendor, "vendor_quote": quote}) == vendor
+
+
+def test_all_notices_and_picks_use_the_full_vendor_label():
+    ext = {"vendor": "SKURKA AEROSPACE INC", "authority_cited": "10 U.S.C. 3204(a)(1)", "value_redacted": True,
+           "additional_vendors": "HYDRO-AIRE AEROSPACE CORP; NEW PHOENIX AEROSPACE INC"}
+    c = candidate("multi", ext=ext)
+    assert c.extraction["additional_vendors"] == ext["additional_vendors"]   # the field reaches the candidate
+    row = render.notice_rows([c], [])[0]
+    assert row["vendor"] == ("SKURKA AEROSPACE INC; HYDRO-AIRE AEROSPACE CORP; NEW PHOENIX AEROSPACE INC "
+                             "(3 firms named)")
+    line = [ln for ln in render.all_notices([c], []).splitlines() if ln.startswith("- ")][0]
+    assert "HYDRO-AIRE AEROSPACE CORP" in line and "(3 firms named)" in line

@@ -7,7 +7,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from ..collect import config
-from .candidates import Candidate
+from .candidates import Candidate, vendor_label
 
 ET = ZoneInfo("America/New_York")
 PREFIX = "WOAH! J&As"
@@ -124,7 +124,7 @@ def notice_rows(cands: list[Candidate], picks: list[dict], gists: dict | None = 
         e = c.extraction or {}
         out.append({"notice_id": c.notice_id, "pick_rank": rank.get(c.notice_id),
                     "org": short_org(c.meta), "title": c.meta.get("title") or "",
-                    "vendor": e.get("vendor") or None, "value": _ext_value(e),
+                    "vendor": vendor_label(e), "value": _ext_value(e),
                     "authority": e.get("authority_cited") or None, "sam_link": _sam_link(c),
                     "gist": ((gists or {}).get(c.notice_id) or "").strip() or None})
     return out
