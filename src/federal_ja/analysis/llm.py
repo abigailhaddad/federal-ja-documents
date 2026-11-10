@@ -68,6 +68,7 @@ CACHE_READ_MULT = 0.10
 
 # The Message Batches API bills all tokens at half the list price.
 BATCH_PRICE_MULT = 0.5
+RESULT_READ_ATTEMPTS = 5
 
 # A prompt: one string, or (cached instructions, per-document rest).
 Prompt = Union[str, tuple[str, str]]
@@ -214,7 +215,8 @@ def _call_anthropic(prompt, *, schema, tool_name, model, timeout, max_attempts, 
 
 def batch_call(prompts: dict[str, Prompt], *, schema: dict, tool_name: str, model: str = DEFAULT_MODEL,
                max_tokens: int = 8192, effort: str | None = None, max_wait_s: float = 12_000,
-               poll_s: float = 60, client=None, sleep=time.sleep, clock=time.monotonic) -> dict:
+               poll_s: float = 60, client=None, sleep=time.sleep, clock=time.monotonic,
+               resume_id: str | None = None) -> dict:
     """Send every prompt as one Message Batch and wait for it.
 
     ``prompts`` maps a custom_id (1-64 of [A-Za-z0-9_-]; a notice id) to a
@@ -225,7 +227,14 @@ def batch_call(prompts: dict[str, Prompt], *, schema: dict, tool_name: str, mode
     answers (and are billed), the rest come back as ModelErrors.
 
     Raises ModelError if the batch can't be created (no credit, bad key):
-    nothing was sent, so nothing is billed."""
+    nothing was sent, so nothing is billed.
+
+    ``resume_id``: fetch the results of a batch already created (its id is
+    printed when it is) instead of creating one. Nothing new is sent or
+    billed. For a run that died after the batch was accepted: on 2026-11-10 a
+    160-request batch finished and the connection dropped while its results
+    were being read, and the paid answers were not stored. Reading the
+    results is now retried, and a batch can be picked up again by id."""
     if provider_for(model) != "anthropic":
         raise ModelError(f"{model}: the batch API is Anthropic-only")
     if not prompts:
@@ -237,12 +246,14 @@ def batch_call(prompts: dict[str, Prompt], *, schema: dict, tool_name: str, mode
                                                              max_tokens=max_tokens, effort=effort)}
                 for cid, p in prompts.items()]
     try:
-        batch = client.messages.batches.create(requests=requests)
+        batch = (client.messages.batches.retrieve(resume_id) if resume_id
+                 else client.messages.batches.create(requests=requests))
     except anthropic.APIStatusError as exc:
         raise ModelError(f"batch not created ({exc.status_code}): {str(exc)[:200]}") from exc
     except anthropic.APIConnectionError as exc:
         raise ModelError(f"batch not created: {str(exc)[:200]}") from exc
-    print(json.dumps({"batch_id": batch.id, "requests": len(requests)}), file=sys.stderr, flush=True)
+    print(json.dumps({"batch_id": batch.id, "requests": len(requests), "resumed": bool(resume_id)}),
+          file=sys.stderr, flush=True)
     deadline = clock() + max_wait_s
     canceled = False
     while batch.processing_status != "ended":
@@ -255,8 +266,24 @@ def batch_call(prompts: dict[str, Prompt], *, schema: dict, tool_name: str, mode
             batch = client.messages.batches.retrieve(batch.id)
         except (anthropic.APIConnectionError, anthropic.InternalServerError, anthropic.RateLimitError):
             continue
+    # The results come as one long stream. A dropped connection part way
+    # through loses nothing on the server, so read it again from the start.
+    import httpx2
+    rows, last = [], None
+    for attempt in range(RESULT_READ_ATTEMPTS):
+        try:
+            rows = list(client.messages.batches.results(batch.id))
+            last = None
+            break
+        except (anthropic.APIConnectionError, anthropic.InternalServerError, httpx2.TransportError) as exc:
+            last = exc
+            sleep(min(poll_s, 5 * (attempt + 1)))
+    if last is not None:
+        raise ModelError(f"batch {batch.id} finished but its results could not be read after "
+                         f"{RESULT_READ_ATTEMPTS} tries ({type(last).__name__}); nothing is lost: "
+                         f"run again with the batch id to fetch them") from last
     out: dict = {}
-    for r in client.messages.batches.results(batch.id):
+    for r in rows:
         res = r.result
         if res.type == "succeeded":
             try:

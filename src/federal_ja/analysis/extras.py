@@ -418,13 +418,16 @@ def extras_document(doc: Document, *, model: str = llm.DEFAULT_MODEL, call_fn=No
 
 
 def extras_documents_batch(docs: list[Document], *, model: str = llm.DEFAULT_MODEL, batch_fn=None,
-                           effort: str | None = EXTRAS_EFFORT, max_wait_s: float = 12_000) -> dict:
+                           effort: str | None = EXTRAS_EFFORT, max_wait_s: float = 12_000,
+                           resume_id: str | None = None) -> dict:
     """{notice_id: record or llm.ModelError} through the Message Batches API
     (half price). Raises llm.ModelError if the batch can't be created."""
     batch_fn = batch_fn or llm.batch_call
     texts = {d.notice_id: model_text(d) for d in docs}
     by_id = {d.notice_id: d for d in docs}
     kw = {"effort": effort} if effort else {}
+    if resume_id:
+        kw["resume_id"] = resume_id
     res = batch_fn({nid: build_prompt(by_id[nid], texts[nid][0]) for nid in by_id}, schema=SCHEMA,
                    tool_name=TOOL_NAME, model=model, max_tokens=MAX_OUTPUT_TOKENS, max_wait_s=max_wait_s, **kw)
     out: dict = {}
