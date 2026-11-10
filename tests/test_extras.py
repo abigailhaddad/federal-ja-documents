@@ -110,6 +110,16 @@ def test_incumbent_needs_a_quote_that_says_incumbent():
     assert dropped[0]["reason"] == "quote does not show the firm is the incumbent"
     f, _ = extras.verify({"facts": [fact("incumbent_vendor", "Noblis", "the current contractor, Noblis, holds the order")]}, d)
     assert f["incumbent_vendor"] == "Noblis"
+    # a past award of the contract counts; "will be awarded to" does not
+    d2 = Document("n3b", {}, [Page("r", "a.pdf", 1, "native",
+                                   "The original five (5) year contract for this region, SPE8E3-15-D-0024, was awarded to "
+                                   "SupplyCore, Inc. in 2015. The bridge will be awarded to Acme Logistics LLC next month.")])
+    f, _ = extras.verify({"facts": [fact("incumbent_vendor", "SupplyCore, Inc.",
+                                         "contract for this region, SPE8E3-15-D-0024, was awarded to SupplyCore, Inc.")]}, d2)
+    assert f["incumbent_vendor"] == "SupplyCore, Inc."
+    f, dropped = extras.verify({"facts": [fact("incumbent_vendor", "Acme Logistics LLC",
+                                               "will be awarded to Acme Logistics LLC next month")]}, d2)
+    assert f["incumbent_vendor"] is None and "incumbent" in dropped[0]["reason"]
 
 
 def test_interested_firm_needs_a_quote_that_says_so_or_a_cage_table_row():

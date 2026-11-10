@@ -123,7 +123,10 @@ _WORD_NUM = re.compile(r"[0-9][0-9,]*(?:\.[0-9]+)?")
 # "interested sources" were accreditation bodies the document merely listed).
 _INCUMBENT_CUE = re.compile(
     r"incumbent|current(ly)?\b|existing|previous(ly)?|prior\b|predecessor|has (been )?provid|have (been )?provid|"
-    r"has (been )?perform|since (19|20)\d\d|extension|extend|bridge|follow-on|modif|increase|option", re.I)
+    r"has (been )?perform|since (19|20)\d\d|extension|extend|bridge|follow-on|modif|increase|option|"
+    # a past award of the contract: "was awarded to", "Award went to", "Award date:", "contract N39430-23-D-4050 ... awarded to"
+    r"(was|were) awarded|award (went|was made)|award date|[A-Z0-9]{4,}-\d{2}-[A-Z]-\d{4}[^.]{0,60}awarded to|"
+    r"renewal|continu", re.I)
 _INTEREST_CUE = re.compile(
     r"interest|respon|capabilit|sources.sought|\bRFI\b|request for information|quot(e|ation)|inquir|"
     r"submitt|proposal|offer", re.I)
