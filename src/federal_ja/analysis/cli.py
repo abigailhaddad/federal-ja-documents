@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from ..collect import config
-from . import data, extract, ja_check, llm, prompts, spreadsheet, table, tagger
+from . import data, extract, extras, ja_check, llm, prompts, spreadsheet, table, tagger
 from .promptfile import CONFIG
 
 EXPERIMENTAL_BANNER = (
@@ -114,6 +114,31 @@ def build_parser() -> argparse.ArgumentParser:
     t2.add_argument("--publish", action="store_true",
                     help="upload the table to the dataset as analysis/extractions.parquet (needs HF_TOKEN); "
                          "refused if it has fewer rows than the published table")
+    e = sub.add_parser("extras", help="EXPERIMENTAL: a second, smaller call per notice for facts the "
+                                      "extraction does not ask for (ceiling changes, not-to-exceed, unit "
+                                      "price, incumbent, approved and interested sources); see docs/extras.md",
+                       description=EXTRAS_BANNER)
+    e.add_argument("--limit", type=int, default=None, help="at most N notices (newest first)")
+    e.add_argument("--notice-id", action="append", default=None, help="only these notices (repeatable)")
+    e.add_argument("--notice-file", type=Path, default=None, help="file of notice ids, one per line")
+    e.add_argument("--since", default=None, help="only notices posted on or after YYYY-MM-DD")
+    e.add_argument("--out", required=True, type=Path, help="output directory (extras.jsonl, extras.csv)")
+    e.add_argument("--data-dir", type=Path, default=Path("work/hf_tables"),
+                   help="where the dataset tables are cached (default work/hf_tables)")
+    e.add_argument("--revision", default=None, help="dataset commit to use (default: latest)")
+    e.add_argument("--model", default=os.environ.get("JA_MODEL", llm.DEFAULT_MODEL),
+                   help=f"model (default {llm.DEFAULT_MODEL})")
+    e.add_argument("--effort", default=extras.EXTRAS_EFFORT, choices=["low", "medium", "high"],
+                   help=f"effort level (default from prompts.yaml: {extras.EXTRAS_EFFORT})")
+    e.add_argument("--max-usd", type=float, default=1.0,
+                   help="spend cap (default 1). Notices are taken in order while their ESTIMATED cost fits "
+                        "under it, before anything is sent, with or without --batch")
+    e.add_argument("--dry-run", action="store_true", help="count notices and estimate the cost; no model calls")
+    e.add_argument("--workers", type=int, default=4, help="notices in parallel without --batch (default 4)")
+    e.add_argument("--batch", action="store_true", help="send through the Message Batches API (half price)")
+    e.add_argument("--batch-max-wait-min", type=float, default=200,
+                   help="with --batch: cancel the batch after this many minutes and keep what came back")
+    e.add_argument("--csv-only", action="store_true", help="no model calls; rebuild extras.csv from extras.jsonl")
     w = sub.add_parser("spreadsheet", help="build a reader-friendly .xlsx from the published dataset "
                                            "(includes the EXPERIMENTAL AI columns)")
     w.add_argument("--out", required=True, type=Path, help="output .xlsx path")
@@ -494,6 +519,130 @@ def extract_min_chars() -> int:
     return MIN_DOC_CHARS
 
 
+EXTRAS_BANNER = (
+    "EXPERIMENTAL second call: AI-extracted ceiling changes, not-to-exceed amounts, unit prices, incumbents and "
+    "source lists. Every value has a verbatim quote that the code checked against the document; a value that "
+    "failed is dropped and listed in values_dropped_by_checks. A blank means not stated or not kept, not none."
+)
+
+
+def write_extras_csv(out: Path, docs_meta: dict) -> int:
+    """extras.csv from extras.jsonl: the latest record per notice."""
+    import pandas as pd
+    recs = list(_latest_by_notice(_load_jsonl(out / "extras.jsonl")).values())
+    df = pd.DataFrame([extras.flat_row(r, docs_meta.get(r["notice_id"], {})) for r in recs])
+    if not df.empty:
+        df = df.sort_values(["posted_date", "notice_id"], ascending=[False, True])
+    df.to_csv(out / "extras.csv", index=False)
+    return len(df)
+
+
+def cmd_extras(a) -> int:
+    """The second call (extras.py). Scope and order as cmd_extract: notices
+    with a downloaded document, newest first, without the Special Notices that
+    don't look like a J&A. A notice is done when extras.jsonl has a record for
+    it with the same model, EXTRAS_VERSION and effort and the same document
+    length. Nothing here reads or writes the extraction records."""
+    print(EXTRAS_BANNER, file=sys.stderr)
+    if a.model not in llm.PRICES_PER_M:
+        raise SystemExit(f"{a.model}: no price on file, so the spend cap can't work")
+    rev = data.download_tables(a.data_dir, revision=a.revision)
+    notices, attachments, pages = data.load_tables(a.data_dir)
+    with_doc = set(attachments.loc[attachments.download_status == "ok", "notice_id"])
+    notices = notices[notices.notice_id.isin(with_doc)]
+    want = set(a.notice_id or [])
+    if a.notice_file:
+        want |= {ln.strip() for ln in a.notice_file.read_text().splitlines() if ln.strip()}
+    if want:
+        notices = notices[notices.notice_id.isin(want)]
+    if a.since:
+        notices = notices[notices.posted_date.fillna("") >= a.since]
+    notices = notices.sort_values(["posted_date", "notice_id"], ascending=[False, True])
+    docs = data.build_documents(notices, attachments, pages, notices.notice_id.tolist())
+    not_ja = ja_check.not_ja_special_notices(notices, docs)
+    docs = {nid: d for nid, d in docs.items() if nid not in not_ja}
+    meta = {nid: {**d.meta} for nid, d in docs.items()}
+    a.out.mkdir(parents=True, exist_ok=True)
+    ext_p, fail_p = a.out / "extras.jsonl", a.out / "extras_failures.jsonl"
+    if a.csv_only:
+        print(json.dumps({"csv_rows": write_extras_csv(a.out, meta)}), file=sys.stderr)
+        return 0
+    done = {r["notice_id"] for r in _load_jsonl(ext_p)
+            if r["model"] == a.model and r["extras_version"] == extras.EXTRAS_VERSION
+            and r.get("effort") == a.effort
+            and (r["notice_id"] not in docs or r.get("chars_total") == len(docs[r["notice_id"]].model_text()))}
+    todo, no_text = [], 0
+    for nid in notices.notice_id.tolist():
+        if nid not in docs:
+            continue
+        doc = docs[nid]
+        if not any(p.text.strip() for p in doc.pages) or len(doc.model_text()) < extract_min_chars():
+            no_text += 1
+            continue
+        if nid not in done:
+            todo.append(doc)
+    if a.limit is not None:
+        todo = todo[:a.limit]
+    # The cap is applied to the estimate before anything is sent, in both
+    # modes, so a run can't overshoot it by more than the estimate is off.
+    picked, est = [], 0.0
+    for doc in todo:
+        c = extras.estimate_cost(doc, a.model, batch=a.batch)
+        if est + c > a.max_usd:
+            break
+        picked.append(doc)
+        est += c
+    summary = {"experimental": True, "dataset_revision": rev.get("sha"), "model": a.model,
+               "extras_version": extras.EXTRAS_VERSION, "in_scope": len(docs),
+               "special_notices_not_ja": len(not_ja), "already_done": len(done & set(docs)),
+               "no_usable_text": no_text, "to_do": len(todo), "sending": len(picked),
+               "estimated_usd": round(est, 4), "batch": bool(a.batch)}
+    print(json.dumps(summary), file=sys.stderr, flush=True)
+    if a.dry_run:
+        return 0
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    lock = threading.Lock()
+    spent, n_done, failed = 0.0, 0, 0
+
+    def store(nid, rec):
+        nonlocal spent, n_done, failed
+        with lock:
+            if isinstance(rec, Exception):
+                failed += 1
+                with open(fail_p, "a") as f:
+                    f.write(json.dumps({"notice_id": nid, "model": a.model,
+                                        "error": f"{type(rec).__name__}: {rec}"[:500], "at": stamp}) + "\n")
+                print(f"{nid}: {rec}", file=sys.stderr)
+                return
+            rec["dataset_revision"] = rev.get("sha")
+            spent += rec["usage"]["cost_usd"] or 0
+            n_done += 1
+            with open(ext_p, "a") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    if a.batch:
+        try:
+            results = extras.extras_documents_batch(picked, model=a.model, effort=a.effort,
+                                                    max_wait_s=a.batch_max_wait_min * 60)
+        except llm.ModelError as exc:
+            print(f"batch not sent: {exc}", file=sys.stderr)
+            return 2
+        for nid, rec in results.items():
+            store(nid, rec)
+    else:
+        def one(doc):
+            try:
+                store(doc.notice_id, extras.extras_document(doc, model=a.model, effort=a.effort))
+            except Exception as exc:   # one notice's failure is recorded; the rest go on
+                store(doc.notice_id, exc)
+        with ThreadPoolExecutor(max_workers=max(1, a.workers)) as ex:
+            list(ex.map(one, picked))
+    n = write_extras_csv(a.out, meta)
+    print(json.dumps({"spent_usd": round(spent, 4), "estimated_usd": round(est, 4), "done": n_done,
+                      "failed": failed, "not_sent": len(todo) - len(picked), "csv_rows": n}), file=sys.stderr)
+    return 1 if failed else 0
+
+
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
     if a.cmd == "tag":
@@ -502,6 +651,8 @@ def main(argv=None) -> int:
         return cmd_extract(a)
     if a.cmd == "extract-table":
         return cmd_extract_table(a)
+    if a.cmd == "extras":
+        return cmd_extras(a)
     if a.cmd == "digest":
         from ..digest import run as digest_run
         return digest_run.run(a)
