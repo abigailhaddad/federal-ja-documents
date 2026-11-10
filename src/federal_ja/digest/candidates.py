@@ -51,7 +51,7 @@ NOTICE_COLS = ("notice_id", "sam_link", "title", "agency", "sub_tier", "office",
 # Extraction fields shown to the model (when present). Every factual one
 # passed the extraction's own quote checks; the summary is model-written.
 EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "estimated_value_usd", "value_basis",
-                     "value_redacted", "value_quote", "garbled_text_layer",
+                     "value_redacted", "value_quote", "garbled_text_layer", "redaction_evidence",
                      "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
 
@@ -77,7 +77,7 @@ def text_unreadable(e: dict) -> bool:
 def value_label(e: dict) -> str | None:
     """What the email and the web archive show in the value slot: the figure
     with what it is ("$5,000,000 (modification/increase)"), "value redacted",
-    or None. One function for the notice list and the picks; until 2026-11-10
+    "value blank or redacted", or None. One function for the notice list and the picks; until 2026-11-10
     the list showed a bare figure, so a ceiling increase, a per-year rent and
     a contract total looked alike."""
     if text_unreadable(e):
@@ -86,7 +86,18 @@ def value_label(e: dict) -> str | None:
     if isinstance(v, (int, float)) and v == v:
         basis = VALUE_BASIS_LABEL.get(_clean(e.get("value_basis")) or "")
         return (f"${v:,.0f}" if v >= 1 else f"${v:,.2f}") + f" ({basis})" if basis else None
-    return "value redacted" if _clean(e.get("value_redacted")) is True else None
+    if _clean(e.get("value_redacted")) is not True:
+        return None
+    # "Redacted" only where something says so: the transcription's [REDACTED]
+    # marker or a file named "..._Redacted.pdf". Otherwise all the text shows
+    # is a blank where the figure belongs ("The total estimated value of the
+    # proposed action is $"), and a black box and an empty field look the same
+    # in a PDF's text. 223 of the 6,958 such notices on 2026-11-10; of two
+    # looked at as page images, one had a black box and one an empty line.
+    ev = str(_clean(e.get("redaction_evidence")) or "")
+    if "[REDACTED] marker" in ev or "filename says redacted" in ev:
+        return "value redacted"
+    return "value blank or redacted"
 
 
 # How many firm names the vendor slot spells out before "and N more".

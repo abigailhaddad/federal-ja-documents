@@ -124,6 +124,10 @@ to pick fewer, or none, rather than pad.
   value and authority are all left blank (`candidates.text_unreadable`): on
   2026-11-06 six such notices read "value redacted" though each document
   states its value.
+  "value redacted" is said only where the transcription has a [REDACTED]
+  marker or a file is named as redacted. A bare blank where the figure belongs
+  reads "value blank or redacted": in a PDF's text a black box and an empty
+  field look the same.
 * The prompt tells the model to state only what the document says, with no
   speculation about motives or wrongdoing. Code cannot check that; the
   backtest below was read by hand for it.
