@@ -116,6 +116,14 @@ to pick fewer, or none, rather than pad.
   first three "and N more". Until 2026-11-10 it showed `vendor` alone, so a
   DLA form listing three approved sources read as a sole source to the first
   (`candidates.vendor_label`).
+  The value slot always says what the figure is: "$5,000,000
+  (modification/increase)", "$146,630 (per year/period)". A figure whose basis
+  is "other" is not shown (`candidates.value_label`); until 2026-11-10 the
+  notice list showed bare figures.
+  When the extraction flags the document's text layer as garbled, vendor,
+  value and authority are all left blank (`candidates.text_unreadable`): on
+  2026-11-06 six such notices read "value redacted" though each document
+  states its value.
 * The prompt tells the model to state only what the document says, with no
   speculation about motives or wrongdoing. Code cannot check that; the
   backtest below was read by hand for it.

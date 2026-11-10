@@ -7,7 +7,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from ..collect import config
-from .candidates import Candidate, vendor_label
+from .candidates import Candidate, text_unreadable, value_label, vendor_label
 
 ET = ZoneInfo("America/New_York")
 PREFIX = "WOAH! J&As"
@@ -91,11 +91,13 @@ def _trim(s: str, n: int) -> str:
     return s if len(s) <= n else s[:n].rsplit(" ", 1)[0] + "\u2026"
 
 
-def _ext_value(e: dict) -> str | None:
-    v = e.get("estimated_value_usd")
-    if isinstance(v, (int, float)) and v == v:
-        return f"${v:,.0f}"
-    return "value redacted" if e.get("value_redacted") is True else None
+# Windows-1252 dashes and quotes that SAM titles carry as C1 control characters.
+_C1 = str.maketrans({"\x96": "\u2013", "\x97": "\u2014", "\x91": "\u2018", "\x92": "\u2019",
+                     "\x93": "\u201c", "\x94": "\u201d", "\x85": "\u2026"})
+
+
+def clean_title(s: str | None) -> str:
+    return (s or "").translate(_C1)
 
 
 def _sam_link(c: Candidate) -> str:
@@ -123,9 +125,10 @@ def notice_rows(cands: list[Candidate], picks: list[dict], gists: dict | None = 
     for c in sorted(cands, key=key):
         e = c.extraction or {}
         out.append({"notice_id": c.notice_id, "pick_rank": rank.get(c.notice_id),
-                    "org": short_org(c.meta), "title": c.meta.get("title") or "",
-                    "vendor": vendor_label(e), "value": _ext_value(e),
-                    "authority": e.get("authority_cited") or None, "sam_link": _sam_link(c),
+                    "org": short_org(c.meta), "title": clean_title(c.meta.get("title")),
+                    "vendor": vendor_label(e), "value": value_label(e),
+                    "authority": None if text_unreadable(e) else (e.get("authority_cited") or None),
+                    "sam_link": _sam_link(c),
                     "gist": ((gists or {}).get(c.notice_id) or "").strip() or None})
     return out
 
@@ -165,7 +168,7 @@ def pick_view(p: dict, c: Candidate) -> dict:
     return {"rank": p["rank"], "notice_id": c.notice_id, "headline": p["headline"], "why": p["why"],
             "org": org, "vendor": p.get("vendor"), "value": p.get("value"), "authority": p.get("authority"),
             "posted_date": str(m.get("posted_date") or "")[:10], "award_number": m.get("award_number"),
-            "title": m.get("title") or "", "sam_link": _sam_link(c),
+            "title": clean_title(m.get("title")), "sam_link": _sam_link(c),
             "quotes": [{"text": q["text"], "where": q["where"], "added_by_code": bool(q.get("added_by_code"))}
                        for q in p["quotes"]],
             "documents": [{"filename": d["filename"], "url": d["url"]} for d in docs[:MAX_DOC_LINKS]],

@@ -51,9 +51,43 @@ NOTICE_COLS = ("notice_id", "sam_link", "title", "agency", "sub_tier", "office",
 # Extraction fields shown to the model (when present). Every factual one
 # passed the extraction's own quote checks; the summary is model-written.
 EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "estimated_value_usd", "value_basis",
-                     "value_redacted", "value_quote",
+                     "value_redacted", "value_quote", "garbled_text_layer",
                      "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
+
+# What a dollar figure is, shown beside it. A figure with basis "other" (the
+# document gives something that is none of these: a unit price, one of two
+# line items, a spend estimate) has no label that would be true, so it is not
+# shown in the summary line at all.
+VALUE_BASIS_LABEL = {"total_including_options": "total incl. options", "base_only": "base period only",
+                     "total_options_not_stated": "total", "modification_or_increase_amount": "modification/increase",
+                     "ceiling_or_maximum": "ceiling", "annual_or_per_period": "per year/period"}
+
+
+def text_unreadable(e: dict) -> bool:
+    """The extraction flagged the document's text layer as garbled (a PDF
+    whose embedded text is shifted or scrambled). Nothing extracted from such
+    text is shown: on 2026-11-06 six VA notices read "value redacted" though
+    each document states its value, and two gave the vendor as
+    "$*)$ +HDOWKFDUH &RUSRUDWLRQ" (AGFA Healthcare Corporation, every
+    character shifted by 29)."""
+    return _clean(e.get("garbled_text_layer")) is True
+
+
+def value_label(e: dict) -> str | None:
+    """What the email and the web archive show in the value slot: the figure
+    with what it is ("$5,000,000 (modification/increase)"), "value redacted",
+    or None. One function for the notice list and the picks; until 2026-11-10
+    the list showed a bare figure, so a ceiling increase, a per-year rent and
+    a contract total looked alike."""
+    if text_unreadable(e):
+        return None
+    v = _clean(e.get("estimated_value_usd"))
+    if isinstance(v, (int, float)) and v == v:
+        basis = VALUE_BASIS_LABEL.get(_clean(e.get("value_basis")) or "")
+        return (f"${v:,.0f}" if v >= 1 else f"${v:,.2f}") + f" ({basis})" if basis else None
+    return "value redacted" if _clean(e.get("value_redacted")) is True else None
+
 
 # How many firm names the vendor slot spells out before "and N more".
 MAX_VENDOR_NAMES = 3
@@ -80,7 +114,7 @@ def vendor_label(e: dict) -> str | None:
     with a row for a different firm, the others weren't captured; the label
     says the firm is one of several rather than presenting it alone."""
     first = _clean(e.get("vendor"))
-    if not first:
+    if not first or text_unreadable(e):
         return None
     extra = _clean(e.get("additional_vendors"))
     if isinstance(extra, str):

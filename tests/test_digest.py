@@ -10,7 +10,8 @@ import pytest
 from federal_ja.analysis import cli
 from federal_ja.analysis.text import Document, Page
 from federal_ja.digest import buttondown, model, render, run as digest_run, state as st, verify
-from federal_ja.digest.candidates import Candidate, build_candidates, select_candidates, vendor_label
+from federal_ja.digest.candidates import (Candidate, build_candidates, select_candidates, value_label,
+                                         vendor_label)
 
 UTC = timezone.utc
 T = lambda s: datetime.fromisoformat(s).replace(tzinfo=UTC)  # noqa: E731
@@ -470,8 +471,8 @@ def test_state_after_send_keeps_the_later_watermark():
 
 def test_all_notices_list_every_candidate_with_checked_fields_only():
     big = candidate("big", ext={"estimated_value_usd": 5_000_000.0, "vendor": "Acme Corp",
-                                "authority_cited": "FAR 6.302-1"})
-    small = candidate("small", ext={"estimated_value_usd": 10_000.0})
+                                "value_basis": "total_including_options", "authority_cited": "FAR 6.302-1"})
+    small = candidate("small", ext={"estimated_value_usd": 10_000.0, "value_basis": "annual_or_per_period"})
     red = candidate("red", ext={"value_redacted": True})
     none = candidate("none")                      # no extraction row: nothing guessed
     star = candidate("star")
@@ -484,9 +485,9 @@ def test_all_notices_list_every_candidate_with_checked_fields_only():
     assert out.startswith("## All new notices (5)")
     assert len(lines) == 5
     assert lines[0].startswith("- ★ Navy · The pick · [SAM.gov](https://sam.gov/opp/star/view)")
-    assert lines[1] == ("- Army · Big buy · Acme Corp · $5,000,000 · FAR 6.302-1 · "
+    assert lines[1] == ("- Army · Big buy · Acme Corp · $5,000,000 (total incl. options) · FAR 6.302-1 · "
                         "[SAM.gov](https://sam.gov/opp/big/view)")
-    assert lines[2].startswith("- Veterans Affairs · Small · $10,000 ·")
+    assert lines[2].startswith("- Veterans Affairs · Small · $10,000 (per year/period) ·")
     # unknown values after known ones, then by agency
     assert lines[3].startswith("- General Services Administration · xxx") and "…" in lines[3]
     assert "$" not in lines[3] and "Optum" not in lines[3]
@@ -620,3 +621,44 @@ def test_all_notices_and_picks_use_the_full_vendor_label():
                              "(3 firms named)")
     line = [ln for ln in render.all_notices([c], []).splitlines() if ln.startswith("- ")][0]
     assert "HYDRO-AIRE AEROSPACE CORP" in line and "(3 firms named)" in line
+
+
+# ── the value slot: always labelled; nothing from a garbled text layer ─────
+
+def test_value_label_says_what_the_figure_is_or_shows_nothing():
+    assert value_label({"estimated_value_usd": 5_000_000.0, "value_basis": "modification_or_increase_amount"}) == \
+        "$5,000,000 (modification/increase)"
+    assert value_label({"estimated_value_usd": 146_629.98, "value_basis": "annual_or_per_period"}) == \
+        "$146,630 (per year/period)"
+    # a figure with no true label is not shown: a unit price, one of two line items
+    assert value_label({"estimated_value_usd": 19_166.0, "value_basis": "other"}) is None
+    assert value_label({"estimated_value_usd": 19_166.0}) is None
+    assert value_label({"value_redacted": True}) == "value redacted" and value_label({}) is None
+
+
+def test_nothing_read_from_a_garbled_text_layer_is_shown():
+    # 2026-11-06: six VA notices said "value redacted" and two gave this vendor;
+    # the documents state the value and name AGFA Healthcare Corporation
+    ext = {"vendor": "$*)$ +HDOWKFDUH &RUSRUDWLRQ", "value_redacted": True, "garbled_text_layer": True,
+           "authority_cited": "41 U.S.C. 4106(c)(2)"}
+    assert value_label(ext) is None and vendor_label(ext) is None
+    row = render.notice_rows([candidate("g", ext=ext)], [])[0]
+    assert (row["vendor"], row["value"], row["authority"]) == (None, None, None)
+    line = [ln for ln in render.all_notices([candidate("g", ext=ext)], []).splitlines() if ln.startswith("- ")][0]
+    assert "redacted" not in line and "HDOWKFDUH" not in line
+
+
+def test_a_pick_from_a_garbled_document_or_an_unlabelled_figure_shows_no_value(monkeypatch):
+    garbled = candidate(ext={"vendor": "$*)$ +HDOWKFDUH", "value_redacted": True, "garbled_text_layer": True,
+                             "authority_cited": "FAR 6.302-1"})
+    picks, _ = verify.verify_picks({"picks": [pick(vendor="Optum", value="$5,000,000")]}, {"n1": garbled})
+    assert picks and (picks[0]["vendor"], picks[0]["value"], picks[0]["authority"]) == (None, None, None)
+    other = candidate(ext={"estimated_value_usd": 19_166.0, "value_basis": "other"})
+    picks, _ = verify.verify_picks({"picks": [pick(value="$19,166")]}, {"n1": other})
+    assert picks and picks[0]["value"] is None        # the model's figure does not fill the slot either
+
+
+def test_c1_control_characters_in_titles_become_dashes():
+    c = candidate("t")
+    c.meta["title"] = "J065\x96\x96PACS \x97 Denver"
+    assert render.notice_rows([c], [])[0]["title"] == "J065\u2013\u2013PACS \u2014 Denver"
