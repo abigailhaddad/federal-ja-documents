@@ -71,7 +71,7 @@ EXTRAS_VERSION = CONFIG["extras"]["version"]
 EXTRAS_EFFORT = CONFIG["extras"].get("effort")
 # The deterministic checks have their own version, as in extract.py: they can
 # be re-applied to the stored model answers without a new call.
-EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks3"
+EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks4"
 TOOL_NAME = "record_ja_extras"
 EXTRAS_TIMEOUT_S = 600
 
@@ -123,13 +123,23 @@ _WORD_NUM = re.compile(r"[0-9][0-9,]*(?:\.[0-9]+)?")
 # "interested sources" were accreditation bodies the document merely listed).
 _INCUMBENT_CUE = re.compile(
     r"incumbent|current(ly)?\b|existing|previous(ly)?|prior\b|predecessor|has (been )?provid|have (been )?provid|"
-    r"has (been )?perform|since (19|20)\d\d|extension|extend|bridge|follow-on|modif|increase|option|"
+    r"has (been )?perform|since (19|20)\d\d|extension|extend(ed|ing|s)?\b[^.]{0,60}(contract|order|agreement|period|"
+    r"services?|performance|\bPoP\b)|bridge|follow-on|modif|increase|option|"
     # a past award of the contract: "was awarded to", "Award went to", "Award date:", "contract N39430-23-D-4050 ... awarded to"
     r"(was|were) awarded|award (went|was made)|award date|[A-Z0-9]{4,}-\d{2}-[A-Z]-\d{4}[^.]{0,60}awarded to|"
     r"renewal|continu", re.I)
 _INTEREST_CUE = re.compile(
     r"interest|respon|capabilit|sources.sought|\bRFI\b|request for information|quot(e|ation)|inquir|"
     r"submitt|proposal|offer", re.I)
+# An increase and the ceilings around it need a quote that says which figure
+# is which (2026-11-10, random pilot: "The government estimate is
+# $1,801,453.52" and "Amount: $62,871.00" came back as increases, and a row
+# of nine bare figures as a prior ceiling).
+_INCREASE_CUE = re.compile(r"increas|rais|additional|\badd(s|ed|ing)?\b|modif|extension|extend|bridge|option|"
+                           r"ceiling|\bby\s+(an estimated\s+)?\$", re.I)
+_CEILING_CUE = re.compile(r"ceiling|maximum|total (estimated )?(contract |task order |order )?(value|amount)|"
+                          r"\bfrom\b.{0,80}?\bto\b|awarded.{0,60}?amount|"       # dots allowed: "$49,000,000.00"
+                          r"current|existing|original|revised|new total|capacity", re.I)
 _CAGE_ROW = re.compile(r"\b(?=[0-9A-Z]*[0-9])[0-9A-Z]{5}\s*\|")
 _CHECKLIST_LINE = re.compile(r"\bAMS?C\s+[1-5A-Z]\.")
 _DATA_CUE = re.compile(r"\bdata\b|drawing|specification|proprietary|rights|technical", re.I)
@@ -256,6 +266,12 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
                 continue
             if kind == "not_to_exceed" and looks_like_tier(amount, quote):
                 drop(kind, value, quote, "an approval threshold, not a value")
+                continue
+            if kind == "increase_amount" and not _INCREASE_CUE.search(quote):
+                drop(kind, value, quote, "quote does not show the figure is an increase")
+                continue
+            if kind in ("prior_ceiling", "new_ceiling") and not _CEILING_CUE.search(quote):
+                drop(kind, value, quote, "quote does not show the figure is a ceiling or total")
                 continue
             if kind == "cost_to_compete" and not _COST_CUE.search(quote):
                 drop(kind, value, quote, "quote does not say what the cost is for")

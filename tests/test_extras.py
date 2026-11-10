@@ -340,3 +340,27 @@ def test_a_form_line_whose_box_is_empty_is_not_the_documents_statement():
         assert f["data_rights_basis"] is None and dropped[0]["reason"] == "the form's box beside this line is not ticked"
     # ordinary prose with no box anywhere near is untouched
     assert extras.beside_an_empty_box("increase the contract ceiling by an estimated $5,000,000", doc()) is False
+
+
+def test_an_increase_and_a_ceiling_need_a_quote_that_says_which_figure_is_which():
+    d = Document("n7", {}, [Page("r", "a.pdf", 1, "native",
+        "The government estimate is $1,801,453.52 for the period. Amount: $62,871.00. "
+        "$534,421,295 $4,344,243 $4,570,539 $556,633,814 $562,158,447 $5,524,633. "
+        "FormAlloy is the only source qualified to extend their marketing efforts to capture customers. "
+        "This action will extend the contract with Acme Corp for six months.")])
+    raw = {"facts": [fact("increase_amount", "1801453.52", "The government estimate is $1,801,453.52 for the period"),
+                     fact("prior_ceiling", "562158447", "$534,421,295 $4,344,243 $4,570,539 $556,633,814 $562,158,447 $5,524,633"),
+                     fact("incumbent_vendor", "FormAlloy", "FormAlloy is the only source qualified to extend their marketing efforts")]}
+    f, dropped = extras.verify(raw, d)
+    assert f["increase_amount"] is None and f["prior_ceiling"] is None and f["incumbent_vendor"] is None
+    assert [x["reason"] for x in dropped] == ["quote does not show the figure is an increase",
+                                              "quote does not show the figure is a ceiling or total",
+                                              "quote does not show the firm is the incumbent"]
+    f, _ = extras.verify({"facts": [fact("incumbent_vendor", "Acme Corp", "This action will extend the contract with Acme Corp for six months")]}, d)
+    assert f["incumbent_vendor"] == "Acme Corp"
+    # "from X to Y" with cents in the figures is still a ceiling change
+    d2 = Document("n8", {}, [Page("r", "a.pdf", 1, "native", "Increase the ceiling by $1,000,000.00 from $49,000,000.00 to $50,000,000.00 for FY26.")])
+    q = "by $1,000,000.00 from $49,000,000.00 to $50,000,000.00"
+    f, dropped = extras.verify({"facts": [fact("increase_amount", "1000000", q), fact("prior_ceiling", "49000000", q),
+                                          fact("new_ceiling", "50000000", q)]}, d2)
+    assert (f["prior_ceiling"], f["new_ceiling"], f["ceiling_arithmetic_ok"]) == (49_000_000.0, 50_000_000.0, True) and not dropped
