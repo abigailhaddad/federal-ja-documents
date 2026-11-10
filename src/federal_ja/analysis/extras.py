@@ -71,7 +71,7 @@ EXTRAS_VERSION = CONFIG["extras"]["version"]
 EXTRAS_EFFORT = CONFIG["extras"].get("effort")
 # The deterministic checks have their own version, as in extract.py: they can
 # be re-applied to the stored model answers without a new call.
-EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks2"
+EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks4"
 TOOL_NAME = "record_ja_extras"
 EXTRAS_TIMEOUT_S = 600
 
@@ -123,13 +123,23 @@ _WORD_NUM = re.compile(r"[0-9][0-9,]*(?:\.[0-9]+)?")
 # "interested sources" were accreditation bodies the document merely listed).
 _INCUMBENT_CUE = re.compile(
     r"incumbent|current(ly)?\b|existing|previous(ly)?|prior\b|predecessor|has (been )?provid|have (been )?provid|"
-    r"has (been )?perform|since (19|20)\d\d|extension|extend|bridge|follow-on|modif|increase|option|"
+    r"has (been )?perform|since (19|20)\d\d|extension|extend(ed|ing|s)?\b[^.]{0,60}(contract|order|agreement|period|"
+    r"services?|performance|\bPoP\b)|bridge|follow-on|modif|increase|option|"
     # a past award of the contract: "was awarded to", "Award went to", "Award date:", "contract N39430-23-D-4050 ... awarded to"
     r"(was|were) awarded|award (went|was made)|award date|[A-Z0-9]{4,}-\d{2}-[A-Z]-\d{4}[^.]{0,60}awarded to|"
     r"renewal|continu", re.I)
 _INTEREST_CUE = re.compile(
     r"interest|respon|capabilit|sources.sought|\bRFI\b|request for information|quot(e|ation)|inquir|"
     r"submitt|proposal|offer", re.I)
+# An increase and the ceilings around it need a quote that says which figure
+# is which (2026-11-10, random pilot: "The government estimate is
+# $1,801,453.52" and "Amount: $62,871.00" came back as increases, and a row
+# of nine bare figures as a prior ceiling).
+_INCREASE_CUE = re.compile(r"increas|rais|additional|\badd(s|ed|ing)?\b|modif|extension|extend|bridge|option|"
+                           r"ceiling|\bby\s+(an estimated\s+)?\$", re.I)
+_CEILING_CUE = re.compile(r"ceiling|maximum|total (estimated )?(contract |task order |order )?(value|amount)|"
+                          r"\bfrom\b.{0,80}?\bto\b|awarded.{0,60}?amount|"       # dots allowed: "$49,000,000.00"
+                          r"current|existing|original|revised|new total|capacity", re.I)
 _CAGE_ROW = re.compile(r"\b(?=[0-9A-Z]*[0-9])[0-9A-Z]{5}\s*\|")
 _CHECKLIST_LINE = re.compile(r"\bAMS?C\s+[1-5A-Z]\.")
 _DATA_CUE = re.compile(r"\bdata\b|drawing|specification|proprietary|rights|technical", re.I)
@@ -175,6 +185,37 @@ def _quantity_in(value: str, quote: str) -> bool:
     return False
 
 
+_EMPTY_BOX_BEFORE = re.compile(r"(?:\[\s*\]|☐|\[unchecked\])\s*$")
+_WS = re.compile(r"\s+")
+
+
+def beside_an_empty_box(quote: str, doc: Document) -> bool:
+    """The quoted passage is a line of a form with an EMPTY tick box in front
+    of it, everywhere it appears: the form prints the sentence, and the
+    agency did not select it. On DLA's AVN Form S53, item 11's "Based upon
+    the technical certification on file, technical data is not available and
+    cannot be developed..." has an empty box on 278 of 1,316 forms
+    (2026-11-10), and reads as the document's own statement when quoted.
+    False when the passage is not found this way (nothing can be said)."""
+    q = _WS.sub(" ", quote or "").strip()
+    if len(q) < 12:
+        return False
+    found = empty = 0
+    for p in doc.pages:
+        t = _WS.sub(" ", p.text)
+        i = t.find(q)
+        while i >= 0:
+            found += 1
+            # the box is at the start of the form line; the quote may begin a
+            # few words in, so take the nearest box in the 80 characters before
+            lead = t[max(0, i - 80):i]
+            box = re.search(r"(\[\s*[xX✓✔√]?\s*\]|☑|☒|☐|\[checked\]|\[unchecked\])[^\[\]☑☒☐]{0,60}$", lead)
+            if box and _EMPTY_BOX_BEFORE.search(box.group(1)):
+                empty += 1
+            i = t.find(q, i + 1)
+    return found > 0 and empty == found
+
+
 def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     """(fields, dropped) from one model answer. ``fields`` has every key of
     the table row, None or an empty list where nothing was kept."""
@@ -212,6 +253,9 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
         if kind not in FIRM_LIST_KINDS and _CHECKLIST_LINE.search(quote):
             drop(kind, value, quote, "quote is a line of a printed checklist")
             continue
+        if kind not in FIRM_LIST_KINDS and beside_an_empty_box(quote, doc):
+            drop(kind, value, quote, "the form's box beside this line is not ticked")
+            continue
         if kind in AMOUNT_KINDS:
             amount = parse_amount(value)
             if amount is None:
@@ -222,6 +266,12 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
                 continue
             if kind == "not_to_exceed" and looks_like_tier(amount, quote):
                 drop(kind, value, quote, "an approval threshold, not a value")
+                continue
+            if kind == "increase_amount" and not _INCREASE_CUE.search(quote):
+                drop(kind, value, quote, "quote does not show the figure is an increase")
+                continue
+            if kind in ("prior_ceiling", "new_ceiling") and not _CEILING_CUE.search(quote):
+                drop(kind, value, quote, "quote does not show the figure is a ceiling or total")
                 continue
             if kind == "cost_to_compete" and not _COST_CUE.search(quote):
                 drop(kind, value, quote, "quote does not say what the cost is for")
@@ -498,10 +548,19 @@ def flat_row(rec: dict, meta: dict) -> dict:
     row["incumbent_vendor"] = f.get("incumbent_vendor")
     row["incumbent_vendor_quote"] = f.get("incumbent_vendor_quote")
     match = f.get("sources_match_form") or {}
+    on_form = bool((rec.get("rules") or {}).get("form"))
     for col in FIRM_LIST_FIELD.values():
         row[col] = _firms(f.get(col) or [])
         row[col + "_count"] = len(f.get(col) or [])
         row[col + "_match_form"] = match.get(col)
+    # The lists to show. On a DLA form, a list only when the form's own table
+    # was read and names the same CAGE codes. Off the form, interested firms
+    # are kept (each has a quote saying it responded or expressed interest),
+    # but "approved source" is not: there the phrase turned up as "FDA
+    # approved" and "only approved reseller" (random pilot, 2026-11-10).
+    row["approved_sources_confirmed"] = row["approved_sources"] if match.get("approved_sources") is True else None
+    row["interested_sources_confirmed"] = (
+        row["interested_sources"] if (match.get("interested_sources") is True or not on_form) else None)
     row["barrier_action_quote"] = f.get("barrier_action_quote")
     row["source_approval_path_quote"] = f.get("source_approval_path_quote")
     row["data_rights_basis"] = f.get("data_rights_basis")

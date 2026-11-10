@@ -80,8 +80,20 @@ def test_the_models_lists_are_compared_with_the_forms_by_cage_code():
     row = extras.flat_row(r, {})
     assert (row["form_amc"], row["form_amsc"], row["approved_sources_match_form"]) == ("1", "C", True)
     assert row["form_interested_sources"] == "3XMD9 | NEW PHOENIX AEROSPACE"
+    # shown only where the form's own table agrees
+    assert row["approved_sources_confirmed"] == row["approved_sources"] and row["interested_sources_confirmed"] is None
+    assert extras.flat_row(rec(both[:1]), {})["approved_sources_confirmed"] is None
     # no form: nothing to compare with
     plain = Document("n2", {}, [Page("r", "a.pdf", 1, "native", "A justification with no form in it at all.")])
     r = extras.extras_document(plain, call_fn=lambda p, **kw: ({"facts": []}, {}))
     assert r["fields"]["sources_match_form"] == {"approved_sources": None, "interested_sources": None}
     assert extras.flat_row(r, {})["dla_form"] is False
+    # off the form: an "approved source" is not shown; an interested firm with a quote that says so is
+    d2 = Document("n3", {}, [Page("r", "a.pdf", 1, "native",
+                                  "Novartis is the sole FDA approved source of this product. One response was received from BHPE LLC.")])
+    r = extras.extras_document(d2, call_fn=lambda p, **kw: ({"facts": [
+        {"kind": "approved_source", "value": "Novartis", "quote": "Novartis is the sole FDA approved source of this product"},
+        {"kind": "interested_source", "value": "BHPE LLC", "quote": "One response was received from BHPE LLC"}]}, {}))
+    row = extras.flat_row(r, {})
+    assert row["approved_sources"] == "Novartis" and row["approved_sources_confirmed"] is None
+    assert row["interested_sources_confirmed"] == "BHPE LLC"
