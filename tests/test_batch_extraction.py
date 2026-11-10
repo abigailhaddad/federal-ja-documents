@@ -292,3 +292,42 @@ def test_refused_notice_shows_as_skipped_in_the_table(tmp_path):
     (tmp_path / "skipped.jsonl").write_text(json.dumps({"notice_id": "r", "reason": "model_refused"}) + "\n")
     df = table.build_table(tmp_path, {})
     assert df.status.tolist() == ["skipped"] and df.skip_reason.tolist() == ["model_refused"]
+
+
+# ── reading the results of a finished batch ────────────────────────────────
+
+def test_a_dropped_connection_while_reading_results_is_retried(doc):
+    # 2026-11-10: a 160-request batch finished, the stream broke part way, and the paid answers were lost
+    b = FakeBatches(lambda cid: succeeded(cid, answer()))
+    reads = []
+    real = b.results
+
+    def flaky(bid):
+        reads.append(bid)
+        if len(reads) < 3:
+            raise httpx2.RemoteProtocolError("peer closed connection without sending complete message body")
+        return real(bid)
+    b.results = flaky
+    out = llm.batch_call({"n1": "p"}, schema=extract.SCHEMA, tool_name=extract.TOOL_NAME, client=client(b),
+                         sleep=lambda s: None)
+    assert len(reads) == 3 and len(b.created) == 1 and not isinstance(out["n1"], Exception)
+
+
+def test_results_that_never_arrive_say_how_to_fetch_them(doc):
+    b = FakeBatches(lambda cid: succeeded(cid, answer()))
+
+    def broken(bid):
+        raise httpx2.RemoteProtocolError("peer closed connection")
+    b.results = broken
+    with pytest.raises(llm.ModelError, match="run again with the batch id"):
+        llm.batch_call({"n1": "p"}, schema=extract.SCHEMA, tool_name=extract.TOOL_NAME, client=client(b),
+                       sleep=lambda s: None)
+
+
+def test_resume_fetches_an_existing_batch_and_sends_nothing(doc):
+    b = FakeBatches(lambda cid: succeeded(cid, answer()))
+    b.created.append([{"custom_id": "n1"}])            # the batch a previous run sent
+    out = llm.batch_call({"n1": "p", "n2": "p"}, schema=extract.SCHEMA, tool_name=extract.TOOL_NAME,
+                         client=client(b), sleep=lambda s: None, resume_id="msgbatch_1")
+    assert len(b.created) == 1                          # nothing new created
+    assert not isinstance(out["n1"], Exception) and isinstance(out["n2"], llm.ModelError)

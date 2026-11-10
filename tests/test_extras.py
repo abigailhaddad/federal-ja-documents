@@ -52,11 +52,17 @@ def test_ceilings_that_do_not_add_up_are_kept_and_flagged():
 
 
 def test_an_amount_the_document_does_not_print_is_dropped():
-    # 5 x the annual figure: the product is in no quote, so it can't be kept
-    f, dropped = extras.verify({"facts": [fact("stated_total", "3913252.65",
+    # 5 x the stated figure: the product is in no quote, so it can't be kept
+    f, dropped = extras.verify({"facts": [fact("not_to_exceed", "3913252.65",
                                                "Total estimated dollar value and performance period. $782,650.53")]}, doc())
-    assert f["stated_total"] is None
+    assert f["not_to_exceed"] is None
     assert dropped[0]["reason"] == "amount not in its quote"
+
+
+def test_stated_total_is_no_longer_a_kind():
+    # extras1 pilot: it picked up prior awards and figures that were really increases
+    f, dropped = extras.verify({"facts": [fact("stated_total", "782650.53", "$782,650.53 (NTE $900K) 12/29/2025")]}, doc())
+    assert "stated_total" not in f and dropped[0]["reason"] == "unknown fact kind"
 
 
 def test_quote_must_be_in_the_document():
@@ -76,7 +82,7 @@ def test_unit_price_and_quantity_are_kept_as_stated_and_never_multiplied():
     q = "The estimated value is $19,166.00 each, quantity 2."
     f, dropped = extras.verify({"facts": [fact("unit_price", "19166.00", q), fact("quantity", "2", q)]}, doc())
     assert (f["unit_price"], f["quantity"]) == (19_166.0, 2.0) and not dropped
-    assert f["stated_total"] is None           # 38,332 is nowhere in the record
+    assert 38_332.0 not in [v for v in f.values() if isinstance(v, float)]   # never multiplied
 
 
 def test_quantity_without_a_unit_price_is_dropped():
@@ -91,6 +97,81 @@ def test_incumbent_name_must_be_in_its_quote():
     assert f["incumbent_vendor"] == "Paragon Systems, Inc."
     f, dropped = extras.verify({"facts": [fact("incumbent_vendor", "Halvik Corp.", q)]}, doc())
     assert f["incumbent_vendor"] is None and dropped[0]["reason"] == "name not in its quote"
+
+
+def test_incumbent_needs_a_quote_that_says_incumbent():
+    d = Document("n3", {}, [Page("r", "a.pdf", 1, "native",
+                                 "(b) The name and address of the contractor: Workwear Outfitters LLC, Nashville. "
+                                 "Noblis is the only contractor who can perform the work, the market study concluded; "
+                                 "the current contractor, Noblis, holds the order.")])
+    f, dropped = extras.verify({"facts": [fact("incumbent_vendor", "Workwear Outfitters LLC",
+                                               "The name and address of the contractor: Workwear Outfitters LLC")]}, d)
+    assert f["incumbent_vendor"] is None
+    assert dropped[0]["reason"] == "quote does not show the firm is the incumbent"
+    f, _ = extras.verify({"facts": [fact("incumbent_vendor", "Noblis", "the current contractor, Noblis, holds the order")]}, d)
+    assert f["incumbent_vendor"] == "Noblis"
+    # a past award of the contract counts; "will be awarded to" does not
+    d2 = Document("n3b", {}, [Page("r", "a.pdf", 1, "native",
+                                   "The original five (5) year contract for this region, SPE8E3-15-D-0024, was awarded to "
+                                   "SupplyCore, Inc. in 2015. The bridge will be awarded to Acme Logistics LLC next month.")])
+    f, _ = extras.verify({"facts": [fact("incumbent_vendor", "SupplyCore, Inc.",
+                                         "contract for this region, SPE8E3-15-D-0024, was awarded to SupplyCore, Inc.")]}, d2)
+    assert f["incumbent_vendor"] == "SupplyCore, Inc."
+    f, dropped = extras.verify({"facts": [fact("incumbent_vendor", "Acme Logistics LLC",
+                                               "will be awarded to Acme Logistics LLC next month")]}, d2)
+    assert f["incumbent_vendor"] is None and "incumbent" in dropped[0]["reason"]
+
+
+def test_interested_firm_needs_a_quote_that_says_so_or_a_cage_table_row():
+    d = Document("n4", {}, [Page("r", "a.pdf", 1, "native",
+                                 "The American Dental Association (ADA CERP) and the American Psychology Association (APA) "
+                                 "are the only organizations that accredit. Five capability packages were received from the "
+                                 "following sources: Boeing (St. Louis, MO).")])
+    raw = {"facts": [fact("interested_source", "American Psychology Association (APA)",
+                          "the American Psychology Association (APA) are the only organizations that accredit"),
+                     fact("interested_source", "Boeing", "Five capability packages were received from the following sources: Boeing")]}
+    f, dropped = extras.verify(raw, d)
+    assert [x["name"] for x in f["interested_sources"]] == ["Boeing"]
+    assert dropped[0]["reason"] == "quote does not show the firm expressed interest"
+
+
+def test_data_rights_cost_and_delay_to_compete():
+    d = Document("n5", {}, [Page("r", "a.pdf", 1, "native",
+        "Based upon the technical certification on file, technical data is not available and cannot be developed "
+        "to permit full and open competition. [ ] AMSC P. The rights to use the data needed to purchase this part "
+        "are not owned by the Government. The estimated cost to reverse engineer the Circuit Card Assembly is $6.5M. "
+        "The Enterprise will recognize a total cost savings of $7,518,865.60. Installing a new commercial provider "
+        "would face 6 to 12 months of permitting and approval delay. Any non approved sources will be sent SAR instructions.")])
+    raw = {"facts": [
+        fact("data_rights_basis", "data_not_available", "technical data is not available and cannot be developed to permit full and open competition"),
+        fact("cost_to_compete", "6500000", "The estimated cost to reverse engineer the Circuit Card Assembly is $6.5M"),
+        fact("delay_to_compete", "6 to 12 months", "would face 6 to 12 months of permitting and approval delay"),
+        fact("source_approval_path", "stated", "Any non approved sources will be sent SAR instructions")]}
+    f, dropped = extras.verify(raw, d)
+    assert f["data_rights_basis"] == "data_not_available" and f["cost_to_compete"] == 6_500_000.0
+    assert f["delay_to_compete"] == "6 to 12 months" and f["source_approval_path"].startswith("Any non approved") and not dropped
+    bad = {"facts": [
+        # a line of the form's printed code list is not something the document says about this part
+        fact("data_rights_basis", "government_lacks_rights", "AMSC P. The rights to use the data needed to purchase this part are not owned by the Government"),
+        fact("data_rights_basis", "they just can't", "technical data is not available and cannot be developed"),
+        fact("cost_to_compete", "7518865.60", "The Enterprise will recognize a total cost savings of $7,518,865.60"),
+        fact("delay_to_compete", "24 months", "would face 6 to 12 months of permitting and approval delay")]}
+    f, dropped = extras.verify(bad, d)
+    assert f["data_rights_basis"] is None and f["cost_to_compete"] is None and f["delay_to_compete"] is None
+    assert [x["reason"] for x in dropped] == ["quote is a line of a printed checklist", "not one of the listed bases",
+                                              "quote does not say what the cost is for", "duration not in its quote"]
+
+
+def test_rule_fields_read_protest_numbers_and_nsns_without_a_model():
+    d = Document("n6", {}, [Page("r", "a.pdf", 1, "native",
+        "The protested task-order award is stayed in connection with GAO Protest B-424920 and B-424107.1. "
+        "This award has been protested to the Court of Federal Claims, Case Number 25-279C. "
+        "BLADE,TURBINE ROTOR | 2840-01-666-1765 | 482. Stator Assembly, Pump | 2915-004499118 | EAQ: 10. "
+        "Phone 703-555-0100-2222. FAR Clause 52.217-8 Option to Extend Services may be exercised.")])
+    r = extras.rule_fields(d)
+    assert r["gao_protests"] == ["B-424107.1", "B-424920"] and r["cofc_cases"] == ["25-279C"]
+    assert r["nsns"] == ["2840-01-666-1765", "2915-00-449-9118"] and r["uses_52_217_8"] is True and r["form"] is None
+    assert extras.rule_fields(doc())["gao_protests"] == [] and extras.rule_fields(doc())["cofc_cases"] == []
 
 
 def test_source_lists_keep_every_firm_with_its_cage_code():

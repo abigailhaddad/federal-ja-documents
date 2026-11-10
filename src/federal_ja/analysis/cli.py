@@ -139,6 +139,10 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--batch-max-wait-min", type=float, default=200,
                    help="with --batch: cancel the batch after this many minutes and keep what came back")
     e.add_argument("--csv-only", action="store_true", help="no model calls; rebuild extras.csv from extras.jsonl")
+    e.add_argument("--resume-batch", default=None, metavar="BATCH_ID",
+                   help="with --batch: fetch the results of a batch already sent (the id printed when it was "
+                        "created) instead of sending one. Use the same notices and options as the run that "
+                        "sent it; nothing new is billed")
     w = sub.add_parser("spreadsheet", help="build a reader-friendly .xlsx from the published dataset "
                                            "(includes the EXPERIMENTAL AI columns)")
     w.add_argument("--out", required=True, type=Path, help="output .xlsx path")
@@ -623,7 +627,8 @@ def cmd_extras(a) -> int:
     if a.batch:
         try:
             results = extras.extras_documents_batch(picked, model=a.model, effort=a.effort,
-                                                    max_wait_s=a.batch_max_wait_min * 60)
+                                                    max_wait_s=a.batch_max_wait_min * 60,
+                                                    resume_id=a.resume_batch)
         except llm.ModelError as exc:
             print(f"batch not sent: {exc}", file=sys.stderr)
             return 2
