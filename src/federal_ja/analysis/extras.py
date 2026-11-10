@@ -71,7 +71,7 @@ EXTRAS_VERSION = CONFIG["extras"]["version"]
 EXTRAS_EFFORT = CONFIG["extras"].get("effort")
 # The deterministic checks have their own version, as in extract.py: they can
 # be re-applied to the stored model answers without a new call.
-EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks4"
+EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks5"
 TOOL_NAME = "record_ja_extras"
 EXTRAS_TIMEOUT_S = 600
 
@@ -128,14 +128,63 @@ _INCUMBENT_CUE = re.compile(
     # a past award of the contract: "was awarded to", "Award went to", "Award date:", "contract N39430-23-D-4050 ... awarded to"
     r"(was|were) awarded|award (went|was made)|award date|[A-Z0-9]{4,}-\d{2}-[A-Z]-\d{4}[^.]{0,60}awarded to|"
     r"renewal|continu", re.I)
+# Further ways a quote shows a past or current contract with the firm
+# (xchecks5). On all 12,295 stored answers the cue above dropped 793
+# incumbents; in a sample of 70 most were real ("was won by", "has
+# successfully performed IDM services since", "has been a past provider",
+# "awarded contract W911QX24D0004 to"). Accepted only when the quote has
+# none of _NOT_YET (a proposed or future award), which is what the cue was
+# guarding against: in the extras1 pilot 2 of 12 "incumbents" were only the
+# proposed contractor.
+_INCUMBENT_PAST = re.compile(
+    r"\bawarded\b|\bwon by\b|\bwas (originally|previously|competitively|issued)|\boriginally\b|"
+    r"\b(has|have|had) (had|been|successfully|historically|paid|contracted|maintained|supported|serviced)\b|"
+    r"\bhistorically\b|\bin the past\b|\bpast (provider|source|performance|supplier)|"
+    r"\b(was|were|been) (procured|purchased|ordered|overhauled|repaired|provided|performed|issued|executed)\b|"
+    r"\bprocured\b[^.]{0,80}\bfrom\b|\b(provided|performed|overhauled|maintained|supported) by\b|"
+    r"\bis the contractor\b|\balready (utiliz|using|uses)", re.I)
+_NOT_YET = re.compile(
+    r"\bwill\b|\bshall\b|\bto be (awarded|issued|placed)|\bpropos(ed|es|ing)\b|\bintends?\b|\bplans? to\b|"
+    r"\banticipated (awardee|contractor|source)|\bprospective\b|\bwould\b", re.I)
 _INTEREST_CUE = re.compile(
     r"interest|respon|capabilit|sources.sought|\bRFI\b|request for information|quot(e|ation)|inquir|"
     r"submitt|proposal|offer", re.I)
+# "are expected to express an interest" is a forecast, not a response
+# (xchecks5: three firms were kept on one notice for this phrase alone).
+_EXPECTED_INTEREST = re.compile(r"expected to (express|show|have)\b[^.]{0,20}interest", re.I)
+# An interested-firm list often has the cue only in its heading ("The
+# following firms responded: 1. ... 2. ..."), so the quote of one row has none
+# (xchecks5: 1,407 firms on 471 notices dropped). A firm is kept when the
+# nearest list-type phrase before its quote is an interest heading, not one
+# for another kind of list (firms identified in SAM, contacted, considered).
+_INTEREST_HEADING = re.compile(
+    r"(?P<other>did not (respond|reply|submit|express)|no (additional |other )?(responses?|replies|interest)|"
+    r"not interested|identified|search(ed|ing)?|registered|listed|considered|reviewed|contacted|solicited|"
+    r"invited|\bfound\b|located|holders?\b|approved sources?|expected to|requested|procurement history|"
+    r"purchas)|"
+    r"(?P<interest>express(ed|ing)?,? (in writing,? )?(an |their |its )?interest|interested (firms|vendors|sources|parties|"
+    r"companies|contractors|offerors)|responded|respondents?|responses? (were |was )?received|"
+    r"received (the following |\w+ )?(responses?|capabilit|quotes?|quotations?|submissions?|proposals?)|"
+    r"submitted (a |their |its )?(response|capabilit|quote|quotation|proposal)|"
+    r"capabilit(y|ies) (statements?|packages?|briefs?) (were |was )?(received|submitted)|replied)", re.I)
+_HEADING_WINDOW = 400
+# A prose sentence between the heading and the firm ("... responded with
+# capability statements, Mistral Group and Precision Welding. The capability
+# statements show ... the sensor from Meggitt") means the firm is not a row of
+# the list. A numbered row ("1. MCS of Tampa") or a firm name after "Inc." does
+# not match: the period has to follow a lowercase letter and start a sentence
+# whose second word is lowercase.
+_PROSE_BREAK = re.compile(r"[a-z]\.\s+[A-Z][a-z]+\s+[a-z]")
 # An increase and the ceilings around it need a quote that says which figure
 # is which (2026-11-10, random pilot: "The government estimate is
 # $1,801,453.52" and "Amount: $62,871.00" came back as increases, and a row
 # of nine bare figures as a prior ceiling).
-_INCREASE_CUE = re.compile(r"increas|rais|additional|\badd(s|ed|ing)?\b|modif|extension|extend|bridge|option|"
+# "extension", "extend", "bridge" and "option" are not cues (xchecks5): on
+# all 12,295 stored answers they let through 93 figures that were the value
+# of the extension or bridge itself, or a running total ("Extension + All
+# Options $1,176,797.98"), not a ceiling increase. That value is the action's
+# value, which the main extraction already reads.
+_INCREASE_CUE = re.compile(r"increas|rais|additional|\badd(s|ed|ing)?\b|modif|"
                            r"ceiling|\bby\s+(an estimated\s+)?\$", re.I)
 _CEILING_CUE = re.compile(r"ceiling|maximum|total (estimated )?(contract |task order |order )?(value|amount)|"
                           r"\bfrom\b.{0,80}?\bto\b|awarded.{0,60}?amount|"       # dots allowed: "$49,000,000.00"
@@ -183,6 +232,82 @@ def _quantity_in(value: str, quote: str) -> bool:
         except ValueError:
             continue
     return False
+
+
+# A unit price has to read as the price of one item (xchecks5). On all 12,295
+# stored answers, 94 of 192 kept "unit prices" had no such cue, and most were
+# rents per square foot, hourly or monthly rates, fuel per gallon, or a
+# period's line in a cost table.
+_PER_ITEM = re.compile(r"\bunit (price|cost)\b|\beach\b|\bEA\b|/\s*ea\b|\bper (unit|item|each|piece|kit|set|"
+                       r"assembly|system|license|licence|device|case|dose|vial|exam|sample|study|student|seat|"
+                       r"user|collar|cutter)\b", re.I)
+_RATE = re.compile(r"(?:\bper|/)\s*(?:rentable |usable )?(?:hour|hr|day|week|month|mo|year|yr|annum|night|"
+                   r"sq|square|RSF|SF|USG|gal|gallon|lbs?|pound|mile|member|space|room|PVPM|PMPM|sea day)\b|"
+                   r"\b(?:monthly|annual|hourly|daily)\b|\bmo\.|\bmonths?\b|\b(?:USG|gallons?|hours?|hrs?)\b", re.I)
+
+
+def unit_price_ok(amount: float, quantity, quote: str) -> bool:
+    """The quote shows ``amount`` is the price of one item: it says so
+    ("unit price", "each", "per license"), or it is a table row in which the
+    quantity times the amount is a line total printed in the same quote. A
+    rate by time, area, volume or weight is never a unit price here."""
+    if _RATE.search(quote):
+        return False
+    if _PER_ITEM.search(quote):
+        return True
+    # a count of items is a whole number; 81,693.75 in a cost table is hours
+    if quantity is None or quantity <= 1 or quantity != int(quantity):
+        return False
+    want = amount * quantity
+    return any(abs(parse_amount(m.group(0)) - want) <= max(0.01, 0.0005 * want)
+               for m in _WORD_NUM.finditer(quote) if parse_amount(m.group(0)))
+
+
+def _windows_before(quote: str, doc: Document, n: int) -> list[str]:
+    """The ``n`` characters of document text before each place the quote
+    appears (whitespace-normalized, pages joined, case ignored)."""
+    q = _WS.sub(" ", quote or "").strip().casefold()
+    t = _WS.sub(" ", " ".join(p.text for p in doc.pages))
+    tl = t.casefold()
+    out, i = [], tl.find(q) if q else -1
+    while i >= 0:
+        out.append(t[max(0, i - n):i])
+        i = tl.find(q, i + 1)
+    return out
+
+
+# Agencies often fill the FAR 6.303-2(b)(10) heading with the proposed
+# contractor itself ("Trane U.S. Inc is the only capable contractor",
+# "TransOx, Inc is the only source sought", "D Noe, LLC ... Incumbent
+# Lessor"; xchecks5 sample). Under the heading alone such a row is not kept.
+_SOLE_ROW = re.compile(r"\bonly\b|\bsole\b|\bincumbent\b|\bpropos|\bawardee\b|\bexclusive", re.I)
+
+
+def under_interest_heading(quote: str, doc: Document, name: str = "") -> bool:
+    """Every place the quote appears, the last list-type phrase before the
+    firm's name (in the _HEADING_WINDOW characters before the quote and the
+    quote up to the name) is an interest heading, with no prose sentence
+    between, and the row does not say the firm is the only or proposed one."""
+    wins = _windows_before(quote, doc, _HEADING_WINDOW)
+    if not wins:
+        return False
+    q = _WS.sub(" ", quote).strip()
+    at = q.casefold().find(_WS.sub(" ", name).strip().casefold()) if name else -1
+    lead = q[:at] if at >= 0 else q
+    if _SOLE_ROW.search(q):
+        return False
+    # "DOLWD and their teaming partner BCI were contacted": a phrase for
+    # another kind of list anywhere in the row itself
+    if any(m.group("other") for m in _INTEREST_HEADING.finditer(q)):
+        return False
+    for w in wins:
+        text = w + " " + lead
+        last = None
+        for m in _INTEREST_HEADING.finditer(text):
+            last = m
+        if last is None or last.group("interest") is None or _PROSE_BREAK.search(text[last.end():]):
+            return False
+    return True
 
 
 _EMPTY_BOX_BEFORE = re.compile(r"(?:\[\s*\]|☐|\[unchecked\])\s*$")
@@ -286,7 +411,8 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
             if not name_in(value, quote):
                 drop(kind, value, quote, "name not in its quote")
                 continue
-            if not _INCUMBENT_CUE.search(quote):
+            if not (_INCUMBENT_CUE.search(quote)
+                    or (_INCUMBENT_PAST.search(quote) and not _NOT_YET.search(quote))):
                 drop(kind, value, quote, "quote does not show the firm is the incumbent")
                 continue
             kept = value
@@ -320,7 +446,11 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
                 continue
             # an interested firm needs a quote that says so, or a row of a CAGE
             # table (which table it is, is checked against the form: sources_match_form)
-            if kind == "interested_source" and not (_INTEREST_CUE.search(quote) or _CAGE_ROW.search(quote)):
+            if kind == "interested_source" and _EXPECTED_INTEREST.search(quote):
+                drop(kind, value, quote, "quote says the firm is expected to express interest, not that it did")
+                continue
+            if kind == "interested_source" and not (_INTEREST_CUE.search(quote) or _CAGE_ROW.search(quote)
+                                                    or under_interest_heading(quote, doc, name)):
                 drop(kind, value, quote, "quote does not show the firm expressed interest")
                 continue
             col = FIRM_LIST_FIELD[kind]
@@ -333,6 +463,15 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
         fields[kind + "_quote"] = display_quote(quote)
         fields[kind + "_quote_info"] = _qinfo(m)
 
+    # a unit price needs a quote that reads as the price of one item; the
+    # quantity counts for a table row only when it is in the same quote
+    if fields["unit_price"] is not None:
+        q = fields["unit_price_quote"]
+        qty = fields["quantity"] if (fields["quantity"] is not None
+                                     and _quantity_in(str(fields["quantity"]), q)) else None
+        if not unit_price_ok(fields["unit_price"], qty, q):
+            drop("unit_price", fields["unit_price"], q, "quote does not show the figure is the price of one item")
+            fields["unit_price"] = fields["unit_price_quote"] = fields["unit_price_quote_info"] = None
     # a quantity means nothing without the unit price it counts
     if fields["quantity"] is not None and fields["unit_price"] is None:
         drop("quantity", fields["quantity"], fields["quantity_quote"], "no unit price kept")
@@ -357,12 +496,61 @@ _COFC_NEAR = re.compile(r"Court of Federal Claims|\bCOFC\b", re.I)
 _NSN = re.compile(r"(?<![\d-])(\d{4})-?(\d{2})-?(\d{3})-?(\d{4})(?![\d-])")
 _NSN_WRITTEN = re.compile(r"(?<![\d-])(?:\d{4}-\d{2}-\d{3}-\d{4}|\d{4}-\d{9})(?![\d-])")
 MAX_LISTED = 25
+# A GAO "B-" number is either a protest about this or a related procurement
+# or a decision the document cites as precedent ("See Major Contracting
+# Services, Inc., B-401472, Sep. 14, 2009, 2009 CPD ¶ 170"). In the
+# 2026-11-10 review 24 of 70 numbers were precedent cites. Each mention is
+# read in the words around it; a protest event wins over a citation style.
+_GAO_EVENT = re.compile(
+    r"\bfiled\b|\bfiling\b|submitted|received|receipt|\bstay(ed)?\b|stop[- ]work|corrective action|pending|"
+    r"pendency|sustained|denied|dismissed|withdrawn|protest (number|file|no\b)|file number|docket|outcome|"
+    r"resolve|delay|level protests?|post-?award protest|bid protest|protested|ongoing|denial|"
+    r"protests?[\s(\[:]*(?:number\s*|no\.?\s*)?B-4\d{5}", re.I)
+_GAO_CITE = re.compile(
+    r"CPD|Comp\.? ?Gen|precedent|\bSee\b|Matter of|recogni[sz]|interpreted|\bruling\b|consistent with|"
+    # a case name before the number: "Inc., B-401472" or "Major Contracting
+    # (B-401472)"; the second only with a capitalized word, so "GAO decisions
+    # (B-424689" (decisions on this procurement's own protests) is not one
+    r"GAO (Decision|case)\b|[A-Za-z.)]\s*,\s*B-4\d{5}|(?-i:[A-Z][a-z][A-Za-z.]*)\s*\(B-4\d{5}", re.I)
+
+
+_SENTENCE_END = re.compile(r"[a-z0-9)\]]\.\s+[A-Z]")
+
+
+def gao_numbers(text: str) -> dict:
+    """{"protests": [...], "cited": [...], "unclear": [...]}: each GAO number
+    once. A protest when any mention has protest-event words within 140
+    characters before or 60 after; otherwise cited when a mention reads as a
+    citation; otherwise unclear."""
+    t = _WS.sub(" ", text)
+    kind: dict[str, set] = {}
+    for m in _GAO.finditer(t):
+        # the mention's own sentence, at most 140 characters before and 60
+        # after: a protest in the sentence before must not make a citation
+        # that follows it a protest ("Inc., B-401472, Sep. 14" is not a break)
+        before, after = t[max(0, m.start() - 140):m.start()], t[m.end():m.end() + 60]
+        cuts = list(_SENTENCE_END.finditer(before))
+        if cuts:
+            before = before[cuts[-1].end() - 1:]
+        cut = re.search(r"\.\s+[A-Z]", after)
+        if cut:
+            after = after[:cut.start() + 1]
+        near = before + m.group(0) + after
+        k = "protests" if _GAO_EVENT.search(near) else "cited" if _GAO_CITE.search(near) else "unclear"
+        kind.setdefault(m.group(0), set()).add(k)
+    out = {"protests": [], "cited": [], "unclear": []}
+    for num, ks in sorted(kind.items()):
+        out["protests" if "protests" in ks else "cited" if "cited" in ks else "unclear"].append(num)
+    return out
 
 
 def rule_fields(doc: Document) -> dict:
     """What is read from the text by rule, with no model call.
 
-    gao_protests       GAO protest file numbers ("B-424920", "B-424107.1")
+    gao_protests       GAO protest file numbers ("B-424920", "B-424107.1"):
+                       a mention with protest-event words around it
+    gao_cited          GAO decisions the document cites as precedent
+    gao_unclear        GAO numbers that read as neither
     cofc_cases         Court of Federal Claims case numbers ("25-279C"), only
                        in a document that names the court
     nsns               National Stock Numbers as 4-2-3-4 digits, from text that
@@ -371,10 +559,11 @@ def rule_fields(doc: Document) -> dict:
     form               dla_form.read for the DLA form, else None
     """
     text = "\n".join(p.text for p in doc.pages)
-    gao = sorted(set(_GAO.findall(text)))
+    gao = gao_numbers(text)
     cofc = sorted({re.sub(r"\s", "", x) for x in _COFC.findall(text)}) if _COFC_NEAR.search(text) else []
     nsns = sorted({"-".join(_NSN.match(x).groups()) for x in _NSN_WRITTEN.findall(text) if _NSN.match(x)})
-    return {"gao_protests": gao[:MAX_LISTED], "cofc_cases": cofc[:MAX_LISTED], "nsns": nsns[:MAX_LISTED],
+    return {"gao_protests": gao["protests"][:MAX_LISTED], "gao_cited": gao["cited"][:MAX_LISTED],
+            "gao_unclear": gao["unclear"][:MAX_LISTED], "cofc_cases": cofc[:MAX_LISTED], "nsns": nsns[:MAX_LISTED],
             "nsn_count": len(nsns), "uses_52_217_8": bool(re.search(r"52\.217-8\b", text)),
             "form": next((f for f in (dla_form.read(p_text) for p_text in _attachment_texts(doc)) if f), None)}
 
@@ -553,14 +742,47 @@ def flat_row(rec: dict, meta: dict) -> dict:
         row[col] = _firms(f.get(col) or [])
         row[col + "_count"] = len(f.get(col) or [])
         row[col + "_match_form"] = match.get(col)
-    # The lists to show. On a DLA form, a list only when the form's own table
-    # was read and names the same CAGE codes. Off the form, interested firms
-    # are kept (each has a quote saying it responded or expressed interest),
-    # but "approved source" is not: there the phrase turned up as "FDA
-    # approved" and "only approved reseller" (random pilot, 2026-11-10).
-    row["approved_sources_confirmed"] = row["approved_sources"] if match.get("approved_sources") is True else None
-    row["interested_sources_confirmed"] = (
-        row["interested_sources"] if (match.get("interested_sources") is True or not on_form) else None)
+    # The lists to show (xchecks5). Off the form, interested firms are kept
+    # (each has a quote or a heading saying it responded or expressed
+    # interest), but "approved source" is not: there the phrase turned up as
+    # "FDA approved" and "only approved reseller" (random pilot, 2026-11-10).
+    #
+    # On a DLA form, against all 1,314 forms on 2026-11-10:
+    # - approved: the form's table (dla_form.read) is the record. The model
+    #   agreed on 1,064 of the 1,197 tables read, listed nothing on 116, and
+    #   named a CAGE code the table lacks on 2. One of those two is a real
+    #   conflict (table 70236, the form's own text "Tactair ... Cage:70326"),
+    #   so a list is not shown when the model names a CAGE the table lacks.
+    # - interested: item 12's table can say NONE while item 6 or 10 of the
+    #   same form says a firm responded ("Triman Industries (CAGE 0ZBE8)
+    #   responded with interest"). So the list is the table plus each model
+    #   firm with a CAGE the table lacks whose quote is a sentence, not a table
+    #   row; "none" only when both are empty. A table not read: not shown.
+    form_rows = (rec.get("rules") or {}).get("form") or {}
+    if on_form:
+        rows = form_rows.get("approved")
+        table = {c for c, _ in rows or []}
+        extra = {x["cage"] for x in f.get("approved_sources") or [] if x.get("cage")} - table
+        row["approved_sources_confirmed"] = (None if rows is None or extra else "none" if not rows else
+                                             "; ".join(f"{c} | {n}" for c, n in rows))
+        rows = form_rows.get("interested")
+        if rows is None:
+            row["interested_sources_confirmed"] = None
+        else:
+            # a model firm without a CAGE code ("BHPE replied to the Sources
+            # Sought") is added unless a table firm starts with the same word
+            table = {c for c, _ in rows}
+            first = {(n.split() or [""])[0].casefold() for _, n in rows}
+            added = [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []
+                     if not _CAGE_ROW.search(x.get("quote") or "")
+                     and (x["cage"] not in table if x.get("cage")
+                          else (x["name"].split() or [""])[0].casefold() not in first)]
+            both = list(rows) + added
+            row["interested_sources_confirmed"] = ("none" if not both else "; ".join(
+                (f"{c} | " if c else "") + n for c, n in both))
+    else:
+        row["approved_sources_confirmed"] = None
+        row["interested_sources_confirmed"] = row["interested_sources"]
     row["barrier_action_quote"] = f.get("barrier_action_quote")
     row["source_approval_path_quote"] = f.get("source_approval_path_quote")
     row["data_rights_basis"] = f.get("data_rights_basis")
@@ -570,6 +792,8 @@ def flat_row(rec: dict, meta: dict) -> dict:
     r = rec.get("rules") or {}
     form = r.get("form") or {}
     row["gao_protests"] = "; ".join(r.get("gao_protests") or []) or None
+    row["gao_cited"] = "; ".join(r.get("gao_cited") or []) or None
+    row["gao_unclear"] = "; ".join(r.get("gao_unclear") or []) or None
     row["cofc_cases"] = "; ".join(r.get("cofc_cases") or []) or None
     row["nsns"] = "; ".join(r.get("nsns") or []) or None
     row["nsn_count"] = r.get("nsn_count")
