@@ -473,7 +473,7 @@ def test_all_notices_list_every_candidate_with_checked_fields_only():
     big = candidate("big", ext={"estimated_value_usd": 5_000_000.0, "vendor": "Acme Corp",
                                 "value_basis": "total_including_options", "authority_cited": "FAR 6.302-1"})
     small = candidate("small", ext={"estimated_value_usd": 10_000.0, "value_basis": "annual_or_per_period"})
-    red = candidate("red", ext={"value_redacted": True})
+    red = candidate("red", ext={"value_redacted": True, "redaction_evidence": "attachment filename says redacted"})
     none = candidate("none")                      # no extraction row: nothing guessed
     star = candidate("star")
     for c, sub, title in ((big, "DEPT OF THE ARMY", "Big buy"), (small, "VETERANS AFFAIRS, DEPARTMENT OF", "Small"),
@@ -633,7 +633,18 @@ def test_value_label_says_what_the_figure_is_or_shows_nothing():
     # a figure with no true label is not shown: a unit price, one of two line items
     assert value_label({"estimated_value_usd": 19_166.0, "value_basis": "other"}) is None
     assert value_label({"estimated_value_usd": 19_166.0}) is None
-    assert value_label({"value_redacted": True}) == "value redacted" and value_label({}) is None
+    assert value_label({}) is None
+
+
+def test_redacted_is_said_only_where_something_says_so():
+    marker = "[REDACTED] marker in transcribed text; model found a redaction (quote verified); value redacted or blank"
+    named = "attachment filename says redacted; value redacted or blank"
+    blank = "model found a redaction (quote verified); value redacted or blank"
+    assert value_label({"value_redacted": True, "redaction_evidence": marker}) == "value redacted"
+    assert value_label({"value_redacted": True, "redaction_evidence": named}) == "value redacted"
+    # only a blank where the figure belongs: a black box and an empty field read the same
+    assert value_label({"value_redacted": True, "redaction_evidence": blank}) == "value blank or redacted"
+    assert value_label({"value_redacted": True}) == "value blank or redacted"
 
 
 def test_nothing_read_from_a_garbled_text_layer_is_shown():
