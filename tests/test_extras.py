@@ -324,3 +324,19 @@ def test_cli_extras_direct_mode_and_notice_file(tmp_path, monkeypatch):
                      "--workers", "1", "--max-usd", "1"]) == 0
     recs = [json.loads(ln) for ln in (out / "extras.jsonl").read_text().splitlines()]
     assert sorted(r["notice_id"] for r in recs) == sorted([ids[1], ids[3]]) and calls == ["record_ja_extras"] * 2
+
+
+def test_a_form_line_whose_box_is_empty_is_not_the_documents_statement():
+    line = "Based upon the technical certification on file, technical data is not available and cannot be developed"
+    ticked = Document("t1", {}, [Page("r", "a.pdf", 3, "transcription",
+                                      f"11. Additional facts supporting other than full and open competition are: [X] {line} to permit full and open competition. [ ] Other: ____")])
+    empty = Document("t2", {}, [Page("r", "a.pdf", 3, "transcription",
+                                     f"11. Additional facts supporting other than full and open competition are: [ ] {line} to permit full and open competition. [X] Other: see below")])
+    for q in (line, "technical data is not available and cannot be developed"):     # from the line's start, or a few words in
+        raw = {"facts": [fact("data_rights_basis", "data_not_available", q)]}
+        f, dropped = extras.verify(raw, ticked)
+        assert f["data_rights_basis"] == "data_not_available" and not dropped
+        f, dropped = extras.verify(raw, empty)
+        assert f["data_rights_basis"] is None and dropped[0]["reason"] == "the form's box beside this line is not ticked"
+    # ordinary prose with no box anywhere near is untouched
+    assert extras.beside_an_empty_box("increase the contract ceiling by an estimated $5,000,000", doc()) is False

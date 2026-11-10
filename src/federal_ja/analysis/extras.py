@@ -71,7 +71,7 @@ EXTRAS_VERSION = CONFIG["extras"]["version"]
 EXTRAS_EFFORT = CONFIG["extras"].get("effort")
 # The deterministic checks have their own version, as in extract.py: they can
 # be re-applied to the stored model answers without a new call.
-EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks2"
+EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks3"
 TOOL_NAME = "record_ja_extras"
 EXTRAS_TIMEOUT_S = 600
 
@@ -175,6 +175,37 @@ def _quantity_in(value: str, quote: str) -> bool:
     return False
 
 
+_EMPTY_BOX_BEFORE = re.compile(r"(?:\[\s*\]|☐|\[unchecked\])\s*$")
+_WS = re.compile(r"\s+")
+
+
+def beside_an_empty_box(quote: str, doc: Document) -> bool:
+    """The quoted passage is a line of a form with an EMPTY tick box in front
+    of it, everywhere it appears: the form prints the sentence, and the
+    agency did not select it. On DLA's AVN Form S53, item 11's "Based upon
+    the technical certification on file, technical data is not available and
+    cannot be developed..." has an empty box on 278 of 1,316 forms
+    (2026-11-10), and reads as the document's own statement when quoted.
+    False when the passage is not found this way (nothing can be said)."""
+    q = _WS.sub(" ", quote or "").strip()
+    if len(q) < 12:
+        return False
+    found = empty = 0
+    for p in doc.pages:
+        t = _WS.sub(" ", p.text)
+        i = t.find(q)
+        while i >= 0:
+            found += 1
+            # the box is at the start of the form line; the quote may begin a
+            # few words in, so take the nearest box in the 80 characters before
+            lead = t[max(0, i - 80):i]
+            box = re.search(r"(\[\s*[xX✓✔√]?\s*\]|☑|☒|☐|\[checked\]|\[unchecked\])[^\[\]☑☒☐]{0,60}$", lead)
+            if box and _EMPTY_BOX_BEFORE.search(box.group(1)):
+                empty += 1
+            i = t.find(q, i + 1)
+    return found > 0 and empty == found
+
+
 def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     """(fields, dropped) from one model answer. ``fields`` has every key of
     the table row, None or an empty list where nothing was kept."""
@@ -211,6 +242,9 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
             continue
         if kind not in FIRM_LIST_KINDS and _CHECKLIST_LINE.search(quote):
             drop(kind, value, quote, "quote is a line of a printed checklist")
+            continue
+        if kind not in FIRM_LIST_KINDS and beside_an_empty_box(quote, doc):
+            drop(kind, value, quote, "the form's box beside this line is not ticked")
             continue
         if kind in AMOUNT_KINDS:
             amount = parse_amount(value)
