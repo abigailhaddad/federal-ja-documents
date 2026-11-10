@@ -37,6 +37,17 @@ For the Defense Logistics Agency's "AVN Form S53" (about 1,300 notices), `dla_fo
 
 The model's two source lists and the form's two tables are independent readings. `sources_match_form` says, per list, whether they name the same CAGE codes. A list that doesn't match shouldn't be shown.
 
+The table's `approved_sources_confirmed` and `interested_sources_confirmed` are the lists to show. On a DLA form a list is there only when the form's own table was read and agrees. Off the form, interested firms are kept, since each has a quote saying it responded; "approved source" is not, because there the phrase turned up as "FDA approved" and "only approved reseller".
+
+## Checks added after the pilots
+
+Three pilots on 2026-11-10 (160 chosen notices twice, then 150 at random). The checks they led to, all applied to stored answers with `reverify`, no new calls:
+
+- A quote that sits beside an empty tick box everywhere it appears is dropped. On the DLA form, item 11's "technical data is not available..." line has an empty box on 278 of 1,316 forms.
+- An increase needs a quote that says it is one ("The government estimate is $1,801,453.52" came back as an increase).
+- A prior or new ceiling needs a quote that says ceiling, maximum, total value or "from X to Y" (a row of nine bare figures came back as a prior ceiling).
+- An incumbent's "extend" has to be about a contract, order or period ("the only source qualified to extend their marketing efforts" came back as an incumbent).
+
 ## The rules behind it
 
 These came out of comparing two extractions of the same documents and finding where a single "value" misled.

@@ -548,10 +548,19 @@ def flat_row(rec: dict, meta: dict) -> dict:
     row["incumbent_vendor"] = f.get("incumbent_vendor")
     row["incumbent_vendor_quote"] = f.get("incumbent_vendor_quote")
     match = f.get("sources_match_form") or {}
+    on_form = bool((rec.get("rules") or {}).get("form"))
     for col in FIRM_LIST_FIELD.values():
         row[col] = _firms(f.get(col) or [])
         row[col + "_count"] = len(f.get(col) or [])
         row[col + "_match_form"] = match.get(col)
+    # The lists to show. On a DLA form, a list only when the form's own table
+    # was read and names the same CAGE codes. Off the form, interested firms
+    # are kept (each has a quote saying it responded or expressed interest),
+    # but "approved source" is not: there the phrase turned up as "FDA
+    # approved" and "only approved reseller" (random pilot, 2026-11-10).
+    row["approved_sources_confirmed"] = row["approved_sources"] if match.get("approved_sources") is True else None
+    row["interested_sources_confirmed"] = (
+        row["interested_sources"] if (match.get("interested_sources") is True or not on_form) else None)
     row["barrier_action_quote"] = f.get("barrier_action_quote")
     row["source_approval_path_quote"] = f.get("source_approval_path_quote")
     row["data_rights_basis"] = f.get("data_rights_basis")
