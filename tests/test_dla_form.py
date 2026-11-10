@@ -80,9 +80,11 @@ def test_the_models_lists_are_compared_with_the_forms_by_cage_code():
     row = extras.flat_row(r, {})
     assert (row["form_amc"], row["form_amsc"], row["approved_sources_match_form"]) == ("1", "C", True)
     assert row["form_interested_sources"] == "3XMD9 | NEW PHOENIX AEROSPACE"
-    # shown only where the form's own table agrees
-    assert row["approved_sources_confirmed"] == row["approved_sources"] and row["interested_sources_confirmed"] is None
-    assert extras.flat_row(rec(both[:1]), {})["approved_sources_confirmed"] is None
+    # on the form, the lists shown are the form's own tables, whatever the model said
+    assert row["approved_sources_confirmed"] == "95270 | SKURKA AEROSPACE INC; 81982 | HYDRO-AIRE AEROSPACE CORP"
+    assert row["interested_sources_confirmed"] == "3XMD9 | NEW PHOENIX AEROSPACE"
+    assert extras.flat_row(rec(both[:1]), {})["approved_sources_confirmed"] == row["approved_sources_confirmed"]
+    assert extras.flat_row(rec([]), {})["approved_sources_confirmed"] == row["approved_sources_confirmed"]
     # no form: nothing to compare with
     plain = Document("n2", {}, [Page("r", "a.pdf", 1, "native", "A justification with no form in it at all.")])
     r = extras.extras_document(plain, call_fn=lambda p, **kw: ({"facts": []}, {}))
@@ -97,3 +99,26 @@ def test_the_models_lists_are_compared_with_the_forms_by_cage_code():
     row = extras.flat_row(r, {})
     assert row["approved_sources"] == "Novartis" and row["approved_sources_confirmed"] is None
     assert row["interested_sources_confirmed"] == "BHPE LLC"
+
+
+def test_on_the_form_a_none_table_does_not_hide_a_firm_the_form_says_responded():
+    # 2026-11-10: item 12 said NONE while item 6 said "Triman Industries (CAGE
+    # 0ZBE8) responded with interest"
+    text = form(item12=["NONE | NONE"]) + "\nOn 03/05/2026, Triman Industries (CAGE 0ZBE8) responded with interest."
+    d = Document("n9", {}, [Page("r1", "S53_Redacted.pdf", 1, "transcription", text)])
+    rec = lambda facts: extras.extras_document(d, call_fn=lambda p, **kw: ({"facts": facts}, {}))
+    row = extras.flat_row(rec([]), {})
+    assert row["interested_sources_confirmed"] == "none"
+    q = "Triman Industries (CAGE 0ZBE8) responded with interest"
+    row = extras.flat_row(rec([{"kind": "interested_source", "value": "0ZBE8 | Triman Industries", "quote": q}]), {})
+    assert row["interested_sources_confirmed"] == "0ZBE8 | Triman Industries"
+
+
+def test_on_the_form_an_approved_cage_the_table_lacks_means_the_list_is_not_shown():
+    # 2026-11-10: the table read 70236 where the form's text said "Tactair ... Cage:70326"
+    text = form() + "\nThe approved source is Tactair Fluid Controls (Cage:70326)."
+    d = Document("n10", {}, [Page("r1", "S53_Redacted.pdf", 1, "transcription", text)])
+    r = extras.extras_document(d, call_fn=lambda p, **kw: ({"facts": [
+        {"kind": "approved_source", "value": "70326 | Tactair Fluid Controls",
+         "quote": "The approved source is Tactair Fluid Controls (Cage:70326)"}]}, {}))
+    assert extras.flat_row(r, {})["approved_sources_confirmed"] is None

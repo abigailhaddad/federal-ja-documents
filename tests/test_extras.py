@@ -364,3 +364,71 @@ def test_an_increase_and_a_ceiling_need_a_quote_that_says_which_figure_is_which(
     f, dropped = extras.verify({"facts": [fact("increase_amount", "1000000", q), fact("prior_ceiling", "49000000", q),
                                           fact("new_ceiling", "50000000", q)]}, d2)
     assert (f["prior_ceiling"], f["new_ceiling"], f["ceiling_arithmetic_ok"]) == (49_000_000.0, 50_000_000.0, True) and not dropped
+
+
+def test_an_extension_or_bridge_value_is_not_a_ceiling_increase():
+    # xchecks5: 93 such figures were kept as increases on 2026-11-10
+    d = Document("n11", {}, [Page("r", "a.pdf", 1, "native",
+        "The total estimated value of this six-month extension is $450,000. "
+        "This modification increases the ceiling by $450,000.")])
+    f, dropped = extras.verify({"facts": [fact("increase_amount", "450000",
+                                               "The total estimated value of this six-month extension is $450,000")]}, d)
+    assert f["increase_amount"] is None and dropped[0]["reason"] == "quote does not show the figure is an increase"
+    f, _ = extras.verify({"facts": [fact("increase_amount", "450000", "This modification increases the ceiling by $450,000")]}, d)
+    assert f["increase_amount"] == 450_000.0
+
+
+def test_a_unit_price_is_the_price_of_one_item_not_a_rate():
+    d = Document("n12", {}, [Page("r", "a.pdf", 1, "native",
+        "The estimated cost of this lease extension is $25.90 per rentable square feet per year. "
+        "LUTATHERA 16 $42,496.79 $679,948.64. PSO Basic / TAS 81,693.75 $67.13 $5,484,101.44. "
+        "Twelve (12) licenses at $151,133.50 per license.")])
+    def up(v, q, qty=None):
+        facts = [fact("unit_price", v, q)] + ([fact("quantity", qty, q)] if qty else [])
+        return extras.verify({"facts": facts}, d)[0]["unit_price"]
+    assert up("25.90", "this lease extension is $25.90 per rentable square feet per year") is None
+    assert up("42496.79", "LUTATHERA 16 $42,496.79 $679,948.64", "16") == 42_496.79      # 16 x price = line total
+    assert up("42496.79", "LUTATHERA 16 $42,496.79 $679,948.64") is None                  # no quantity: no way to tell
+    assert up("67.13", "PSO Basic / TAS 81,693.75 $67.13 $5,484,101.44", "81693.75") is None   # hours, not items
+    assert up("151133.50", "Twelve (12) licenses at $151,133.50 per license") == 151_133.5
+
+
+def test_more_ways_a_quote_shows_a_past_contract_but_not_a_proposed_one():
+    d = Document("n13", {}, [Page("r", "a.pdf", 1, "native",
+        "The baseline task order was won by TekSynap via robust competition. "
+        "Procurement history shows that International Television Corp. has been a past provider for this item. "
+        "The contract will be awarded to Acme Logistics LLC, which has been identified as the only source.")])
+    keep = lambda v, q: extras.verify({"facts": [fact("incumbent_vendor", v, q)]}, d)[0]["incumbent_vendor"]
+    assert keep("TekSynap", "The baseline task order was won by TekSynap via robust competition") == "TekSynap"
+    assert keep("International Television Corp.",
+                "International Television Corp. has been a past provider for this item") == "International Television Corp."
+    assert keep("Acme Logistics LLC",
+                "The contract will be awarded to Acme Logistics LLC, which has been identified as the only source") is None
+
+
+def test_an_interested_firm_can_be_a_row_under_an_interest_heading():
+    d = Document("n14", {}, [Page("r", "a.pdf", 1, "native",
+        "10. Interested Sources: Seven small businesses responded to the Sources Sought notice. "
+        "a. Mary Helen Parkey Middlesboro, KY b. Premier Pump LLC Buford, GA. "
+        "11. Market research: The following potential contractors were contacted: 1. Doculogix; 2. M8. "
+        "12. A listing of the sources, if any, that expressed, in writing, an interest in the acquisition: "
+        "Trane U.S. Inc is the only capable contractor. "
+        "13. The following contractors are expected to express an interest: Medline Industries, LP.")])
+    raw = {"facts": [fact("interested_source", "Premier Pump LLC", "b. Premier Pump LLC Buford, GA"),
+                     fact("interested_source", "Doculogix", "1. Doculogix; 2. M8"),
+                     fact("interested_source", "Trane U.S. Inc", "Trane U.S. Inc is the only capable contractor"),
+                     fact("interested_source", "Medline Industries, LP",
+                          "The following contractors are expected to express an interest: Medline Industries, LP")]}
+    f, dropped = extras.verify(raw, d)
+    assert [x["name"] for x in f["interested_sources"]] == ["Premier Pump LLC"]
+    assert [x["value"] for x in dropped] == ["Doculogix", "Trane U.S. Inc", "Medline Industries, LP"]
+
+
+def test_gao_numbers_are_split_into_protests_and_cited_decisions():
+    d = Document("n15", {}, [Page("r", "a.pdf", 1, "native",
+        "Performance is stayed while the agency completes corrective action in connection with GAO Protest B-424920. "
+        "See Major Contracting Services, Inc., B-401472, Sep. 14, 2009, 2009 CPD ¶ 170 at 6. "
+        "Standardization was supported under GAO ruling B-407223.2. Due to ongoing protests B-424143.2 of the award.")])
+    r = extras.rule_fields(d)
+    assert r["gao_protests"] == ["B-424143.2", "B-424920"] and r["gao_cited"] == ["B-401472", "B-407223.2"]
+    assert r["gao_unclear"] == []
