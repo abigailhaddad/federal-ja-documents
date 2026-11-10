@@ -50,9 +50,55 @@ NOTICE_COLS = ("notice_id", "sam_link", "title", "agency", "sub_tier", "office",
                "collection_reason", "award_number", "solicitation_number", "description", "first_seen_at")
 # Extraction fields shown to the model (when present). Every factual one
 # passed the extraction's own quote checks; the summary is model-written.
-EXTRACTION_FIELDS = ("is_ja", "vendor", "estimated_value_usd", "value_basis", "value_redacted", "value_quote",
+EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "estimated_value_usd", "value_basis",
+                     "value_redacted", "value_quote",
                      "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
+
+# How many firm names the vendor slot spells out before "and N more".
+MAX_VENDOR_NAMES = 3
+# A row of a CAGE | COMPANY NAME table inside a vendor quote ("95270 | SKURKA AEROSPACE INC").
+_CAGE = r"\b(?=[0-9A-Z]*[0-9])[0-9A-Z]{5} ?\|"
+_CAGE_ROW = re.compile(_CAGE + r" ?(.+?)(?= " + _CAGE + r"|$)")
+
+
+def _squash(s: str) -> str:
+    return re.sub(r"[^0-9a-z]+", "", s.casefold())
+
+
+def vendor_label(e: dict) -> str | None:
+    """What the email and the web archive show in the vendor slot.
+
+    The extraction puts the first firm a justification names in ``vendor``
+    and the rest in ``additional_vendors`` (prompts.yaml). Showing ``vendor``
+    alone made a document that lists several approved sources read as a sole
+    source to the first one: the 2026-11-10 email gave "SKURKA AEROSPACE INC"
+    for SPE4A726R0767, whose DLA form lists Skurka, Hydro-Aire and New
+    Phoenix. So every named firm is shown, with the count.
+
+    If ``additional_vendors`` is empty but the vendor quote is a CAGE table
+    with a row for a different firm, the others weren't captured; the label
+    says the firm is one of several rather than presenting it alone."""
+    first = _clean(e.get("vendor"))
+    if not first:
+        return None
+    extra = _clean(e.get("additional_vendors"))
+    if isinstance(extra, str):
+        extra = [x.strip() for x in extra.split(";")]
+    names = [first] + [x for x in (extra or []) if isinstance(x, str) and x and x != first]
+    if len(names) > 1:
+        shown = "; ".join(names[:MAX_VENDOR_NAMES])
+        more = len(names) - MAX_VENDOR_NAMES
+        return shown + (f" and {more} more" if more > 0 else "") + f" ({len(names)} firms named)"
+    # other rows of the table naming a different firm (one firm can hold several CAGE codes)
+    # Only a table with two or more CAGE rows counts, and a row counts as another
+    # firm only if the vendor's name is not in it: a single row is followed by
+    # other text (a part number, the next sentence), and in other table layouts
+    # a 5-character part or line number can look like a CAGE code.
+    rows = [_squash(n) for n in _CAGE_ROW.findall(" ".join(str(_clean(e.get("vendor_quote")) or "").split()))]
+    if len(rows) > 1 and any(r and _squash(first) not in r for r in rows):
+        return f"{first} (one of several firms listed)"
+    return first
 
 DESCRIPTION_PAGE = "SAM.gov notice description"
 

@@ -111,6 +111,11 @@ to pick fewer, or none, rather than pad.
 * **Summary line:** vendor, value and authority come from the extraction's
   quote-checked fields when there is a row; otherwise the model's, only if
   found in the text (a value only if it is an amount in a verified quote).
+  The vendor slot names every firm the extraction found (`vendor` and
+  `additional_vendors`), with the count: "A; B; C (3 firms named)", or the
+  first three "and N more". Until 2026-11-10 it showed `vendor` alone, so a
+  DLA form listing three approved sources read as a sole source to the first
+  (`candidates.vendor_label`).
 * The prompt tells the model to state only what the document says, with no
   speculation about motives or wrongdoing. Code cannot check that; the
   backtest below was read by hand for it.

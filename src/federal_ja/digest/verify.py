@@ -34,7 +34,7 @@ import re
 
 from ..analysis.extract import amounts_in, looks_like_tier, name_in, value_in_quote
 from ..analysis.text import MIN_QUOTE_WORDS, Document, Page, clean_quote, display_quote, locate_quote, normalize
-from .candidates import DESCRIPTION_PAGE, Candidate
+from .candidates import DESCRIPTION_PAGE, Candidate, vendor_label
 
 MAX_PICKS = 5
 MAX_QUOTES = 2
@@ -264,7 +264,8 @@ def verify_picks(raw: dict, cands: dict[str, Candidate]) -> tuple[list[dict], li
             dropped.append({"notice_id": nid, "what": "pick", "reason": "no 'why' sentence passed the checks"})
             continue
         vt = c.doc.verification_text()
-        vendor = ext.get("vendor") or ((p.get("vendor") or "").strip() or None)
+        # every firm the extraction names, not only the first (candidates.vendor_label)
+        vendor = vendor_label(ext) or ((p.get("vendor") or "").strip() or None)
         vendor_src = "extraction" if ext.get("vendor") else "model"
         if vendor and vendor_src == "model" and not name_in(vendor, vt):
             dropped.append({"notice_id": nid, "what": "vendor", "value": vendor, "reason": "not in the text"})
