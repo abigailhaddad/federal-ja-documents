@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "5f4262d684aa4d28b859fb39c87e07d5",
+  "verdict": "correct",
+  "reason": "Urgency: 'continuity of services under unusual and compelling circumstances'; trigger 'unanticipated Reduction in Force (RIF) ... delayed the re-competition timeline' = agency planning delay."
+ },
+ {
+  "notice_id": "b7dd6d759681457e95d91fe0889a5674",
+  "verdict": "wrong",
+  "reason": "Urgency not shown as cited: the form reprints every 8.405-6 option ((a)(1)(A), (B), (C), (b)) with checkbox state lost, and the only rationale given is sole-source: 'The ScriptPro equipment ... is proprietary, and the required services can only be performed by ScriptPro personnel.' No urgency trigger is stated."
+ },
+ {
+  "notice_id": "c056e8c9995d4886a68030da8e939628",
+  "verdict": "correct",
+  "reason": "'☒ FAR 6.103-2 – Unusual and compelling urgency'; trigger 'The 43-day government shutdown ... severely disrupted the acquisition timeline for the recompete' = delay of the follow-on procurement (agency_planning_delay; cause external but the trigger is the delayed recompete)."
+ },
+ {
+  "notice_id": "895c365998214e1daadd8e94ccd00945",
+  "verdict": "correct",
+  "reason": "'meets the requirement of urgency in nature'; trigger is equipment failure ('The current secondary pump is not working'); no named category fits a broken pump, so 'other'. (Note: the dataset puts similar failures under emergency_or_disaster in other rows.)"
+ },
+ {
+  "notice_id": "3831e198cbd9486cab8e01965fea5c79",
+  "verdict": "unclear",
+  "reason": "Urgency checked ('☒ Urgent and compelling circumstances exist'). Doc says 'continuing support to emergency operations', but the trigger it describes is an enforcement surge: 'to accommodate an influx of personnel at the Naval Station Great Lakes for United States Border Patrol' -- not a disaster or declared emergency; readers could pick emergency_or_disaster or other."
+ },
+ {
+  "notice_id": "01cfaed64bed402a80ba125daf9dd7f1",
+  "verdict": "correct",
+  "reason": "'C. UNUSUAL AND COMPELLING URGENCY Yes'; trigger is equipment breakdown and vendor withdrawal ('the second operational posi-check unit ... broke down'; prior vendor could not do 'the service due to manning constraints'); no named category fits, so 'other'."
+ },
+ {
+  "notice_id": "58fccbfdcb3d4b2ca04ffdda85f9be85",
+  "verdict": "unclear",
+  "reason": "Urgency cited ('RFO 6.103-2, a bridge action sole source award is justified for unusual and compelling urgency'), but the trigger is redacted: 'The need for this actions arose from a confluence of factors. [REDACTED]'. It is a bridge action, so agency_planning_delay may be the real trigger; cannot confirm 'other'."
+ },
+ {
+  "notice_id": "89c0a545173346bcab9e282396b7eba1",
+  "verdict": "correct",
+  "reason": "'[X] A. The agency need for services is of such urgency...'; trigger 'Repairs are urgent due to all HVAC units being [REDACTED]' with crew living aboard; equipment failure, no named category fits -> 'other'."
+ },
+ {
+  "notice_id": "e8b14f84956e41fa92b35cc782332bc9",
+  "verdict": "correct",
+  "reason": "'unusual and compelling urgency'; trigger is operational need for CONSOL coverage while STENA POLARIS is in 'a regulatory dry-docking period' and the vessel's 'current contract runs out'; no named category fits -> 'other'."
+ },
+ {
+  "notice_id": "5f7165770d4b4ed8841c3802e9aefa74",
+  "verdict": "correct",
+  "reason": "'FAR 6.302-2, \"Unusual and Compelling Urgency.\"'; trigger 'New policies required more robust market research ... added significant time to the completion of this acquisition' = agency planning delay."
+ },
+ {
+  "notice_id": "2079bc20a88a419b908c8f937e737752",
+  "verdict": "correct",
+  "reason": "'Unusual and Compelling Urgency, due to proprietary compatibility requirements and urgent operational need'; no specific event stated beyond operational need -> 'other'."
+ },
+ {
+  "notice_id": "a77194778c944624bf70ea4b2b90667e",
+  "verdict": "wrong",
+  "reason": "Urgency not cited. Authority is only-one-source: '10 United States Code § 3204(a)(1) as implemented by ... FAR 6.302-1 (a)(2)(iii)(B) \"Unacceptable Delays in Fulfilling the Agency's Requirements.\"' The quoted phrase is the 6.302-1 follow-on prong, not 6.302-2 urgency."
+ },
+ {
+  "notice_id": "a8f88c824189400abce1f0a08e3e59e9",
+  "verdict": "unclear",
+  "reason": "Urgency cited ('( x ) (2) Unusual and Compelling Urgency ... FAR 6.302-2'). Trigger is equipment failure ('catastrophic failure of multiple cooling systems'), which the doc calls 'The emergency nature of this system failure'. No disaster or declared emergency; readers could choose emergency_or_disaster or other (dataset files similar failures as 'other' elsewhere)."
+ },
+ {
+  "notice_id": "5b914a0096684205a7da31765ce351ab",
+  "verdict": "unclear",
+  "reason": "Urgency cited ('RFO 16.507-6(b)(1) The agency need ... is so urgent'). Trigger is a failed part ('replacement Digital Detector'; 'must be replaced immediately'); doc labels it 'This emergency procurement' but states no disaster or emergency event. emergency_or_disaster vs other is debatable."
+ },
+ {
+  "notice_id": "237959bf01a14e3cb6122beb7c0c46c2",
+  "verdict": "correct",
+  "reason": "'☒ A. The agency need for services is of such urgency...'; trigger 'Due to YRBM(L)-35's operational schedule an expedited procurement process is essential to maintain habitability for the crew'; no named category fits -> 'other'."
+ },
+ {
+  "notice_id": "927fd3b94ed14b01895169a4eb338212",
+  "verdict": "unclear",
+  "reason": "'__X____ Urgent and compelling circumstances exist'; trigger is a failed HVAC unit ('The Heating and Air Conditioning unit on the Entrance Station is not operating'), called 'this emergency repair'. Equipment failure, not a disaster; emergency_or_disaster vs other is debatable."
+ },
+ {
+  "notice_id": "ae21dcd231e84bf5bb1383cc005fbedf",
+  "verdict": "unclear",
+  "reason": "'☒ FAR 6.103-2 – Unusual and compelling urgency'. Two triggers stated: contracts were terminated ('Their contracts were terminated as a result of the foreign assistance review, and not performance concerns') and a funding deadline ('G2G agreements that will end September 30, 2026, with all associated funding canceling'). contractor_default_or_termination arguably fits the reinstatement of terminated contracts better than 'other'."
+ },
+ {
+  "notice_id": "77620a82e4ba4b2da48d5abbb343e6a3",
+  "verdict": "correct",
+  "reason": "'This transfer has been determined to be an urgent manner'; trigger is an inmate medical flight transfer ('When a medical need arises that cannot be provided by the institution'); no named category fits -> 'other'."
+ },
+ {
+  "notice_id": "864fcb09ee5e47c9a1bb120fecc20349",
+  "verdict": "unclear",
+  "reason": "Urgency cited ('The need is of such unusual urgency that following the procedures would result in unacceptable delays'). Trigger is incumbent non-performance: 'the CO cannot exercise the next option, which precludes re-procurement' [page break] 'or a bridge contract with the current contractor'. No default termination occurred, but contractor_default_or_termination arguably fits better than 'other'."
+ },
+ {
+  "notice_id": "dc0d815cbdb7476c9e32a2bf724b1a9a",
+  "verdict": "correct",
+  "reason": "'Single source acquisition (Urgency)'; 'due to the urgent need of these services'; no trigger stated beyond the need, so 'other'."
+ },
+ {
+  "notice_id": "f951da2391c44485a538a00a7948afbe",
+  "verdict": "correct",
+  "reason": "'☒ FAR 6.302-2 – Unusual and compelling urgency'; trigger 'the avoidance of a lapse in service until the follow-on award process is completed' and 'Post intends to launch the new solicitation' = follow-on not ready (agency_planning_delay)."
+ },
+ {
+  "notice_id": "cc8201da1b114256b24a9068b7852225",
+  "verdict": "correct",
+  "reason": "'10 U.S.C. 3204(a)(2), as implemented by FAR 6.103-2, Unusual and compelling urgency'; trigger is Artemis schedule plus 'forthcoming reduction in the COMET contract's scope' and insourcing; none of the named categories fits -> 'other'."
+ },
+ {
+  "notice_id": "1cac77f9fad14a83835e5fa99408943a",
+  "verdict": "correct",
+  "reason": "'FAR 6.302-2, Unusual and compelling urgency'; trigger 'With the follow-on procurement delayed to award the next FFS IDIQ' = agency planning delay."
+ },
+ {
+  "notice_id": "a2d3c7d63c3b4c31a1bb7424342c0cf7",
+  "verdict": "correct",
+  "reason": "'10 U.S.C. §3204(a)(2)' ... 'Unusual and Compelling Urgency'; trigger 'The follow-on procurement is delayed due to an ongoing GAO bid protest.'"
+ },
+ {
+  "notice_id": "787af977f0a041689440aef649675298",
+  "verdict": "wrong",
+  "reason": "Urgency is not the cited justification. Authority is statutory: '41 USC §3304(a)(5), 38 U.S. Code § 8127(c), as implemented by FAR 6.302-5 (Authorized or Required by Statute)'. The doc uses urgency words ('emergency bridge', 'urgent and ongoing requirement'); if those counted, contractor_default_or_termination would be the right trigger."
+ },
+ {
+  "notice_id": "a05ffbc7228440fe92cf940b0b4c490f",
+  "verdict": "wrong",
+  "reason": "Urgency cited ('This procurement is urgent and compelling'), but no emergency or disaster is stated: 'emergency requirement' is a label for 'continued rental of mobile blood gas analyzers'. No event fits a named category -> should be 'other'."
+ },
+ {
+  "notice_id": "36a59fbe432e48dc8cff13e218dedb9d",
+  "verdict": "correct",
+  "reason": "Urgency under 13.106-1(b)(1)(i) ('only one source reasonably available due to urgency'); trigger 'The procurement of these services has faced significant and unavoidable delays' (8(a)/SBA process) = agency planning delay."
+ },
+ {
+  "notice_id": "17e829daae824adfb51a8b74b189a3b8",
+  "verdict": "wrong",
+  "reason": "Urgency cited ('unusual and compelling urgency ... FAR 6.302-2'), but the trigger is short-notice of a VIP visit ('The VIP visit information was not available in sufficient time'; 'VIP visits are not announced or confirmed in sufficient time'), not a delay in the agency's acquisition planning -> 'other'."
+ },
+ {
+  "notice_id": "1feec759cbab4a069fa63dc22613d483",
+  "verdict": "correct",
+  "reason": "'☒ 8.405-6(a)(1)(i)(A) An urgent and compelling need exists'; trigger 'The President declared a national emergency, Southern Border Executive Order (EO) No. 14194' = emergency_or_disaster."
+ },
+ {
+  "notice_id": "7ace8112b6c64f47b8a8fdc900c4d0bb",
+  "verdict": "wrong",
+  "reason": "Urgency not shown as cited: the form reprints every 8.405-6 option with checkbox state lost; no rationale under (A), and the rationale given is sole-source: 'Olympus is the is the sole manufacturer of the required endoscopes'. No urgency trigger stated."
+ }
+]

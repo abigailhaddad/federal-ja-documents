@@ -1,5 +1,8 @@
 # Proof files for the second-call columns
 
+For the main-extraction fields checked on 2026-11-11 (and the seven no longer published), see
+[main_fields/](main_fields/).
+
 These are the random samples behind the counts on the dataset card ("30 of 30" and so on) for the
 columns from the second model call in `analysis/extractions.parquet`. They were made 2026-11-10 and
 2026-11-11 and are published unchanged.

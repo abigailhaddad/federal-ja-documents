@@ -10,6 +10,21 @@
 entries:
   - date: "2026-11-12"
     where: "Dataset"
+    title: "Seven fields no longer published"
+    text: >-
+      Fields from the main extraction that had only been checked on a handful of cases were each read
+      against the document on a random sample of 30. Removed from analysis/extractions.parquet:
+      need_by_date (19 of 30 right), stated_pop_limit_days (18 of 30), urgency_trigger (17 of 30),
+      bridge_or_extension (23 of 30 "yes" right), prior_extension_count (25 of 30, the rest unclear),
+      and, on their earlier validation, market_research_methods (77-84% of codes right) and
+      contract_types (11 of 18 types found). Kept after the same check: incumbent_piid (30 of 30),
+      covered_piids (28, none wrong), is_letter_contract (28 of 30) and funding_sources (27, none wrong).
+      The model's answers stay in record_json, unchecked. The email's ranking model still sees the
+      bridge, urgency and extension-count answers as hints to check against the text, as before.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/tree/main/docs/checks/main_fields"
+
+  - date: "2026-11-12"
+    where: "Dataset"
     title: "Which interested firm is the contractor itself"
     text: >-
       analysis/extractions.parquet gains interested_firms_contractor_entry: the entries of

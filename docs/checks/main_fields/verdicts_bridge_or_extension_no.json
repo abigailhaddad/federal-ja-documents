@@ -1,0 +1,52 @@
+[
+ {
+  "notice_id": "c0682149fe8c4ea1a763d209cbe38ce1",
+  "verdict": "correct",
+  "reason": "\"New Action\"; one-time spare-parts buy (41 EA) from OEM; \"will not include an option\". The document gives no sign of a bridge or extension."
+ },
+ {
+  "notice_id": "a1a8ee90b4a34319b3a0f9d45f6f5b2f",
+  "verdict": "correct",
+  "reason": "\"New Action\"; buy of 50 F-16 module assemblies from the OEM; no bridge or extension language."
+ },
+ {
+  "notice_id": "2b87b0d0e88b4fc5b1869831c9f74cf5",
+  "verdict": "correct",
+  "reason": "Long-term follow-on: \"Six-month base period with four (4) one-year option periods\" through 2030 after the prior contract \"expires 30 September 2025\". This is the follow-on itself, not a bridge."
+ },
+ {
+  "notice_id": "25669b0590d740c48eaec5e18176dd70",
+  "verdict": "correct",
+  "reason": "Brand-name furniture purchase: \"brand-name and single source justification for MillerKnoll furniture\" for \"two (2) new cubicles\"."
+ },
+ {
+  "notice_id": "324a0a6a6baf4283b282f8599db1fe37",
+  "verdict": "correct",
+  "reason": "Discrete training program: \"This J&A supports a discrete requirement that will end when the project is complete\". It is not an extension of an existing contract."
+ },
+ {
+  "notice_id": "10dcf6ab22e343ccacee228458d393a5",
+  "verdict": "correct",
+  "reason": "Long-term follow-on: \"intends to establish a 5-year FFP contract to Mark43, Inc. for continuity of services\"."
+ },
+ {
+  "notice_id": "7c00fa444e45427ab8f9780d90b49b32",
+  "verdict": "correct",
+  "reason": "Annual sole-source equipment lease: \"operating lease for the GE XRA X-ray equipment\"; \"$27,300.00 for FY 27\". No bridge or stop-gap language."
+ },
+ {
+  "notice_id": "ae10f4a796bc496e97c0a19c5f656bc8",
+  "verdict": "correct",
+  "reason": "\"New Action\"; buy of 128 indicators from the sole approved source; no bridge or extension language."
+ },
+ {
+  "notice_id": "ce39552fcc614eb6932dc185bb9f606c",
+  "verdict": "correct",
+  "reason": "Sole-source maintenance service for custom instruments (\"annual maintenance services\"). No bridge or extension language in the text."
+ },
+ {
+  "notice_id": "15ee8c4b69a841d392d2f18a2d5c1963",
+  "verdict": "correct",
+  "reason": "Scope expansion of an existing order (\"modification to an existing task order\" to add N4 tasks; \"The increase in scope to encompass logistics is a logical extension of the current services\"). It does not extend the order's period to bridge to a follow-on."
+ }
+]

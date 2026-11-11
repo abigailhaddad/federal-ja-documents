@@ -48,7 +48,8 @@ def test_trial_fields_kept(doc):
     assert not dropped
     row = extract.flat_row(extract.extract_document(doc, call_fn=fake(answer(
         facts=[F("contract_type", "firm-fixed-price", "on a firm-fixed-price basis")])), retries=0), {})
-    assert row["contract_types"] == "firm-fixed-price" and "policy_citations" not in row
+    # contract_types is still extracted but not a table column (2026-11-12)
+    assert "contract_types" not in row and "policy_citations" not in row
 
 
 def test_trial_fields_dropped(doc):

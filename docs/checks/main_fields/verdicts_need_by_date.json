@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "0d463fe6786d4b2fa7b284a5ff8bb207",
+  "verdict": "correct",
+  "reason": "\"The urgent need to have a contractual vehicle in place by 1 April 2026 to prevent a critical service gap\"; current TO expires 31 March 2026."
+ },
+ {
+  "notice_id": "dff1df1040544deaa97f7b536478cb73",
+  "verdict": "correct",
+  "reason": "\"not sufficient time to compete the new procurement before 30 September 2026 without creating an unacceptable gap in service\"; current PoP \"ending on 30 September 2026\" (matches the definition's lapse-at-expiration example)."
+ },
+ {
+  "notice_id": "19b4cbbca74c474ea3ab78294b4043a4",
+  "verdict": "wrong",
+  "reason": "Only the OF-347 form box \"15. DELIVER TO F.O.B. POINT ON OR BEFORE (Date): 09/30/2026\", which equals the subscription start (\"Period of Performance: 09/30/2026 - 09/29/2027\"). Nothing in the J&A text presents it as when the need must be met."
+ },
+ {
+  "notice_id": "8d4771d4ea0a47b7843035b66bd28841",
+  "verdict": "correct",
+  "reason": "\"if this new contract is not in place on 02 June 2025, the Government will be seriously impacted\"; current TO \"scheduled to expire on 31 May 2025\"."
+ },
+ {
+  "notice_id": "c1c0caabe88b43e88a4a4d0704aba994",
+  "verdict": "correct",
+  "reason": "\"undergoing a ... (DSRA) with a required delivery date of 18 August 2025 and requires these parts to overhaul the main propulsion diesel engine\"; stated in the J&A narrative as the required date for these parts."
+ },
+ {
+  "notice_id": "9005fa3158024ad9ab65dc1e0ff392d2",
+  "verdict": "wrong",
+  "reason": "Not a hard deadline: \"the delivery date from Jered LLC is to be 8/1/2025 or best available date\"."
+ },
+ {
+  "notice_id": "cba5d0c81ae44260a8bb1072a1d7c245",
+  "verdict": "correct",
+  "reason": "\"the deadline to award (July 31, 2025)\"; \"the directed award date of July 31, 2025\"."
+ },
+ {
+  "notice_id": "cc368eff5e96442c8939b628ecbb5580",
+  "verdict": "correct",
+  "reason": "\"could not meet the schedule need date of 26 September 2025 when the existing contract ends\"."
+ },
+ {
+  "notice_id": "f0f58fada1834f6bb289105c48f45db8",
+  "verdict": "correct",
+  "reason": "\"execute the modification prior to the current contract expiration date of 2 April 2026\" to \"prevent a gap in coverage\" / \"no break in service\"."
+ },
+ {
+  "notice_id": "f32736b3560b448894d7384d94868a46",
+  "verdict": "wrong",
+  "reason": "Only a solicitation CLIN schedule field: \"0001 Delivery Requested By Delivery Date 30 Sep 2026\"; a requested delivery date that no text presents as when the requirement must be met."
+ },
+ {
+  "notice_id": "49ac3da9f77b4efdb847930cdb59764f",
+  "verdict": "correct",
+  "reason": "\"The requirement needs to be awarded by 11/15/2025, so that the software will be available ... beginning 12/01/2025\"; this is the earliest stated deadline (the subscription expires 11/30/2025)."
+ },
+ {
+  "notice_id": "85a8e85bd2944ef78d0017eedc8d8082",
+  "verdict": "unclear",
+  "reason": "No explicit deadline. The quote is about the contractor's ability (\"able to take over immediately and absorb B&O employees to continue service January 1, 2025\"). 1 Jan 2025 is also the bridge PoP start (\"January 1, 2025 through June 30, 2025\"). The contract expired \"December 31, 2024 at 11:59 pm\" and the bridge is \"to avoid any break in service\". Under the definition's lapse-at-expiration example a reader could pick 2024-12-31 instead."
+ },
+ {
+  "notice_id": "2db3a84e293845faa3e26be61a902f75",
+  "verdict": "correct",
+  "reason": "\"The agency requires uninterrupted performance beginning 23 October 2026. Absent award ... services will lapse on that date\"; \"would not permit services to continue by 23 October 2026\"."
+ },
+ {
+  "notice_id": "cd514cabca2a4628a144f1365126aacf",
+  "verdict": "correct",
+  "reason": "\"These identified deficiencies require repair prior to the vessel's scheduled departure on 06 Dec 2026\"."
+ },
+ {
+  "notice_id": "7dd70ff77a2247fe87f398ea0f42b1e4",
+  "verdict": "unclear",
+  "reason": "Only a NAVSUP form field, \"Required Delivery Date 02/27/2026\", with no narrative saying the need must be met by then. The label says \"Required\", but the form gives no mission reason; readers could differ on whether a form RDD counts."
+ },
+ {
+  "notice_id": "63fcee4b1a3e40bab815da8417a0d6b7",
+  "verdict": "correct",
+  "reason": "\"A new contract is needed by the end of the current and final option year, ending 08/15/2026\"."
+ },
+ {
+  "notice_id": "687a819324fa4b7cb1e67a15c4fff8b0",
+  "verdict": "correct",
+  "reason": "\"No other vendor would be able to provide services by September 1, 2025\"; the current bridge \"expires on August 31, 2025\" and the extension is \"needed\". The by-date framing presents 1 Sep 2025 as when services must be provided."
+ },
+ {
+  "notice_id": "bbc5469f8ebb44ee96ffc0fa25fe4b5a",
+  "verdict": "unclear",
+  "reason": "Only a NAVSUP form field, \"Required Delivery Date | 10/14/2025\", with no narrative tying it to a need. Same issue as the other form RDD item."
+ },
+ {
+  "notice_id": "298c1ca607dc46aebfce6cbd76867c48",
+  "verdict": "unclear",
+  "reason": "\"The delivery schedule for these items is requested no later than 15 August 2025 (30 days ARO)\". It says \"no later than\", but the date is \"requested\" and is derived from the award date (30 days ARO), not tied to a stated mission need."
+ },
+ {
+  "notice_id": "e6f3252f42c2479083b5e515e8741224",
+  "verdict": "wrong",
+  "reason": "Only a bare form field, \"Delivery Date: 15 March 2025\", for a permit fee. No text presents it as a deadline the requirement must be met by."
+ },
+ {
+  "notice_id": "ce25b749a0bf4d1a94a6616105e30a7b",
+  "verdict": "wrong",
+  "reason": "\"The requested delivery date is 25 April 2026.\" This is a requested delivery date, and no text says the need must be met by it."
+ },
+ {
+  "notice_id": "8fa8f1dc28d2401a973a38ebbe228b18",
+  "verdict": "correct",
+  "reason": "Table column \"Required By ... 8/14/2026\" plus \"damaging operational impact ... if the required brand specific software is not received by the specified 'Required By' dates\"."
+ },
+ {
+  "notice_id": "90b1222399704cb6945da075038d7794",
+  "verdict": "wrong",
+  "reason": "\"Required delivery date/period of performance: 02/17/2025 to 02/28/2025\" is the PoP start. The form marks urgency \"No\" and the explanation of why the date is required is \"N/A\"."
+ },
+ {
+  "notice_id": "7526c05fdbe84f2d8ee6944c5233c207",
+  "verdict": "correct",
+  "reason": "\"Delivery of the services shall be completed by 30 March 2026.\""
+ },
+ {
+  "notice_id": "d715679dc66f4381b5e8dc960f6f4321",
+  "verdict": "correct",
+  "reason": "DoD memo: \"must complete full G5 implementation by 02 June 2025\"; the action converts E3 to G5 licenses to meet it. (\"initiate ... by 03 June 2024\" is a past milestone.)"
+ },
+ {
+  "notice_id": "d04a67bdbbd64785bdfdc8787405680c",
+  "verdict": "wrong",
+  "reason": "Only solicitation CLIN fields: \"Delivery Requested By Delivery Date 30 Sep 2026\"; a requested delivery date that no text presents as a need-by deadline."
+ },
+ {
+  "notice_id": "95fe652970b34af1bf026d46cc252c25",
+  "verdict": "correct",
+  "reason": "\"The need-by date is September 22, 2025.\""
+ },
+ {
+  "notice_id": "e08a74c4111c43aea36b247cbc8eb4e8",
+  "verdict": "correct",
+  "reason": "\"to meet the timeframe of services to begin no later than May 15, 2025 at all three locations\"."
+ },
+ {
+  "notice_id": "f18c9c38d7ff41f3b62c40203ad98af3",
+  "verdict": "correct",
+  "reason": "\"delay DTRA the ability to deliver the MARMS system as a joint required capability by September 30th, 2026, on all three networks\"."
+ },
+ {
+  "notice_id": "76079b139eac4ed2948d9a3893ec1bf0",
+  "verdict": "correct",
+  "reason": "\"the EDGB repair must be completed no later than 31 March 2026. This deadline reflects the submarine's scheduled operational tasking\"."
+ }
+]

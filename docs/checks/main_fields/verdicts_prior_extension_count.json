@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "53f0ef41f20d44ca8cd72cd3fdd89216",
+  "verdict": "correct",
+  "reason": "History given as initial 10-yr O&M, then 'A bridge action was then completed and followed by an additional 10-year O&M contract'; one earlier bridge = 1 (single bridge narrated, no ordinal)."
+ },
+ {
+  "notice_id": "74d9a2a7d8674df0bd29941140ffbe97",
+  "verdict": "correct",
+  "reason": "One-year contract; 'The contract included clause 52.217-8 for an additional six months and was exercised on May 1, 2025'; one earlier extension = 1 (narrated, no ordinal)."
+ },
+ {
+  "notice_id": "98512d05aee64084be8339a7384baaa3",
+  "verdict": "unclear",
+  "reason": "No stated count; value is a tally of history bullets 'In 2023, the contract was extended by 12 month period' and 'In 2024, the contract was again extended by 12 months', followed by 'In 2025, the contract was awarded as sole source'. Whether a bullet tally counts as a statement, and whether the 2025 sole-source award counts as a bridge, is a judgment call."
+ },
+ {
+  "notice_id": "8088b4b47d9944d4a81a94cb0547b014",
+  "verdict": "correct",
+  "reason": "'already extended to 31 January 2026 using the optional six-month extension per FAR clause 52.217-8'; one earlier extension = 1 (narrated)."
+ },
+ {
+  "notice_id": "2872e4f30c9a4d09836e03962dc60cf9",
+  "verdict": "correct",
+  "reason": "'This is the first bridge request for this contract' -> 0 earlier."
+ },
+ {
+  "notice_id": "86912facaef647a1b91d6c0343d19dec",
+  "verdict": "correct",
+  "reason": "'To date one six-month option exercise has been implemented extending the task' -> 1."
+ },
+ {
+  "notice_id": "60b0763ff0184dfb88e5f7894c13cf90",
+  "verdict": "correct",
+  "reason": "'The proposed action will be the fifth bridge contract' -> 4."
+ },
+ {
+  "notice_id": "f531220d39b549eda5131fad448726b8",
+  "verdict": "unclear",
+  "reason": "'issue a third GNAL bridge contract' gives 2 under the ordinal rule, but the doc also says of the second bridge 'In addition, a 6-month extension of services option was exercised'; counting bridges OR extensions could give 3."
+ },
+ {
+  "notice_id": "09d467e6ce2f46ac91e6cbf60a315ced",
+  "verdict": "correct",
+  "reason": "'option to extend by six (6) months. The option was exercised on all six (6) contracts' -> one earlier extension = 1."
+ },
+ {
+  "notice_id": "b3d5439722484e8d82aeca27d64663d2",
+  "verdict": "correct",
+  "reason": "'award a second short-term bridge contract to the incumbent' -> 1."
+ },
+ {
+  "notice_id": "cb787bb5fe8f45ad8c6fd603f40d9828",
+  "verdict": "correct",
+  "reason": "'The proposed action will be the ninth bridge contract' -> 8."
+ },
+ {
+  "notice_id": "42926828bbac4ef3a3c621a517a14788",
+  "verdict": "correct",
+  "reason": "'This is the first bridge request for this contract' -> 0."
+ },
+ {
+  "notice_id": "6ce5a3a7094448919a3c7164d5216072",
+  "verdict": "correct",
+  "reason": "'extended non-competitively for a total of six (6) months via modifications No. P00035 ... and P00037' -> 2."
+ },
+ {
+  "notice_id": "33fd695e26a0484e897dd2f7c2de8213",
+  "verdict": "correct",
+  "reason": "'This is the third bridge contract action for these requirements' -> 2."
+ },
+ {
+  "notice_id": "9bc2f2e8a55c42638d40256638be849a",
+  "verdict": "correct",
+  "reason": "'SBA awarded two sole-source bridge task orders' (first to incumbent, then Chenega, current expiring Nov 8 2025) -> 2."
+ },
+ {
+  "notice_id": "dfbf14951ec0467f852d1c790120b1cb",
+  "verdict": "unclear",
+  "reason": "The contract being extended is itself a bridge: 'extension to the ordering period of the ... (DAFSLDP) Bridge contract', 'originally awarded ... in accordance with FAR 6.302-1, and was previously extended by 12 months'. Earlier bridges+extensions could be 1 (extension only) or 2 (the bridge award plus the extension)."
+ },
+ {
+  "notice_id": "6f47158de5b64c6fb49dc75dd93f4aba",
+  "verdict": "correct",
+  "reason": "'The need for a second bridge contract' -> 1."
+ },
+ {
+  "notice_id": "f3dc2563e692480c9d7177e0cd12a6f5",
+  "verdict": "correct",
+  "reason": "'The proposed action will be the tenth bridge contract' -> 9."
+ },
+ {
+  "notice_id": "8d6029bce6324d5c979e96f19a0982ba",
+  "verdict": "unclear",
+  "reason": "Only one extension named ('extended from 07/01/2025 to 12/31/2025 non-competitively via modification No. P00036'), but the order was competitively awarded and the doc says 'Two prior exceptions to fair opportunity were issued; the first ... logical follow-on', suggesting a possible second earlier non-competitive extension."
+ },
+ {
+  "notice_id": "1947f505653946aaba8006c50aa61996",
+  "verdict": "correct",
+  "reason": "'awarded for a 10 year term (7 years firm), which was extended for an additional 4 years in 2020' -> 1."
+ },
+ {
+  "notice_id": "f2cc62d4f3ce4cd8bc57bdaf1d4ba792",
+  "verdict": "correct",
+  "reason": "'currently performing under a six (6) month extension'; 'the previous Justification and Approval ... FY25-019' -> 1 (narrated)."
+ },
+ {
+  "notice_id": "0d463fe6786d4b2fa7b284a5ff8bb207",
+  "verdict": "correct",
+  "reason": "'utilized the full six months available under ... 52.217-8 ... through two separate extensions' -> 2."
+ },
+ {
+  "notice_id": "ff3dea26b58a44148fe2b6dc51923f3b",
+  "verdict": "correct",
+  "reason": "'September 24, 2021, to September 23, 2025, with a 6-month extension from September 24, 2025, to March 23, 2026' -> 1."
+ },
+ {
+  "notice_id": "5364abee0baa40db86023c70ee33ee22",
+  "verdict": "correct",
+  "reason": "'BTI is currently performing under the twelve-month (12) month extension pursuant to ... J&A FY24-00252' -> 1."
+ },
+ {
+  "notice_id": "223a05513aaf46ac8fd13c8208c43c48",
+  "verdict": "correct",
+  "reason": "'a modification for two, three-month extensions was put into place' -> 2."
+ },
+ {
+  "notice_id": "34abf61fccdd44ac82cd08db2d7cbe35",
+  "verdict": "unclear",
+  "reason": "'On 28 October 2021 a modification ... extended the period of performance to 5 April 2026 to reflect the changes' is a scope/design-change PoP extension on an A-E task order, and this J&A is a scope modification, not a bridge. Whether that counts as an earlier 'extension' under this field is debatable."
+ },
+ {
+  "notice_id": "84375b466d8b416b85e7b25982639265",
+  "verdict": "correct",
+  "reason": "'Two additional three-month extensions were executed under FAR 52.217-8' -> 2."
+ },
+ {
+  "notice_id": "9c6fd036d74d4e9c9a7760be91f58692",
+  "verdict": "correct",
+  "reason": "'set to expire following a six-month extension that was executed' -> 1."
+ },
+ {
+  "notice_id": "cc03c7dbaf344aa98ab81cd7f8fef5ac",
+  "verdict": "correct",
+  "reason": "'The proposed action will be the seventh bridge contract' -> 6."
+ },
+ {
+  "notice_id": "55a962d0e1154bf1ad6c258f9bcd0422",
+  "verdict": "correct",
+  "reason": "'currently performing under a six (6) month extension pursuant to FAR 52.217-8' -> 1 (narrated)."
+ }
+]
