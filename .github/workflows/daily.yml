@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install poppler (pdftotext reads the PDFs' text layers)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+        run: bash .github/scripts/install-poppler.sh
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --frozen
       - run: uv run pytest -q
