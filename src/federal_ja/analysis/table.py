@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import extract
+from . import extract, extras
 from .data import HF_DATASET
 
 TABLE_PATH = "analysis/extractions.parquet"
@@ -87,7 +87,27 @@ def seed_from_hf(out: Path, *, revision: str | None = None, table=None) -> dict:
     recs, skipped = seed_rows(table)
     ext_p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs))
     skip_p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in skipped))
-    return {"seeded": True, "extracted_rows": len(recs), "skipped_rows": len(skipped)}
+    # the second call's records (extras.py), stored with each row since
+    # 2026-11-11 so the daily run sends only notices that have none
+    sec = seed_extras_rows(table)
+    (out / "extras.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in sec))
+    return {"seeded": True, "extracted_rows": len(recs), "skipped_rows": len(skipped), "second_call_rows": len(sec)}
+
+
+def seed_extras_rows(table) -> list[dict]:
+    """The second-call records stored in a published table's
+    ``extras_record_json`` column (none before 2026-11-11)."""
+    if "extras_record_json" not in getattr(table, "columns", []):
+        return []
+    return [json.loads(x) for x in table["extras_record_json"].tolist() if isinstance(x, str) and x]
+
+
+def latest_extras(out: Path) -> dict[str, dict]:
+    """The latest second-call record per notice in out/extras.jsonl."""
+    latest: dict[str, dict] = {}
+    for r in _jsonl(Path(out) / "extras.jsonl"):
+        latest[r["notice_id"]] = r
+    return latest
 
 
 def notice_ids(out: Path) -> set[str]:
@@ -122,16 +142,19 @@ def build_excluded(out: Path, docs_meta: dict[str, dict], reasons: dict[str, str
     for r in _jsonl(out / "extractions.jsonl"):
         if r["notice_id"] in reasons:
             latest[r["notice_id"]] = ("extracted", r)
+    second = latest_extras(out)
     rows = []
     for nid, (status, rec) in latest.items():
         meta = docs_meta.get(nid) or {}
+        x = second.get(nid)
         rows.append({"notice_id": nid, "exclude_reason": reasons[nid], "status": status,
+                     "extras_record_json": json.dumps(extras.public_record(x), ensure_ascii=False) if x else None,
                      **{k: meta.get(k) for k in _META},
                      "sam_link": meta.get("sam_link") or f"https://sam.gov/opp/{nid}/view",
                      "is_ja": (rec.get("fields") or {}).get("is_ja"), "experimental": True,
                      "record_json": json.dumps(rec, ensure_ascii=False)})
     df = pd.DataFrame(rows, columns=["notice_id", "exclude_reason", "status", *_META, "is_ja", "experimental",
-                                     "record_json"])
+                                     "record_json", "extras_record_json"])
     return df.sort_values("notice_id").reset_index(drop=True)
 
 
@@ -147,12 +170,16 @@ def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = fr
     for r in _jsonl(out / "extractions.jsonl"):
         if r["notice_id"] not in exclude:
             latest[r["notice_id"]] = r
+    second = latest_extras(out)
     rows = []
     for nid, r in latest.items():
+        x = second.get(nid)
         rows.append({"notice_id": nid, "status": "extracted", "skip_reason": None,
                      **extract.flat_row(r, docs_meta.get(nid) or {}), "effort": r.get("effort"),
                      "run_at": r.get("run_at"), "experimental": True,
-                     "record_json": json.dumps(r, ensure_ascii=False)})
+                     "record_json": json.dumps(r, ensure_ascii=False),
+                     **extras.published_columns(x),
+                     "extras_record_json": json.dumps(extras.public_record(x), ensure_ascii=False) if x else None})
     seen = set(latest) | set(exclude)
     for s in _jsonl(out / "skipped.jsonl"):
         nid = s["notice_id"]
@@ -164,7 +191,8 @@ def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = fr
                      **{k: meta.get(k) for k in _META},
                      "sam_link": meta.get("sam_link") or f"https://sam.gov/opp/{nid}/view",
                      "dataset_revision": s.get("dataset_revision"), "experimental": True,
-                     "record_json": json.dumps(s, ensure_ascii=False)})
+                     "record_json": json.dumps(s, ensure_ascii=False),
+                     "extras_record_json": json.dumps(extras.public_record(second[nid]), ensure_ascii=False) if nid in second else None})
     df = pd.DataFrame(rows)
     if not df.empty:
         df = df.sort_values(["posted_date", "notice_id"], ascending=[False, True], na_position="last")

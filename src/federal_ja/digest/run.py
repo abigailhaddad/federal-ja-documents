@@ -77,6 +77,11 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
     g.add_argument("--posted-from", default=None, help="posted on or after YYYY-MM-DD")
     g.add_argument("--posted-to", default=None, help="posted on or before YYYY-MM-DD")
     g.add_argument("--as-of", default=None, help="the digest's date/time (ISO; default now): subject date and age cutoff")
+    x = p.add_argument_group("experiments (only with --dry-run; for comparing variations, never sent)")
+    x.add_argument("--facts-file", type=Path, default=None,
+                   help="JSON {notice_id: {label: value}} of checked facts added to each candidate's card")
+    x.add_argument("--rank-addendum", type=Path, default=None,
+                   help="text file appended to the ranking instructions")
 
 
 def _iso(s: str | None) -> datetime | None:
@@ -123,6 +128,8 @@ def run(a, *, store=None, archive=None, reader_factory=DatasetReader, revision_f
     manual = any([a.first_seen_from, a.first_seen_to, a.posted_from, a.posted_to])
     if a.send and (manual or a.as_of):
         raise SystemExit("--send cannot be combined with the backtest window options")
+    if not a.dry_run and (getattr(a, "facts_file", None) or getattr(a, "rank_addendum", None)):
+        raise SystemExit("--facts-file and --rank-addendum are for --dry-run experiments only")
     as_of = _iso(a.as_of) or now
     today_et = as_of.astimezone(render.ET).date().isoformat()
     store = store or (st.LocalState(a.state_file) if a.state_file else st.HFState())
@@ -189,6 +196,18 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
 
     docs, links = reader.documents(rows)
     ext = reader.extractions([r["notice_id"] for r in rows])
+    if getattr(a, "facts_file", None):
+        facts = json.loads(a.facts_file.read_text())
+        for r in rows:
+            f = facts.get(r["notice_id"])
+            if f:
+                ext[r["notice_id"]] = {**(ext.get(r["notice_id"]) or {}), "checked_facts": f}
+        report["facts_file"] = str(a.facts_file)
+        report["with_checked_facts"] = sum(1 for r in rows if facts.get(r["notice_id"]))
+    if getattr(a, "rank_addendum", None):
+        add = a.rank_addendum.read_text().strip()
+        model.CONFIG["rank"] = {**model.CONFIG["rank"], "prompt": model.CONFIG["rank"]["prompt"] + "\n\n" + add}
+        report["rank_addendum"] = add
     cands = build_candidates(rows, docs, links, ext)
     report["with_extraction_row"] = sum(1 for c in cands if c.extraction)
     report["with_document_text"] = sum(1 for c in cands if any(p.text.strip() and p.resource_id != "sam_description"

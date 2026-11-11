@@ -38,6 +38,13 @@ on:
         # backfill in fewer runs if the API rate limit allows (429s retry).
         description: "Parallel model calls (one-at-a-time mode only)"
         default: "4"
+      second_call_max_usd:
+        # 2026-11-11: the second call (extras.py) for notices that have a row
+        # but no second-call record. Estimates run about $0.003 a notice
+        # (actual about $0.0013), so $0.25 is about 80 notices, more than a
+        # day's new ones. 0 skips it.
+        description: "Second-call spend cap for this run (USD)"
+        default: "0.25"
       batch:
         # 2026-10-26: the Message Batches API bills every token at half price.
         # One batch per run (plus a retry batch), canceled after 200 minutes
@@ -86,6 +93,23 @@ jobs:
           rc=$?
           set -e
           if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+      - name: Second call (notices with a row but no second-call record)
+        shell: bash
+        run: |
+          # 2026-11-11. Only notices that already have a row in work/extract: the
+          # record is stored with the row (extras_record_json), so one without a
+          # row would be lost and paid for again the next day. Seeded records
+          # count as done, so this sends only new notices. One call at a time,
+          # not a batch: a day's handful costs cents and a batch can take hours.
+          # exit 1 = some calls failed (retried next run); the rest are kept.
+          CAP="${{ inputs.second_call_max_usd || '0.25' }}"
+          if [ "$CAP" = "0" ]; then echo "second call skipped (cap 0)"; exit 0; fi
+          set +e
+          uv run python -m federal_ja.analysis extras --out work/extract --only-with-extraction \
+            --max-usd "$CAP" --workers 4 2> >(tee second_call.log >&2)
+          rc=$?
+          set -e
+          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
       - name: Build table (and publish)
         shell: bash
         run: |
@@ -101,6 +125,7 @@ jobs:
           name: extraction-run
           path: |
             extract.log
+            second_call.log
             table.log
             work/extract/failures.jsonl
           if-no-files-found: ignore

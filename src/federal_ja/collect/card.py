@@ -316,6 +316,27 @@ prompt), `checks_version`, `model` and `dataset_revision`, and lists in
 `values_dropped_by_checks` anything the checks removed. Notices with no
 usable text have `status` `skipped` and a `skip_reason`.
 
+**From a second model call** (added 2026-11-11; [docs/extras.md](@@PROJECT_URL@@/blob/main/docs/extras.md)).
+A separate call reads each J&A again for facts the main extraction doesn't ask for. Only the fields
+below are published, because only these held up when 30 random notices each were read against the
+document; others it asks for (interested firms, delay and cost to compete, not-to-exceed amounts, the
+technical-data reason) did not, and are not published. Each value is as the document states it, with
+its quote; a blank means it was not found, not that the document doesn't say it.
+
+| Field | What it is |
+|---|---|
+| `contractor_named` (`_quote`, `_quote_pages`) | a current or previous contractor for this work that the document names (not always the most recent one; 29 of 30 right, 1 unclear) |
+| `new_source_approval_quote` (`_pages`) | the document's statement of how a firm not yet approved can become a source (a source approval request, an alternate offer, qualification); 30 of 30 |
+| `ceiling_prior_usd`, `ceiling_increase_usd`, `ceiling_new_usd` (each with `_quote`) | a ceiling change, only when the document states all three and they add up; the quote says whose ceiling it is (a contract, an order, or a whole program); 30 of 30 |
+| `gao_protest_numbers` | GAO protest numbers (B-4xxxxx) the document mentions in a sentence about a protest, of this or a related procurement; decisions cited as precedent are left out (all 120 numbers read) |
+| `dla_approved_sources` | on DLA's AVN Form S53, the approved sources (CAGE \| name) from the form's own table, read by rule |
+| `nsns` | National Stock Numbers written in the text, read by rule |
+| `second_call_version` | the second call's prompt and checks version |
+
+`extras_record_json` holds the second call's stored record for these fields only (the model's
+answers for them, what the checks kept, and the run's model, prompt version and cost); the facts that
+are not published are not in it either.
+
 **Known weak spots** (validation numbers in [docs/field_extraction.md](@@PROJECT_URL@@/blob/main/docs/field_extraction.md)):
 
 * `contract_types` misses about a third of the types a document states (11
@@ -366,6 +387,8 @@ usable text have `status` `skipped` and a `skip_reason`.
   (expected within a few days of 2026-10-21), rows from the older
   `2026-10-17.extract2` prompt, which have none of the newer fields, sit
   next to `extract6` rows. Filter on `extract_version` to use one version.
+  The second call runs in the same job, after the extraction, for notices
+  that have a row but no second-call record, under its own spend cap.
 * **Themes** (`analysis/theme_tags.parquet`, `analysis/theme_status.parquet`)
   are not refreshed: they are a one-off snapshot built 2026-10-18 from
   dataset revision `11a221ab5ae9583a95ae645883de75237a46d44d`, and notices collected after it have no theme

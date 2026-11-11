@@ -721,7 +721,55 @@ def _pages(info: dict | None) -> str | None:
     return ", ".join(str(p["page_number"]) for p in pages) or None
 
 
-def flat_row(rec: dict, meta: dict) -> dict:
+_CORP_WORDS = frozenset(("inc", "incorporated", "llc", "l l c", "corp", "corporation", "co", "company",
+                         "ltd", "limited", "lp", "llp", "plc", "pllc", "pc", "the", "dba"))
+
+
+def firm_key(name: str) -> list[str]:
+    """Words of a firm name for matching: lowercased, '&' as 'and', punctuation
+    dropped, corporate suffixes (Inc, LLC, Corp...) and 'the' removed."""
+    s = re.sub(r"[^a-z0-9 ]+", " ", (name or "").lower().replace("&", " and "))
+    return [w for w in s.split() if w not in _CORP_WORDS]
+
+
+def same_firm(name: str, others: list[str]) -> bool:
+    """True if ``name`` is one of ``others`` once suffixes and punctuation are
+    set aside, or one name's words begin with all of the other's ('BAE Systems'
+    and 'BAE Systems San Diego Ship Repair Inc.'). Errs toward calling a parent
+    or sibling the same firm: here that only leaves a firm off the list of
+    other interested firms, which is safer than listing the awardee as one.
+    A one-word name matches as a prefix ('Boeing' / 'Boeing Defense, Space,
+    and Security') only if the word is not a generic one ('General', 'National'),
+    so 'General' never swallows 'General Dynamics'."""
+    a = firm_key(name)
+    if not a:
+        return False
+    for o in others:
+        b = firm_key(o)
+        if not b:
+            continue
+        short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+        if short == long_:
+            return True
+        if long_[:len(short)] == short and (len(short) >= 2 or
+                                            (len(short[0]) >= 4 and short[0] not in _GENERIC_FIRST)):
+            return True
+    return False
+
+
+_GENERIC_FIRST = frozenset((
+    "general", "national", "american", "united", "international", "global", "advanced", "applied",
+    "integrated", "technical", "technology", "technologies", "systems", "federal", "government",
+    "defense", "data", "digital", "medical", "health", "science", "sciences", "solutions", "services",
+    "engineering", "research", "management", "consulting", "associates", "enterprises", "industries",
+    "group", "partners", "north", "south", "east", "west", "pacific", "atlantic", "eastern", "western",
+    "first", "premier", "strategic", "professional", "innovative", "precision", "quality", "allied",
+    "universal", "standard", "summit", "pioneer", "eagle", "liberty", "patriot", "veterans", "native",
+    "southern", "northern", "central", "capital", "metro", "city", "county", "state", "world",
+))
+
+
+def flat_row(rec: dict, meta: dict, awardee_names: list[str] | None = None) -> dict:
     """One row of extras.csv / the published table."""
     f = rec["fields"]
     row = {"notice_id": rec["notice_id"], "sam_link": meta.get("sam_link"), "title": meta.get("title"),
@@ -767,7 +815,7 @@ def flat_row(rec: dict, meta: dict) -> dict:
                                              "; ".join(f"{c} | {n}" for c, n in rows))
         rows = form_rows.get("interested")
         if rows is None:
-            row["interested_sources_confirmed"] = None
+            interested = None
         else:
             # a model firm without a CAGE code ("BHPE replied to the Sources
             # Sought") is added unless a table firm starts with the same word
@@ -777,12 +825,26 @@ def flat_row(rec: dict, meta: dict) -> dict:
                      if not _CAGE_ROW.search(x.get("quote") or "")
                      and (x["cage"] not in table if x.get("cage")
                           else (x["name"].split() or [""])[0].casefold() not in first)]
-            both = list(rows) + added
-            row["interested_sources_confirmed"] = ("none" if not both else "; ".join(
-                (f"{c} | " if c else "") + n for c, n in both))
+            interested = list(rows) + added
     else:
         row["approved_sources_confirmed"] = None
-        row["interested_sources_confirmed"] = row["interested_sources"]
+        interested = [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []] or None
+    fmt = lambda rows: "; ".join((f"{c} | " if c else "") + n for c, n in rows)   # noqa: E731
+    row["interested_sources_confirmed"] = (None if interested is None else
+                                           "none" if not interested else fmt(interested))
+    # Interested firms other than the awardee (2026-11-11): on about 902 of
+    # 1,638 notices with an award name, the awardee itself was on the list
+    # (agencies often put the proposed contractor under the "(10) sources that
+    # expressed interest" heading). Shown as "interested firms" that reads as
+    # competition that wasn't there. The awardee names come from the main
+    # extraction's vendor and from SAM and USAspending, not from this call.
+    # None when no awardee name is known: the list can't be told apart then.
+    names = [n for n in (awardee_names or []) if n]
+    if interested is None or not names:
+        row["other_interested_sources"] = None
+    else:
+        others = [(c, n) for c, n in interested if not same_firm(n, names)]
+        row["other_interested_sources"] = fmt(others) if others else "none"
     row["barrier_action_quote"] = f.get("barrier_action_quote")
     row["source_approval_path_quote"] = f.get("source_approval_path_quote")
     row["data_rights_basis"] = f.get("data_rights_basis")
@@ -815,6 +877,101 @@ def flat_row(rec: dict, meta: dict) -> dict:
                effort=rec.get("effort"), dataset_revision=rec.get("dataset_revision"),
                run_at=rec.get("run_at"), experimental=True)
     return row
+
+
+# ---------------------------------------------------------------------------
+# What is published from the second call (2026-11-11)
+# ---------------------------------------------------------------------------
+#
+# Only fields that held up when 30 random notices were read against the
+# document (proof files: ~/Documents/ja-extraction-comparison-2026-11-10/
+# group1_check, group2_check; summary in docs/extras.md):
+#   contractor named (29 of 30, 1 unclear), new-source approval path (30/30),
+#   ceiling changes with all three figures adding up (30/30), GAO protest
+#   numbers (all 120 read), DLA approved sources from the form's own table,
+#   NSNs (by rule, 55/55).
+# Not published: interested firms (26/30), delay (28/30) and cost (25/30) to
+# compete, not-to-exceed (25/30), technical-data reason (18/30), unit price,
+# quantity, GAO decisions cited, the 52.217-8 flag, barrier-removal quotes.
+# A column added here needs an entry in digest/changelog.yaml.
+
+PUBLISHED_COLUMNS = (
+    "contractor_named", "contractor_named_quote", "contractor_named_quote_pages",
+    "new_source_approval_quote", "new_source_approval_quote_pages",
+    "ceiling_prior_usd", "ceiling_increase_usd", "ceiling_new_usd",
+    "ceiling_prior_quote", "ceiling_increase_quote", "ceiling_new_quote",
+    "gao_protest_numbers", "dla_approved_sources", "nsns",
+    "second_call_version",
+)
+
+
+# What the published record keeps: only what the published columns are built
+# from, and what the daily run needs to tell that a notice is done. The other
+# facts the call asks for did not pass their checks and are not published, not
+# even inside the stored record ("we only publish what we can justify",
+# 2026-11-11). The full records of the 2026-11-10 run are kept outside the
+# dataset (~/Documents/ja-extraction-comparison-2026-11-10/extras_full_backup.jsonl).
+_PUBLIC_KINDS = ("incumbent_vendor", "source_approval_path", "increase_amount", "prior_ceiling", "new_ceiling",
+                 "approved_source")
+_PUBLIC_FIELDS = tuple(k + s for k in ("incumbent_vendor", "source_approval_path", "increase_amount",
+                                       "prior_ceiling", "new_ceiling")
+                       for s in ("", "_quote", "_quote_info")) + ("ceiling_arithmetic_ok", "approved_sources")
+_BOOKKEEPING = ("experimental", "notice_id", "model", "extras_version", "effort", "checks_version", "run_at",
+                "pages", "transcribed_pages", "chars_total", "chars_sent", "truncated", "usage", "dataset_revision")
+
+
+def public_record(rec: dict | None) -> dict | None:
+    """The stored record cut down to the published facts (see _PUBLIC_KINDS)."""
+    if not rec:
+        return None
+    f, r = rec.get("fields") or {}, rec.get("rules") or {}
+    form = r.get("form") or None
+    # the model's approved sources only matter (and are only checked) on a DLA form
+    kinds = _PUBLIC_KINDS if form else tuple(k for k in _PUBLIC_KINDS if k != "approved_source")
+    fields = {k: f.get(k) for k in _PUBLIC_FIELDS}
+    if not form:
+        fields["approved_sources"] = []
+    return {**{k: rec.get(k) for k in _BOOKKEEPING},
+            "fields": fields,
+            "rules": {"gao_protests": r.get("gao_protests") or [], "nsns": r.get("nsns") or [],
+                      "nsn_count": r.get("nsn_count"),
+                      "form": {"approved": form.get("approved")} if form else None},
+            "raw": {"facts": [x for x in (rec.get("raw") or {}).get("facts") or []
+                              if isinstance(x, dict) and x.get("kind") in kinds]},
+            "published_subset": True}
+
+
+def published_columns(rec: dict | None) -> dict:
+    """The second call's published columns for one notice (all None without a
+    record). Values are as the document states them, each with its quote."""
+    out = dict.fromkeys(PUBLISHED_COLUMNS)
+    if not rec:
+        return out
+    f, r = rec.get("fields") or {}, rec.get("rules") or {}
+    if f.get("incumbent_vendor"):
+        out.update(contractor_named=f["incumbent_vendor"], contractor_named_quote=f.get("incumbent_vendor_quote"),
+                   contractor_named_quote_pages=_pages(f.get("incumbent_vendor_quote_info")))
+    if f.get("source_approval_path_quote"):
+        out.update(new_source_approval_quote=f["source_approval_path_quote"],
+                   new_source_approval_quote_pages=_pages(f.get("source_approval_path_quote_info")))
+    # all three stated, and new = prior + increase (186 notices on 2026-11-10)
+    if f.get("ceiling_arithmetic_ok") is True:
+        out.update(ceiling_prior_usd=f["prior_ceiling"], ceiling_increase_usd=f["increase_amount"],
+                   ceiling_new_usd=f["new_ceiling"], ceiling_prior_quote=f.get("prior_ceiling_quote"),
+                   ceiling_increase_quote=f.get("increase_amount_quote"), ceiling_new_quote=f.get("new_ceiling_quote"))
+    out["gao_protest_numbers"] = "; ".join(r.get("gao_protests") or []) or None
+    out["nsns"] = "; ".join(r.get("nsns") or []) or None
+    form = r.get("form") or {}
+    if form:
+        # the form's own table; not shown when the model names a CAGE code the
+        # table lacks (one real conflict in 1,197 tables, see flat_row)
+        rows = form.get("approved")
+        table_cages = {c for c, _ in rows or []}
+        extra = {x["cage"] for x in f.get("approved_sources") or [] if x.get("cage")} - table_cages
+        if rows and not extra:
+            out["dla_approved_sources"] = "; ".join(f"{c} | {n}" for c, n in rows)
+    out["second_call_version"] = f"{rec.get('extras_version')} / checks {rec.get('checks_version')}"
+    return out
 
 
 __all__ = ["EXTRAS_VERSION", "KINDS", "SCHEMA", "TOOL_NAME", "build_prompt", "estimate_cost",

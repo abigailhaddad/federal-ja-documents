@@ -8,6 +8,20 @@
 # with a count where there is one), link (the pull request or commit).
 
 entries:
+  - date: "2026-11-11"
+    where: "Dataset"
+    title: "Six new columns from a second reading of each J&A"
+    text: >-
+      analysis/extractions.parquet gains columns from a second model call: a current or previous
+      contractor the document names, how a firm not yet approved can become a source, ceiling changes
+      (only when the prior ceiling, the increase and the new ceiling are all stated and add up), GAO
+      protest numbers (precedent citations left out), DLA approved sources from the form's own table,
+      and National Stock Numbers. Each value comes with the document's own words. These are the fields
+      that held up when 30 random notices each were read against the document. Others the call asks
+      for (interested firms, the delay and cost of competing, not-to-exceed amounts, the technical-data
+      reason) did not, and are not published.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/extras.md"
+
   - date: "2026-11-10"
     where: "Email and website"
     title: '"Value redacted" only where the document marks a redaction'

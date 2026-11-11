@@ -139,9 +139,14 @@ def _ext_line(e: dict) -> str:
         bits.append(f"value: ${v:,.0f} ({e.get('value_basis') or 'basis not stated'})")
     elif e.get("value_redacted") is True:
         bits.append("value: redacted")
-    out = "AI-extracted fields (hints; check against the text): " + "; ".join(bits)
+    facts_only = set(e) == {"checked_facts"}   # --facts-file on a notice with no extraction row
+    out = "" if facts_only else "AI-extracted fields (hints; check against the text): " + "; ".join(bits)
     if e.get("summary_model_written"):
         out += f"\nAI summary: {e['summary_model_written']}"
+    facts = e.get("checked_facts")
+    if facts:
+        out += (("\n" if out else "") + "Checked facts (each read from this document and checked against it): "
+                + "; ".join(f"{k}: {v}" for k, v in facts.items()))
     return out
 
 
