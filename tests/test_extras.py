@@ -511,3 +511,23 @@ def test_a_not_to_exceed_quoted_from_mid_sentence_is_read_with_the_start_of_its_
 ])
 def test_round_four_data_rights_phrasings(quote, want):
     assert extras.data_rights_reasons(quote) == want
+
+
+def test_stored_record_gives_the_same_published_columns():
+    # The daily rebuild reads the stored (trimmed) record, which keeps the delay and
+    # cost quotes but not the model's own values. Until 2026-11-11 the rebuild blanked
+    # every delay and cost quote because it also required those values.
+    info = {"quote_match": "exact", "quote_pages": [{"resource_id": "r1", "page_number": 3, "text_source": "native"}],
+            "quote_on_transcribed_page": False}
+    full = {"notice_id": "n1", "extras_version": "v", "checks_version": "c",
+            "fields": {"delay_to_compete": "6 to 12 months", "delay_to_compete_quote": "This adds 6 to 12 months of delay.",
+                       "delay_to_compete_quote_info": info,
+                       "cost_to_compete": 250000, "cost_to_compete_quote": "Recompeting would cost $250,000.",
+                       "cost_to_compete_quote_info": info},
+            "rules": {}, "raw": {"facts": []}}
+    stored = extras.public_record(full)
+    assert "delay_to_compete" not in stored["fields"]
+    a, b = extras.published_columns(full), extras.published_columns(stored)
+    assert b["delay_to_compete_quote"] == "This adds 6 to 12 months of delay."
+    assert b["cost_to_compete_quote"] == "Recompeting would cost $250,000."
+    assert a == b
