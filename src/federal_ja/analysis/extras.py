@@ -1150,8 +1150,10 @@ def published_columns(rec: dict | None) -> dict:
     if f.get("not_to_exceed") is not None:
         out.update(not_to_exceed_usd=f["not_to_exceed"], not_to_exceed_quote=f.get("not_to_exceed_quote"),
                    not_to_exceed_quote_pages=_pages(f.get("not_to_exceed_quote_info")))
+    # Only the quote is required: the stored record (public_record) keeps the quote but
+    # not the model's own value, and the daily rebuild reads the stored record.
     for k in ("delay_to_compete", "cost_to_compete"):
-        if f.get(k) is not None and f.get(k + "_quote"):
+        if f.get(k + "_quote"):
             out[k + "_quote"] = f[k + "_quote"]
             out[k + "_quote_pages"] = _pages(f.get(k + "_quote_info"))
     if f.get("data_rights_reasons"):
