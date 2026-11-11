@@ -103,12 +103,13 @@ def test_second_call_records_round_trip_and_only_checked_fields_are_published(tm
     assert row.contractor_named == "Acme Widget Corporation" and row.gao_protest_numbers == "B-424920"
     stored = json.loads(row.extras_record_json)
     assert stored == extras.public_record(x) and stored["model"] == "m"
-    # the stored record keeps nothing that is not published
-    for k in ("interested_sources", "not_to_exceed", "data_rights_basis", "gao_cited"):
-        assert k not in json.dumps(stored)
-    # nothing that failed its check is a column: no interested firms, NTE, data-rights reason, cited decisions
+    # the stored record keeps nothing that is not published: not the model's own data-rights
+    # category (only the reasons read from its sentence are), and not cited decisions
+    assert "proprietary_to_contractor" not in json.dumps(stored) and "gao_cited" not in json.dumps(stored)
+    assert "data_rights_basis" not in stored["fields"] and "delay_to_compete" not in stored["fields"]
+    assert stored["fields"]["not_to_exceed"] == 900000.0 and row.not_to_exceed_usd == 900000.0
     for col in df.columns:
-        assert not any(k in col for k in ("interested", "not_to_exceed", "data_rights", "gao_cited", "unit_price"))
+        assert not any(k in col for k in ("gao_cited", "unit_price", "data_rights_basis"))
     assert set(extras.PUBLISHED_COLUMNS) <= set(df.columns)
 
 
@@ -141,3 +142,36 @@ def test_second_call_records_are_kept_on_excluded_and_skipped_rows(tmp_path):
     assert json.loads(ex.iloc[0].extras_record_json)["notice_id"] == NID
     df = table.build_table(tmp_path, {}, exclude={NID})
     assert json.loads(df.iloc[0].extras_record_json)["notice_id"] == skip_id
+
+
+def test_interested_firms_named_lists_the_named_firms_and_never_says_none():
+    # the literal list: the awardee is not removed (the column's label says it can be there)
+    x = _second_call(NID, interested_sources=[{"cage": None, "name": "Acme Widget Corporation", "quote": "Acme responded"},
+                                              {"cage": None, "name": "Other Co", "quote": "Other Co responded"}])
+    assert extras.interested_firms_named(x) == "Acme Widget Corporation; Other Co"
+    off = _second_call(NID, interested_sources=[])
+    assert extras.interested_firms_named(off) is None                         # off the form: not "none"
+    form = _second_call(NID, interested_sources=[])
+    form["rules"]["form"] = {"approved": [], "interested": []}
+    assert extras.interested_firms_named(form) is None                        # never "none": lists can miss firms
+    assert extras.interested_firms_named(None) is None
+
+
+def test_an_agency_assessment_that_a_firm_appears_qualified_is_not_interest():
+    from federal_ja.analysis.text import Document, Page
+    d = Document("n1", {}, [Page("r", "a.pdf", 1, "native",
+        "Market research found the following firms appear qualified and interested to fulfill this requirement: "
+        "Firm 1: Gilchrist Global Strategies. One response was received from SolVet Services, LLC, which appears qualified.")])
+    f, dropped = extras.verify({"facts": [
+        {"kind": "interested_source", "value": "Gilchrist Global Strategies",
+         "quote": "appear qualified and interested to fulfill this requirement: Firm 1: Gilchrist Global Strategies"},
+        {"kind": "interested_source", "value": "SolVet Services, LLC",
+         "quote": "One response was received from SolVet Services, LLC, which appears qualified"}]}, d)
+    assert [x["name"] for x in f["interested_sources"]] == ["SolVet Services, LLC"]
+    assert "appears qualified" in dropped[0]["reason"]
+    # the firm saying so itself is a response (275bfad6)
+    d2 = Document("n2", {}, [Page("r", "a.pdf", 1, "native",
+        "BLUEWAY ONE JV LLC was asked and stated that they were capable and interested in performing the work.")])
+    f2, _ = extras.verify({"facts": [{"kind": "interested_source", "value": "BLUEWAY ONE JV LLC",
+        "quote": "BLUEWAY ONE JV LLC was asked and stated that they were capable and interested in performing the work"}]}, d2)
+    assert [x["name"] for x in f2["interested_sources"]] == ["BLUEWAY ONE JV LLC"]

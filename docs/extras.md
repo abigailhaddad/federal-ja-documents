@@ -109,15 +109,24 @@ We publish only what we can justify: a field goes into `analysis/extractions.par
 | DLA approved sources | form table, read by rule; agrees with the model on 1,064 of 1,197 | `dla_approved_sources` (not shown when the model names a CAGE the table lacks) |
 | NSNs | by rule; 55 / 55 | `nsns` |
 
+### Added 2026-11-11 (checks `xchecks6`)
+
+| Field | Check | Published as |
+|---|---|---|
+| interested firms named (2,177 notices) | 20 fresh random lists: none named a firm that shouldn't be there; 15 complete, 4 left out firms the document names, 1 unclear. Round 3 (20 lists) failed only on removing the awardee by name, so the awardee is no longer removed. | `interested_firms_named`: every firm the document names as having responded or expressed interest, can include the awardee, not always all of them, never "none" |
+| not-to-exceed (43 notices) | every published value read: 43 / 43 | `not_to_exceed_usd` (+ quote, pages); partial caps (also read from the start of a sentence the model quoted from the middle), estimate-range tops and the VA's $5M limit dropped |
+| delay to compete (1,574) | 30 / 30 | `delay_to_compete_quote` (+ pages): the document's sentence, not the model's number |
+| cost to compete (341) | 29 / 30, 1 unclear | `cost_to_compete_quote` (+ pages): the document's sentence |
+| technical-data reason (2,288) | of the 41 published items judged in two random samples, 39 right, 1 unclear, 1 a software subscription | `technical_data_reasons` (+ quote, pages), four labels read by rule from the quote's own words |
+
+The technical-data labels: `data_not_available`, `government_lacks_rights`, `government_does_not_own_data` (the data itself, not rights to it; "does not own the ... data rights" is lacking rights), `data_uneconomical_to_obtain`. A "proprietary to the contractor" label was dropped: after two rounds of narrowing it was right on 11 of 20 in a sample built to test it, mostly by tagging a proprietary software product, data product or brand. A quote whose only reason was that (353 notices) is not published. "Unwilling to sell" is the owner's position and no longer counts as lacking rights. Proof files: `round3_check/` and `round4_check/` in the comparison folder.
+
 Not published, and why:
 
 | Field | Check | What went wrong |
 |---|---|---|
-| other interested firms (awardee removed) | 26 / 30 | "none" while a redacted firm responded; a list cut at a page break; a VA template line ("appear qualified and interested") counted as interest. To fix: never say "none", label as "named in the document", rule out that template line, then check again. |
-| delay to compete | 28 / 30 | a bridge's period of performance taken as the delay; several values are one part of a longer stated span |
-| cost to compete | 25 / 30 | one line item instead of the stated total; a per-year or per-project rate |
-| not-to-exceed | 25 / 30 (8 of the 30 are one notice's copies) | the VA's $5 million statutory limit; the top of an estimate range; a cap on one part of the action |
-| technical-data reason | 18 / 30 | software licenses read as technical data; "does not possess" read as "does not own" |
+| proprietary-to-contractor reason | 11 / 20 | proprietary products, software and data products read as technical data |
+| interested firms with the awardee removed | 14 / 20 | the awardee's name in another form (misspelling, parent, acquired firm, distributor) |
 
 Also not published: unit price and quantity, GAO decisions cited as precedent, the 52.217-8 flag, barrier-removal quotes.
 

@@ -71,7 +71,7 @@ EXTRAS_VERSION = CONFIG["extras"]["version"]
 EXTRAS_EFFORT = CONFIG["extras"].get("effort")
 # The deterministic checks have their own version, as in extract.py: they can
 # be re-applied to the stored model answers without a new call.
-EXTRAS_CHECKS_VERSION = "2026-11-10.xchecks5"
+EXTRAS_CHECKS_VERSION = "2026-11-11.xchecks6"
 TOOL_NAME = "record_ja_extras"
 EXTRAS_TIMEOUT_S = 600
 
@@ -152,6 +152,13 @@ _INTEREST_CUE = re.compile(
 # "are expected to express an interest" is a forecast, not a response
 # (xchecks5: three firms were kept on one notice for this phrase alone).
 _EXPECTED_INTEREST = re.compile(r"expected to (express|show|have)\b[^.]{0,20}interest", re.I)
+# "appear(s) qualified and interested to fulfill this requirement: Firm 1: ..."
+# is the agency's own market-research assessment (a VA template), not a
+# response from the firm (xchecks6: group-1 check, 3daaec51; the J&A's own
+# item 10 named only the incumbent). Dropped unless the quote also says the
+# firm responded.
+_APPEARS_QUALIFIED = re.compile(r"appears? (to be )?(qualified|capable)|(qualified|capable) and interested", re.I)
+_RESPONDED = re.compile(r"respon|replied|submitt|received|expressed (an |their )?interest|provided (a |their )?(quote|capabilit)|\b(stated|said|indicated|confirmed|told)\b", re.I)
 # An interested-firm list often has the cue only in its heading ("The
 # following firms responded: 1. ... 2. ..."), so the quote of one row has none
 # (xchecks5: 1,407 firms on 471 notices dropped). A firm is kept when the
@@ -196,6 +203,72 @@ _COST_CUE = re.compile(r"reverse|re-?engineer|duplicat|qualif|test|develop|trans
                        r"new (source|vendor|contractor)|another (source|vendor|contractor)|recompet|compet", re.I)
 _APPROVAL_CUE = re.compile(r"source approval|\bSAR\b|L04|M06|alternate offer|approved source|qualif|"
                            r"submit|new sources?", re.I)
+
+
+# not-to-exceed (xchecks6; group-2 check 25/30): "will range from $274 to
+# approximate $959,799" is the top of an estimate, and the VA's "$5 million"
+# is the VAAR 819.7008 / 38 U.S.C. 8127 limit for a sole source to an SDVOSB or
+# VOSB, which VA J&As restate ("The total contract value will not exceed
+# $5,000,000"), not the contract's own maximum.
+# A cap on part of the action, or not a cap at all (round-3 check of all 46,
+# 2026-11-11): "an initial Not-To-Exceed (NTE) value of $49M" for the first
+# undefinitized action under a $124M class ceiling; "The sum of all special
+# projects ... will not exceed"; "Variance up to $2,800,000 is requested".
+_PARTIAL_CAP = re.compile(r"\binitial\b[^.]{0,30}?\b(?:not[- ]to[- ]exceed|nte)\b|\bspecial\s+projects?\b|\bvariance\b|"
+                          r"\b(?:each|per)\s+(?:clin|line\s+item|order|task\s+order|call)\b", re.I)
+_RANGE = re.compile(r"\brang(e|es|ing)\b|\bfrom\s+(US)?\$\s?[\d,.]+\s*(to|-|through)\s", re.I)
+_VA_SOLE_SOURCE_LIMIT = re.compile(r"819\.70(07|08|09)|38 U\.?\s?S\.?\s?C\.?\s?(§\s?)?8127", re.I)
+
+# technical-data reason (xchecks6; group-2 check 18/30): 4 of the 6 wrong were
+# software licences read as technical data, and "does not possess" was read as
+# "does not own". The published reasons come from the quote's own words by
+# rule, not from the model's category; a quote can give more than one.
+_SOFTWARE = re.compile(r"software|licen[cs]|subscription|source code|\bSaaS\b|operating system|firmware", re.I)
+_TECH_DATA = re.compile(r"drawing|technical data|data package|\bTDP\b|specification|engineering data|data rights|"
+                        r"manufacturing data|design data|technical information", re.I)
+_NEG = r"(?:does|do|did)\s+not\s+(?:currently\s+|physically\s+)?(?:possess|have)(?:\s+or\s+have\s+access\s+to)?"
+_DATA_WORD = r"(?:technical|drawings?|data\b|tdp|specifications?|engineering)"
+_REASON_RULES = (
+    # No "proprietary to the contractor" reason (2026-11-11): two rounds of narrowing still
+    # left it right on only 11 of 20 in the round-4 check; most wrong ones were a
+    # proprietary software product, data product or brand, not technical data. A quote
+    # whose only reason was that is now not published.
+    # the data (not rights to it) is not the Government's: "does not own the drawings"
+    ("government_does_not_own_data", re.compile(r"\b(?:does|do|did)\s+not\s+own\s+(?!(?:(?!(?:or|and)\b)[\w-]+\s+){0,5}rights\b)|\bnot\s+owned\s+by\b", re.I)),
+    # a negation near "rights", rights not owned or unobtainable, or a refusal to sell them
+    ("government_lacks_rights", re.compile(
+        r"\b(?:not|lack(?:s|ed)?|without|no|insufficient|limited|restricted)\b[^.]{0,120}?\brights\b|"
+        r"\brights\b[^.]{0,160}?\b(?:not\s+owned|not\s+available|cannot\s+be\s+(?:purchased|obtained)|unsuccessful)|"
+        # not "unwilling to sell": that is the owner's position, not the Government's rights
+        r"\b(?:need|needs|required?)\s+to\s+(?:acquire|purchase|obtain)\s+(?:full\s+|the\s+)?(?:data\s+)?rights", re.I)),
+    # the data itself is not available or not in hand
+    ("data_not_available", re.compile(
+        r"\bnot\s+(?:currently\s+|physically\s+)?available|\bunavailab|\bno\s+(?:technical\s+)?data\s+package|"
+        r"\b(?:not|n't)\s+(?:currently\s+)?(?:have\s+)?in\s+(?:its|their|the\s+government'?s?)?\s*possession|"
+        r"\bnot\s+in\s+(?:the\s+)?government\s+possession|"
+        r"\b(?:lack(?:s|ing)?|limited|insufficient)\s+(?:of\s+)?(?:the\s+|complete\s+|adequate\s+|sufficient\s+|necessary\s+)*"
+        + _DATA_WORD + r"|\bdata\b[^.]{0,30}?\bis\s+insufficient|"
+        r"\b(?:cannot\s+be|not\s+(?:currently\s+)?being|have\s+not\s+been|has\s+not\s+been)\s+developed|"
+        r"\b(?:data|tdp|technical\s+data)\b[^.]{0,20}?\bis\s+incomplete|\bincomplete\s+(?:technical\s+)?data|"
+        + _NEG + r"\b(?:(?!rights)[^.]){0,40}?\b" + _DATA_WORD + r"(?!\s+rights)|"
+        r"\b(?:technical|drawings?|data|tdp)\b[^.]{0,80}?\b(?:that|which)\s+the\s+government\s+" + _NEG, re.I)),
+    ("data_uneconomical_to_obtain", re.compile(r"uneconomical|not\s+economically|cannot\s+be\s+economically|cost[- ]prohibitive|prohibitive|prohibitively\s+expensive", re.I)),
+)
+_RIGHTS_NOT_OWNED = re.compile(r"\brights\b[^.]{0,160}?\bnot\s+owned\b", re.I)
+
+
+def data_rights_reasons(quote: str) -> list[str]:
+    """The technical-data reasons the quote states in its own words, in a fixed
+    order. "The rights to use the data ... are not owned by the Government" is
+    lacking rights, not not owning the data (2f15fa14)."""
+    q = quote or ""
+    out = [name for name, rx in _REASON_RULES if rx.search(q)]
+    if "government_does_not_own_data" in out and _RIGHTS_NOT_OWNED.search(q) \
+            and not re.search(r"\bnot\s+own\b[^.]{0,30}\b(?:the\s+)?(?:data|drawings|tdp)\b(?!\s+rights)", q, re.I):
+        out.remove("government_does_not_own_data")
+        if "government_lacks_rights" not in out:
+            out.append("government_lacks_rights")
+    return out
 
 
 def parse_amount(value) -> float | None:
@@ -345,12 +418,30 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
     """(fields, dropped) from one model answer. ``fields`` has every key of
     the table row, None or an empty list where nothing was kept."""
     nd = doc.normalized()
+    _text_cache: list = []
+
+    def doc_text() -> str:
+        if not _text_cache:
+            _text_cache.append(" ".join(p.text for p in doc.pages))
+        return _text_cache[0]
+    def sentence_before(quote: str) -> str:
+        # the start of the quote's sentence when the model began the quote mid-sentence
+        # ("The sum of all special projects ... will not exceed $6.6M" quoted from "will not")
+        text = doc_text()
+        q = " ".join(quote.split())[:60]
+        i = " ".join(text.split()).find(q) if q else -1
+        if i < 0:
+            return ""
+        before = " ".join(text.split())[max(0, i - 300):i]
+        ends = list(_SENTENCE_END.finditer(before))
+        return before[ends[-1].end() - 1:] if ends else before
     fields: dict = {k: None for k in AMOUNT_KINDS + TEXT_KINDS}
     for k in AMOUNT_KINDS + TEXT_KINDS:
         fields[k + "_quote"] = None
         fields[k + "_quote_info"] = None
     for col in FIRM_LIST_FIELD.values():
         fields[col] = []
+    fields["data_rights_reasons"] = None
     dropped: list[dict] = []
     seen: set[str] = set()
 
@@ -392,6 +483,15 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
             if kind == "not_to_exceed" and looks_like_tier(amount, quote):
                 drop(kind, value, quote, "an approval threshold, not a value")
                 continue
+            if kind == "not_to_exceed" and (_PARTIAL_CAP.search(quote) or _PARTIAL_CAP.search(sentence_before(quote))):
+                drop(kind, value, quote, "a cap on part of the action, or a requested variance, not the action's maximum")
+                continue
+            if kind == "not_to_exceed" and _RANGE.search(quote):
+                drop(kind, value, quote, "the top of an estimate range, not a stated maximum")
+                continue
+            if kind == "not_to_exceed" and amount == 5_000_000 and _VA_SOLE_SOURCE_LIMIT.search(doc_text()):
+                drop(kind, value, quote, "VA's $5 million limit for an SDVOSB/VOSB sole source, not this action's maximum")
+                continue
             if kind == "increase_amount" and not _INCREASE_CUE.search(quote):
                 drop(kind, value, quote, "quote does not show the figure is an increase")
                 continue
@@ -430,6 +530,14 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
             if not _DATA_CUE.search(quote):
                 drop(kind, value, quote, "quote is not about technical data")
                 continue
+            if _SOFTWARE.search(quote) and not _TECH_DATA.search(quote):
+                drop(kind, value, quote, "software licensing, not technical data")
+                continue
+            reasons = data_rights_reasons(quote)
+            if not reasons:
+                drop(kind, value, quote, "the quote names none of the technical-data reasons in its own words")
+                continue
+            fields["data_rights_reasons"] = "; ".join(reasons)
             kept = value
         elif kind == "delay_to_compete":
             if not durations_in(quote) or not name_in(value, quote):
@@ -448,6 +556,9 @@ def verify(raw: dict, doc: Document) -> tuple[dict, list[dict]]:
             # table (which table it is, is checked against the form: sources_match_form)
             if kind == "interested_source" and _EXPECTED_INTEREST.search(quote):
                 drop(kind, value, quote, "quote says the firm is expected to express interest, not that it did")
+                continue
+            if kind == "interested_source" and _APPEARS_QUALIFIED.search(quote) and not _RESPONDED.search(quote):
+                drop(kind, value, quote, "the agency's assessment that the firm appears qualified, not a response from it")
                 continue
             if kind == "interested_source" and not (_INTEREST_CUE.search(quote) or _CAGE_ROW.search(quote)
                                                     or under_interest_heading(quote, doc, name)):
@@ -732,28 +843,51 @@ def firm_key(name: str) -> list[str]:
     return [w for w in s.split() if w not in _CORP_WORDS]
 
 
+def _name_variants(name: str) -> list[tuple[list[str], bool]]:
+    """(words, is_acronym) for a firm name: the name without its
+    parentheticals, the full name, and each parenthetical on its own
+    ("Hindustan Aeronautics Ltd. (HAL)" -> hindustan aeronautics, ..., hal).
+    is_acronym: written in capitals with no spaces ("HAL", "MTU", "Cal-Waste" no)."""
+    raw = str(name or "")
+    inner = re.findall(r"\(([^()]{1,40})\)", raw)
+    base = re.sub(r"\([^()]*\)", " ", raw)
+    out = []
+    for v in [base, raw, *inner]:
+        k = firm_key(v)
+        if k:
+            out.append((k, bool(re.fullmatch(r"[A-Z0-9&]{2,8}", v.strip()))))
+    return out
+
+
 def same_firm(name: str, others: list[str]) -> bool:
-    """True if ``name`` is one of ``others`` once suffixes and punctuation are
-    set aside, or one name's words begin with all of the other's ('BAE Systems'
-    and 'BAE Systems San Diego Ship Repair Inc.'). Errs toward calling a parent
-    or sibling the same firm: here that only leaves a firm off the list of
-    other interested firms, which is safer than listing the awardee as one.
-    A one-word name matches as a prefix ('Boeing' / 'Boeing Defense, Space,
-    and Security') only if the word is not a generic one ('General', 'National'),
-    so 'General' never swallows 'General Dynamics'."""
-    a = firm_key(name)
-    if not a:
-        return False
-    for o in others:
-        b = firm_key(o)
-        if not b:
-            continue
-        short, long_ = (a, b) if len(a) <= len(b) else (b, a)
-        if short == long_:
-            return True
-        if long_[:len(short)] == short and (len(short) >= 2 or
-                                            (len(short[0]) >= 4 and short[0] not in _GENERIC_FIRST)):
-            return True
+    """True if ``name`` is one of ``others`` once suffixes, punctuation and
+    parentheticals are set aside, or one name's words begin with all of the
+    other's ('BAE Systems' / 'BAE Systems San Diego Ship Repair Inc.').
+    A parenthetical counts as a name of its own ("HAL" matches "Hindustan
+    Aeronautics Ltd. (HAL)", xchecks6 interested recheck, fc54adb6). Errs
+    toward calling a parent or sibling the same firm: here that only leaves a
+    firm off the list of other interested firms, which is safer than listing
+    the awardee as one. A one-word name matches as a prefix ('Boeing' /
+    'Boeing Defense, Space, and Security'; 'MTU' / 'MTU Berlin-Brandenburg
+    GmbH') only if it is not a generic word ('General', 'National') and is
+    at least 4 letters or written as an acronym."""
+    for a, a_acr in _name_variants(name):
+        for o in others:
+            for b, b_acr in _name_variants(o):
+                short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+                short_acr = a_acr if short is a else b_acr
+                if short == long_:
+                    return True
+                # an acronym of the other name's initials ("GDIT" / "General
+                # Dynamics Information Technology")
+                for acr, words, is_acr in ((a, b, a_acr), (b, a, b_acr)):
+                    if is_acr and len(acr) == 1 and len(acr[0]) >= 3 and len(words) >= 3 \
+                            and acr[0] == "".join(w[0] for w in words if w != "and"):
+                        return True
+                if long_[:len(short)] == short and (
+                        len(short) >= 2 or (short[0] not in _GENERIC_FIRST
+                                            and (len(short[0]) >= 4 or (short_acr and len(short[0]) >= 3)))):
+                    return True
     return False
 
 
@@ -767,6 +901,49 @@ _GENERIC_FIRST = frozenset((
     "universal", "standard", "summit", "pioneer", "eagle", "liberty", "patriot", "veterans", "native",
     "southern", "northern", "central", "capital", "metro", "city", "county", "state", "world",
 ))
+
+
+def interested_list(rec: dict) -> list[tuple] | None:
+    """(cage, name) of every firm the document says responded or expressed
+    interest; [] when a DLA form's item 12 says none and its text names no
+    responder; None when it can't be read. On a DLA form: the form's table
+    plus each model firm whose quote is a sentence (not a table row) and whose
+    CAGE, or first word without one, the table lacks (see flat_row)."""
+    f = rec.get("fields") or {}
+    form = (rec.get("rules") or {}).get("form") or {}
+    if form:
+        rows = form.get("interested")
+        if rows is None:
+            return None
+        # a model firm without a CAGE code ("BHPE replied to the Sources
+        # Sought") is added unless a table firm starts with the same word
+        table = {c for c, _ in rows}
+        first = {(n.split() or [""])[0].casefold() for _, n in rows}
+        added = [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []
+                 if not _CAGE_ROW.search(x.get("quote") or "")
+                 and (x["cage"] not in table if x.get("cage")
+                      else (x["name"].split() or [""])[0].casefold() not in first)]
+        return [tuple(r) for r in rows] + added
+    return [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []] or None
+
+
+def interested_firms_named(rec: dict | None) -> str | None:
+    """The published interested-firms value (xchecks6): every firm the
+    document names as having responded to the agency or expressed interest in
+    the work. It can include the firm that got the award: agencies often list
+    the sole source itself as an interested source, and taking it out by name
+    failed on 5 of 20 lists in the round-3 check (misspellings, a parent
+    company, an acquired firm, the awardee's distributor), so it is not taken
+    out and the label says so.
+    - Never "none", not even on a DLA form whose item 12 says none: the
+      round-4 check (2026-11-11) found 4 of 20 lists missing firms the
+      document names (a list cut at a signature block, item 10 naming firms
+      the model left out), so an empty list is "not found", not "none".
+    - Not necessarily every firm that responded: "named", not "all"."""
+    if not rec:
+        return None
+    lst = interested_list(rec)
+    return "; ".join((f"{c} | " if c else "") + n for c, n in lst) if lst else None
 
 
 def flat_row(rec: dict, meta: dict, awardee_names: list[str] | None = None) -> dict:
@@ -813,22 +990,9 @@ def flat_row(rec: dict, meta: dict, awardee_names: list[str] | None = None) -> d
         extra = {x["cage"] for x in f.get("approved_sources") or [] if x.get("cage")} - table
         row["approved_sources_confirmed"] = (None if rows is None or extra else "none" if not rows else
                                              "; ".join(f"{c} | {n}" for c, n in rows))
-        rows = form_rows.get("interested")
-        if rows is None:
-            interested = None
-        else:
-            # a model firm without a CAGE code ("BHPE replied to the Sources
-            # Sought") is added unless a table firm starts with the same word
-            table = {c for c, _ in rows}
-            first = {(n.split() or [""])[0].casefold() for _, n in rows}
-            added = [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []
-                     if not _CAGE_ROW.search(x.get("quote") or "")
-                     and (x["cage"] not in table if x.get("cage")
-                          else (x["name"].split() or [""])[0].casefold() not in first)]
-            interested = list(rows) + added
     else:
         row["approved_sources_confirmed"] = None
-        interested = [(x.get("cage"), x["name"]) for x in f.get("interested_sources") or []] or None
+    interested = interested_list(rec)
     fmt = lambda rows: "; ".join((f"{c} | " if c else "") + n for c, n in rows)   # noqa: E731
     row["interested_sources_confirmed"] = (None if interested is None else
                                            "none" if not interested else fmt(interested))
@@ -900,7 +1064,11 @@ PUBLISHED_COLUMNS = (
     "new_source_approval_quote", "new_source_approval_quote_pages",
     "ceiling_prior_usd", "ceiling_increase_usd", "ceiling_new_usd",
     "ceiling_prior_quote", "ceiling_increase_quote", "ceiling_new_quote",
-    "gao_protest_numbers", "dla_approved_sources", "nsns",
+    "gao_protest_numbers", "dla_approved_sources", "nsns", "interested_firms_named",
+    "not_to_exceed_usd", "not_to_exceed_quote", "not_to_exceed_quote_pages",
+    "delay_to_compete_quote", "delay_to_compete_quote_pages",
+    "cost_to_compete_quote", "cost_to_compete_quote_pages",
+    "technical_data_reasons", "technical_data_reasons_quote", "technical_data_reasons_quote_pages",
     "second_call_version",
 )
 
@@ -912,10 +1080,15 @@ PUBLISHED_COLUMNS = (
 # 2026-11-11). The full records of the 2026-11-10 run are kept outside the
 # dataset (~/Documents/ja-extraction-comparison-2026-11-10/extras_full_backup.jsonl).
 _PUBLIC_KINDS = ("incumbent_vendor", "source_approval_path", "increase_amount", "prior_ceiling", "new_ceiling",
-                 "approved_source")
+                 "approved_source", "interested_source")
+# Fields kept in the stored record. For delay, cost and the data-rights reason only the
+# document's own sentence was checked (and the reasons read from it by rule), so the
+# model's own value or category for those is left out.
 _PUBLIC_FIELDS = tuple(k + s for k in ("incumbent_vendor", "source_approval_path", "increase_amount",
-                                       "prior_ceiling", "new_ceiling")
-                       for s in ("", "_quote", "_quote_info")) + ("ceiling_arithmetic_ok", "approved_sources")
+                                       "prior_ceiling", "new_ceiling", "not_to_exceed")
+                       for s in ("", "_quote", "_quote_info")) + tuple(
+    k + s for k in ("delay_to_compete", "cost_to_compete", "data_rights_basis") for s in ("_quote", "_quote_info")) + (
+    "ceiling_arithmetic_ok", "approved_sources", "interested_sources", "data_rights_reasons")
 _BOOKKEEPING = ("experimental", "notice_id", "model", "extras_version", "effort", "checks_version", "run_at",
                 "pages", "transcribed_pages", "chars_total", "chars_sent", "truncated", "usage", "dataset_revision")
 
@@ -935,7 +1108,7 @@ def public_record(rec: dict | None) -> dict | None:
             "fields": fields,
             "rules": {"gao_protests": r.get("gao_protests") or [], "nsns": r.get("nsns") or [],
                       "nsn_count": r.get("nsn_count"),
-                      "form": {"approved": form.get("approved")} if form else None},
+                      "form": {"approved": form.get("approved"), "interested": form.get("interested")} if form else None},
             "raw": {"facts": [x for x in (rec.get("raw") or {}).get("facts") or []
                               if isinstance(x, dict) and x.get("kind") in kinds]},
             "published_subset": True}
@@ -970,6 +1143,20 @@ def published_columns(rec: dict | None) -> dict:
         extra = {x["cage"] for x in f.get("approved_sources") or [] if x.get("cage")} - table_cages
         if rows and not extra:
             out["dla_approved_sources"] = "; ".join(f"{c} | {n}" for c, n in rows)
+    out["interested_firms_named"] = interested_firms_named(rec)
+    # round-3 checks (2026-11-11): not-to-exceed, all 43 remaining values read;
+    # delay and cost published as the document's own sentence (30/30, 29/30);
+    # the technical-data reasons from the quote's own words, by rule
+    if f.get("not_to_exceed") is not None:
+        out.update(not_to_exceed_usd=f["not_to_exceed"], not_to_exceed_quote=f.get("not_to_exceed_quote"),
+                   not_to_exceed_quote_pages=_pages(f.get("not_to_exceed_quote_info")))
+    for k in ("delay_to_compete", "cost_to_compete"):
+        if f.get(k) is not None and f.get(k + "_quote"):
+            out[k + "_quote"] = f[k + "_quote"]
+            out[k + "_quote_pages"] = _pages(f.get(k + "_quote_info"))
+    if f.get("data_rights_reasons"):
+        out.update(technical_data_reasons=f["data_rights_reasons"], technical_data_reasons_quote=f.get("data_rights_basis_quote"),
+                   technical_data_reasons_quote_pages=_pages(f.get("data_rights_basis_quote_info")))
     out["second_call_version"] = f"{rec.get('extras_version')} / checks {rec.get('checks_version')}"
     return out
 
