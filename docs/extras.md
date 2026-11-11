@@ -98,7 +98,7 @@ python -m federal_ja.analysis extras --out work/extras --notice-file ids.txt --m
 
 ## What is published (2026-11-11)
 
-We publish only what we can justify: a field goes into `analysis/extractions.parquet` only after 30 random notices (fewer where there are fewer) were read against the document text and it held up. The reading was done by Claude subagents with written criteria, and every item marked wrong or unclear, plus a sample of those marked right, was re-read. Proof files with each value next to the document text: `group1_check/` and `group2_check/` in the comparison folder (outside the repo).
+We publish only what we can justify: a field goes into `analysis/extractions.parquet` only after 30 random notices (fewer where there are fewer) were read against the document text and it held up. The reading was done by Claude subagents with written criteria, and every item marked wrong or unclear, plus a sample of those marked right, was re-read. Proof files with each value next to the document text are in [docs/checks/](checks/), with a table of which file backs which count.
 
 | Field | Check | Published as |
 |---|---|---|

@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "76008cc4d02143dfa2ddb562b512aac3",
+  "verdict": "correct",
+  "reason": "'the $1.75M to reverse engineer the fire extinguisher' is a reverse-engineering cost for a competitive TDP."
+ },
+ {
+  "notice_id": "c541bef586f3472cafee3287c6fcabba",
+  "verdict": "correct",
+  "reason": "'reverse engineering this Radiator ... would be $3M for design, development, testing, technical data development, and finding a new source' is a cost to bring in another source."
+ },
+ {
+  "notice_id": "0dba2e52e60d4334b7311d490ffb236c",
+  "verdict": "correct",
+  "reason": "'the estimated $3,000,000.00 cost of reverse engineering the item and validating a competitive TDP' is a reverse-engineering cost."
+ },
+ {
+  "notice_id": "163db8be2d0c44aab217550d68573111",
+  "verdict": "correct",
+  "reason": "'duplication of costs of ~$16.8M' for 'Establishing alternate sources' covers reverse engineering, TDPs and competitive procurements."
+ },
+ {
+  "notice_id": "d51da2ae462041d7b3cd4524bf16f320",
+  "verdict": "correct",
+  "reason": "'duplication of costs of approximately $625,000 ... to instantiate a SCIF for the new vendor' is a cost of switching sources."
+ },
+ {
+  "notice_id": "b04f025574d04c8ea64538239a49fc25",
+  "verdict": "correct",
+  "reason": "'sourcing from an alternative vendor would require an estimated $220,000.00 ... in R&D' is a cost of bringing in another source."
+ },
+ {
+  "notice_id": "301ece9a6d964f978afea8f6850ad161",
+  "verdict": "correct",
+  "reason": "'to replace the current Honeywell system with the system from another vendor would ... cost approximately $8.4M' is a switching cost."
+ },
+ {
+  "notice_id": "48ff0b7123584adeac0c79a2352c52ae",
+  "verdict": "correct",
+  "reason": "'To attempt to obtain these integrated capabilities from any other source would result in ... duplication of cost estimated at over $65,000,000' is a cost of another source."
+ },
+ {
+  "notice_id": "6690da964b7143c598d51ad74a7cd90f",
+  "verdict": "correct",
+  "reason": "'recompeting this Task Order now would result in an estimated $250,000.00 in unnecessary, duplicative costs' is a cost of competing."
+ },
+ {
+  "notice_id": "9dce3cb0708a41c389c0a75e8c49ffcb",
+  "verdict": "correct",
+  "reason": "'The substantial duplication of cost is estimated at $253,047.88' is tied to onboarding/training another vendor (not the $766,896 extension value)."
+ },
+ {
+  "notice_id": "3143e65d07bd4374a646a2333bcc6356",
+  "verdict": "correct",
+  "reason": "'Total Duplication of Cost | $2,159,080' totals reverse engineering, tooling and qualification costs for an alternate source."
+ },
+ {
+  "notice_id": "c700c3ab94c447e085cce567e3f871ec",
+  "verdict": "correct",
+  "reason": "'an additional $900K in program management and technical oversight to manage the transition' is a transition cost component for a new contractor."
+ },
+ {
+  "notice_id": "3a5c1cb92a3d4d1787d48722e41b9021",
+  "verdict": "correct",
+  "reason": "'the estimated $3,500,000 in cost to reverse engineer the transmission and qualify another source' is a reverse-engineering/qualification cost."
+ },
+ {
+  "notice_id": "996b385416f34f8fbce5b1723bc569df",
+  "verdict": "correct",
+  "reason": "'The total estimated duplication of cost including all the tasks to reverse engineer and test a new item would be approximately $2.7M' is a reverse-engineering/qualification cost."
+ },
+ {
+  "notice_id": "ab15adb6543e4428958f8fee9891ca71",
+  "verdict": "correct",
+  "reason": "'$1.2 million for startup and adaptability if another contractor was selected' is a switching cost."
+ },
+ {
+  "notice_id": "953fd22b541641a6a3c3bcae77eb37d6",
+  "verdict": "correct",
+  "reason": "'These redundant engineering reviews and duplicate logistics costs are estimated to exceed $250,000' are costs of introducing a new contractor."
+ },
+ {
+  "notice_id": "e9571c5b0419428b857d739433b2bac8",
+  "verdict": "correct",
+  "reason": "'Labor costs for training & transitioning users on a new system ... are estimated at $15,744,000.00' is a switching cost."
+ },
+ {
+  "notice_id": "f4aa136bb59a4f5bb9d53ceb6527258f",
+  "verdict": "correct",
+  "reason": "'to replace the current Honeywell system with the system from another vendor would ... cost approximately $8.4M' is a switching cost."
+ },
+ {
+  "notice_id": "d27d165e57334c06a94bc2f02ebf554d",
+  "verdict": "correct",
+  "reason": "'Awarding this follow-on requirement to any other source ... would result in a duplication of cost estimated to exceed $2.5M' is a switching cost."
+ },
+ {
+  "notice_id": "7a1defba6a5f472baf9fa3faa43b91a9",
+  "verdict": "correct",
+  "reason": "'Reverse Engineer & technical data development ... Final Qual. ... Sub Total: $2.9M' is a reverse-engineering/qualification cost subtotal (table row, not a sentence)."
+ },
+ {
+  "notice_id": "4f9888771e2b440c81fde519336606e9",
+  "verdict": "correct",
+  "reason": "'estimated $3.73M cost of reverse engineering the item and validating a competitive TDP' is a reverse-engineering cost."
+ },
+ {
+  "notice_id": "6213662f33a442988aeaf485306776a6",
+  "verdict": "correct",
+  "reason": "'If the government were to test any other technology ... it would take approximately 545 days and $1M' is a qualification cost for another source."
+ },
+ {
+  "notice_id": "e9b7ba5f39944fad851d92a050b5e2de",
+  "verdict": "correct",
+  "reason": "'award to any other source would result in substantial duplication of cost ... in the estimated amount of $5M' is a switching cost."
+ },
+ {
+  "notice_id": "48f2bb7facb4419da18a5caadf4c4aaf",
+  "verdict": "correct",
+  "reason": "'the development of another source ... would cost the Government, at a minimum, an additional $11,064,102' is a cost of bringing in another source."
+ },
+ {
+  "notice_id": "0841a2fb26a843aa90468596b424df22",
+  "verdict": "correct",
+  "reason": "'an estimated total of $6,750,000 for both reverse engineering and testing verification' is a reverse-engineering/qualification cost."
+ },
+ {
+  "notice_id": "272f463dd52747eeaee68e1aad8514f1",
+  "verdict": "correct",
+  "reason": "'The estimated cost for a new vendor to redesign and/or RE this item ... is estimated to be $1M or greater' is a cost of bringing in another source."
+ },
+ {
+  "notice_id": "52ceffe24f02472a9e244189e315f7b8",
+  "verdict": "correct",
+  "reason": "'Awarding a new source for this interim period would necessitate a transition period estimated at over $1,200,000.00 in redundant direct labor costs' is a transition cost."
+ },
+ {
+  "notice_id": "40f3dfb03aa941fdb4fb09b0607acb6e",
+  "verdict": "unclear",
+  "reason": "'Replacing ~240 working sensors (current value ~$61,707) would be duplicative' gives the current value of the installed sensors, not a stated cost of switching; whether that value is the duplication cost is an inference."
+ },
+ {
+  "notice_id": "f59444fc9d6f4b71a0702470a627a134",
+  "verdict": "correct",
+  "reason": "'Having another contractor complete this work could potentially cost the government an additional $180,000 for temporary services' is a cost of switching contractors."
+ },
+ {
+  "notice_id": "bc7648494fca484fbf0fc262c90f28b2",
+  "verdict": "correct",
+  "reason": "'since the current contract already has fire trees and pumping services in place, duplicative costs would exceed $500,000.00' is the duplication cost of not using the incumbent CMSD (sole-source rationale after 3 sources-sought responses)."
+ }
+]

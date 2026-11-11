@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "592ecddf4f934de7aba6b7e368563a36",
+  "verdict": "wrong",
+  "reason": "\"none\" is shown, but the text says \"one response was received from [REDACTED]\" to the sole-source notice: a non-awardee firm responded whose name is redacted. Spectrum gave only an informational quote and is the awardee."
+ },
+ {
+  "notice_id": "f4e7a7994a7f44d3986436791c758130",
+  "verdict": "correct",
+  "reason": "Item 12 lists \"745V4 | Don Industrial Group 00360 | Apollo Aerospace\"; neither is the awardee (SPS Technologies)."
+ },
+ {
+  "notice_id": "65d3b57eb69e47d589beeff5906af4a0",
+  "verdict": "correct",
+  "reason": "\"a sole response coming from Extant Aerospace. There were no other responses from industry.\" Extant is the awardee."
+ },
+ {
+  "notice_id": "f91676373be649378e6f8b78e18758a7",
+  "verdict": "correct",
+  "reason": "\"One response was received from Telops\" (awardee) and \"no other sources have expressed interest\"."
+ },
+ {
+  "notice_id": "48e8122683c04df09fd9436283eb6cc2",
+  "verdict": "correct",
+  "reason": "Item 12 reads \"None | None\"."
+ },
+ {
+  "notice_id": "55df1f4d3a66432d90060514dead31a9",
+  "verdict": "correct",
+  "reason": "Item 12 lists \"9SWS7 | BHPE LLC.\" and paragraph 6 says \"Interest was received from BHPE LLC.\"; the awardee is Edro/Kampi."
+ },
+ {
+  "notice_id": "72e125750bf8479fbf2154b963b32749",
+  "verdict": "correct",
+  "reason": "KPaul \"submitted a response\" (and another on 21 November 2023) and \"One response from Emory Dry Ice was received\"; the full text shows no other responders, and neither firm is Toray."
+ },
+ {
+  "notice_id": "5934438671a8406b91c04378b53d8897",
+  "verdict": "correct",
+  "reason": "\"One firm (BHPE LLC) expressed its interest in the upcoming procurement\"; the awardee is Grove/Melton."
+ },
+ {
+  "notice_id": "19d1d6b6ae204b47945fb4c134c3c351",
+  "verdict": "correct",
+  "reason": "The only firm in the interest listing is \"VetMed Group-SDVOSB\", the awardee."
+ },
+ {
+  "notice_id": "9030707c31e9423289ad94241b47353c",
+  "verdict": "correct",
+  "reason": "The only firm named is the awardee: \"We have provided a quote from Colter & Peterson.\""
+ },
+ {
+  "notice_id": "60e744b10e9445e5ae901fa466c0c356",
+  "verdict": "correct",
+  "reason": "\"One response was received, and that was from AAR Manufacturing, Inc.\" (the awardee)."
+ },
+ {
+  "notice_id": "8a3ba7bc539041fda02601fb1f7ddc77",
+  "verdict": "wrong",
+  "reason": "Text says \"responses were received from six other vendors\" besides TCOM, but the shown list has only four; \"Vantage...\" (name cut off at a page break) and a sixth vendor (apparently redacted) are missing."
+ },
+ {
+  "notice_id": "0b118817b0484d0f9c114dd202c6182f",
+  "verdict": "correct",
+  "reason": "\"Trane Incorporated has expressed an interest, in writing\" (awardee) is the only firm in item 10."
+ },
+ {
+  "notice_id": "b1fba0396f994aad9959b837da1d4131",
+  "verdict": "correct",
+  "reason": "The sources sought table lists five respondents; the shown list contains the four other than awardee Motorola Solutions."
+ },
+ {
+  "notice_id": "bf97ef81e64f4451861836af9c68daf0",
+  "verdict": "correct",
+  "reason": "Paragraph 9 lists Ruta Supplies, Global Logistics Strategies and Giga; Ruta Supplies is among the awardee names, so the shown list correctly holds the other two."
+ },
+ {
+  "notice_id": "2dc7721d82da479ea1ee2ccbee9e5054",
+  "verdict": "correct",
+  "reason": "\"A Sole Source Memorandum was received from ScriptPro USA, Inc.; however, no quoters submitted quotes\"; ScriptPro is the awardee."
+ },
+ {
+  "notice_id": "3daaec5186a14148ab13d38a6b763fa4",
+  "verdict": "wrong",
+  "reason": "The three firms come from the market-research template line \"appear qualified and interested to fulfill this requirement\", an agency assessment rather than a response. The J&A's own \"Listing of Sources that Expressed, in Writing, an Interest\" (item 10) names only the incumbent, Millbrook."
+ },
+ {
+  "notice_id": "8e7b50a26fdc46ed93d3f136d374f307",
+  "verdict": "unclear",
+  "reason": "\"Cages 5A2W3, 9TPW0, 0XAK6 responded to RFI confirming they will quote\", but the form's item 12 record lists only 8P309 Sharp. The shown values are bare CAGE codes with no names, so I could not confirm that none of them is co-awardee FERBAK, Inc."
+ },
+ {
+  "notice_id": "6a183e3593c242bcbeb329c57f260cae",
+  "verdict": "correct",
+  "reason": "Item 12 lists \"393D8 | Quality Welding and Fab., LLC 9LYF8 | ATZ SOLUTION LLC\"; the awardee is Boeing."
+ },
+ {
+  "notice_id": "7aef7cff4e894faca4113bab2ab8ca47",
+  "verdict": "correct",
+  "reason": "Item 12 reads \"None received\"."
+ },
+ {
+  "notice_id": "b5e78eb717944a0faabda485d143559b",
+  "verdict": "correct",
+  "reason": "Item 12 lists \"7Z016 | KAMPI COMPONENTS\"; the awardee is Cortron."
+ },
+ {
+  "notice_id": "53d80bf144804de8a5e5138dd62cf873",
+  "verdict": "correct",
+  "reason": "\"Amentum was the only company that expressed interest\"; Amentum is the awardee."
+ },
+ {
+  "notice_id": "66cc45f1ee5c4c82a0b6dd2956e04cd6",
+  "verdict": "correct",
+  "reason": "Paragraph 9 lists only \"5ZD19 | FBC ENTERPRISES LLC\", the awardee."
+ },
+ {
+  "notice_id": "ba016ba252fb4f0e913b7236b49769af",
+  "verdict": "correct",
+  "reason": "Item 12 reads \"None | None\"."
+ },
+ {
+  "notice_id": "7f8435f427f64956899922241f2b3f25",
+  "verdict": "correct",
+  "reason": "Item 12 lists only \"45934 | Ontic Engineering\", the awardee."
+ },
+ {
+  "notice_id": "7882448625264048a93c0aeca8eaf061",
+  "verdict": "correct",
+  "reason": "\"Two (2) responses were received: BHPE LLC and Buchan Edna dba Nimbus Environmental Services (NES)\"; NES is the awardee, leaving BHPE."
+ },
+ {
+  "notice_id": "4d4123fcba8a4bc080ab06ca7b98027c",
+  "verdict": "correct",
+  "reason": "Item 12 lists Moorhouse Made, Hanes Supply and VPM Parts; Hanes Supply is among the awardee names, leaving the other two."
+ },
+ {
+  "notice_id": "74b5d0317ddb46809f5912be551ad9db",
+  "verdict": "correct",
+  "reason": "Item 12 reads \"None Received\" (the Applied Systems Engineering data-rights reply in item 13 is the awardee and is not an expression of interest)."
+ },
+ {
+  "notice_id": "82a55763ab6d40c3b5a857c69b9755ec",
+  "verdict": "correct",
+  "reason": "\"the USAF received submissions from\" 12 companies; the shown list is those 12 minus \"Boeing Defense, Space, and Security\" (awardee The Boeing Company)."
+ },
+ {
+  "notice_id": "f05ac21dc3f244f4973bedbb6a2ba32d",
+  "verdict": "correct",
+  "reason": "Item 12 reads \"None\"."
+ }
+]

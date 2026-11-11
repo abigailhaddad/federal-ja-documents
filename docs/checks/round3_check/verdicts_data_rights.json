@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "98709d52f8844efeaded273ad7789465",
+  "verdict": "unclear",
+  "reason": "Quote is cut off mid-sentence at 'from other sources other than'; it supports does-not-own and lacks-rights, but the full sentence continues '[REDACTED] is uneconomical to obtain', a possible uneconomical reason hidden by truncation and redaction."
+ },
+ {
+  "notice_id": "619812a577e942098236307bc203aa21",
+  "verdict": "wrong",
+  "reason": "'proprietary nature of the Black River Systems (BRS) NINJA system' is about a proprietary product/system, not technical data, drawings or data rights."
+ },
+ {
+  "notice_id": "d9abae6a7a814208963aedc4ef3b2474",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed to permit full and open competition' supports data_not_available."
+ },
+ {
+  "notice_id": "260e26ce491e4fe5abbf22e9f6c0b0ac",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "f6bdce2fae5b4d39a74259347031f2b7",
+  "verdict": "correct",
+  "reason": "Box marked [X]: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "045028459d9042eba77236434e46b2ab",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "6bb12bbfbdbb4d8a8297603f7bdcb206",
+  "verdict": "correct",
+  "reason": "'The available technical data is insufficient for the development of new sources' supports data_not_available (incomplete data)."
+ },
+ {
+  "notice_id": "7c030b4517854be6b06394b773f9b069",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "eb047fae5d4b41abadf06813dd1d34bc",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "ff8e001bc48a4a93b9b62859b2484758",
+  "verdict": "wrong",
+  "reason": "'ScriptPro is the intellectual property rights holder' refers to medication dispensing platforms as products, not technical data or drawings; the second quoted sentence is about an equipment standardization list."
+ },
+ {
+  "notice_id": "1755146b9eb84d6cbc6b3c048ef80b90",
+  "verdict": "wrong",
+  "reason": "'COF's proprietary college preparation platform and testing resourc[es]' describes a proprietary service platform being bought, not technical data blocking competition."
+ },
+ {
+  "notice_id": "c02e0b87cec74a2bbb737e29e9d11d26",
+  "verdict": "correct",
+  "reason": "'does not own the data or the rights to the data' supports both government_does_not_own_data and government_lacks_rights."
+ },
+ {
+  "notice_id": "176ec5b8508f430ba25e5157d8062f29",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "24393ea31aa34d5ab6c0a4728ba52827",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "edbdd705c4b147ddbc2a6e38070d270d",
+  "verdict": "correct",
+  "reason": "Ticked 'Other: USG does not own the data rights for this NSN' supports government_lacks_rights."
+ },
+ {
+  "notice_id": "7597c37b0333447a85bcb973787749ba",
+  "verdict": "wrong",
+  "reason": "Quote says 'the cost to procure such data is prohibitive and not recou[p]able', so data_uneconomical_to_obtain is missing; also this is a Trellix software subscription where the sentence reads as generic text."
+ },
+ {
+  "notice_id": "3fabf2a3f18c423d8912ef5626cf70aa",
+  "verdict": "correct",
+  "reason": "Box marked [X]: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "e562a78cdda5424fb95f2baca7997ac3",
+  "verdict": "correct",
+  "reason": "'sole owner of the original, proprietary W-1 window information, including drawings' supports proprietary_to_contractor."
+ },
+ {
+  "notice_id": "a66b49ceffd640cf976f345baaff21d2",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "5c89ea8588b74133a93d1905d3425390",
+  "verdict": "wrong",
+  "reason": "'All INTERCEPT supplies and services are proprietary to Cerus Corporation' is about proprietary products/services, not technical data or drawings."
+ },
+ {
+  "notice_id": "62956d4c8c0c4c1aad4ba1bd02709b8a",
+  "verdict": "correct",
+  "reason": "'the Navy does not possess sufficient rights to information such as drawings, specifications' supports government_lacks_rights."
+ },
+ {
+  "notice_id": "e730631baf8a4256bb60355b46cee405",
+  "verdict": "correct",
+  "reason": "'technical data is not available and cannot be developed' (DLA narrative, adopted) supports data_not_available."
+ },
+ {
+  "notice_id": "1ff7f8ab33b547218502584fcc0f1553",
+  "verdict": "correct",
+  "reason": "'technical data, data rights ... are not available ... and cannot be purchased, developed, or otherwise obtained' supports government_lacks_rights and data_not_available."
+ },
+ {
+  "notice_id": "8d9da97388a441dca2fe114994b9d3f9",
+  "verdict": "wrong",
+  "reason": "'BenchMark Ultra Plus system, along with its reagents and required service, is proprietary' is about a proprietary product, not technical data."
+ },
+ {
+  "notice_id": "73ca7ba12e8e4f0ba2d16b3f0c8706fd",
+  "verdict": "correct",
+  "reason": "'does not own the data or the rights to the data' supports both government_does_not_own_data and government_lacks_rights."
+ },
+ {
+  "notice_id": "ab4a976df57b4437824197bb7307c615",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "ce30034a04d0429c92eb07d92a962387",
+  "verdict": "correct",
+  "reason": "'Parts required by this procurement are shown on the vendor's proprietary drawings' supports proprietary_to_contractor."
+ },
+ {
+  "notice_id": "a9dc4f8eb2d5462b9da5dafea68c32a3",
+  "verdict": "correct",
+  "reason": "Checked: 'USG does not own the data ... and contractor is unwilling to sell the rights' supports government_does_not_own_data and government_lacks_rights."
+ },
+ {
+  "notice_id": "136e106dea6c47cf9587170ea71d7def",
+  "verdict": "correct",
+  "reason": "Box marked [X]: 'technical data is not available and cannot be developed' supports data_not_available."
+ },
+ {
+  "notice_id": "bc65d08501294be891438b40880754c5",
+  "verdict": "correct",
+  "reason": "Ticked box: 'technical data is not available and cannot be developed' supports data_not_available."
+ }
+]

@@ -1,0 +1,333 @@
+[
+ {
+  "notice_id": "4860d05106484801a744fe9d4e86d5b0",
+  "sam_link": "https://sam.gov/opp/4860d05106484801a744fe9d4e86d5b0/view",
+  "proposed_contractors": [
+   "BEACH ELECTRONICS & MANUFACTURING, INC."
+  ],
+  "interested_firms_named": "0SFB3 | BEACH ELECTRONICS & MANUFACTURING, INC.",
+  "interested_firms_contractor_entry": "0SFB3 | BEACH ELECTRONICS & MANUFACTURING, INC.",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "60e744b10e9445e5ae901fa466c0c356",
+  "sam_link": "https://sam.gov/opp/60e744b10e9445e5ae901fa466c0c356/view",
+  "proposed_contractors": [
+   "AAR Manufacturing Inc"
+  ],
+  "interested_firms_named": "AAR Manufacturing, Inc.",
+  "interested_firms_contractor_entry": "AAR Manufacturing, Inc.",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "eac0caf926f94fcea341662855dfc1e2",
+  "sam_link": "https://sam.gov/opp/eac0caf926f94fcea341662855dfc1e2/view",
+  "proposed_contractors": [
+   "Complete Parachute Solutions, Inc."
+  ],
+  "interested_firms_named": "Complete Parachute Solutions, Inc.",
+  "interested_firms_contractor_entry": "Complete Parachute Solutions, Inc.",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "e11248d0ce904162937d8cccbf0be533",
+  "sam_link": "https://sam.gov/opp/e11248d0ce904162937d8cccbf0be533/view",
+  "proposed_contractors": [
+   "Babington Technology, Incorporated"
+  ],
+  "interested_firms_named": "BHPE LLC; Babington Technology, Incorporated",
+  "interested_firms_contractor_entry": "Babington Technology, Incorporated",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "f8cac3dd6e3b464c96d648a889056b9d",
+  "sam_link": "https://sam.gov/opp/f8cac3dd6e3b464c96d648a889056b9d/view",
+  "proposed_contractors": [
+   "TrillaMed, LLC"
+  ],
+  "interested_firms_named": "TrillaMed, LLC",
+  "interested_firms_contractor_entry": "TrillaMed, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "ad0aa7ae97e147cdac9b6adce837c1c8",
+  "sam_link": "https://sam.gov/opp/ad0aa7ae97e147cdac9b6adce837c1c8/view",
+  "proposed_contractors": [
+   "GENTEX CORP"
+  ],
+  "interested_firms_named": "60240 | GENTEX CORP",
+  "interested_firms_contractor_entry": "60240 | GENTEX CORP",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "cea1d976cb5a4f628d67275381db048b",
+  "sam_link": "https://sam.gov/opp/cea1d976cb5a4f628d67275381db048b/view",
+  "proposed_contractors": [
+   "Hamilton Sundstrand (Collins Aerospace)"
+  ],
+  "interested_firms_named": "Hamilton Sundstrand (Collins Aerospace); Scix3 LLC; SOS LLC",
+  "interested_firms_contractor_entry": "Hamilton Sundstrand (Collins Aerospace)",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "fc3df4c39cef478a97d5b5f4398e0866",
+  "sam_link": "https://sam.gov/opp/fc3df4c39cef478a97d5b5f4398e0866/view",
+  "proposed_contractors": [
+   "VetMed Group LLC"
+  ],
+  "interested_firms_named": "VetMed Group LLC; Newname Healthcare Consulting LLC",
+  "interested_firms_contractor_entry": "VetMed Group LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "86086f978d274010a2d016ff6cc595a1",
+  "sam_link": "https://sam.gov/opp/86086f978d274010a2d016ff6cc595a1/view",
+  "proposed_contractors": [
+   "NIBS"
+  ],
+  "interested_firms_named": "NIBS",
+  "interested_firms_contractor_entry": "NIBS",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "9df36b46c0ef454d82155ae4e8f21aee",
+  "sam_link": "https://sam.gov/opp/9df36b46c0ef454d82155ae4e8f21aee/view",
+  "proposed_contractors": [
+   "Howmedics Osteonics Corp., dba Stryker Corp."
+  ],
+  "interested_firms_named": "Howmedics Osteonics Corp., dba Stryker Corp.",
+  "interested_firms_contractor_entry": "Howmedics Osteonics Corp., dba Stryker Corp.",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "e74c419857c444768f33db542b98698b",
+  "sam_link": "https://sam.gov/opp/e74c419857c444768f33db542b98698b/view",
+  "proposed_contractors": [
+   "Ozark Aerosports LLC"
+  ],
+  "interested_firms_named": "Ozark Aerosports LLC",
+  "interested_firms_contractor_entry": "Ozark Aerosports LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "d91ccd0054104fd48a7b1810dacad283",
+  "sam_link": "https://sam.gov/opp/d91ccd0054104fd48a7b1810dacad283/view",
+  "proposed_contractors": [
+   "SoCal Hydraulics"
+  ],
+  "interested_firms_named": "SoCal Hydraulics; Morning Star Industries Inc.",
+  "interested_firms_contractor_entry": "SoCal Hydraulics",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "e433375c801a45fabf4f27dd72f5a7d4",
+  "sam_link": "https://sam.gov/opp/e433375c801a45fabf4f27dd72f5a7d4/view",
+  "proposed_contractors": [
+   "ASTM International"
+  ],
+  "interested_firms_named": "ASTM International",
+  "interested_firms_contractor_entry": "ASTM International",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "c96c9610e4544bac992a689277234764",
+  "sam_link": "https://sam.gov/opp/c96c9610e4544bac992a689277234764/view",
+  "proposed_contractors": [
+   "Venergy Group, LLC"
+  ],
+  "interested_firms_named": "Venergy Group, LLC",
+  "interested_firms_contractor_entry": "Venergy Group, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "c770aabe40ac48cbb83a02300a37d4bf",
+  "sam_link": "https://sam.gov/opp/c770aabe40ac48cbb83a02300a37d4bf/view",
+  "proposed_contractors": [
+   "Airgas USA, LLC"
+  ],
+  "interested_firms_named": "Airgas USA, LLC",
+  "interested_firms_contractor_entry": "Airgas USA, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "9679c0f27d9d4a8a91889e1101913fc8",
+  "sam_link": "https://sam.gov/opp/9679c0f27d9d4a8a91889e1101913fc8/view",
+  "proposed_contractors": [
+   "Trillamed, LLC"
+  ],
+  "interested_firms_named": "Trillamed, LLC",
+  "interested_firms_contractor_entry": "Trillamed, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "8e7b50a26fdc46ed93d3f136d374f307",
+  "sam_link": "https://sam.gov/opp/8e7b50a26fdc46ed93d3f136d374f307/view",
+  "proposed_contractors": [
+   "SHARP ELECTRONICS CORP GOVERNMENT"
+  ],
+  "interested_firms_named": "8P309 | SHARP ELECTRONICS CORP GOVERNMENT; 5A2W3; 9TPW0; 0XAK6",
+  "interested_firms_contractor_entry": "8P309 | SHARP ELECTRONICS CORP GOVERNMENT",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "c541bef586f3472cafee3287c6fcabba",
+  "sam_link": "https://sam.gov/opp/c541bef586f3472cafee3287c6fcabba/view",
+  "proposed_contractors": [
+   "AM General LLC"
+  ],
+  "interested_firms_named": "34623 | AM General LLC",
+  "interested_firms_contractor_entry": "34623 | AM General LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "4932d6516d5844c6ba4d5dcd8b2d75ab",
+  "sam_link": "https://sam.gov/opp/4932d6516d5844c6ba4d5dcd8b2d75ab/view",
+  "proposed_contractors": [
+   "V-Line Services"
+  ],
+  "interested_firms_named": "V-Line Services",
+  "interested_firms_contractor_entry": "V-Line Services",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "19e49da3475d4c318bc0dea598c2f5c8",
+  "sam_link": "https://sam.gov/opp/19e49da3475d4c318bc0dea598c2f5c8/view",
+  "proposed_contractors": [
+   "Millbrook Support Services Inc"
+  ],
+  "interested_firms_named": "Millbrook Support Services Inc",
+  "interested_firms_contractor_entry": "Millbrook Support Services Inc",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "30659f99779e43f59ef28ef95794ffab",
+  "sam_link": "https://sam.gov/opp/30659f99779e43f59ef28ef95794ffab/view",
+  "proposed_contractors": [
+   "C&S Wholesale Grocers, LLC"
+  ],
+  "interested_firms_named": "C&S Wholesale Grocers, LLC; SpartanNash Company; Coastal Pacific Food Distributors, Inc.; United Natural Foods, Inc.; Associated Wholesale Grocers, Inc.; DHL Supply Chain; KeHE Distributors, LLC",
+  "interested_firms_contractor_entry": "C&S Wholesale Grocers, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "11e80b109e0f417da1d2c904a7620c61",
+  "sam_link": "https://sam.gov/opp/11e80b109e0f417da1d2c904a7620c61/view",
+  "proposed_contractors": [
+   "Van Wagner Sports & Entertainment, LLC. doing business as: Van Wagner"
+  ],
+  "interested_firms_named": "Van Wagner Sports & Entertainment, LLC. doing business as: Van Wagner",
+  "interested_firms_contractor_entry": "Van Wagner Sports & Entertainment, LLC. doing business as: Van Wagner",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "a556d1f213da4413a85e3264f9823f47",
+  "sam_link": "https://sam.gov/opp/a556d1f213da4413a85e3264f9823f47/view",
+  "proposed_contractors": [
+   "Smartlite"
+  ],
+  "interested_firms_named": "Smartlite",
+  "interested_firms_contractor_entry": "Smartlite",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "1cf2592d7ea74190a3d663c1008f9da5",
+  "sam_link": "https://sam.gov/opp/1cf2592d7ea74190a3d663c1008f9da5/view",
+  "proposed_contractors": [
+   "Experian"
+  ],
+  "interested_firms_named": "Experian",
+  "interested_firms_contractor_entry": "Experian",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "18a9c420d68d4ef08ecebc3152b12272",
+  "sam_link": "https://sam.gov/opp/18a9c420d68d4ef08ecebc3152b12272/view",
+  "proposed_contractors": [
+   "Power Edge, Inc."
+  ],
+  "interested_firms_named": "Power Edge, Inc.; Blue Steel Power Technologies",
+  "interested_firms_contractor_entry": "Power Edge, Inc.",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "c5e20589d8194888b49822db655a1564",
+  "sam_link": "https://sam.gov/opp/c5e20589d8194888b49822db655a1564/view",
+  "proposed_contractors": [
+   "Alvarez, LLC"
+  ],
+  "interested_firms_named": "Alvarez, LLC",
+  "interested_firms_contractor_entry": "Alvarez, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "27725f60c4ea404391357d2ca62eba4f",
+  "sam_link": "https://sam.gov/opp/27725f60c4ea404391357d2ca62eba4f/view",
+  "proposed_contractors": [
+   "Simba Enterprises LLC"
+  ],
+  "interested_firms_named": "Simba Enterprises, LLC",
+  "interested_firms_contractor_entry": "Simba Enterprises, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "e4ffaecbcf02497b94c014a32981e304",
+  "sam_link": "https://sam.gov/opp/e4ffaecbcf02497b94c014a32981e304/view",
+  "proposed_contractors": [
+   "CANADIAN COMMERCIAL CORP",
+   "PRATT & WHITNEY CANADA CORP"
+  ],
+  "interested_firms_named": "98247 | CANADIAN COMMERCIAL CORP; 9SWS7 | BPHE",
+  "interested_firms_contractor_entry": "98247 | CANADIAN COMMERCIAL CORP",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "c643e6ddfb7f4716b302b31f5e494b96",
+  "sam_link": "https://sam.gov/opp/c643e6ddfb7f4716b302b31f5e494b96/view",
+  "proposed_contractors": [
+   "Jared LLC"
+  ],
+  "interested_firms_named": "Jared LLC",
+  "interested_firms_contractor_entry": "Jared LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ },
+ {
+  "notice_id": "8e3a69ec29a848cd85ca9091484c0ee2",
+  "sam_link": "https://sam.gov/opp/8e3a69ec29a848cd85ca9091484c0ee2/view",
+  "proposed_contractors": [
+   "Werfen USA, LLC"
+  ],
+  "interested_firms_named": "Werfen USA, LLC",
+  "interested_firms_contractor_entry": "Werfen USA, LLC",
+  "verdict": "correct",
+  "reason": "The flagged entry names the same firm as the proposed contractor (same name apart from case, punctuation, legal suffix or a CAGE code)."
+ }
+]

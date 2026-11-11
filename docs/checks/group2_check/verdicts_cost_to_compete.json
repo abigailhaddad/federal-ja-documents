@@ -1,0 +1,152 @@
+[
+  {
+    "notice_id": "f3ebf2bf76ac47489ac9c276b4e1ad1a",
+    "verdict": "correct",
+    "reason": "\"Reverse Engineering the PLS piston pump would cost an estimated minimum of 12 months and $875,000.00 for ... TDP development, to procure competitively\"; table total also $875,000.00."
+  },
+  {
+    "notice_id": "47b71b5fdd3d45edb865c982f9718d86",
+    "verdict": "unclear",
+    "reason": "\"The estimated cost for custom development work is $2 million a year, over a 2–3-year period of performance to stand-up any new system\" is a new-source cost, but $2M is an annual rate; the implied total ($4-6M) is not stated."
+  },
+  {
+    "notice_id": "3d6d58b213b8472598659d2892356eb0",
+    "verdict": "correct",
+    "reason": "\"the estimated $1,396,150 cost of reverse engineering the item and validating a competitive TDP.\""
+  },
+  {
+    "notice_id": "7b04b33a2d7d4204b627101734092833",
+    "verdict": "correct",
+    "reason": "\"The estimated cost for bringing a new contractor up to speed ... is estimated to be at least $6.5 million.\""
+  },
+  {
+    "notice_id": "5c5234ac16114489a21098a4ce84d04c",
+    "verdict": "correct",
+    "reason": "\"Total preventable cost of award to another contractor | $3,600,000\" (table line items sum to $3.6M)."
+  },
+  {
+    "notice_id": "df75fb79ca694e9e8406808ae9b0d15e",
+    "verdict": "wrong",
+    "reason": "$1,500,000 is only line a) \"Reverse Engineering of Application Specific Design\"; the same table gives \"Totals: $3,400,000.00\" for enabling a new vendor."
+  },
+  {
+    "notice_id": "7513bf3c9f214621b0e34944d01f824f",
+    "verdict": "correct",
+    "reason": "\"The only option to introduce another source(s) ... the total cost to complete the qualification process would cost $5,610,000\" (table sums to $5.61M)."
+  },
+  {
+    "notice_id": "66d9a180ffb34774a1956fd29f598cbc",
+    "verdict": "correct",
+    "reason": "\"a reverse engineering effort to develop the TDP for hardware with appropriate data rights would take 72 months at an estimated cost of $50M.\""
+  },
+  {
+    "notice_id": "9fff26f805a14e649452eac368bc1115",
+    "verdict": "correct",
+    "reason": "\"The duplicated costs to the Government to replace the infrastructure would be in an amount of over $100 million\" if another software product were used."
+  },
+  {
+    "notice_id": "996b385416f34f8fbce5b1723bc569df",
+    "verdict": "correct",
+    "reason": "\"The total estimated duplication of cost including all the tasks to reverse engineer and test a new item would be approximately $2.7M.\""
+  },
+  {
+    "notice_id": "93c8bfcd611e49d994f4834f479f3e95",
+    "verdict": "correct",
+    "reason": "\"Recompeting the contract and transitioning to a new vendor would involve significant transition costs totaling an estimated $502,640.00\" (line items sum exactly)."
+  },
+  {
+    "notice_id": "e6d03270f10f40b5ab09056dc7aa0099",
+    "verdict": "correct",
+    "reason": "\"reengineering VistA Imaging to use an alternate toolkit is currently estimated to cost approximately $7M for the first year\" (plus a separate $660,000/yr toolkit cost not included)."
+  },
+  {
+    "notice_id": "c3e08c836ccb4ae78893f07e17493da5",
+    "verdict": "correct",
+    "reason": "\"Not awarding a follow-on contract to Oak Point Associates ... would result in a duplication of efforts valued at $27,000.\""
+  },
+  {
+    "notice_id": "fab7cd6fab2e47ffb3b35af7ccdeaa0f",
+    "verdict": "correct",
+    "reason": "\"If a different SaaS product was utilized ... this extensive redevelopment and reconfiguration effort would result in 1 year and $8.5 million in duplicated costs.\""
+  },
+  {
+    "notice_id": "72e125750bf8479fbf2154b963b32749",
+    "verdict": "correct",
+    "reason": "\"Materials from any other source would need to be certified ... the total estimated cost for testing of all 16 Radome configurations is $75,315,680\" (value matches the document, though 16 x $4,707,320 = $75,317,120)."
+  },
+  {
+    "notice_id": "c4a27af5b8754afc8ffb682d1cdb9a8c",
+    "verdict": "correct",
+    "reason": "\"The Reverse Engineering effort would cost an estimated total of $4.675M\" (listed components sum to $4.675M)."
+  },
+  {
+    "notice_id": "d7877f5e1d50493f9459a02037554af1",
+    "verdict": "correct",
+    "reason": "\"award of this BOA to a source other than Lockheed Martin RMS would result in approximately $23.1M in duplicative non-recurring costs.\""
+  },
+  {
+    "notice_id": "48e301048ba54ba0a29c433c6f753760",
+    "verdict": "unclear",
+    "reason": "\"The associated administrative cost for Government personnel ... to re-procure and re-administer this effort would also result in a substantial duplication of costs estimated at a minimum of $2,000,000 per project\" is a competition cost, but a per-project rate with the number of projects not given."
+  },
+  {
+    "notice_id": "ea04f81ed319493e88e6797726a65103",
+    "verdict": "correct",
+    "reason": "\"Total preventable cost of award to another contractor | $3,600,000\" (same text as notice 5c5234ac16114489a21098a4ce84d04c)."
+  },
+  {
+    "notice_id": "7ad62f6398f849ff92ab5956eeee0256",
+    "verdict": "correct",
+    "reason": "\"the estimated $2.75M cost of reverse engineering the item and validating a competitive TDP or qualifying another source.\""
+  },
+  {
+    "notice_id": "ea6cc8bd581349e99c9c16aef6754244",
+    "verdict": "unclear",
+    "reason": "\"requiring over 2700 man-hours to complete the migration, costing the taxpayer approximately $81 thousand dollars\" is one piece of switching cost; the same passage also gives \"over a $1.5 million dollar loss\" from non-NetApp equipment, so $81K understates the switching cost."
+  },
+  {
+    "notice_id": "a9a67173ef11465e8a2ef46c5fc968ad",
+    "verdict": "correct",
+    "reason": "\"If FAR 6.302-1 ... was not used to award the 11.5 month extension to the incumbent ... the cost to the Government that would be duplicated would be approximately $184,391\" (components sum exactly)."
+  },
+  {
+    "notice_id": "ae29bafd4f7244a5a748e4e8c7fd5902",
+    "verdict": "correct",
+    "reason": "\"the estimated $4.4M cost of reverse engineering the item and validating a competitive TDP or qualifying another source.\""
+  },
+  {
+    "notice_id": "6fd0b5e65877415fb057d5e0c53b6200",
+    "verdict": "correct",
+    "reason": "\"Estimated cost duplication to the government would be $1.5M\" with \"Development of smart fuze algorithms by another company would be very costly.\""
+  },
+  {
+    "notice_id": "e7677537c2aa406489a07e2e67eb9c58",
+    "verdict": "unclear",
+    "reason": "\"The development costs for curation of learning content or the establishment of this content on average is around $800,000 per occurrence\" is a per-occurrence figure with no count, and it is not clear it is the cost of switching to another source rather than a generic content-development cost."
+  },
+  {
+    "notice_id": "693abb3bef1d4e5e90c0d7288bc14049",
+    "verdict": "correct",
+    "reason": "\"If new vendors were to be selected to develop replacement components, it would result in a duplication of cost upwards of $5.6M.\""
+  },
+  {
+    "notice_id": "c59091bc181c463aa1ebcb3fda83ab3d",
+    "verdict": "correct",
+    "reason": "\"the estimated $2.4M cost of reverse engineering the item and qualifying another source.\""
+  },
+  {
+    "notice_id": "52ceffe24f02472a9e244189e315f7b8",
+    "verdict": "correct",
+    "reason": "\"Awarding a new source for this interim period would necessitate a transition period estimated at over $1,200,000.00 in redundant direct labor costs.\""
+  },
+  {
+    "notice_id": "0ed89f8783e747d6b7939b25d25f979f",
+    "verdict": "correct",
+    "reason": "\"the estimated $1.950M cost of reverse engineering the item and qualifying another source\" (applies to NSN 2520-01-577-1837 only; the other NSN's cost is blank in the document)."
+  },
+  {
+    "notice_id": "b97975505ebb4572a9164801ce391aef",
+    "verdict": "correct",
+    "reason": "\"The cost to reverse-engineer this unique component is estimated at $2.80M\"; table \"Total $2,800,000\"."
+  }
+]

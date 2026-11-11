@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "0204fdbc1c09431fbfaa67133269495a",
+  "verdict": "correct",
+  "reason": "'Replacing the incumbent ... even via competition ... would require a minimum 60–90 day onboarding period' states time to switch sources."
+ },
+ {
+  "notice_id": "a532873313ff4de8848e913d152e658d",
+  "verdict": "correct",
+  "reason": "'the customary transition period of 30 to 45 days that a new vendor would need' states time to bring in a new source."
+ },
+ {
+  "notice_id": "708faad9bc254e68a6518681b5893267",
+  "verdict": "correct",
+  "reason": "'a minimum of approximately one year ... to complete a full re-competition and award' states time to compete."
+ },
+ {
+  "notice_id": "b6cca69f42d84a4f8b82f326ec439d43",
+  "verdict": "correct",
+  "reason": "'60 to 90 days for a new vendor to achieve full operational proficiency' states time to bring in a new contractor."
+ },
+ {
+  "notice_id": "140fb43f0cee4203aea2bc4f331f7815",
+  "verdict": "correct",
+  "reason": "'Competitively soliciting ... will require a procurement action lead time of 381 days' states time to compete."
+ },
+ {
+  "notice_id": "903ff6edae4246d9b8dd353786ba24bd",
+  "verdict": "correct",
+  "reason": "'Transitioning this expedited scope to any other source would introduce a minimum acquisition and mobilization delay of 135 days' states time to switch."
+ },
+ {
+  "notice_id": "233b5291b27c45a38dfd114a0c255e74",
+  "verdict": "correct",
+  "reason": "Recompete timing set 'to allow for an estimated 60-day transition period for a potential new awardee' states time to bring in a new source and ties it to the bridge."
+ },
+ {
+  "notice_id": "7c13119b0bc94c9ab86a4a64ab0766d5",
+  "verdict": "correct",
+  "reason": "'A new contractor would require significant time (estimated at over 6 months) to reverse-engineer and learn' states time to bring in another source."
+ },
+ {
+  "notice_id": "827649ddf0824481be9f3960c6402235",
+  "verdict": "correct",
+  "reason": "'Historical transitions ... have taken up to six months for new contractors to be fully operational' states time to switch."
+ },
+ {
+  "notice_id": "508428bfb98e4081b2084eef8b466e7f",
+  "verdict": "correct",
+  "reason": "'The proposed six-month period of performance represents the minimum time necessary to complete the competitive acquisition' (pages 5-6, split by page break and 'six- month' hyphen) ties bridge length to time to compete."
+ },
+ {
+  "notice_id": "db09574a726d4fc8b8b769488da5657f",
+  "verdict": "correct",
+  "reason": "'Competitively soliciting ... will require a procurement action lead time of 381 days' states time to compete."
+ },
+ {
+  "notice_id": "085682f126fe48469dc67e2031a3f08a",
+  "verdict": "correct",
+  "reason": "'A new contractor for this requirement would require a minimum of 12 months for implementation' states time to bring in a new source."
+ },
+ {
+  "notice_id": "bc4cd669a5ab4c5d8cd07cb6b2dde147",
+  "verdict": "correct",
+  "reason": "'Realistic Implementation: 18-24 months for full operational capability' is in the Schedule Impact Summary of transitioning to an alternative platform."
+ },
+ {
+  "notice_id": "9b2dc97edd7f44d296103909f0acf741",
+  "verdict": "correct",
+  "reason": "'If each service was required to award a new competitive contract ... 9–12 months, before being able to release a contract award' states time to compete."
+ },
+ {
+  "notice_id": "285b4e7b96504d418e9a29c3b87856ab",
+  "verdict": "correct",
+  "reason": "'A new vendor would require ... six to nine months of discovery and knowledge transfer' states time to bring in a new source."
+ },
+ {
+  "notice_id": "db361a3aaf5d4a47b7e31d49575400e9",
+  "verdict": "correct",
+  "reason": "'a new contractor ... would need approximately 120 days to fully ramp up' states time to bring in a new source."
+ },
+ {
+  "notice_id": "9a634634ec6746358b3d36619ef44405",
+  "verdict": "correct",
+  "reason": "'the transition to a new third-party administrator requires a service commencement period of 30 days' states time to switch."
+ },
+ {
+  "notice_id": "a0e4453a19cb4c92bb1c96e12c2070d5",
+  "verdict": "correct",
+  "reason": "'Awarding an interim contract to a new source ... The Government estimates an 18-month procurement lead time' states time to compete."
+ },
+ {
+  "notice_id": "cc37af454c3c4d7eaeb1760795cdd055",
+  "verdict": "correct",
+  "reason": "'it would take at least two years to develop, test, and fully implement a competitor's product' states time to switch."
+ },
+ {
+  "notice_id": "eecba6b3ad6142aeb62501125fa4b22b",
+  "verdict": "correct",
+  "reason": "'Replacing these resources would necessitate a significant onboarding period, estimated at 9-12 months' states time to replace the incumbent team."
+ },
+ {
+  "notice_id": "323268bfe288455f857635e9da879b94",
+  "verdict": "correct",
+  "reason": "'Teledyne FLIR could only support another vendor ... a delay of approximately 6 to 9 months to establish the terms' states time to bring in another vendor."
+ },
+ {
+  "notice_id": "70b2527d861d4a78984c5c25ab58c198",
+  "verdict": "correct",
+  "reason": "'Bringing in a new firm would require a minimum 3-month learning curve and onboarding process' states time to bring in a new source."
+ },
+ {
+  "notice_id": "b148d43ae2d943de90df0f6f69e75248",
+  "verdict": "correct",
+  "reason": "Market research 'vendors typically require a minimum of 60 days to submit proposals, 30 days to begin community services' states time to compete and transition."
+ },
+ {
+  "notice_id": "8d1fa9f3738147b1adfe7be9fbb18201",
+  "verdict": "correct",
+  "reason": "'The NEPA EA process for new contractors can take six to twenty-four months' states time to qualify a new source, cited as why new research would not yield an award."
+ },
+ {
+  "notice_id": "311aa2bf70a244c8862e7c84fa65f12d",
+  "verdict": "correct",
+  "reason": "'If this requirement was competed ... GSM would experience a break in service of more than 9 months' states the time to compete."
+ },
+ {
+  "notice_id": "69b62dec9cc2486f8e6247b102c71d9a",
+  "verdict": "correct",
+  "reason": "'Transitioning to a new third-party administrator typically requires a minimum 30-day service commencement period' states time to switch."
+ },
+ {
+  "notice_id": "8e32b2b9b347423eaeb53eb7c4d14724",
+  "verdict": "correct",
+  "reason": "'a lengthy 90-to-120-day minimum crossover period would be required if new analyzers ... were purchased from a different manufacturer' states time to switch."
+ },
+ {
+  "notice_id": "db5b282741854a3ba0177bd3f42f5f71",
+  "verdict": "correct",
+  "reason": "Switching to another vendor's software (Nutanix) 'would require a complete re-work of the system causing an estimated six months loss in program schedule' states time to switch."
+ },
+ {
+  "notice_id": "c60fd7cd97544c5a8ebd7adfabaf812a",
+  "verdict": "correct",
+  "reason": "'A competitive award would take approximately 60 days' states time to compete."
+ },
+ {
+  "notice_id": "a3452d2dd7d445bbb196b6a7e15315b1",
+  "verdict": "correct",
+  "reason": "Extension 'will also cover the 120-day transition for the new vendor' states time to bring in a new source and ties it to the extension length."
+ }
+]

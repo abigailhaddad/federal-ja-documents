@@ -1,0 +1,186 @@
+[
+ {
+  "notice_id": "91e0302872824b3496cfc7b4b0df0faf",
+  "verdict": "wrong",
+  "reason": "Definition mismatch: published definition says 'none' means item 12 says none, but item 12 lists only the awardee ('50632 | Kamatics Corporation 8V122 | Mechatronics, Inc', both in awardee_names); no non-awardee responder is named (sources sought: 'No response was received'), so the substance is right but the stated meaning is false.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "f4626247aaa84fc0afa3c7aaa28fb2a3",
+  "verdict": "correct",
+  "reason": "Item 12 'sources ... indicating an interest in writing' lists '1CAY9 | ADS INC 8BBZ7 | Airborne Outfitters d/b/a Kro Defense'; neither is an awardee (Amerex, Oshkosh).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "1ca4366470c148039f871215c578527b",
+  "verdict": "correct",
+  "reason": "Item 12 lists '8DX08 | CORMAX RIGGING SUPPLY LLC' and the sources sought section says 'One response received'; not an awardee (Oshkosh, W. H. Smith).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "979778a2a5764c74b294d92614c37cc5",
+  "verdict": "correct",
+  "reason": "'One inquiry was received from Shiraa Al-Abhar Company (SQXV7)' in response to the RFI/Sources Sought; awardee is Crane Pumps.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "24808ea199f946e3ada34e8355819daf",
+  "verdict": "wrong",
+  "reason": "Definition mismatch: published definition says 'none' means item 12 says none, but item 12 lists only the awardee ('22501 | HOWELL LABORATORIES INC', the awardee); RFI text says 'No responses were received', so no non-awardee responder, but the stated meaning is false.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "352ea65e6c06486da2af1b0be2dfe5cc",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'NONE' and the RFI result is 'To date, no responses have been received'; no other firm named as responding.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "ea84d89b0a1e470d91bccaa953c7c253",
+  "verdict": "correct",
+  "reason": "'ESF Brown LLC, indicated that they were an interested vendor in SAM' on the Notice of Intent (though it 'did not reach out' to the CO); not the awardee (Desko). Borderline: interest shown only via SAM interested-vendor list.",
+  "missing_firms": [
+   "Apryse",
+   "Solarville",
+   "HID Global"
+  ]
+ },
+ {
+  "notice_id": "3743096f6c9f4c1bb159c49cc3a765ce",
+  "verdict": "correct",
+  "reason": "'One source, Louis Allis LLC showed interest in becoming a repair/manufacturing source' after the synopsis; awardee is Raytheon.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "489a5d08b50a4ad793554679876cc1a0",
+  "verdict": "wrong",
+  "reason": "'California Waste Recovery, LLC (Cal-Waste)' (listed under 'Listing of Interested Sources') is the awardee California Waste Recovery Systems, LLC; the other three ('Three responses were received from...') are correct.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "3d5f3c8e75e54c2cabee731c0689592a",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'None | None'; market research names only the approved source Hamilton Sundstrand (awardee) and no responder.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "7a1defba6a5f472baf9fa3faa43b91a9",
+  "verdict": "correct",
+  "reason": "'BHPE LLC (CAGE: 9SWS7) has provided a response as an interested vendor'; not an awardee (Renk, Tecmotiv, EOS).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "7a13d142faa14b83a59f9a25b2cbfd7a",
+  "verdict": "correct",
+  "reason": "'One vendor, Hänel Storage Systems ... responded to the Sources Sought notice'; awardee is Advanced Office Systems.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "de677ffda7514aaca457a476401c0139",
+  "verdict": "correct",
+  "reason": "'Maytag Aircraft LLC stated their interest' and 'KVG LLC stated their interest' via capability statements; awardee is Wyndham Green (note the J&A's own section 10 says 'Not applicable').",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "72e96e71417c4b49882694c2c639aee7",
+  "verdict": "wrong",
+  "reason": "Definition mismatch: published definition says 'none' means item 12 says none, but item 12 lists only the awardee ('03DC1 | Advanced Control Technology Inc.', the awardee); sources sought 'no response received', so substance is right but the stated meaning is false.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "93b4054bd645422398d50131b4f7ff18",
+  "verdict": "correct",
+  "reason": "Item 12 lists '04836 | Jamaica Bearing Co Inc' and the RFI result is 'One response received'; awardee is MPB/SKF.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "13de34b2fd624b91855bd9c9dc3d7ffe",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'None' and 'Sources Sought posted ... no response received'; no other responder named.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "74b85b5ec2b8490487bca9459ff0907b",
+  "verdict": "wrong",
+  "reason": "Definition mismatch: published definition says 'none' means item 12 says none, but item 12 lists only the awardee ('13567 | ELBIT SYSTEMS OF AMERICA – NIGHT VISION', the awardee); RFI result 'OEM 13567 confirmed they will quote' is also the awardee, so substance is right but the stated meaning is false.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "cb7709190512456aa9beb0a067584198",
+  "verdict": "correct",
+  "reason": "Section X 'sources that expressed, in writing, an interest' lists Serka Federal Services LLC, Baykal Technologies, Impex Foreign Trade Ltd., and Shalon (awardee, correctly dropped).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "ff903b20b1c24501bc3a21df257c3f42",
+  "verdict": "correct",
+  "reason": "'There was one response of an interested vendor - Oxley, Inc., CAGE code 3R006', also in item 12; awardee is Symetrics/Rural Route 2.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "ce115672dc6d49e9973158fe0dfe23fe",
+  "verdict": "correct",
+  "reason": "'Kompass Engineering, LLC and Affinda expressed interest' in response to the sole-source notice; awardee is Sphera Solutions.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "fc54adb64bf946bdb4068823f1b6aa89",
+  "verdict": "wrong",
+  "reason": "'receiving interest from MTU, GE Avio, HAL and TEI' – but MTU (MTU Berlin-Brandenburg), HAL (Hindustan Aeronautics) and TEI (Tusas Engine Industries) are all in awardee_names; only GE Avio was removed, so every shown firm is an awardee.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "d97306c77a824e06bdcfcc4f54ae5a7e",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'None | None' and 'There were no responses or inquiries received by the Government from any other contractors.'",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "c0b6ba11b00f4c40b8d87bd0a48e526e",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'None'; the only response mentioned is GE's (awardee) silence on a data-rights request ('no response was received').",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "a0f7b2068c064d77aaa518a51e0d81ee",
+  "verdict": "unclear",
+  "reason": "Item 12 reads 'NONE' and sources sought had 'no responses were received', but the text says an RFI was sent to The Boeing Company (non-awardee) and 'A \"no bid\" response was submitted on 09 May 2024' – literally a response to the agency, though declining.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "6ea66e53fdd9419ea3d44965c58878a1",
+  "verdict": "correct",
+  "reason": "'Respondents included The Boeing Company, Advanced Autonomics LLC, ...'; all 10 shown are listed respondents and Boeing (awardee) is dropped.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "660177927ac44164ab3f08fd2efc6466",
+  "verdict": "correct",
+  "reason": "Item 12 reads 'N/A | None' and 'No sources replied to the posting.'",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "dc1235ed89744cf998e282b1e0848d70",
+  "verdict": "correct",
+  "reason": "'One response was received from Marberry Machine' to the Sources Sought; awardee is Kaydon.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "c11f7d861229442b94c2af4b05773057",
+  "verdict": "correct",
+  "reason": "'The company that expressed an interest in this requirement was BHPE LLC (CAGE 9SWS7)'; awardee is Oshkosh.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "fad50ee7478347ef8582a7c653983887",
+  "verdict": "correct",
+  "reason": "'One source, Reliant Global Technology Inc. (RGT), submitted a written capability statement in response to the notice'; awardee is GalaxyWorks.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "3824394b77c64daf9de7e2f8faf5ed97",
+  "verdict": "correct",
+  "reason": "Table 1 'Respondent:' row lists the six 8(a) responses ('These six responses are shown in Table 1'), and section 10 says Table 1 lists 'sources that expressed in writing an interest'; EvoTech (awardee) dropped.",
+  "missing_firms": []
+ }
+]

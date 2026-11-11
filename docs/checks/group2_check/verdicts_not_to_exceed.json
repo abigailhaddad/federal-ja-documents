@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "e05fda3ba145495791349376c3535633",
+  "verdict": "wrong",
+  "reason": "\"The anticipated contract price will not exceed $5 million\" restates the VAAR 819.7008 sole-source cap (\"up to $5,000,000\") rather than a ceiling for this action; the SAM award notice shows an award amount of $2,000,160.00."
+ },
+ {
+  "notice_id": "4852e719d8304c6d8a6c98dd0431c3c1",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "bf86098c5ae447d4abd04e3dee15427c",
+  "verdict": "correct",
+  "reason": "\"The proposed contract maximum dollar value is $100,000,000.00 which is 200% of the estimated contract value\" for the proposed bridge contract."
+ },
+ {
+  "notice_id": "0702129655024445a1c0ca5188e3766a",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "7544e3a0a83348f5b02f4f66d788ddc4",
+  "verdict": "correct",
+  "reason": "\"Table 3 provides the total estimated maximum dollar value for this procurement of $2,500,000.00\"; Tables 1 and 2 totals ($1,413,361.77 + $1,086,638.23) sum to it."
+ },
+ {
+  "notice_id": "e6acc2f70f4f4ed3adcd6a0d47412653",
+  "verdict": "wrong",
+  "reason": "\"The estimated cost will range from $ 274 to approximate $959,799/-\" is the top of an approximate estimate range, not a stated not-to-exceed or maximum."
+ },
+ {
+  "notice_id": "953684e125d544e584aa5df354a44e85",
+  "verdict": "correct",
+  "reason": "Source text reads \"for 60 months, not-to- exceed $749,000.00\" for this BPA (the line-wrap hyphen is why the quote was not located verbatim)."
+ },
+ {
+  "notice_id": "0ec0d027c57c45bb9d97d4e6410d2c82",
+  "verdict": "unclear",
+  "reason": "\"The total cumulative estimated value for all Phase III awards is anticipated not-to-exceed $5M\" caps all Phase III awards to multiple current performers, so it may not be the ceiling for the single contract HR001124C0315 named in the title."
+ },
+ {
+  "notice_id": "6d50ac18589a45b0ad1ae9660c01368c",
+  "verdict": "correct",
+  "reason": "\"Estimated Dollar Value, inclusive of options: $20,300,000.00 Maximum Dollar Value: $24,300,000.00\"."
+ },
+ {
+  "notice_id": "260ef82206534d688555a576a0437805",
+  "verdict": "correct",
+  "reason": "\"grants the VA the authority to award a contract valued Not-to- Exceed $13.5 Million\" next to a $13,283,290.00 estimate for this task order."
+ },
+ {
+  "notice_id": "0db3068b99ec4cd9ad62703b93de7197",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "de99779d561a49e28e5ed72ad109ac36",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value is 300% of the estimated value, $2,100,000.00\" for the proposed bridge contract."
+ },
+ {
+  "notice_id": "b02c49232eda4f6a9f7467f0bf85723b",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "f0d284169c764feca10d05b7aac2f562",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value of the proposed bridge contract is $28,000,000.00\"."
+ },
+ {
+  "notice_id": "750cf294dfee40db9cdc5dd7eea1359b",
+  "verdict": "correct",
+  "reason": "\"approximately $11,277 (base scope) ... with a recommended not-to-exceed value of $15,192\" for this pump replacement."
+ },
+ {
+  "notice_id": "104315067e31404491d4cfc23e9016f7",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "24843b2725774d8faa5e5874669f6182",
+  "verdict": "correct",
+  "reason": "\"The intended action is to modify the current TO ... This modification is estimated not to exceed $2,000,000.00.\""
+ },
+ {
+  "notice_id": "79454b4615b34e3fb1447520d80525b7",
+  "verdict": "correct",
+  "reason": "\"ESTIMATED BASE VALUE: $342,001.15 ... MAXIMUM CONTRACT VALUE : $684,002.30\"."
+ },
+ {
+  "notice_id": "0a296a05e99f4d11b56eae7b7477c79a",
+  "verdict": "correct",
+  "reason": "\"the anticipated total cost for a five- year procurement is under the simplified acquisition threshold and will not exceed $120,000\" for this SNI procurement."
+ },
+ {
+  "notice_id": "cd259eb15906429389ceb15bba8ec1f8",
+  "verdict": "correct",
+  "reason": "\"Period of Performance: 1 NOV 2025 \u2013 31 OCT 2030 Total Value: Not to exceed $249,999.99\" for this BPA."
+ },
+ {
+  "notice_id": "efdacc36d55145a2ab74bf7a9d9da3b8",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "9b780932af814577a3470b9f90d5bee9",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "b0e6aa4b0a964a879c23ff32d8d1072f",
+  "verdict": "wrong",
+  "reason": "\"The sum of all special projects, either as option CLINs or task orders, will not exceed $6,615,821.77\" caps only the special-project CLINs, not the whole MABSM bridge task-order action (other values are redacted)."
+ },
+ {
+  "notice_id": "6c0f08b504034f7a810070d4334ba078",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period.\" gives the estimate followed by \"(NTE $900K)\" for this bridge action."
+ },
+ {
+  "notice_id": "19fcc490a6834bce9d18a13297764b57",
+  "verdict": "correct",
+  "reason": "\"single award ... IDIQ contract ... beginning June 1, 2026, through May 31, 2031, at a not-to-exceed value of $95 million\"."
+ },
+ {
+  "notice_id": "5cf83fed735043b4842557e9d2511559",
+  "verdict": "wrong",
+  "reason": "\"The requirements of 819.7008 are met for this anticipated sole source. The total contract value will not exceed $5,000,000\" restates the VAAR 819.7008 $5M sole-source cap (award notice shows $4,949,438.00), not a contract-specific NTE."
+ },
+ {
+  "notice_id": "cf9fc88f22964137a1090d155bcd3da0",
+  "verdict": "correct",
+  "reason": "\"The proposed contract maximum dollar value is $308,700,000.00 which is 300% of the estimated contract value\"."
+ },
+ {
+  "notice_id": "780a515435314f1f8bec32cf76c18a9f",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value is 300% of the estimated value, $210,000,000.00\" for the proposed bridge contract."
+ },
+ {
+  "notice_id": "1627aa3ebda24da2b7726837c3d0e51a",
+  "verdict": "correct",
+  "reason": "\"The total estimated maximum value of this sole-source acquisition, inclusive of the base period and all options, is $4.8M\"."
+ },
+ {
+  "notice_id": "0e1f9b21c9c54ab3a7d0ee0ce24f399f",
+  "verdict": "correct",
+  "reason": "\"The total estimated value for all actions, orders, or calls placed under the authority of this Class J&A shall not exceed $25,000,000\" (the J&A is a class J&A, so this is its ceiling)."
+ }
+]

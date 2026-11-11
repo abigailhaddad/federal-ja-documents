@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "912e04563f284ce4be6737a532c85feb",
+  "verdict": "correct",
+  "reason": "\"modification to Contract W15QKN-19- D-0084, increasing the total maximum contract value by $15,000,000 from $891,165,000 to $906,165,000\"."
+ },
+ {
+  "notice_id": "3efa9340f52441baa8613f8882e57745",
+  "verdict": "correct",
+  "reason": "\"The total contract value will increase by $31,134,666.52 from $30,169,150.04 to $61,303,816.56\" for bridge contract 36C10X25C0003."
+ },
+ {
+  "notice_id": "025c259db7e34261b37ea3c86620432a",
+  "verdict": "correct",
+  "reason": "\"The estimated total value of the proposed action increases the contract by $9,615,220.00 from $5,369,500 to $14,984,720.00\"."
+ },
+ {
+  "notice_id": "d51da2ae462041d7b3cd4524bf16f320",
+  "verdict": "correct",
+  "reason": "\"requests an increase to the contract ceiling from $42M, by $23.1M, to a new ceiling of $65.1M\" for the AMaS contract."
+ },
+ {
+  "notice_id": "cb27faacaa6d4f59bea23192b4c58e16",
+  "verdict": "correct",
+  "reason": "\"increase the ordering ceiling on the ... IDIQ contract N00024-19-D-4323 ... by $36,600,000, from $330,200,000 to $366,800,000\"."
+ },
+ {
+  "notice_id": "ebc06fb564d74726b85fa47187c45fc3",
+  "verdict": "correct",
+  "reason": "\"this action increases the total IDIQ ceiling by $15,000,000.00, from $90,851,053.89 to $105,851,053.89\"."
+ },
+ {
+  "notice_id": "77b6b3a42138456b85764641e5796b0e",
+  "verdict": "correct",
+  "reason": "\"A modification ... to increase the total estimated value by $209,407.41, from $295,812.97 to $505,220.38\" for the call order."
+ },
+ {
+  "notice_id": "2c31b175a82d474cb7ef98d7ea83f669",
+  "verdict": "correct",
+  "reason": "\"increase the maximum not- to-exceed value of the ... IDIQ contract, N62473-22-D-1202 by $10,000,000 from $15,000,000 to $25,000,000\"."
+ },
+ {
+  "notice_id": "01534528e0854ca28a7dfe54f533669d",
+  "verdict": "correct",
+  "reason": "\"The estimated value for this within scope ceiling increase is $3.7M ... The total value of the contract will increase from $34,072,387.70 to $37,772,387.70\"."
+ },
+ {
+  "notice_id": "fe943fd429874c749adf5eea1ecf230d",
+  "verdict": "correct",
+  "reason": "\"increase the ceiling for ... IDIQ contract HHM402-18-D-0004 ... by $100,000,000.00 from $231,709,748.00 to $331,709,748.00\" (prior ceiling confirmed by \"On May 08, 2026, the ceiling was increased to $231,709,748.00\")."
+ },
+ {
+  "notice_id": "5e84483a342e4250850df11e07f976d9",
+  "verdict": "correct",
+  "reason": "\"Contract # 15M50026DA4400018 currently has a ceiling of $499,999.99. The total estimate value of the proposed modification to increase the contract ceiling is $490,000.00 which brings the total estimated value of the contract to $989,999.99\"."
+ },
+ {
+  "notice_id": "ded7835dbcd64b5d8d242715dd26a931",
+  "verdict": "correct",
+  "reason": "\"J&A Basic Value: $6,499,999 J&A Amendment 01: Increase $3,500,001\" and \"increase the ceiling value from $6,499,999 to $10,000,000\" for the COTS Gear Issue BPA."
+ },
+ {
+  "notice_id": "de4588b7500a4785b368c2dff0039771",
+  "verdict": "correct",
+  "reason": "\"Request the total contract ceiling value change from $204,639,688.42 to $294,639,688.42, a net increase of $90,000,000\"."
+ },
+ {
+  "notice_id": "bb14e10b55344a09a5b9affd216f718d",
+  "verdict": "correct",
+  "reason": "\"The total not-to-exceed value of the MACC will be increased by $35,000,000, from $95,000,000 to $130,000,000\" (the MACC is the six contracts this J&A modifies)."
+ },
+ {
+  "notice_id": "5fbdcd543523497498c7527ecdcf7dc1",
+  "verdict": "correct",
+  "reason": "\"Overall IDIQ Contract Ceiling: Increase the maximum cumulative IDIQ capacity by $4M, raising the overall ceiling form $5M to $9M\"."
+ },
+ {
+  "notice_id": "7b75037706074bacb75caa003ca01c8e",
+  "verdict": "correct",
+  "reason": "\"increase the ceiling of the Task Order by $8,000,000.00 from $25,436,744 to $33,436,744\" (the separate $89,000,000 is the parent IDIQ ceiling, correctly not used)."
+ },
+ {
+  "notice_id": "1fbc53fee0274e12be609adc843eb92c",
+  "verdict": "correct",
+  "reason": "\"The requested modification will increase the IDIQ ceiling by $1,200,000.00, from $4,000,000.00 to $5,200,000.00\"."
+ },
+ {
+  "notice_id": "eea1c18c17b7410588b5e39b8e92a91d",
+  "verdict": "correct",
+  "reason": "\"increase the IDIQ maximum value from $45,000,000 by $7,000,000 to $52,000,000\"."
+ },
+ {
+  "notice_id": "d5350619f0584644a9da2ddd96acbd50",
+  "verdict": "correct",
+  "reason": "\"This extension will increase the overall contract value by $59,395.60 from $856,888.50 to $916,284.10\"."
+ },
+ {
+  "notice_id": "76953bf1771b4f16869740b92ed13370",
+  "verdict": "correct",
+  "reason": "\"An increase of $15,769,013 is required for the BECOS IDIQ contract, raising the total ceiling from $60 million to $75,769,013\"."
+ },
+ {
+  "notice_id": "c4a9474a92fb46038c10dda8ee23ab5e",
+  "verdict": "correct",
+  "reason": "\"resulting in a cumulative program ceiling increase of $12.0M (from $29.4M to $41.4M across all six contracts)\"; values are program-wide totals for the six IDIQs this class action modifies (each goes $4.9M to $6.9M)."
+ },
+ {
+  "notice_id": "3534f9651094437e89ef8074f4fda37e",
+  "verdict": "correct",
+  "reason": "\"increase the total contract capacity by $10 million, from $35 million to $45 million\" for the Micro MACC IDIQs."
+ },
+ {
+  "notice_id": "6c81b81f7dbc441ab6e8e803f57862e3",
+  "verdict": "correct",
+  "reason": "\"Amount: $9 million increase (total revised ceiling: $29 million)\" with prior quoted as \"original ceiling value of $20,000,000\"; prior is the original (not explicitly current) ceiling but 20+9=29 is consistent with no earlier increase."
+ },
+ {
+  "notice_id": "558d317a64f84eb69f9a673e10e1b4dd",
+  "verdict": "correct",
+  "reason": "\"The MACC program ceiling is currently $75M. Approval of this J&A will increase the ceiling amount by $23M, resulting in a new program ceiling amount of $98M\"."
+ },
+ {
+  "notice_id": "63733ad4fc8840f5842c42c70d880d75",
+  "verdict": "correct",
+  "reason": "\"results in an estimated price increase of $320,188.32, thereby adjusting the Task Order value from $1,128,288.98 to $1,448,477.30\"."
+ },
+ {
+  "notice_id": "7f2584ab49a84dc3b417a1f5dca33b1b",
+  "verdict": "correct",
+  "reason": "\"The increase in IDIQ contract ceiling will be $100 Million ... necessitating a ceiling increase from $800 Million to $900 Million\"."
+ },
+ {
+  "notice_id": "4020cdf0053744d9bcc40831c2a2813c",
+  "verdict": "correct",
+  "reason": "\"The estimated value of the new Task Order is $1,000,000.00 ..., increasing the current contract ceiling from $ 3,250,000.00 ... to $ 4,250,000.00\"; the increase is phrased as the new task order's value but equals the ceiling change."
+ },
+ {
+  "notice_id": "9815d372e25a4fdea6e7386b59edf744",
+  "verdict": "correct",
+  "reason": "\"the total order value is increased by $539,460.00 from $259,531.82 to $798,991.82\" (the obligation figures $124,773.00 to $664,233.00 were correctly not used)."
+ },
+ {
+  "notice_id": "a8fe781362354eb4acc6625c3334bb92",
+  "verdict": "correct",
+  "reason": "\"increase the value of the SA contract from its current value of $139,977,483.00 to $294,977,483.00, an increase of $155,000,000.00\"."
+ },
+ {
+  "notice_id": "7e9afbd1af2947eaa3b17c85f937031c",
+  "verdict": "correct",
+  "reason": "\"The TO value will increase from $1.38 Million by $3.2 Million to $4.58 Million\" for task order W912DY-24- F-0373."
+ }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "notice_id": "892d854933b246a089ed670cbac7f75f",
+    "verdict": "correct",
+    "reason": "\"The transition-in time needed for a new contractor to mobilize ... takes at a minimum 6-8-months\" is the time to bring in a different contractor."
+  },
+  {
+    "notice_id": "2651f392f442452fb6284a8731cd3a33",
+    "verdict": "correct",
+    "reason": "\"Attempting to onboard a new vendor ... would require a minimum 30- to 60-day transition window\" is the time to switch to a new vendor."
+  },
+  {
+    "notice_id": "ef81f782908148ae9b4cbd8e0fd6a938",
+    "verdict": "correct",
+    "reason": "\"The development and sustainment of alternate sources would result in ... a delay 18 months to 24 months\" is the time to develop an alternate source."
+  },
+  {
+    "notice_id": "04935f16d7744fe4b0ddb269f886ea34",
+    "verdict": "correct",
+    "reason": "\"Utilizing any other company would require a significant transition period (estimated 90 days)\" is the time to switch to another company."
+  },
+  {
+    "notice_id": "b37f1c156e344bc7a1baa3488d249581",
+    "verdict": "correct",
+    "reason": "\"Historical transitions ... have taken up to six months for new contractors to be fully operational\" is the time to transition to a new contractor."
+  },
+  {
+    "notice_id": "6a4838990c4747ef870c0652b9625da5",
+    "verdict": "correct",
+    "reason": "\"The use of a platform other than Bell ... would require approximately two years of time and training to fully transition\" is the time to switch to a different manufacturer."
+  },
+  {
+    "notice_id": "53e8295e32044da2884589ad1bf37183",
+    "verdict": "correct",
+    "reason": "\"six months for a competition\" is the stated competition time, but note the same sentence adds \"two months for program management strategy\" and \"three months for transition\" (11 months total), so the value is one component."
+  },
+  {
+    "notice_id": "76aafd2f984b4c469351b3945ae1881e",
+    "verdict": "correct",
+    "reason": "\"A vendor change would also result in significant schedule delays, estimated at a minimum of 24-36 months\" is the time to switch vendors."
+  },
+  {
+    "notice_id": "cf30e501543c4ca28b5d1e8973cd55e9",
+    "verdict": "correct",
+    "reason": "\"Transitioning to an alternate source would cause an estimated minimum schedule delay of 6 months\" is the time to switch sources."
+  },
+  {
+    "notice_id": "8983ae7345e14eb084142fe66f7cd928",
+    "verdict": "correct",
+    "reason": "\"These contractors would need the time to transition the lines, a process that previously took 16 months\" is the time for other BPA holders to take over."
+  },
+  {
+    "notice_id": "f644871772754d9fabb57c00fcd79904",
+    "verdict": "correct",
+    "reason": "\"The transition to a new product, to reach full operational capability, is estimated at six weeks\" is the time to switch away from the Entrust/Sectigo product."
+  },
+  {
+    "notice_id": "8134aab85e5f4ad99b30f43902c49547",
+    "verdict": "correct",
+    "reason": "Following the cost \"to develop a potential additional source\", \"a minimum lead-time of 35 months is required ... based on historical tire/wheel testing\" and \"This delay is unacceptable\" describe qualifying a new source."
+  },
+  {
+    "notice_id": "508428bfb98e4081b2084eef8b466e7f",
+    "verdict": "wrong",
+    "reason": "Quote not located in the document; the quote itself says \"The proposed six-month period of performance\", which is the length of this bridge action, not a time to bring in another source."
+  },
+  {
+    "notice_id": "d4404f77681642b78226ba8d69b5a961",
+    "verdict": "correct",
+    "reason": "\"Allowing full and open competition would result in at least five months of additional delay, including three months to develop and qualify a new Avionics Unit and two months to update and certify the necessary software.\""
+  },
+  {
+    "notice_id": "cefd28d32e3f4c548e6e389f0bd31f97",
+    "verdict": "correct",
+    "reason": "\"Awarding a short-term contract to other than the incumbent ... it would take upwards of 1.5 to two years just for the center to get back to the point (staffing and student OBS)\" is the ramp-up time for a new contractor."
+  },
+  {
+    "notice_id": "904acc86a4674280898c89265195c45c",
+    "verdict": "correct",
+    "reason": "\"DMG MORI and Okuma: These machines would necessitate retraining nine machinists ... This retraining would also delay production by approximately three months\" is the delay from switching to an alternate brand."
+  },
+  {
+    "notice_id": "61f8149100f7462bb5eb17c5fb628c50",
+    "verdict": "correct",
+    "reason": "\"a new contractor would require a minimum of 60-90 days to hire appropriately cleared personnel, conduct knowledge transfer\" is the time to transition to another source."
+  },
+  {
+    "notice_id": "3bde552d64604607aeaa275888f5bfda",
+    "verdict": "correct",
+    "reason": "\"An award to another contractor would disrupt operations at MacDill AFB for 14 months (two months for KOMAN to tear down ... 8-12 months for a new contractor to construct)\" is the time to switch sources."
+  },
+  {
+    "notice_id": "6366e926b661423db459d9e2abce5be9",
+    "verdict": "correct",
+    "reason": "\"Competitively soliciting for these work items is not feasible as ... award ... will require a procurement action lead time of 381 days\" is the time to compete (excluding repair time)."
+  },
+  {
+    "notice_id": "1a963aa915964dcf864f61a67bf18d49",
+    "verdict": "correct",
+    "reason": "\"Conducting a full and open competition and transitioning to a new contractor would require an estimated Procurement Action Lead Time (PALT) of at least 12-18 months\" (followed by an unquantified mobilization period)."
+  },
+  {
+    "notice_id": "1375cdd9d5a74ef783590ff3f17eb8c3",
+    "verdict": "correct",
+    "reason": "\"A new competition would take a minimum of 90 -120 days\" is the time to compete."
+  },
+  {
+    "notice_id": "140fb43f0cee4203aea2bc4f331f7815",
+    "verdict": "correct",
+    "reason": "\"Competitively soliciting these work items is not feasible as ... will require a procurement action lead time of 381 days\" is the time to compete (excluding repair time)."
+  },
+  {
+    "notice_id": "15296ebe0fc7430d8de0f35227096dfe",
+    "verdict": "correct",
+    "reason": "\"Total delay to procure competitively and stand up repair facility is 9.75 years\" sums the reverse engineering, development, certification and repair stand-up delays (3.25+1.25+2.25+3)."
+  },
+  {
+    "notice_id": "4603ba1353924630b5b8a7815f61a5d0",
+    "verdict": "correct",
+    "reason": "\"it would take at least 180 days for ACC-RI to compete the requirement amongst the four LOGCAP V contract holders\" is the time to compete."
+  },
+  {
+    "notice_id": "e8db578d5469481a9096b93bf3c2b875",
+    "verdict": "unclear",
+    "reason": "\"a new production and packaging contract would have to be funded ... and take up to 7 years to receive a new IRSP\" is the time to replace the whole projector array, an alternative to the purchase, not clearly the time to bring in a different source for the windows being bought."
+  },
+  {
+    "notice_id": "bb0c621047d24efd98ee0f3212e4dfbc",
+    "verdict": "correct",
+    "reason": "\"Migration to another CSP ... would result in resetting the project, add a minimum of two years\" is the delay from switching providers."
+  },
+  {
+    "notice_id": "2207dbcf3b114b09aa538096c984bb79",
+    "verdict": "correct",
+    "reason": "Delay from a new contractor needing to \"recruit and hire qualified and cleared personnel\": \"The delays could range from 30-45 days or more.\""
+  },
+  {
+    "notice_id": "5384973cd51a4c0c9d6b36cae54caab1",
+    "verdict": "correct",
+    "reason": "\"Reverse Engineering the PLS axle assembly would cost an estimated minimum of 54 months\" is the time to enable a competitive TDP \"to procure competitively.\""
+  },
+  {
+    "notice_id": "e75de17bfb4044479fcf597b6e1742c7",
+    "verdict": "correct",
+    "reason": "\"Transitioning to a new contractor is estimated to delay the project schedule by two to three months.\""
+  },
+  {
+    "notice_id": "2136b304eaac4a5cbc307f0638559f13",
+    "verdict": "correct",
+    "reason": "\"it would take approximately 9-months to award a short-term competitive contract\" is the time to compete; note a further \"90-day phase-in period\" follows award and is not included."
+  }
+]
