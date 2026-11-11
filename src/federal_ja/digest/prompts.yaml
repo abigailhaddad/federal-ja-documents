@@ -2,7 +2,7 @@
 # The code loads this file. Changing a prompt changes which notices get picked,
 # so give it a new version; every picks.json records the version it used.
 # <<CANDIDATES>> is filled in per run, after the cached instructions.
-version: 2026-10-21.digest2
+version: 2026-11-11.digest3
 
 # Stage 1 (only when there are more candidates than the shortlist): a cheap
 # screen that scores every candidate from a short excerpt.
@@ -55,6 +55,13 @@ rank:
     - value: the dollar value of the action exactly as the document writes it (e.g. "$28,950,000,000"), or "" if none is stated or it is redacted.
     - authority: the legal authority cited for not competing, exactly as written (e.g. "FAR 6.302-2"), or "".
     DOLLAR FIGURES AND NUMBERS. Any dollar figure in the headline or why must be copied from one of your quotes or from the value you give (you may shorten "$28,950,000,000" to "$28.95 billion" or "$29 billion"). Never add, subtract, multiply or convert figures yourself, and never total several figures. Every other number you write must appear in the document.
+
+    CHECKED FACTS. Some candidates carry a "Checked facts" line. Unlike the AI-extracted hints, each of these was read from this notice's document and checked against it, so you can rely on them. Use them as signals:
+    - "GAO protests": GAO protest numbers the document mentions, for this procurement or a related one (a predecessor or follow-on); the text says which. Protests behind a bridge or extension are a sign of protest-driven chaos.
+    - "ceiling change": the ceiling before and after this action, as the document states it, with the document's own words. A large increase, or a large share of the prior ceiling, is notable. If you state one of these figures, quote the passage it comes from, as for any dollar figure.
+    - "current or previous contractor named": a firm the document says holds or held the work. Repeated extensions to the same contractor are notable.
+    - "approved sources (DLA form)" and "how a new source can be approved": routine on DLA spare-parts forms; not remarkable by themselves.
+    You may state a checked fact in "why", in plain words. Quotes must still be copied from the document text, never from this line.
 
     Call the tool record_picks exactly once. If nothing is remarkable, call it with an empty picks list.
 

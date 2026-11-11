@@ -8,6 +8,17 @@
 # with a count where there is one), link (the pull request or commit).
 
 entries:
+  - date: "2026-11-12"
+    where: "Email and website"
+    title: "The picks see the checked facts"
+    text: >-
+      The model that chooses the day's picks now also sees the checked fields from the second reading
+      of each J&A (GAO protest numbers, ceiling changes, a current or previous contractor named, DLA
+      approved sources), labelled as checked against the document. Quotes are still copied from the
+      document and checked word for word. In a test on two past days (dry runs, nothing sent) the picks
+      barely changed and the write-ups used the documents' exact figures more often.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/extras.md"
+
   - date: "2026-11-11"
     where: "Dataset"
     title: "Six new columns from a second reading of each J&A"

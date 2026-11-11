@@ -54,6 +54,32 @@ EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "e
                      "value_redacted", "value_quote", "garbled_text_layer", "redaction_evidence",
                      "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
+# The second call's published columns (2026-11-11): only fields that held up when
+# 30 random notices each were read against the document (docs/extras.md).
+CHECKED_FIELDS = ("contractor_named", "gao_protest_numbers", "ceiling_prior_usd", "ceiling_increase_usd",
+                  "ceiling_new_usd", "ceiling_increase_quote", "dla_approved_sources", "new_source_approval_quote")
+
+
+def _money(v: float) -> str:
+    return f"${v:,.0f}" if v == int(v) else f"${v:,.2f}"
+
+
+def checked_facts(r: dict) -> dict:
+    """The "Checked facts" the ranking model sees, from the published columns.
+    Labels match the ranking prompt's CHECKED FACTS section."""
+    f = {}
+    if _clean(r.get("gao_protest_numbers")):
+        f["GAO protests"] = r["gao_protest_numbers"]
+    if all(isinstance(_clean(r.get(k)), (int, float)) for k in ("ceiling_prior_usd", "ceiling_increase_usd", "ceiling_new_usd")):
+        f["ceiling change"] = (f"{_money(r['ceiling_prior_usd'])} -> {_money(r['ceiling_new_usd'])} "
+                               f"(+{_money(r['ceiling_increase_usd'])}); document: \"{_clean(r.get('ceiling_increase_quote')) or ''}\"")
+    if _clean(r.get("contractor_named")):
+        f["current or previous contractor named"] = r["contractor_named"]
+    if _clean(r.get("dla_approved_sources")):
+        f["approved sources (DLA form)"] = r["dla_approved_sources"]
+    if _clean(r.get("new_source_approval_quote")):
+        f["how a new source can be approved"] = r["new_source_approval_quote"]
+    return f
 
 # What a dollar figure is, shown beside it. A figure with basis "other" (the
 # document gives something that is none of these: a unit price, one of two
@@ -279,7 +305,11 @@ class DatasetReader:
             return {}
         out = {}
         for r in df.to_dict("records"):
-            out[r["notice_id"]] = {k: _clean(r.get(k)) for k in EXTRACTION_FIELDS if k in r}
+            e = {k: _clean(r.get(k)) for k in EXTRACTION_FIELDS if k in r}
+            facts = checked_facts(r)
+            if facts:
+                e["checked_facts"] = facts
+            out[r["notice_id"]] = e
         return out
 
 

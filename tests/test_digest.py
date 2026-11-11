@@ -673,3 +673,22 @@ def test_c1_control_characters_in_titles_become_dashes():
     c = candidate("t")
     c.meta["title"] = "J065\x96\x96PACS \x97 Denver"
     assert render.notice_rows([c], [])[0]["title"] == "J065\u2013\u2013PACS \u2014 Denver"
+
+
+def test_checked_facts_come_from_the_published_columns_and_reach_the_card():
+    """2026-11-11: the second call's published columns become a "Checked facts" line."""
+    from federal_ja.digest.candidates import checked_facts
+    row = {"gao_protest_numbers": "B-424920", "contractor_named": "KBR", "ceiling_prior_usd": 79467840.0,
+           "ceiling_increase_usd": 65532160.0, "ceiling_new_usd": 145000000.0,
+           "ceiling_increase_quote": "by $65,532,160.00 from $79,467,840.00 to $145,000,000.00",
+           "dla_approved_sources": None, "new_source_approval_quote": float("nan")}
+    f = checked_facts(row)
+    assert f["GAO protests"] == "B-424920" and f["current or previous contractor named"] == "KBR"
+    assert f["ceiling change"].startswith("$79,467,840 -> $145,000,000 (+$65,532,160)")
+    assert "approved sources (DLA form)" not in f and "how a new source can be approved" not in f
+    from federal_ja.digest import model
+    line = model._ext_line({"vendor": "KBR", "checked_facts": f})
+    assert "Checked facts (each read from this document and checked against it): GAO protests: B-424920" in line
+    # a row with none of the columns (before 2026-11-11, or nothing found) adds nothing
+    assert checked_facts({"ceiling_prior_usd": float("nan")}) == {}
+    assert "CHECKED FACTS" in model.CONFIG["rank"]["prompt"] and model.VERSION.endswith("digest3")
