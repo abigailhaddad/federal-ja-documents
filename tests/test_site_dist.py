@@ -31,7 +31,7 @@ FORBIDDEN_NAME_GLOBS = ["*.py", "*.pyc", "*.pyo", "*.parquet", "*.csv", "*.json"
                         "*.yaml", "*.toml", "*.lock", ".DS_Store", ".env", "*.env", ".gitignore", "*.sh"]
 FORBIDDEN_DIR_NAMES = {"tests", "src", "data", "analysis", "work", "docs", "__pycache__", ".git", ".github",
                        ".venv", ".pytest_cache", "node_modules", ".wrangler"}
-TOP_LEVEL = {"index.html", "about.html", "feed.xml", "style.css", "404.html", "issues"}
+TOP_LEVEL = {"index.html", "about.html", "changelog.html", "feed.xml", "style.css", "404.html", "issues"}
 ISSUE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(-\d+)?\.html$")
 REF_RE = re.compile(r"""\b(?:href|src)\s*=\s*(['"])(?P<url>[^'"]*)\1""", re.I)
 SKIP = ("http://", "https://", "mailto:")
@@ -58,7 +58,7 @@ def files(d: Path) -> list[Path]:
 def test_only_the_site_files_are_there(dist):
     top = {p.name for p in dist.iterdir()}
     assert top <= TOP_LEVEL, f"unexpected top-level entries: {sorted(top - TOP_LEVEL)}"
-    assert {"index.html", "about.html", "feed.xml", "style.css", "404.html"} <= top
+    assert {"index.html", "about.html", "changelog.html", "feed.xml", "style.css", "404.html"} <= top
     for p in files(dist):
         rel = p.relative_to(dist)
         if rel.parts[0] == "issues":

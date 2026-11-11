@@ -13,6 +13,7 @@ deny-list deploy):
     issues/<name>.html   one page per issue: the picks with their quotes and
                          links, then the "All new notices" list
     about.html           what this is (the email footer's wording)
+    changelog.html       changes to the fields shown (changelog.yaml), newest first
     feed.xml             RSS 2.0, the last FEED_ITEMS issues, full content
     style.css            light/dark via prefers-color-scheme
     404.html             Cloudflare Pages serves index.html with HTTP 200 for
@@ -36,7 +37,10 @@ import shutil
 import sys
 from datetime import datetime, timezone
 from email.utils import format_datetime
+from importlib.resources import files
 from pathlib import Path
+
+import yaml
 
 from ..collect import config
 from . import archive as ar
@@ -59,7 +63,7 @@ TAGLINE = ("New federal J&As (justifications for contracts awarded without full 
            "and summarized by Claude")
 FEED_ITEMS = 30
 # the only files the builder writes (issue pages aside); test_site_dist.py checks the tree independently
-FIXED_FILES = ("index.html", "about.html", "feed.xml", "style.css", "404.html")
+FIXED_FILES = ("index.html", "about.html", "changelog.html", "feed.xml", "style.css", "404.html")
 
 
 def add_arguments(p: argparse.ArgumentParser) -> None:
@@ -124,7 +128,7 @@ def page(title: str, body: str, *, root: str = "", description: str = "", home: 
 </head>
 <body>
 <header class="site"><a class="brand" href="{root}index.html">{e(TITLE)}</a>
-<nav>{past}<a href="{root}about.html">About</a> <a href="{root}feed.xml">RSS</a> <a href="{SUBSCRIBE_URL}">Subscribe by email</a></nav>
+<nav>{past}<a href="{root}about.html">About</a> <a href="{root}changelog.html">Changes</a> <a href="{root}feed.xml">RSS</a> <a href="{SUBSCRIBE_URL}">Subscribe by email</a></nav>
 </header>
 <main>
 {body}
@@ -244,8 +248,34 @@ Data: <a href="{e(DATASET_URL)}">{e(DATASET_LABEL)}</a>.</p>
 <a href="{ISSUE_URL}">Open an issue on GitHub</a>.</p>
 <p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>, or by email (sent through Buttondown):</p>
 {signup_form()}
+<p>When we change what a field shows or how it is checked, it is listed under
+<a href="changelog.html">Changes</a>.</p>
 <p>No JavaScript, no cookies, no trackers on this site.</p>"""
     return page(f"About · {TITLE}", body)
+
+
+def changelog_entries() -> list[dict]:
+    """changelog.yaml's entries, newest first (by date; file order within a day)."""
+    data = yaml.safe_load(files(__package__).joinpath("changelog.yaml").read_text(encoding="utf-8"))
+    entries = list(data.get("entries") or [])
+    for x in entries:
+        missing = {"date", "where", "title", "text"} - set(x)
+        if missing:
+            raise ValueError(f"changelog entry {x.get('title')!r} is missing {sorted(missing)}")
+        datetime.strptime(str(x["date"]), "%Y-%m-%d")
+    return sorted(entries, key=lambda x: str(x["date"]), reverse=True)
+
+
+def changelog_page() -> str:
+    rows = []
+    for x in changelog_entries():
+        more = f' {link(safe_url(x.get("link")), "Details")}' if safe_url(x.get("link")) else ""
+        rows.append(f'<li><span class="date">{e(x["date"])} · {e(x["where"])}</span>'
+                    f'<strong>{e(x["title"])}</strong><br>{e(x["text"])}{more}</li>')
+    body = (f"<h1>Changes</h1>\n<p>Changes to the fields the email, this site and the "
+            f'<a href="{e(DATASET_URL)}">dataset</a> show: what each change was and why, newest first.</p>\n'
+            f'<ul class="issues">\n' + "\n".join(rows) + "\n</ul>")
+    return page(f"Changes · {TITLE}", body, description="Changes to the fields WOAH! J&As and its dataset show")
 
 
 def not_found_page() -> str:
@@ -329,8 +359,8 @@ def build(items: list[tuple[str, dict]], out: Path, now: datetime | None = None)
     if out.exists():
         shutil.rmtree(out)
     (out / "issues").mkdir(parents=True)
-    files = {"index.html": index_page(items), "about.html": about_page(), "feed.xml": feed_xml(items, now),
-             "style.css": CSS, "404.html": not_found_page()}
+    files = {"index.html": index_page(items), "about.html": about_page(), "changelog.html": changelog_page(),
+             "feed.xml": feed_xml(items, now), "style.css": CSS, "404.html": not_found_page()}
     for i, (name, entry) in enumerate(items):
         prev_name = items[i - 1][0] if i > 0 else None
         next_name = items[i + 1][0] if i + 1 < len(items) else None

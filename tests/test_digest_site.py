@@ -131,7 +131,7 @@ def test_index_newest_first_with_pick_counts(tmp_path):
     items = [("2026-10-20.json", entry("2026-10-20", n_picks=2)), ("2026-10-21.json", entry("2026-10-21")),
              ("2026-10-21-2.json", entry("2026-10-21", "em_2", n_picks=0))]
     files = site.build(items, tmp_path / "dist")
-    assert files == ["404.html", "about.html", "feed.xml", "index.html", "issues/2026-10-20.html",
+    assert files == ["404.html", "about.html", "changelog.html", "feed.xml", "index.html", "issues/2026-10-20.html",
                      "issues/2026-10-21-2.html", "issues/2026-10-21.html", "style.css"]
     idx = (tmp_path / "dist" / "index.html").read_text()
     order = [idx.index(f"issues/{s}.html") for s in ("2026-10-21-2", "2026-10-21", "2026-10-20")]
@@ -211,3 +211,16 @@ def test_past_emails_link_everywhere_but_the_list_itself(tmp_path):
         t = (out / rel).read_text()
         assert "All issues" not in t, rel
         assert ("Past emails" in t) == (rel != "index.html"), rel
+
+
+def test_changelog_page_lists_every_entry_newest_first_escaped(tmp_path):
+    entries = site.changelog_entries()
+    assert entries and all(x["date"] and x["where"] and x["title"] and x["text"] for x in entries)
+    assert [x["date"] for x in entries] == sorted((x["date"] for x in entries), reverse=True)
+    site.build([("2026-10-21.json", entry("2026-10-21"))], tmp_path / "dist")
+    out = (tmp_path / "dist" / "changelog.html").read_text()
+    for x in entries:
+        assert site.e(x["title"]) in out
+    assert "J&amp;A" in out and "J&A notices" not in out             # text is escaped
+    assert 'href="changelog.html"' in (tmp_path / "dist" / "about.html").read_text()
+    assert 'href="../changelog.html"' in (tmp_path / "dist" / "issues" / "2026-10-21.html").read_text()
