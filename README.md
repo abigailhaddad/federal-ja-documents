@@ -298,35 +298,33 @@ rely on against the document.
 | `vendor`, `additional_vendors`, `covers_multiple_actions` | the proposed contractor(s), and whether the J&A covers more than one action |
 | `period_of_performance`, `signature_date` | how long the work runs; the latest signature date |
 | `market_research_summary_model_written`, `other_firms_named` | the market research described, and other firms named |
-| `market_research_methods` | the market-research methods the document says were used (codes such as `sources_sought`, `rfi`, `sam_search`, `vendor_contact`) |
 | `redaction_detected`, `redaction_evidence` | whether redactions were detected, and what showed it ("not detected" is not "no") |
 | `redaction_significant` | `yes` / `no` / `unclear`: the model's judgement whether the redactions remove substance (value, prices, rationale, vendor, market-research results) rather than only names and contact details |
 | `people_named`, `people_signature_block`, `people_redacted_blocks`, `people_json` | every person the document names (signers, approvers, reviewers, points of contact, vendor staff, anyone else); the subset in signature, approval and review blocks; the number of those blocks whose name is redacted; and the full list, each with name, title, organization, role, a one-sentence description (model-written), a redacted flag and the quote |
-| `need_by_date` | a hard deadline the document says the requirement must be met by |
-| `stated_pop_limit_days` | a stated cap on the period of performance, in days ("not to exceed six months" gives 180) |
-| `covered_piids`, `incumbent_piid` | contract, order or modification numbers this action awards, modifies, extends or is placed under; the current or predecessor contract |
-| `bridge_or_extension`, `prior_extension_count` | whether this bridges or extends an existing contract; how many earlier extensions the document states ("fourth bridge" gives 3) |
-| `contract_types`, `is_letter_contract` | the contract type(s) as stated; whether it is a letter contract or undefinitized action |
-| `funding_sources` | the named appropriation(s) or fund(s) |
-| `urgency_trigger` | only when urgency is cited, what caused it: `congressional_or_oversight_deadline`, `bid_protest`, `contractor_default_or_termination`, `emergency_or_disaster`, `agency_planning_delay` or `other` |
+| `covered_piids`, `incumbent_piid` | contract, order or modification numbers this action awards, modifies, extends or is placed under; the current or predecessor contract (random samples of 30: `incumbent_piid` 30 right; `covered_piids` 28 right, 2 unclear where the document gives two different numbers, none wrong; lists can miss numbers that appear only in file names) |
+| `prior_extension_count` (`_quote`) | how many earlier bridges or extensions the document states, only when its quote states the number ("the fifth bridge" gives 4, "two separate extensions" gives 2); 72 of the 189 counts the model read. Two random samples: 41 of 45 right, 4 unclear (the document's own count may leave out a 52.217-8 extension), none wrong |
+| `is_letter_contract` | whether it is a letter contract or undefinitized action (`yes` checked: 28 of 30 right in a random sample) |
+| `funding_sources` | the named appropriation(s) or fund(s), as written (random sample of 30: 27 right, 3 unclear because the name is generic, such as "IT Funds"; none wrong) |
 
 Each single-value field has a `*_quote` column with the verbatim text it came
 from (`value_quote_pages` and `signature_quote_pages` give the page). The list
-fields (`people`, `market_research_methods`, `contract_types`,
-`funding_sources`) keep a quote per item in `people_json` or `record_json`
+fields (`people`, `funding_sources`) keep a quote per item in `people_json` or `record_json`
 (the full stored record). Every row also says its `extract_version` (the
 prompt), `checks_version`, `model` and `dataset_revision`, and lists in
 `values_dropped_by_checks` anything the checks removed. Notices with no
 usable text have `status` `skipped` and a `skip_reason`.
 
+**Not published** (removed 2026-11-12). Six fields the extraction still asks for are no longer
+columns, because they failed random-sample checks against the documents (each of 30 values read by
+Claude subagents, not a person; files in [docs/checks/main_fields](docs/checks/main_fields)):
+`need_by_date` (19 of 30 right: requested delivery dates on order forms taken as deadlines),
+`stated_pop_limit_days` (18 of 30: the six-month extension option of FAR 52.217-8 taken as a cap on the
+whole contract), `urgency_trigger` (17 of 30), `bridge_or_extension` (23 of 30 "yes" right: ceiling
+increases and multi-year extensions called bridges), `market_research_methods` (77-84% of codes right in the October validation) and `contract_types` (11 of 18
+stated types found). The model's answers for them are still in `record_json`, unchecked.
+
 **Known weak spots** (validation numbers in [docs/field_extraction.md](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/field_extraction.md)):
 
-* `contract_types` misses about a third of the types a document states (11
-  of 18 found in the validation sample).
-* `market_research_methods` follows fuzzy category boundaries: treat it as a
-  screen, not a count.
-* `need_by_date` and `stated_pop_limit_days` had only 2-6 cases in the
-  validation sample, too few to measure how often they are right.
 * People: names are copied from the public documents as printed, so they can
   carry layout errors (a title glued onto a name, a stray extra word) and
   digital-signature stamps such as `SMITH.JOHN.A.1234567890`. A redacted name

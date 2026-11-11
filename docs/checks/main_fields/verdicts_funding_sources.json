@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "c3b3bb64481746f4ab568edb6a5a2bb5",
+  "verdict": "correct",
+  "reason": "'funded utilizing Fiscal Year (FY) 26 United States Operations and Maintenance, Navy (O&MN) funds' -- named appropriation for this contract."
+ },
+ {
+  "notice_id": "eac941fd6adc4a42b1acc4d9cab18d1f",
+  "verdict": "unclear",
+  "reason": "Form shows '[checkbox, marked] Other Funds: DHA FY: 26'. 'DHA' names the funding agency (Defense Health Agency), not an appropriation or fund by name; and the listed name includes the form label 'Other Funds:'."
+ },
+ {
+  "notice_id": "272f463dd52747eeaee68e1aad8514f1",
+  "verdict": "correct",
+  "reason": "'funded with Consolidated Sustainment Activity Group-Supply Division Defense Working Capital Fund 97X4930 appropriations' -- specific fund."
+ },
+ {
+  "notice_id": "1db962fdcf91402a81ec2951d916c5ca",
+  "verdict": "unclear",
+  "reason": "'Type of Funds: IT Funds are provided for this action'. Could be HUD's Information Technology Fund appropriation, or just a generic 'IT money' type; the document does not name the fund."
+ },
+ {
+  "notice_id": "2136b304eaac4a5cbc307f0638559f13",
+  "verdict": "correct",
+  "reason": "'Operation Maintenance Army (OMA) funds will be used for the initial obligation under the contract.'"
+ },
+ {
+  "notice_id": "3fd7f25f5a76430a96edc8944018ac49",
+  "verdict": "correct",
+  "reason": "'using Army Working Capital Funds (AWCF).'"
+ },
+ {
+  "notice_id": "1717039ec24641ee91dd3c6330d88d46",
+  "verdict": "correct",
+  "reason": "'This contract will use 3 year Aircraft Procurement 3010 appropriations' -- appropriation title and Treasury code."
+ },
+ {
+  "notice_id": "b0e1ae37fbc847df9b1b876594029e5f",
+  "verdict": "correct",
+  "reason": "'(e) Type of funding: Operations and Support funds' -- USCG Operations and Support appropriation (component not restated)."
+ },
+ {
+  "notice_id": "669ea6e3a7f741a8abb81583c6f7634a",
+  "verdict": "correct",
+  "reason": "'Operations and Maintenance (O&M, AF) (3400) appropriations to fund this contract action'."
+ },
+ {
+  "notice_id": "8fe2266fe3fb4748b5af1f0668f81e55",
+  "verdict": "correct",
+  "reason": "'fully funded using Army Working Capital Funds (Capital Improvement Program (CIP) Funds).'"
+ },
+ {
+  "notice_id": "0b30699327dd40d69875a9466229f199",
+  "verdict": "correct",
+  "reason": "'fiscal year 2026, Operations and Maintenance, Army (OMA) funds will be used'."
+ },
+ {
+  "notice_id": "025c9f86944347bc94a4dcf84b1bc32f",
+  "verdict": "correct",
+  "reason": "'(e) Type of funding: Operations and Support funds (O&S)' -- USCG O&S appropriation."
+ },
+ {
+  "notice_id": "bb63b714d6d74e91be3d2f76e0f96e6f",
+  "verdict": "correct",
+  "reason": "'Operations & Maintenance (O&M) 3400 funds will be used.' -- 3400 = Air Force O&M."
+ },
+ {
+  "notice_id": "54fb113fd1d94c0e85289f0cd6bab585",
+  "verdict": "correct",
+  "reason": "'FISCAL YEAR: 2026 [ ] OMA [X] AWCF' -- AWCF is the checked box."
+ },
+ {
+  "notice_id": "70a0214b61af48179ca641a6c64a88d0",
+  "verdict": "unclear",
+  "reason": "'have a fully implemented and funded Foreign Military Sales (FMS) Letter of Offer and Acceptance (LOA)'. FMS case funding is this action's source, but an LOA is an agreement, not an appropriation/act/fund by name."
+ },
+ {
+  "notice_id": "c7de2873dd974bbab86b3d5e0cb36052",
+  "verdict": "correct",
+  "reason": "'Common Ethernet Switching with Container, using Army Working Capital Funds (AWCF).'"
+ },
+ {
+  "notice_id": "18c44ee1be5c474a9f3c11051c40e26b",
+  "verdict": "correct",
+  "reason": "'which will be funded by Research, Development, Test & Evaluation funds.' -- appropriation title (service/Defense-Wide not stated)."
+ },
+ {
+  "notice_id": "a4bb1374b65c4132ad74415ee132af05",
+  "verdict": "correct",
+  "reason": "'Operations and Maintenance Fiscal Year 25 funds will be used to fund this requirement.' -- appropriation title (service not stated)."
+ },
+ {
+  "notice_id": "decfeeeb85b14c3a86789e680fa7764d",
+  "verdict": "correct",
+  "reason": "'EstimatedDollar Value FY25 - 26 Total O&MN $500,000' -- O&MN for this action."
+ },
+ {
+  "notice_id": "cf30e501543c4ca28b5d1e8973cd55e9",
+  "verdict": "correct",
+  "reason": "'will be funded by both 3400 and 3600 funds' -- Air Force O&M and RDT&E Treasury codes; two sources in one entry."
+ },
+ {
+  "notice_id": "3f371afa53a44f0fa73bcba2b9297428",
+  "verdict": "correct",
+  "reason": "'The extension will be funded with defense working capital funds (DWCF)'."
+ },
+ {
+  "notice_id": "3b31d4b8ad124ba68df67968995aa8d9",
+  "verdict": "correct",
+  "reason": "'(a) Type of funding: Operations and support funds.' -- DHS O&S appropriation (component not restated)."
+ },
+ {
+  "notice_id": "252c4c1d076e42c8b426cfb2dae9bad3",
+  "verdict": "correct",
+  "reason": "'FY25 Operations and Maintenance (O&M) funding in the amount of [REDACTED]' -- appropriation title (service not stated)."
+ },
+ {
+  "notice_id": "753aadffa1ed4ba5816bab42bae18ab1",
+  "verdict": "correct",
+  "reason": "'d. Fund Type O&M, Air'."
+ },
+ {
+  "notice_id": "bd859c42b73e40439c1985d7fd70b302",
+  "verdict": "correct",
+  "reason": "'firm fixed price with FY26 Operations and Maintenance, Army funding.'"
+ },
+ {
+  "notice_id": "53d80bf144804de8a5e5138dd62cf873",
+  "verdict": "correct",
+  "reason": "'(e) Type of funding: One Big Beautiful Bill Act'."
+ },
+ {
+  "notice_id": "5b38825fa61148a6a71940faf097a181",
+  "verdict": "correct",
+  "reason": "Funding table: 'Funding Source Base (FY24) ... Total OMN' -- 'The following table depicts the approximate total funding by fiscal year and appropriation'."
+ },
+ {
+  "notice_id": "a1b21594923c4851b62926adb02585fc",
+  "verdict": "correct",
+  "reason": "'funding to be provided as Operations and Maintenance (O&M) appropriations and applied to subsequent task orders.' -- appropriation title (service not stated)."
+ },
+ {
+  "notice_id": "ae83112baa13488daeb595e7760b5f18",
+  "verdict": "correct",
+  "reason": "'d. Fund Type: O&M, Army'."
+ },
+ {
+  "notice_id": "fbcffe1b70b9403099074242a1c5fc33",
+  "verdict": "correct",
+  "reason": "'(e) Type of funding. Operations and Support Training and Development (T&D).' -- O&S appropriation with PPA."
+ }
+]

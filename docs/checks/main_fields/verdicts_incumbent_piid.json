@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "83efe7bc936d4015852a18eacd446bf3",
+  "verdict": "correct",
+  "reason": "'intends to modify ... MAC-IDIQ Contracts N50054-20-D-0001 (Lyon Shipyard, Inc.), N50054-20-D-0002 ...' - first of the five contracts being modified."
+ },
+ {
+  "notice_id": "77301438e3634b6bb382eda1fe0f7be9",
+  "verdict": "correct",
+  "reason": "'The current home oxygen and ventilator services contract 36C24722D0049 expires on March 31, 2026' - bridge follows it."
+ },
+ {
+  "notice_id": "41f2a6fe165243718d8288c6e0835675",
+  "verdict": "correct",
+  "reason": "'bridge modification to extend the term of the Task Order W15QKN-20F-0336' (parent IDIQ W15QKN-19-D-0042)."
+ },
+ {
+  "notice_id": "81baafcedede4078aea79bbc532d835e",
+  "verdict": "correct",
+  "reason": "'This action is a follow-on to call orders W912DY24F0064 and W912DY24F0071 under ... BPA W912DY19A0002' - first named predecessor order."
+ },
+ {
+  "notice_id": "3710c290f05040e8935320703df13143",
+  "verdict": "correct",
+  "reason": "'out-of-scope bi-lateral modification to existing firm-fixed price contract number 36C77623C0149'."
+ },
+ {
+  "notice_id": "873f0d58475a4a06a4636f4f3cdad1c4",
+  "verdict": "correct",
+  "reason": "'This requirement was previously acquired under a MATOC Task Order W912DQ22F4013'; 'the task order expired before the need for commissioning transpired'."
+ },
+ {
+  "notice_id": "810bd3764e5741c5bb027dd0a18ce9cd",
+  "verdict": "correct",
+  "reason": "'The prior contract, 36C25918C0264, was sole sourced to Draeger for the same reasons'. Caveat: notice title says 'concerning 36C25923C0110', which may be a later contract; the J&A text itself names only 36C25918C0264 as prior."
+ },
+ {
+  "notice_id": "a9a67173ef11465e8a2ef46c5fc968ad",
+  "verdict": "correct",
+  "reason": "'Contract Award 47QFSA20F0066'; 'approval is requested to extend the current contract ... The resultant Task Order extension'."
+ },
+ {
+  "notice_id": "2b13b75165a84afaac91b0dcc3d1ed08",
+  "verdict": "correct",
+  "reason": "'originally procured and installed in FY2019 under NAC Delivery Order VA797H-15-J-0143'; action is 'a logical follow-on to the original contract'. (Doc also miscalls it an 'IDIQ contract'; the actual IDIQ is VA797H-17-D-0024.)"
+ },
+ {
+  "notice_id": "4121bb5ec58544a2975ab2a23879bc43",
+  "verdict": "correct",
+  "reason": "'award a modification to extend the current ... contract ... This modification will be to contract W9127822C0027'."
+ },
+ {
+  "notice_id": "b2fdd1f56e4b4ec2b85f0d6077944aa3",
+  "verdict": "correct",
+  "reason": "'This is a follow-up to previous Rolls-Royce Corporation contract FA811920D0006. Previous contract ... expired 31 Dec 2024.'"
+ },
+ {
+  "notice_id": "6eb2a4f53d4f4c8e9662aefa3b7b38ac",
+  "verdict": "correct",
+  "reason": "Incumbent IMS 'has agreed to continue providing services ... at the same rates of option year four defined in contract DJBP021800000007'. Context shown starts mid-document; no other contract number appears."
+ },
+ {
+  "notice_id": "1ddd8b7229b44e7dabddc439ec3e7f8a",
+  "verdict": "correct",
+  "reason": "'bridge contract extending for 12 months the period of performance on contract N62473-20-D-0614'."
+ },
+ {
+  "notice_id": "acbd6a39282e4edab30a4e13352aed31",
+  "verdict": "correct",
+  "reason": "'currently leases ... under lease number 127EAB08L0501 ... The current lease expired 01/31/2025'; extension requested."
+ },
+ {
+  "notice_id": "caf5bad0de434422b4275c84d1987de1",
+  "verdict": "correct",
+  "reason": "'This requirement was initially fulfilled by the IVISS enterprise system ... The corresponding contract, SPE2D120D0004, has expired'."
+ },
+ {
+  "notice_id": "0e0ad0d4596348dc853050a088600015",
+  "verdict": "correct",
+  "reason": "'3-month extension to the IPF Staff Support task order (HM047621F0272)' - matches body text (twice). Caveat: file name reads HM047619F0272 and award was 2019, so the body may itself contain a typo."
+ },
+ {
+  "notice_id": "b08dfdfba8a44b72963a09505bf50b93",
+  "verdict": "correct",
+  "reason": "'extending for 12 months the period of performance on contracts N62473-20-D-1122, ...' - first of five named."
+ },
+ {
+  "notice_id": "04f328d93c414f4a8c27b6d86b23e9ec",
+  "verdict": "correct",
+  "reason": "'under Lease No. LNY23558, which expires on 8/12/2025'; three-year extension with current Lessor."
+ },
+ {
+  "notice_id": "8983ae7345e14eb084142fe66f7cd928",
+  "verdict": "correct",
+  "reason": "'bridge contract for continuation of services that are currently provided under BPA Call Order W564KV-23-F-0148'."
+ },
+ {
+  "notice_id": "d231b0d896444ce8b0a05e4065662dc8",
+  "verdict": "correct",
+  "reason": "'This J&A supports the Industrial Gas Program, Contract SPE4A6-16-D-0226'; modification extends it as a bridge."
+ },
+ {
+  "notice_id": "9d503c08732e4529981dcca5f853ea3e",
+  "verdict": "correct",
+  "reason": "'This is a follow on requirement for 140A0125P0044.'"
+ },
+ {
+  "notice_id": "03cc32606ec8439c9ad9ec8a4aface19",
+  "verdict": "correct",
+  "reason": "'Order 693JJ321F000361 through modification P00009 has a period of performance ... This modification, P00010, will extend'."
+ },
+ {
+  "notice_id": "1e8a16dc25d543c2ba7a59b1e8aef049",
+  "verdict": "correct",
+  "reason": "'requests a modification to extend the period of performance of contract W911S0-18-C-0004 with Northrop Grumman'."
+ },
+ {
+  "notice_id": "dd4045e2a2f54ed492bc5c9393604ae0",
+  "verdict": "correct",
+  "reason": "'6-month bridge contract ... to continue performance while a competitive requirement is being procured for services under contract no. 86615322C00005'."
+ },
+ {
+  "notice_id": "e1f9035aadd940dab3740991a5e5874d",
+  "verdict": "correct",
+  "reason": "'In FY24 contract FA469024P0047 was awarded to Honeywell for the same requirements.' (Prior contract, not described as expiring; this is a one-time upgrade.)"
+ },
+ {
+  "notice_id": "98512d05aee64084be8339a7384baaa3",
+  "verdict": "correct",
+  "reason": "'In 2025, the contract was awarded as sole source (LCLGD25C0001) to PTLP' - most recent of the listed prior awards for this 2026 requirement."
+ },
+ {
+  "notice_id": "ac0162bd96174cfca34131cb1a9de01f",
+  "verdict": "correct",
+  "reason": "'award a time extension modification for continued services for contract NND17AL01C ... The current and final option period expires on January 31, 2025'."
+ },
+ {
+  "notice_id": "2848b30f890b4575a1dc67dea7b6511e",
+  "verdict": "correct",
+  "reason": "'The previous contract award, W912DW21P0019, was issued to WDFW on 8 March 2021' (first of the prior awards listed)."
+ },
+ {
+  "notice_id": "8c892cd83c474fc0b8737ce6e4026f05",
+  "verdict": "correct",
+  "reason": "'follow-on task order modification ... under the existing Task Order ... (Contract SP4709-17-D-0002, Task Order SP4709-23-F-0083)'."
+ },
+ {
+  "notice_id": "da380d4669a64081948432a8b38e49c7",
+  "verdict": "correct",
+  "reason": "'The proposed contract action is to modify contract 2031JW21F00067 (BPA order against a GSA contract)'."
+ }
+]

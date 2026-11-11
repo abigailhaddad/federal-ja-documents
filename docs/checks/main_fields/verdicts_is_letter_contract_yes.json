@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "37c1dffcf3a24a36a34e3ff21df0bedd",
+  "verdict": "correct",
+  "reason": "'A letter contract is being pursued in accordance with FAR 16.603, with definitization to occur at a later date.'"
+ },
+ {
+  "notice_id": "011bc8da6961463ba2df7c9b0c2d55f6",
+  "verdict": "correct",
+  "reason": "'approves issuance of a sole-source undefinitized contract action (UCA) to V2X'"
+ },
+ {
+  "notice_id": "2b1a847d875d48b081672cae97deb644",
+  "verdict": "correct",
+  "reason": "'award the base contract and an order for an estimated 333 ... kits on an Undefinitized Contract Action (UCA)'"
+ },
+ {
+  "notice_id": "7d8cfb628ea44d14b79d88fc30d54c20",
+  "verdict": "correct",
+  "reason": "'This J&A supports four separate out-of-scope Undefinitized Contract Action (UCA)' (three awarded, one pending, all covered by this J&A)."
+ },
+ {
+  "notice_id": "19cc698adcd841b797089f76cf3b63dd",
+  "verdict": "correct",
+  "reason": "Title 'CLS UCA'; 'The UCA period of performance would begin on 01 June 2025'."
+ },
+ {
+  "notice_id": "6d89b6cb5a3e45828790891555ebe522",
+  "verdict": "correct",
+  "reason": "'awarding task order W519TC-26-F-0074 as an Undefinitized Contract Action (#26-16)'"
+ },
+ {
+  "notice_id": "903ff6edae4246d9b8dd353786ba24bd",
+  "verdict": "correct",
+  "reason": "Same document as NWS item: 'supports four separate out-of-scope Undefinitized Contract Action (UCA)'."
+ },
+ {
+  "notice_id": "92d4d5d735f54129aafe8709f29c3c56",
+  "verdict": "correct",
+  "reason": "'proposes issuance of a sole-source undefinitized contract action (UCA) to RQ Construction'"
+ },
+ {
+  "notice_id": "cec4686dca1f4a9d914f251d96ead266",
+  "verdict": "correct",
+  "reason": "'award a new noncompetitive Firm-Fixed-Priced (FFP) letter contract'; 'An undefinitized contract action is required'."
+ },
+ {
+  "notice_id": "18df2a02e5b44b68a9a9ddfd73823d89",
+  "verdict": "unclear",
+  "reason": "Action described is 'requests a firm-fixed-price Delivery Order under ... W52P1J-11-D-0013'; the UCA sentence 'ACC-RI awarded a Undefinitized Contract Action (UCA) to BAE Systems on [date redacted]' is past tense and the text does not say whether that UCA is this delivery order (after-the-fact J&A) or an earlier action."
+ },
+ {
+  "notice_id": "416621c834d344e780ec4b5560e1f1b7",
+  "verdict": "correct",
+  "reason": "'This action was initiated via a Time and Materials (T&M) Undefinitized Contract Action (UCA), FA805225C0014'; 'The target date for definitization of the UCA is 30 September 2025' (still undefinitized at J&A signing, Aug 2025)."
+ },
+ {
+  "notice_id": "d960d195de734e1291bd6dbca982cc52",
+  "verdict": "correct",
+  "reason": "'This action will result in the award of a Undefinitized Contract Action (UCA)'"
+ },
+ {
+  "notice_id": "6ae21941174746859322722fa8dbab95",
+  "verdict": "correct",
+  "reason": "'issue an initial delivery order for 357 ... Retrofit Kits via an Undefinitized Contract Action (UCA)'"
+ },
+ {
+  "notice_id": "15b08347f2fa4283ac78eb1a86e40299",
+  "verdict": "correct",
+  "reason": "'The Army Sustainment Command requests a letter contract with Southern Foodservice Management'"
+ },
+ {
+  "notice_id": "b9c96cac4f2f432ea07cddb79cd9d430",
+  "verdict": "correct",
+  "reason": "'Because this is a letter contract, the estimated total value is based upon the ... IGCE until the contract is fully negotiated at definitization.'"
+ },
+ {
+  "notice_id": "1db3f3a66b70487f852683e78da543f9",
+  "verdict": "correct",
+  "reason": "'issue a new, standalone, sole-source letter contract (also known as an undefinitized contract action or UCA) to KPMG'"
+ },
+ {
+  "notice_id": "dd9d0a1af2534bf9ade958b2795081c1",
+  "verdict": "correct",
+  "reason": "'This UCA action addresses an unusual and compelling need for a quantity of 160,000 each Track Shoes.'"
+ },
+ {
+  "notice_id": "24429e846fac42448d614cac1c20b165",
+  "verdict": "correct",
+  "reason": "'Task Order (TO) to be issued as an Undefinitized Contract Action (UCA) bridge'"
+ },
+ {
+  "notice_id": "0cda40e2973f4557ba3dd5b486834f0d",
+  "verdict": "correct",
+  "reason": "'To prevent a critical lapse in mission support, a UCA is required'; 'The UCA w[ill b]e awarded a[f]ter the approval of this J&A.'"
+ },
+ {
+  "notice_id": "cd219f77bc9e40b194f90d05293679be",
+  "verdict": "correct",
+  "reason": "'The existing Undefinitized Contract Action (UCA) will be modified'; 'The second action is for a FY25 UCA'."
+ },
+ {
+  "notice_id": "cba5d0c81ae44260a8bb1072a1d7c245",
+  "verdict": "correct",
+  "reason": "'a requirement for a letter contract'; 'the award of the sole source letter contract to BlueStar'."
+ },
+ {
+  "notice_id": "89f698baf5274acebd4820e3c04bc654",
+  "verdict": "correct",
+  "reason": "'award a new sole-source, Time & Materials (T&M) letter contract to Pate Construction'"
+ },
+ {
+  "notice_id": "388c89b14b0e4d91ad7131d82eb6dd25",
+  "verdict": "correct",
+  "reason": "'proposes issuance of a sole-source undefinitized contract action (UCA) to Ratcliff Construction'"
+ },
+ {
+  "notice_id": "1bb0ea02b2544f748f1964e773b8fddd",
+  "verdict": "correct",
+  "reason": "'Initial UCA (Letter Contract): ... the action will commence on 1 July 2026 as an Undefinitized Contract Action (UCA)'"
+ },
+ {
+  "notice_id": "53d80bf144804de8a5e5138dd62cf873",
+  "verdict": "wrong",
+  "reason": "The action is definitization of an earlier letter contract, not a letter contract: 'proposes to definitize a letter contract previously awarded'; 'This action does not constitute a new initial justification for award'; 'This action definitizes that letter contract'."
+ },
+ {
+  "notice_id": "3feae3362cf84c8eb8d65c592e45754d",
+  "verdict": "correct",
+  "reason": "'with award of the letter contract, with a full price analysis ... in accordance with the letter contract definitization schedule' (this J&A's own award)."
+ },
+ {
+  "notice_id": "e517583fc68c45ff95c4102c9d9fde8a",
+  "verdict": "correct",
+  "reason": "Same as Blue Star item: 'the award of the sole source letter contract to BlueStar'."
+ },
+ {
+  "notice_id": "2726c26c5dc947f5aad3f3dc6147ab01",
+  "verdict": "correct",
+  "reason": "'Request approval for a Firm-Fixed-Price Undefinitized Contract Action (UCA) bridge modification'"
+ },
+ {
+  "notice_id": "53e8295e32044da2884589ad1bf37183",
+  "verdict": "correct",
+  "reason": "'A letter contract is being pursued in accordance with FAR 16.603, with definitization to occur at a later date.'"
+ },
+ {
+  "notice_id": "8c170dda7be84780a057d55d5207231e",
+  "verdict": "correct",
+  "reason": "'A letter contract is being pursued in accordance with FAR 16.603, with definitization to occur at a later date.'"
+ }
+]

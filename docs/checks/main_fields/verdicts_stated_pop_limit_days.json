@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "e78890b2bd42456c96fa878ddd5b5d4b",
+  "verdict": "correct",
+  "reason": "\"The Period of performance (Deliveries) should not exceed 100 days.\" Cap on this purchase order; 100 days."
+ },
+ {
+  "notice_id": "a9a67173ef11465e8a2ef46c5fc968ad",
+  "verdict": "correct",
+  "reason": "\"extend the current contract ... by up to 11.5 months\"; 11.5 x 30 = 345."
+ },
+ {
+  "notice_id": "b274d011570f4b0d93cd2daf8677049e",
+  "verdict": "wrong",
+  "reason": "\"by 6 months from 11 February 2026 to 11 August 2026\" / \"A six-month bridge contract action\": a plain stated period. The context has no limit wording (no not-to-exceed, up to, or limited to)."
+ },
+ {
+  "notice_id": "6c930a1e54aa4f6ba44fab474dc77e69",
+  "verdict": "correct",
+  "reason": "\"The proposed bridge action is limited to one-month\"; 30 days."
+ },
+ {
+  "notice_id": "f0ad5863df1f49b1903a727e0d22bcd3",
+  "verdict": "correct",
+  "reason": "\"The totality of the contract extension will not exceed six months.\" 180."
+ },
+ {
+  "notice_id": "2e82b06ac0ea4eb49a4b1182df234a34",
+  "verdict": "correct",
+  "reason": "\"Period of Performance shall be no longer than 120 days.\" (SOW for this sole-source project)."
+ },
+ {
+  "notice_id": "13a233b6d48549ba895f719de377c363",
+  "verdict": "wrong",
+  "reason": "\"Authority to act under this CJ&A expires five years from the date of BOA execution, or 15 July 2027\": this is when the class J&A's authority expires, not a cap on a period of performance."
+ },
+ {
+  "notice_id": "784087a51f6d4a8eaa91b1abd00e694b",
+  "verdict": "correct",
+  "reason": "\"allow for up to a twelve (12) month extension\"; 365."
+ },
+ {
+  "notice_id": "417875e154f644ada22de599a2e0f945",
+  "verdict": "unclear",
+  "reason": "\"deliver and complete all requirements of this Statement of Work no later than 6 weeks after contract award\": this is a delivery and completion deadline, not worded as a period-of-performance limit. It works as a 6-week cap (42 days), so readers could disagree."
+ },
+ {
+  "notice_id": "fa277055a7d14d3ba502074074ab9742",
+  "verdict": "correct",
+  "reason": "\"initially be extended six (6) months but may be extended up to an additional six (6) months for a total of twelve (12) months\"; a cap on this extension of 12 x 30 = 360."
+ },
+ {
+  "notice_id": "ba85db342a064bf481cc30c87f1ab396",
+  "verdict": "wrong",
+  "reason": "\"one-year base period with four one-year option periods. The contract will also include up to a six-month period under the authority of FAR 52.217-8\": the six-month cap applies to the 52.217-8 extension option, not to this 5-year contract."
+ },
+ {
+  "notice_id": "adc6f220b8b241e89a597f2cd0586801",
+  "verdict": "correct",
+  "reason": "\"The estimated period of performance is up to four months.\" (this sole-source extension); 120."
+ },
+ {
+  "notice_id": "e3f145eb4a824b369581aa84bc3e5d26",
+  "verdict": "wrong",
+  "reason": "\"Option to Extend Services per FAR Clause 52.217-8 up to 6 months\": the cap applies to the 52.217-8 option of a new contract with a 12-month base plus four 12-month options, not to the action's period of performance."
+ },
+ {
+  "notice_id": "4020cdf0053744d9bcc40831c2a2813c",
+  "verdict": "correct",
+  "reason": "\"extend the services on the current contract for up to one year\" via the new task order; 365."
+ },
+ {
+  "notice_id": "09243b2859704764aa8b330f6c0e586c",
+  "verdict": "correct",
+  "reason": "\"bridge TO is limited to a single 12-month order period\"; 365."
+ },
+ {
+  "notice_id": "9bff34f6bfe04b8b8443c2d892b71d74",
+  "verdict": "wrong",
+  "reason": "\"extend the period of performance ... through August 5, 2026, and for up to six (6) months thereafter\": the 'up to six months' applies only to the second segment. The text describes an \"initial six-month extension\" plus a \"six-month extension thereafter\", so 180 is not the cap on the whole action."
+ },
+ {
+  "notice_id": "e856ef0602ef4dab88edae4c873e1dbe",
+  "verdict": "correct",
+  "reason": "\"bridge of continuity ... for a period of up to 24 months\" (12-month base plus two 6-month options); 730."
+ },
+ {
+  "notice_id": "2b99f3b30d3f4ab481c07d44f66d75f8",
+  "verdict": "wrong",
+  "reason": "\"five one-year ordering periods and an Option to Extend Services for no more than 6 months via RFO 52.217-8\": the cap applies to the 52.217-8 option of a 5-year IDIQ, not to the action's period."
+ },
+ {
+  "notice_id": "b3393cf6c6b94192bac1c0b283a68ba1",
+  "verdict": "wrong",
+  "reason": "\"in no case will any of those subsumable contracts exceed the ten-year period authorized by 10 U.S.C. 2304a(f), unless appropriate approval is obtained\": a statutory limit on future subsumable contracts (the overarching terms run 20 years), not a cap on this action."
+ },
+ {
+  "notice_id": "89b38b1f7f334f03b18d99a58a7f02df",
+  "verdict": "correct",
+  "reason": "\"extended under this contract for the necessary length of time required, but not to exceed six (6) months\"; 180."
+ },
+ {
+  "notice_id": "8433a6d7eb144662bdd9b37d1eeed176",
+  "verdict": "correct",
+  "reason": "\"The total duration of the contract shall not exceed five (5) years.\" 5 x 365 = 1825."
+ },
+ {
+  "notice_id": "5a6e83066a444218b3ed4633f48d0219",
+  "verdict": "correct",
+  "reason": "\"extend the ordering period for up to two (2) months\": this action's extension; 60."
+ },
+ {
+  "notice_id": "5d55c86c62e3435cb3d19fe4558e8eb2",
+  "verdict": "correct",
+  "reason": "\"The contract will be executed in a timely manner ... but not more than 180 days.\""
+ },
+ {
+  "notice_id": "c4bad86f34314b579a52144c1c0d2fa0",
+  "verdict": "correct",
+  "reason": "\"for up to one (1) year of contract performance\" for the CCN Region 3 extension; 365."
+ },
+ {
+  "notice_id": "b35ad281a1704691a7add76ad0c6d657",
+  "verdict": "correct",
+  "reason": "\"extending the period of performance of this TO up to six (6) months\" (this modification); 180."
+ },
+ {
+  "notice_id": "706db4d43a4e4c3ea12df0237a67eaf7",
+  "verdict": "correct",
+  "reason": "\"three-month base period and one three-month option period, not to exceed six months in total\"; 180."
+ },
+ {
+  "notice_id": "1cf2592d7ea74190a3d663c1008f9da5",
+  "verdict": "wrong",
+  "reason": "\"EEOC will determine if these services are required past a 36-month period\": a statement about future competition, not limit wording on this action's period of performance."
+ },
+ {
+  "notice_id": "6d8c43041f7748368fa7fdc69d53ee82",
+  "verdict": "wrong",
+  "reason": "\"The length of this SSJ will be for 18 months from the date of the Presidential Disaster Declaration, in accordance with HSAR 3006.302-1(b)(4)\": a regulatory duration for the J&A that runs from the declaration date, not a cap on the action's period (base 3 months plus five 3-month extensions)."
+ },
+ {
+  "notice_id": "ec46c5ccaa834a4790ca4c95a38e2943",
+  "verdict": "wrong",
+  "reason": "\"Period of Performance (PoP) from October 1, 2026 through September 30, 2030. This task order will have FAR 52.217-8 ... not to exceed six (6) months\": the cap applies to the 52.217-8 option, not to this 4-year task order."
+ },
+ {
+  "notice_id": "b7e07b74f57e41caa9ee964c976b883b",
+  "verdict": "wrong",
+  "reason": "GSA Class justification CD-2021-02 (2021): \"This class justification is limited to lease acquisitions\u2014 a. with a total period of performance no longer than one (1) year, unless exceptional circumstances exist\": a general class-wide limit with an exception, not specific to the Wichita lease."
+ }
+]

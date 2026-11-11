@@ -52,8 +52,9 @@ DuckDB, only the needed columns and rows.
 
 For each candidate: the SAM.gov metadata; the fields from
 `analysis/extractions.parquet` when the notice has a row (vendor, value,
-authority, urgency trigger, bridge, prior extensions, letter contract,
-funding, the model-written summary), labelled as hints; and an excerpt of its
+authority, prior extensions where the document states the number, letter contract,
+funding, the model-written summary), labelled as hints (since 2026-11-12 not the urgency trigger
+or the bridge flag, which failed their sample checks); and an excerpt of its
 text with page markers, the attachment whose filename looks like the
 justification first. The SAM.gov description is included too (all of it when
 the notice has no document text, as many Special Notices do). The digest

@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "827045cc4dad4f6bb4a2f76efb1b84d2",
+  "verdict": "correct",
+  "reason": "'LEASE NO. 57-6395-11-002' ... 'under lease number 57-6395-11-002 ... Approval is requested to negotiate a lease extension'."
+ },
+ {
+  "notice_id": "96311ee185cf4fa89e80a15283fa6a09",
+  "verdict": "correct",
+  "reason": "'Contract No: HQ0854-22-D-0001'; MDA 'intends to extend the ordering period ... and increase ceiling value'."
+ },
+ {
+  "notice_id": "d3934b74c2484484a6ce138eeeacbde4",
+  "verdict": "correct",
+  "reason": "'orders against a Basic Ordering Agreement BOA Number | N0010424GG101'. Note: the same number is also printed as 'Class J&A # | N0010424GG101'; order N0010425FG109 appears only in the file name and is not listed."
+ },
+ {
+  "notice_id": "f1dc11bfb473454a8d200d47680dc79b",
+  "verdict": "correct",
+  "reason": "'modifying BIM Task Order 5 (FA8726-26-F-B050) to absorb ... Task Order 6 (FA8726-26-F-B051)'; 'awarded ... under IDIQ FA8726-24-D-B019'."
+ },
+ {
+  "notice_id": "36f8bc3bae1d4fa3aa8f0a136444d0e9",
+  "verdict": "correct",
+  "reason": "'award an extension to contract number 80MSFC22CA004 with New Rights Group, Inc.'"
+ },
+ {
+  "notice_id": "903ff6edae4246d9b8dd353786ba24bd",
+  "verdict": "correct",
+  "reason": "'four separate out-of-scope ... UCA ... to Contract W9126G26CA011'; 'resulted in Modification P00001', 'Modification P00002', 'Modification P00004'."
+ },
+ {
+  "notice_id": "3145a25045e9466babcd0402ea4c2523",
+  "verdict": "correct",
+  "reason": "'Modification of Existing Purchase Order / Contract Number: 47QTCA18D0081 / 75FCMC22F0017'."
+ },
+ {
+  "notice_id": "c777dcb7597a457f808e77fdbe90c744",
+  "verdict": "correct",
+  "reason": "'award a sole source modification to add additional support to established ... task order SP4704-24-F-0098'. Missing: the STEPS BPA/GSA schedule numbers are not given in the context."
+ },
+ {
+  "notice_id": "4374a151f282469184ea417a91850d73",
+  "verdict": "unclear",
+  "reason": "Body says 'will be awarded under contract N00024-22-D-4412 as an CM, FFP delivery order N5005426FC006', which matches the list, but the header says 'EXCEPTION TO FAIR OPPORTUNITY UNDER IDIQ CONTRACT N00024-22-D-4413'. The document contradicts itself on the parent IDIQ."
+ },
+ {
+  "notice_id": "1893143dc2914c81866fef550443a0f5",
+  "verdict": "correct",
+  "reason": "'proposes to extend the ordering period of Contract 70RFPW19DW8000001, with Triple Canopy'."
+ },
+ {
+  "notice_id": "d759a8a4398048a99f200b9d805a122b",
+  "verdict": "correct",
+  "reason": "'This action will increase the scope of the BPAs'; BPAs listed: 'GS-02F-0185N 36C10X24A0004', '47QREA18D000Y 36C10X23A0011', 'GS-00F-283GA 36C10X23A0012'. Missing: the parent GSA schedule numbers."
+ },
+ {
+  "notice_id": "bf84ff86290b4caab129ac016310f3e3",
+  "verdict": "correct",
+  "reason": "'a modification to the contract W56KGY-20-D-0012 to extend the ordering period'."
+ },
+ {
+  "notice_id": "c443d81af9e3462c8abf14d225f8f276",
+  "verdict": "correct",
+  "reason": "'Capacity Increase for ... Single Award Task Order Contract (SATOC) No. W912EK-23-D-0011'."
+ },
+ {
+  "notice_id": "847dc3ae9f454c2f9c542efae9f5bc97",
+  "verdict": "correct",
+  "reason": "'award a firm-fixed-price contract modification to contract W911SF-21-C-0005 with DAWSON SOLUTIONS'."
+ },
+ {
+  "notice_id": "eea1e4739a69475e80e72e637c90effc",
+  "verdict": "unclear",
+  "reason": "HTC711-23-D-C025 is supported: 'proposed sole source task order against GWAC contract number HTC711-23-D-C025'. But 36C26326F0054 appears only in the attachment file name '[HTC711-23-D-C025 36C26326F0054_1.docx]'; the text never says it is the order this action awards."
+ },
+ {
+  "notice_id": "90afcbb8f748426790b231db8b3e61ac",
+  "verdict": "correct",
+  "reason": "'extend the period of performance for Contract N39430-20-D-2211 ... by 6 months'."
+ },
+ {
+  "notice_id": "72c4873798c44443b0e06fb8fdc3e8a6",
+  "verdict": "correct",
+  "reason": "'acquisition of an upgrade/replacement ... under Philips' Patient Monitoring Program contract, SPE2D1-19-D-0014'. Missing: order SPE2D126F0082 appears only in the file name."
+ },
+ {
+  "notice_id": "8015e2720e5746dbb4978fcabc00f226",
+  "verdict": "correct",
+  "reason": "'add two additional option years to this delivery order'; 'delivery order 73351022F0229 was awarded ... under NASA SEWP GWAC NNG15SD39B'. Missing (possibly): 47QACA25F0279 appears only as a pricing-sheet name."
+ },
+ {
+  "notice_id": "3960954a3b9741399542125846afbce0",
+  "verdict": "correct",
+  "reason": "'Contract Number: 47QTCA20D005Y Task Order Number: HC104721F0011'; action is 'a modification ... under the aforementioned TIBI contract/order'."
+ },
+ {
+  "notice_id": "408300be0abc484f87c079c463c18e8c",
+  "verdict": "correct",
+  "reason": "'Lease Number: | GS-07P-LTX00909 ... Lease Action Type: | Succeeding'."
+ },
+ {
+  "notice_id": "152774d6ffb64df4a60c095e174d888a",
+  "verdict": "correct",
+  "reason": "'via a modification to DLA J6 Enterprise Technology Services (JETS) Contract number: SP4709-17-D-0045/SP4709-23-F-0090'."
+ },
+ {
+  "notice_id": "c1fd5074744d434ab7e91b86789d764b",
+  "verdict": "correct",
+  "reason": "'services are currently supported under Contract HQ0034-20-F-0353 ... The Government intends to extend the current Period of Performance'."
+ },
+ {
+  "notice_id": "41a37079cafc415688ea05ad84f4f449",
+  "verdict": "correct",
+  "reason": "'BPA ... will be issued pursuant to the terms and conditions of the GSA MAS 47QRAA18D001Y' (parent schedule). Predecessor BPA 15BNAS20A00000068 correctly not listed; the new BPA number is not given."
+ },
+ {
+  "notice_id": "d51fae9ede5d4b9e8358dba53f6f136e",
+  "verdict": "correct",
+  "reason": "'Contract Number: 47QTCA19D00MV Blanket Purchase Agreement (BPA) Number/Modification: HC108421A0001/P00010' - copied as written; note it joins the BPA number and mod number in one entry. The follow-on IDIQ HC108424D0002 is correctly not listed."
+ },
+ {
+  "notice_id": "5cf83fed735043b4842557e9d2511559",
+  "verdict": "correct",
+  "reason": "'issued an award no. 36C24826P1254, M&H Transformation Partners'."
+ },
+ {
+  "notice_id": "1d5da6f06f294473bfdd8fb2b7cae963",
+  "verdict": "correct",
+  "reason": "'Joint Warfighting Cloud Capability (JWCC) Contract Number: HC105023D0005 Task Order (TO) Number: HC105025F0032'."
+ },
+ {
+  "notice_id": "32f6f64d721f49798e6af5131d9fcd10",
+  "verdict": "correct",
+  "reason": "'Schedule GS-00F-218CA Order 15PAAM26F00000003'; 'issue a task order ... under Federal Supply Schedule (FSS) contract GS-00F-218CA'."
+ },
+ {
+  "notice_id": "fa7ba08334f5475ebcb2502cacc943da",
+  "verdict": "correct",
+  "reason": "'request approval to award the MATOC ... task order W9124J-25-F-A123 as a Sole Source logical follow on'. Missing: the parent MATOC number is not given in the context."
+ },
+ {
+  "notice_id": "04a61e905ae44ec5bd810380c80cbdb5",
+  "verdict": "correct",
+  "reason": "'intends to award a task order under an indefinite-delivery indefinite-quantity vehicle ... under contract number GS00Q17OADS0010'."
+ },
+ {
+  "notice_id": "83a963f5b0a34db78e9bd4f7f4a836ef",
+  "verdict": "correct",
+  "reason": "'purchase Pentax Endoscopy Equipment and accessories on contract 36C24222F0215'; 'Order against: FS ... 36F79721D0031'. Missing/caveat: 36C24225F0086 appears in the file name and may be the new order; the text never says so."
+ }
+]

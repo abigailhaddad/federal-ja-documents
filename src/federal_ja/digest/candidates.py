@@ -29,6 +29,7 @@ Candidate rules (``select_candidates``, a pure function, tested):
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -52,8 +53,11 @@ NOTICE_COLS = ("notice_id", "sam_link", "title", "agency", "sub_tier", "office",
 # passed the extraction's own quote checks; the summary is model-written.
 EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "estimated_value_usd", "value_basis",
                      "value_redacted", "value_quote", "garbled_text_layer", "redaction_evidence",
-                     "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
+                     "authority_cited", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
+# Not shown (2026-11-12): urgency_trigger and bridge_or_extension failed their sample checks
+# (docs/checks/main_fields), so the ranking model no longer sees them, not even as hints.
+# prior_extension_count is published only when the document states the number.
 # The second call's published columns (2026-11-11): only fields that held up when
 # 30 random notices each were read against the document (docs/extras.md).
 CHECKED_FIELDS = ("contractor_named", "gao_protest_numbers", "ceiling_prior_usd", "ceiling_increase_usd",

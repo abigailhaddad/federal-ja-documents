@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "82f02cb18f1940eda0900974557efe7c",
+  "verdict": "correct",
+  "reason": "\"Bridge Contract for Architecture/Engineering for the continuation of design services\"; prior IDIQ \"lapsed\"; \"Period of Performance: 12 Months\"."
+ },
+ {
+  "notice_id": "70a737e34e22423881c11e2c6dfcaa6e",
+  "verdict": "correct",
+  "reason": "\"procuring this follow-on as a short-term bridge task order to facilitate ... a competitive follow-on contract\"; \"bridge period not to exceed one year\"."
+ },
+ {
+  "notice_id": "f1346b47ae114ecdb89d92c5d9bb2eff",
+  "verdict": "unclear",
+  "reason": "The action is an IDIQ capacity (NTE) increase that also adds LID scope (\"Issue #2\"). Part of the increase pays for a contingency six-month option (\"Exercising Option Year 5 (OY5)... is a contingency plan\"; \"needing this six month bridge to cover the gap\"). Whether the capacity increase itself counts as a bridge is a judgment call."
+ },
+ {
+  "notice_id": "e5ff9fe12ba34423989fa494ca4f1bdc",
+  "verdict": "correct",
+  "reason": "\"out-of-scope modification to an existing task order\"; \"construction was delayed necessitating an extension to the period of performance for temporary solution\"; \"extend the Period of Performance (PoP) for up to 12 months\"."
+ },
+ {
+  "notice_id": "729c4446dfa2488ea7a0c5a679a70be5",
+  "verdict": "correct",
+  "reason": "\"A short-duration sole source bridge is required to ensure continuity ... while the competitive process is completed\"."
+ },
+ {
+  "notice_id": "99bea877d2f948ffbb04800b20ffc03c",
+  "verdict": "wrong",
+  "reason": "This action is a ceiling increase to a five-year brand-name class J&A (\"This modification will increase the current ceiling\"; \"Brand Name Class Justification for Software Support\"; \"five years ... January 1, 2021 ... through December 31, 2025\"). It does not extend the term or bridge to a competitive follow-on; \"until a follow resolution or new Justification\" only means until the existing J&A expires."
+ },
+ {
+  "notice_id": "a9a67173ef11465e8a2ef46c5fc968ad",
+  "verdict": "correct",
+  "reason": "\"approval is requested to extend the current contract ... by up to 11.5 months\"; \"allow GSA AAS and USSOCOM J3I the time necessary to ... scope a competitive effort\"."
+ },
+ {
+  "notice_id": "b2ac869cecae4f3e838f33aaad0299d0",
+  "verdict": "correct",
+  "reason": "\"The objective is to issue a one-year bridge contract with the incumbent contractor\"."
+ },
+ {
+  "notice_id": "ef6da5b4bd9b45e6aac67d584970bea2",
+  "verdict": "correct",
+  "reason": "\"The sole source bridge contract to ECSI will ensure continuation of critical services while FSA awaits the results of a Court of Federal Claims protest\"; \"6-month base period with four 3-month options for a total of 18 months\". 18 months is long for a bridge, but it is explicitly a stop-gap until a competed award."
+ },
+ {
+  "notice_id": "a726ba40982a4ad9ad80d131e3b7e528",
+  "verdict": "correct",
+  "reason": "\"award, on a sole-source basis, a bridge contract to the incumbent\"; \"while the Government completes a full and open competition for the follow-on requirement\"."
+ },
+ {
+  "notice_id": "82d7fec932e142908fee04715909d8ba",
+  "verdict": "correct",
+  "reason": "\"sole-source, short-term, fixed price task order\"; \"12 months: 6/1/2026 - 5/31/2027\"; \"permit the Government sufficient time to ... complete an open market competitive procurement\"."
+ },
+ {
+  "notice_id": "5e6b435738b24553b480e192ec14aa86",
+  "verdict": "correct",
+  "reason": "\"The bridge task order will include a six (6) month base period and a six (6) month extension of services option in accordance with FAR 52.217-8\", until transition to AFMS3."
+ },
+ {
+  "notice_id": "62a132f56b3b422db3109f144a295f74",
+  "verdict": "correct",
+  "reason": "\"extend the ordering period ... for a total of 12 months\"; \"zero-dollar extension\"; \"no gaps in service while a follow-on contract is processed and awarded\"."
+ },
+ {
+  "notice_id": "ef5d9e9e35c64130af7568c29839e860",
+  "verdict": "correct",
+  "reason": "\"award of a bridge action by contract modification\"; \"three-month base period and three, one-month options\"; \"All options and extension periods ... exhausted\"."
+ },
+ {
+  "notice_id": "228d59a3cbe3460db2cd2443d790376f",
+  "verdict": "correct",
+  "reason": "\"award a 12-month bridge Blanket Purchase Agreement (BPA)\" \"to avoid a lapse in essential building services\"."
+ },
+ {
+  "notice_id": "074d448e1d8d4a1bb85a94a611f4ff91",
+  "verdict": "unclear",
+  "reason": "It is an extension of an existing order (\"modifying the current task order W519TC-24-F-0176 to extend the Period of Performance\"; \"Performance will need to continue beyond 30 March 2025\"). But the text given does not state the length of the extension, and does not say it is a stop-gap until a follow-on, so \"short-term\" cannot be confirmed."
+ },
+ {
+  "notice_id": "db5405883600482f83976689d0f6f35a",
+  "verdict": "correct",
+  "reason": "Stop-gap contracts to the two incumbents: \"keeping their production lines for these boots open until the competitive contract is awarded\"; \"A competitive, long-term acquisition was recently synopsized\". The authority is industrial mobilization, not continuity of service."
+ },
+ {
+  "notice_id": "20a5bde6253c410a8431761f75c426ef",
+  "verdict": "wrong",
+  "reason": "This extends a sole-source sustainment contract's ordering period for about five more years with no planned follow-on: \"FY25-FY29 Updated Estimate\"; \"no plans for successor technology are currently in place\"; \"NSWC Crane cannot pursue competitive acquisition\". That is a long-term extension, not a bridge or stop-gap."
+ },
+ {
+  "notice_id": "1a73433674fa485da43c2d33ba7c3b4d",
+  "verdict": "correct",
+  "reason": "\"This contract is a temporary measure, and the Government is fully committed to securing the next follow-on ... through competition\"; \"necessary for the continuation of critical security services previously rendered under contract N3220523C4141\"."
+ },
+ {
+  "notice_id": "af29f6cfa71a44348f252c29aedcf3e5",
+  "verdict": "correct",
+  "reason": "\"a sole-source bridge action is required ... to ensure continuity of services\"; \"this bridge action will provide the limited period of performance necessary to complete that competition\". It is a base year plus an option year."
+ },
+ {
+  "notice_id": "7ef9161aebb2425ab6043697f5e9c8d4",
+  "verdict": "correct",
+  "reason": "\"continue services with the incumbent contractor ... for a period of three months\"; \"short-term emergency requirement until long term contract is complete\"."
+ },
+ {
+  "notice_id": "85ee0995cb3d42119bc0b36b46f11a9b",
+  "verdict": "unclear",
+  "reason": "A \"24-month logical follow-on including the three-month transition out option period\" to the incumbent, followed by re-competition (\"CCIIO plans to re-compete ... at the end of the 24-month logical follow-on\"). The text never calls it a bridge, and at two years it is not clearly short-term. Reasonable readers could call it either a stop-gap or a multi-year sole-source follow-on."
+ },
+ {
+  "notice_id": "fc3ada26ae05497f832eb294d2d55fd1",
+  "verdict": "correct",
+  "reason": "\"A one-year contract is being requested to cover services until the new VISN contract is awarded.\" The document calls it a \"new requirement\", but it is a one-year stop-gap."
+ },
+ {
+  "notice_id": "dbe6aa6d695449d4b0ae70129f645452",
+  "verdict": "correct",
+  "reason": "\"modify the existing GSA Schedule Task Order ... to extend Mechanical Maintenance Services pursuant to FAR 52.217-8\"; \"This limited extension is temporary\"."
+ },
+ {
+  "notice_id": "97d46fe2c11e4c4eb3a2fb3bf46daf4f",
+  "verdict": "correct",
+  "reason": "\"interim three-month extension of contract W91151-21-C-0003 is required while the competitive follow-on procurement is finalized\"."
+ },
+ {
+  "notice_id": "3da75468e717402496cbd09b7a62845b",
+  "verdict": "correct",
+  "reason": "The action is a ceiling increase plus a 12-month PoP extension (\"cover the TO until 11 March 2026\"; \"two-month base ... and five two-month options\") \"while the follow-on requirement is being processed\". The cited quote refers to an earlier 52.217-8 extension, but the current action is also a short-term extension."
+ },
+ {
+  "notice_id": "de511a3c08f7419ba309cfecda89152d",
+  "verdict": "correct",
+  "reason": "\"extend the period of performance from May 13, 2026 to June 12, 2026 ... until the follow-on award can be made\"."
+ },
+ {
+  "notice_id": "1632e9ba608945e5b22282702c3cb0c8",
+  "verdict": "correct",
+  "reason": "\"noncompetitive task order extension, via the FAR Clause 52.217-8\"; \"extended from September 2, 2026, to December 1, 2026\"; \"bridge contract extension\"."
+ },
+ {
+  "notice_id": "ad37e4fef707475eb4a3e9c8fea0e1b8",
+  "verdict": "wrong",
+  "reason": "A 36.83% ($152,779,419) ceiling increase \"to sustain operations through Option Periods Two through Four\" of the existing task order. The document's own words are \"acts as a critical operational bridge\", but the action funds the order's remaining multi-year option periods. It does not extend the order's term and is not short-term."
+ },
+ {
+  "notice_id": "78ecac7b794d4a5cb558e5bf8627965f",
+  "verdict": "wrong",
+  "reason": "\"extension of the duration of ordering period of five Blanket Purchase Agreements ... by two years, from June 2, 2026 to June 1, 2028\". The stated purpose is to recompete orders under these BPAs (\"conduct a competitive process among the existing BPA holders\"), not to bridge to a competitive follow-on BPA. A two-year extension is not short-term."
+ }
+]

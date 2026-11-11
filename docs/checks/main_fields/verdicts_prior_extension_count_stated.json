@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "bf86098c5ae447d4abd04e3dee15427c",
+  "verdict": "correct",
+  "reason": "value 2: 'first bridge contract ... SPE300-24-D-4000', 'A second bridge was awarded', 'award of a third bridge contract' -> 2 prior"
+ },
+ {
+  "notice_id": "925b924e48d84c958d679ed996284180",
+  "verdict": "correct",
+  "reason": "value 1: 'This is the second bridge contract requested for this service' -> 1"
+ },
+ {
+  "notice_id": "6a375e2c99904f00bf5a124664462a3c",
+  "verdict": "correct",
+  "reason": "value 6: history lists first through 'sixth (current) bridge contract'; 'will be the seventh bridge contract' -> 6"
+ },
+ {
+  "notice_id": "38a9eb1ba79240aabb405ebf1d8b6fd0",
+  "verdict": "correct",
+  "reason": "value 2: 'This is the third bridge contract for this requirement' -> 2"
+ },
+ {
+  "notice_id": "638f7cea62bf4e7ab59b847b41d33033",
+  "verdict": "correct",
+  "reason": "value 7: history lists first through 'seventh (current) bridge contract'; 'will be the eighth bridge contract' -> 7"
+ },
+ {
+  "notice_id": "17998a9fc2a2458ca7ea8414d7245954",
+  "verdict": "correct",
+  "reason": "value 7: history lists first through 'seventh (current) bridge contract'; 'will be the eighth bridge contract' -> 7"
+ },
+ {
+  "notice_id": "6febc29cbed148cd935f73a906586916",
+  "verdict": "correct",
+  "reason": "value 5: history lists first through 'fifth (current) bridge contract'; 'will be the sixth bridge contract' -> 5"
+ },
+ {
+  "notice_id": "acf97cabf8fe4173b7d2b6ecd9a5ffff",
+  "verdict": "unclear",
+  "reason": "value 1: 'second three-month bridge contract' gives 1, but the document also says 52.217-8 'has already been used to extend the current contract from 1 January 2025 to 30 June 2025'; counting earlier bridges OR extensions could give 2"
+ },
+ {
+  "notice_id": "5165444d401345bfad87b2784814e6ad",
+  "verdict": "correct",
+  "reason": "value 1: one prior bridge order (75N97025F00053, PoP 06/01/25-05/31/26); 'The order number for this second bridge contract/order action' -> 1; option periods 2-4 are periods of this action, not prior bridges"
+ },
+ {
+  "notice_id": "dffc49531758474c8abf6e13da1e824d",
+  "verdict": "correct",
+  "reason": "value 1: same text as the other STSS notice: one prior bridge order; 'this second bridge contract/order action' -> 1"
+ },
+ {
+  "notice_id": "9b114ae9b27542dab322075cc3107c54",
+  "verdict": "correct",
+  "reason": "value 2: 'This is the third bridge request for this contract'; title 'THIRD BRIDGE MODIFICATION' -> 2"
+ },
+ {
+  "notice_id": "f16733276ab34abcb161f5bf8e56bac7",
+  "verdict": "correct",
+  "reason": "value 1: 'This represents a second and final extension' -> 1; nothing in context lists more earlier extensions"
+ },
+ {
+  "notice_id": "bc12e5703bf24edd957784446c380503",
+  "verdict": "correct",
+  "reason": "value 6: history lists first through 'sixth (current) bridge contract'; 'will be the seventh bridge contract' -> 6"
+ },
+ {
+  "notice_id": "c93ee22b80454d5394ec921769af76cc",
+  "verdict": "correct",
+  "reason": "value 4: 'will result in the award of a fifth bridge contract to the incumbent, OFI'; file name 'Bridge 5' -> 4 (history redacted, no contradiction visible)"
+ },
+ {
+  "notice_id": "90868f763f1143bc9f80ee447d9410fa",
+  "verdict": "correct",
+  "reason": "value 6: history lists first through 'sixth (current) bridge contract'; 'will be the seventh bridge contract' -> 6"
+ },
+ {
+  "notice_id": "95b7a5af64dc4422b456e21ae52d0f45",
+  "verdict": "correct",
+  "reason": "value 2: 'FOR THIRD BRIDGE MODIFICATION SOLE SOURCE AWARD' -> 2"
+ },
+ {
+  "notice_id": "2a83c29c9af94bf1ada00c009c12ac0f",
+  "verdict": "correct",
+  "reason": "value 7: history lists first through 'seventh (current) bridge contract'; 'will be the eighth bridge contract' -> 7"
+ },
+ {
+  "notice_id": "3d50bc8286c8471fb290d2fced9e9ab3",
+  "verdict": "correct",
+  "reason": "value 1: 'This second bridge action by contract modification will extend the period of performance to August 31, 2026' -> 1; three-month option is part of this action"
+ },
+ {
+  "notice_id": "cb890447f40448d8ad865f3339b93634",
+  "verdict": "correct",
+  "reason": "value 4: history lists first through 'fourth (current) bridge contract'; 'will be the fifth bridge contract' -> 4"
+ },
+ {
+  "notice_id": "b639ac1a7e9e40d39a1013cbc62220be",
+  "verdict": "correct",
+  "reason": "value 5: history lists first through 'fifth (current) bridge contract'; 'will be the sixth bridge contract' -> 5"
+ },
+ {
+  "notice_id": "bfae3cb706914a5284b82bac5f7bdbb3",
+  "verdict": "correct",
+  "reason": "value 5: history lists first through 'fifth (current) bridge contract'; 'will be the sixth bridge contract' -> 5"
+ },
+ {
+  "notice_id": "12fb78f6f5664ea782df338c98409049",
+  "verdict": "correct",
+  "reason": "value 1: 'The need for a second bridge contract'; title '2nd Bridge' -> 1"
+ },
+ {
+  "notice_id": "34ff3e009d7548d7850228c3c095828a",
+  "verdict": "correct",
+  "reason": "value 5: history lists first through 'fifth (current) bridge contract'; 'will be the sixth bridge contract' -> 5"
+ },
+ {
+  "notice_id": "8b9eeda0467140ba9a9749a1e6381ab0",
+  "verdict": "correct",
+  "reason": "value 1: doc is JA23-110 MOD 02, a value increase ('estimated value for this bridge extension') on the MOD 01 bridge (Feb 1-Jul 31, 2025), which the doc calls 'The proposed second bridge of the current task order'; first bridge was Oct 2023-Jan 2025 -> 1"
+ },
+ {
+  "notice_id": "b8242f6fd1b843d7b0e8ea53c99e58b9",
+  "verdict": "correct",
+  "reason": "value 3: 'The proposed fourth bridge of the current task order'; prior bridges Oct 2023-Jan 2025, 'second bridge' Feb-Jul 2025, 'third bridge' Aug 2025-Jan 2026 -> 3"
+ },
+ {
+  "notice_id": "4b44b0be4d3b44ef896ee3871152cc42",
+  "verdict": "unclear",
+  "reason": "value 1: context says 'thus the need for a second three-month bridge contract' (-> 1) but gives no period of performance; the same requirement's 25PA052 determination already called the 1 Oct-31 Dec 2025 action the 'second three-month bridge', and this is control 26PA009, so this may be a later (third) bridge with reused wording; context cannot settle it"
+ },
+ {
+  "notice_id": "e128bfbd84c34a54837081b18474b26f",
+  "verdict": "unclear",
+  "reason": "value 3: quote says 'this fourth START contract bridge extension' (-> 3), but the 'Previous Bridge' section lists only 'a one-month bridge extension followed by a five-month extension' (2 prior); earlier bridges may exist outside the context, so the stated ordinal and described history conflict"
+ },
+ {
+  "notice_id": "21c3100e6d1945ba98a9f1f404886159",
+  "verdict": "correct",
+  "reason": "value 1: 'This action will be a second bridge action to a contract' -> 1"
+ },
+ {
+  "notice_id": "04a7ee9f41704e84b32aae3afe9b60cb",
+  "verdict": "correct",
+  "reason": "value 4: history lists first through 'fourth (current) bridge contract'; 'will be the fifth bridge contract' -> 4"
+ },
+ {
+  "notice_id": "04b1a7e56ca4421eaebd23c7fb318b59",
+  "verdict": "correct",
+  "reason": "value 8: history lists first through 'eighth (current) bridge contract'; 'will be the ninth bridge contract' -> 8"
+ }
+]
