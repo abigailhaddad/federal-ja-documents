@@ -1,0 +1,60 @@
+# Changes to the fields the email, this site and the dataset show, newest first.
+# Rendered as changelog.html on https://woah-jas.abigailhaddad.com by digest/site.py.
+#
+# Add an entry whenever a published field is added, removed, renamed, or changes
+# what it means or how it is checked; in the same pull request as the change.
+# Keys: date (YYYY-MM-DD, the day it went live), where ("Email and website",
+# "Dataset" or both), title, text (plain sentences; say what changed and why,
+# with a count where there is one), link (the pull request or commit).
+
+entries:
+  - date: "2026-11-10"
+    where: "Email and website"
+    title: '"Value redacted" only where the document marks a redaction'
+    text: >-
+      The value slot says "value redacted" only when the document marks a redaction: a [REDACTED]
+      marker in the text, or a file named as redacted. Where the text shows only a blank where the
+      figure belongs, it now says "value blank or redacted", because a black box and an empty field
+      look the same in a PDF's text. Of the 6,958 notices that showed "value redacted", 223 had no
+      such mark.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/pull/45"
+
+  - date: "2026-11-10"
+    where: "Email and website"
+    title: "Every dollar figure says what it is; nothing shown from scrambled text"
+    text: >-
+      Each figure in the notice list now carries its basis (total incl. options, base period only,
+      modification/increase, ceiling, per year/period), as the picks already did, so a ceiling
+      increase, a yearly rent and a contract total no longer look alike. A figure with no label that
+      would be true is not shown. For documents whose PDF text layer is scrambled, vendor, value and
+      authority are left blank: on November 6, six VA notices read "value redacted" although each
+      document states its value.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/pull/44"
+
+  - date: "2026-11-10"
+    where: "Email and website"
+    title: "Vendor lists every firm the justification names"
+    text: >-
+      The vendor slot now lists every firm the justification names, with the count ("A; B; C (3
+      firms named)"), instead of only the first. Showing the first firm alone made a notice with
+      several approved sources read as a sole source. 715 notices in the extraction table name more
+      than one firm.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/pull/42"
+
+  - date: "2026-10-26"
+    where: "Dataset"
+    title: "Non-J&A notices moved out of the extraction table"
+    text: >-
+      analysis/extractions.parquet no longer includes Special Notices that don't look like a
+      justification (most are notices of intent to sole source) or notices whose documents contain no
+      J&A. They are kept in analysis/extractions_excluded.parquet with the reason, so nothing is lost.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/commit/da11022"
+
+  - date: "2026-10-21"
+    where: "Email and website"
+    title: "First issues"
+    text: >-
+      Each email lists every new notice with a one-line summary written by Claude (not checked
+      against the document), and picks out at most five. Vendor, value and authority in the list come
+      only from extraction fields whose quotes were checked against the document.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/commit/86bd6b9"
