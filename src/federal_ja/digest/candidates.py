@@ -53,10 +53,11 @@ NOTICE_COLS = ("notice_id", "sam_link", "title", "agency", "sub_tier", "office",
 # passed the extraction's own quote checks; the summary is model-written.
 EXTRACTION_FIELDS = ("is_ja", "vendor", "vendor_quote", "additional_vendors", "estimated_value_usd", "value_basis",
                      "value_redacted", "value_quote", "garbled_text_layer", "redaction_evidence",
-                     "authority_cited", "urgency_trigger", "bridge_or_extension", "prior_extension_count",
+                     "authority_cited", "prior_extension_count",
                      "is_letter_contract", "funding_sources", "summary_model_written", "extract_version")
-# Read from record_json when the table has no such column (see extractions()).
-RECORD_HINTS = ("urgency_trigger", "bridge_or_extension", "prior_extension_count")
+# Not shown (2026-11-12): urgency_trigger and bridge_or_extension failed their sample checks
+# (docs/checks/main_fields), so the ranking model no longer sees them, not even as hints.
+# prior_extension_count is published only when the document states the number.
 # The second call's published columns (2026-11-11): only fields that held up when
 # 30 random notices each were read against the document (docs/extras.md).
 CHECKED_FIELDS = ("contractor_named", "gao_protest_numbers", "ceiling_prior_usd", "ceiling_increase_usd",
@@ -309,13 +310,6 @@ class DatasetReader:
         out = {}
         for r in df.to_dict("records"):
             e = {k: _clean(r.get(k)) for k in EXTRACTION_FIELDS if k in r}
-            # Hints no longer published as columns (2026-11-12, they failed their sample checks)
-            # come from the stored record, so the ranking model still sees them, labelled as hints.
-            if any(k not in r for k in RECORD_HINTS) and _clean(r.get("record_json")):
-                rf = json.loads(r["record_json"]).get("fields") or {}
-                for k in RECORD_HINTS:
-                    if k not in e and rf.get(k) not in (None, "", []):
-                        e[k] = rf[k]
             facts = checked_facts(r)
             if facts:
                 e["checked_facts"] = facts

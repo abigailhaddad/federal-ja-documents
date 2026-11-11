@@ -1233,6 +1233,39 @@ def _person_label(p: dict) -> str:
     return f"{who} ({extra})" if extra else who
 
 
+
+# prior_extension_count is published only when its quote states the number (2026-11-12): an ordinal
+# before the noun ("the fifth bridge" -> 4 earlier) or a count of the noun ("two additional three-month
+# extensions" -> 2). On a random 30 of all values, the 14 stated this way were all right; the others
+# (a single extension mentioned, a count added up from a history) were 11 right and 5 unclear.
+_EXTC_ORDINALS = {w: i for i, w in enumerate(
+    "first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth "
+    "fifteenth sixteenth seventeenth eighteenth nineteenth twentieth".split(), 1)}
+_EXTC_CARDINALS = {w: i for i, w in enumerate("one two three four five six seven eight nine ten eleven twelve".split(), 1)}
+_EXTC_NOUN = r"(?:bridges?|extensions?|option\s+exercises?|bridge\s+(?:contracts?|actions?|task\s+orders?|orders?))"
+_EXTC_GAP = r"(?:[\w\-]+[\s,]+){0,3}?"   # "second short-term bridge"
+_EXTC_DURATION = r"[\s\-]*(?:\(\d+\)[\s\-]*)?(?:months?|years?|days?|weeks?)\b"   # "six (6) month": a length
+
+
+def stated_extension_counts(quote: str | None) -> set[int]:
+    """Numbers of earlier bridges/extensions the quote states. Durations are not counts."""
+    q = (quote or "").lower()
+    out: set[int] = set()
+    for m in re.finditer(r"(?<![\d.\-])\b(" + "|".join(_EXTC_ORDINALS) + r"|(\d{1,2})(?:st|nd|rd|th))\b(?=[\s,]+" + _EXTC_GAP + _EXTC_NOUN + ")", q):
+        out.add((_EXTC_ORDINALS.get(m.group(1)) or int(m.group(2))) - 1)
+    for m in re.finditer(r"(?<![\d.\-])\b(" + "|".join(_EXTC_CARDINALS) + r"|\d{1,2})\b(?!" + _EXTC_DURATION + r")(?![.\-]\d)(?=[\s,]+" + _EXTC_GAP + _EXTC_NOUN + ")", q):
+        out.add(_EXTC_CARDINALS[m.group(1)] if m.group(1) in _EXTC_CARDINALS else int(m.group(1)))
+    return out
+
+
+def published_extension_count(value, quote: str | None) -> int | None:
+    """The count, only when the quote states that number."""
+    try:
+        v = int(float(value))
+    except (TypeError, ValueError):
+        return None
+    return v if v in stated_extension_counts(quote) else None
+
 def flat_row(rec: dict, meta: dict) -> dict:
     f = rec["fields"]
     a = f["authorities"]
@@ -1272,9 +1305,13 @@ def flat_row(rec: dict, meta: dict) -> dict:
         "redaction_evidence": _redaction_evidence(rec),
         "redaction_quote": f["redaction_quote"],
         "notes_model_written": f["notes"],
+        "prior_extension_count": (n := published_extension_count(f.get("prior_extension_count"),
+                                                                  f.get("prior_extension_count_quote"))),
+        "prior_extension_count_quote": f.get("prior_extension_count_quote") if n is not None else None,
         # Not published (2026-11-12): need_by_date, stated_pop_limit_days, market_research_methods,
-        # bridge_or_extension, prior_extension_count, contract_types and urgency_trigger failed their
-        # random-sample checks (docs/checks/main_fields/). They stay in record_json.
+        # bridge_or_extension, contract_types and urgency_trigger failed their random-sample checks
+        # (docs/checks/main_fields/). They stay in record_json. prior_extension_count is published
+        # only where the document states the number (published_extension_count).
         "covered_piids": "; ".join(f.get("covered_piids") or []) or None,
         "incumbent_piid": f.get("incumbent_piid"),
         "incumbent_piid_quote": f.get("incumbent_piid_quote"),

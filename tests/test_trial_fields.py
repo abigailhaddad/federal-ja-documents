@@ -75,3 +75,19 @@ def test_trial_no_values(doc):
     f, _ = run(doc, facts=[F("bridge", "no", '""'), F("letter_contract", "No")])
     assert (f["bridge_or_extension"], f["is_letter_contract"], f["prior_extension_count"], f["urgency_trigger"]) == \
         ("no", "no", None, None)
+
+
+def test_extension_count_published_only_when_stated():
+    pub = extract.published_extension_count
+    assert pub(4, "The proposed action will be the fifth bridge contract for the South Central Region Zone 1.") == 4
+    assert pub(0, "This is the first bridge request for this contract.") == 0
+    assert pub(1, "is to award a second short-term bridge contract to the incumbent") == 1
+    assert pub(2, "Two additional three-month extensions were executed under FAR 52.217-8") == 2
+    assert pub(2, "utilized the full six months available under FAR 52.217-8 through two separate extensions.") == 2
+    # a duration is not a count; a single extension mentioned is not a stated number
+    assert pub(1, "is currently performing under a six (6) month extension in accordance with FAR 6.302-1") is None
+    assert pub(1, "BTI is currently performing under the twelve-month (12) month extension") is None
+    assert pub(1, "was previously extended by 12 months to address initial recompete delays") is None
+    # the number must match what the quote states
+    assert pub(3, "The proposed action will be the fifth bridge contract") is None
+    assert pub(None, "the fifth bridge") is None

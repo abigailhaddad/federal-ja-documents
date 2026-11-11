@@ -21,7 +21,8 @@ errors. 25 of 30 was not enough there either.
 | `covered_piids` | 28 | 0 | 2 | published (both unclear: the document gives two different numbers) |
 | `is_letter_contract` = yes | 28 | 1 | 1 | published (the wrong one definitizes an earlier letter contract) |
 | `funding_sources` | 27 | 0 | 3 | published: nothing wrong; the 3 unclear are generic names copied as written ("IT Funds") |
-| `prior_extension_count` | 25 | 0 | 5 | removed: the unclear ones may be wrong numbers; the 14 with an explicit count or ordinal were all right, so a version limited to those could come back after its own check |
+| `prior_extension_count`, all values | 25 | 0 | 5 | not published as read: the unclear ones may be wrong numbers |
+| `prior_extension_count`, only where the quote states the number | 27 | 0 | 3 | published (72 of 189 values). A fresh random 30 of the kept values (`prior_extension_count_stated.json`); in the first sample the rule kept 15, 14 right and 1 unclear. The 3 unclear match the document's own ordinal but the document may count a 52.217-8 extension separately or conflict with its history |
 | `bridge_or_extension` = yes | 23 | 4 | 3 | removed: ceiling increases and multi-year extensions called bridges ("no": 10 of 10 right) |
 | `need_by_date` | 19 | 7 | 4 | removed: requested delivery dates on order forms taken as deadlines |
 | `stated_pop_limit_days` | 18 | 11 | 1 | removed: the FAR 52.217-8 six-month option taken as a cap on the whole contract |

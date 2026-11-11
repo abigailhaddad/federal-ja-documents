@@ -128,8 +128,7 @@ def _ext_line(e: dict) -> str:
     bits = []
     for k, label in (("is_ja", "is a J&A"), ("vendor", "vendor"), ("additional_vendors", "other firms the document names as sources"),
                      ("authority_cited", "authority"),
-                     ("urgency_trigger", "urgency trigger"), ("bridge_or_extension", "bridge/extension"),
-                     ("prior_extension_count", "prior extensions"), ("is_letter_contract", "letter contract"),
+                     ("prior_extension_count", "prior extensions (stated in the document)"), ("is_letter_contract", "letter contract"),
                      ("funding_sources", "funding")):
         v = e.get(k)
         if v not in (None, "", []):

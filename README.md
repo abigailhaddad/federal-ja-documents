@@ -302,6 +302,7 @@ rely on against the document.
 | `redaction_significant` | `yes` / `no` / `unclear`: the model's judgement whether the redactions remove substance (value, prices, rationale, vendor, market-research results) rather than only names and contact details |
 | `people_named`, `people_signature_block`, `people_redacted_blocks`, `people_json` | every person the document names (signers, approvers, reviewers, points of contact, vendor staff, anyone else); the subset in signature, approval and review blocks; the number of those blocks whose name is redacted; and the full list, each with name, title, organization, role, a one-sentence description (model-written), a redacted flag and the quote |
 | `covered_piids`, `incumbent_piid` | contract, order or modification numbers this action awards, modifies, extends or is placed under; the current or predecessor contract (random samples of 30: `incumbent_piid` 30 right; `covered_piids` 28 right, 2 unclear where the document gives two different numbers, none wrong; lists can miss numbers that appear only in file names) |
+| `prior_extension_count` (`_quote`) | how many earlier bridges or extensions the document states, only when its quote states the number ("the fifth bridge" gives 4, "two separate extensions" gives 2); 72 of the 189 counts the model read. Two random samples: 41 of 45 right, 4 unclear (the document's own count may leave out a 52.217-8 extension), none wrong |
 | `is_letter_contract` | whether it is a letter contract or undefinitized action (`yes` checked: 28 of 30 right in a random sample) |
 | `funding_sources` | the named appropriation(s) or fund(s), as written (random sample of 30: 27 right, 3 unclear because the name is generic, such as "IT Funds"; none wrong) |
 
@@ -313,14 +314,13 @@ prompt), `checks_version`, `model` and `dataset_revision`, and lists in
 `values_dropped_by_checks` anything the checks removed. Notices with no
 usable text have `status` `skipped` and a `skip_reason`.
 
-**Not published** (removed 2026-11-12). Seven fields the extraction still asks for are no longer
+**Not published** (removed 2026-11-12). Six fields the extraction still asks for are no longer
 columns, because they failed random-sample checks against the documents (each of 30 values read by
 Claude subagents, not a person; files in [docs/checks/main_fields](docs/checks/main_fields)):
 `need_by_date` (19 of 30 right: requested delivery dates on order forms taken as deadlines),
 `stated_pop_limit_days` (18 of 30: the six-month extension option of FAR 52.217-8 taken as a cap on the
 whole contract), `urgency_trigger` (17 of 30), `bridge_or_extension` (23 of 30 "yes" right: ceiling
-increases and multi-year extensions called bridges), `prior_extension_count` (25 of 30, the rest unclear),
-`market_research_methods` (77-84% of codes right in the October validation) and `contract_types` (11 of 18
+increases and multi-year extensions called bridges), `market_research_methods` (77-84% of codes right in the October validation) and `contract_types` (11 of 18
 stated types found). The model's answers for them are still in `record_json`, unchecked.
 
 **Known weak spots** (validation numbers in [docs/field_extraction.md](https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/field_extraction.md)):

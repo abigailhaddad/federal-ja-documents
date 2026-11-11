@@ -10,18 +10,28 @@
 entries:
   - date: "2026-11-12"
     where: "Dataset"
-    title: "Seven fields no longer published"
+    title: "Six fields no longer published; extension counts only where stated"
     text: >-
       Fields from the main extraction that had only been checked on a handful of cases were each read
       against the document on a random sample of 30. Removed from analysis/extractions.parquet:
       need_by_date (19 of 30 right), stated_pop_limit_days (18 of 30), urgency_trigger (17 of 30),
-      bridge_or_extension (23 of 30 "yes" right), prior_extension_count (25 of 30, the rest unclear),
-      and, on their earlier validation, market_research_methods (77-84% of codes right) and
-      contract_types (11 of 18 types found). Kept after the same check: incumbent_piid (30 of 30),
-      covered_piids (28, none wrong), is_letter_contract (28 of 30) and funding_sources (27, none wrong).
-      The model's answers stay in record_json, unchecked. The email's ranking model still sees the
-      bridge, urgency and extension-count answers as hints to check against the text, as before.
+      bridge_or_extension (23 of 30 "yes" right), and, on their earlier validation,
+      market_research_methods (77-84% of codes right) and contract_types (11 of 18 types found).
+      prior_extension_count (25 of 30, the rest unclear) is now published only when the document states
+      the number ("the fifth bridge", "two separate extensions"): 72 of 189 counts, 41 of 45 right in two
+      samples, none wrong. Kept after the same check: incumbent_piid (30 of 30), covered_piids (28, none
+      wrong), is_letter_contract (28 of 30) and funding_sources (27, none wrong). The model's other answers
+      stay in record_json, unchecked.
     link: "https://github.com/abigailhaddad/federal-ja-documents/tree/main/docs/checks/main_fields"
+
+  - date: "2026-11-12"
+    where: "Email and website"
+    title: "The picks no longer see failed fields"
+    text: >-
+      The model that chooses the day's picks no longer sees the urgency trigger or the bridge flag, not
+      even as hints, because they failed their checks; it sees the number of earlier extensions only where
+      the document states it.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/digest.md"
 
   - date: "2026-11-12"
     where: "Dataset"
