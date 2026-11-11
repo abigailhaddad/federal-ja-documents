@@ -179,7 +179,11 @@ def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = fr
                      **flat, "effort": r.get("effort"),
                      "run_at": r.get("run_at"), "experimental": True,
                      "record_json": json.dumps(r, ensure_ascii=False),
-                     **extras.published_columns(x),
+                     **(pub := extras.published_columns(x)),
+                     # entries of the interested list that are this J&A's own proposed contractor(s)
+                     "interested_firms_contractor_entry": extras.interested_contractor_entries(
+                         pub["interested_firms_named"],
+                         [flat.get("vendor") or ""] + (flat.get("additional_vendors") or "").split("; ")),
                      "extras_record_json": json.dumps(extras.public_record(x), ensure_ascii=False) if x else None})
     seen = set(latest) | set(exclude)
     for s in _jsonl(out / "skipped.jsonl"):

@@ -318,8 +318,10 @@ usable text have `status` `skipped` and a `skip_reason`.
 
 **From a second model call** (added 2026-11-11; [docs/extras.md](@@PROJECT_URL@@/blob/main/docs/extras.md)).
 A separate call reads each J&A again for facts the main extraction doesn't ask for. Only the fields
-below are published, because only these held up when random notices were read against the document;
-the rest of what it asks for (unit prices, a proprietary-to-the-contractor reason, and others) is not
+below are published: for each, a random sample of notices (usually 20 or 30) was read against the
+document, and the counts below are the results. A sample is not a guarantee: 30 right out of 30 is still
+consistent with an error rate of up to about 10% across the whole table. The rest of what the call asks
+for (unit prices, a proprietary-to-the-contractor reason, and others) did worse in its samples and is not
 published. Each value is as the document states it, with its quote; a blank means it was not found,
 not that the document doesn't say it.
 
@@ -331,7 +333,8 @@ not that the document doesn't say it.
 | `gao_protest_numbers` | GAO protest numbers (B-4xxxxx) the document mentions in a sentence about a protest, of this or a related procurement; decisions cited as precedent are left out (all 120 numbers read) |
 | `dla_approved_sources` | on DLA's AVN Form S53, the approved sources (CAGE \| name) from the form's own table, read by rule |
 | `nsns` | National Stock Numbers written in the text, read by rule |
-| `interested_firms_named` | firms (CAGE \| name where given) the document names as having responded or expressed interest. Can include the firm that got the award, and is not always every firm: in 20 random lists none named a firm that shouldn't be there, but 4 left out firms the document names. Never "none"; blank means none found |
+| `interested_firms_named` | firms (CAGE \| name where given) the document names as having responded or expressed interest. Can include the firm that got the award, and is not always every firm: in 20 random lists none named a firm that shouldn't be there, but 4 left out firms the document names. Never "none"; blank means none found. **Not a count of competitors:** on nearly half the lists (989 of 2,177 on 2026-11-11) the J&A's own proposed contractor is one of the firms, and on a third (730) it is the only one (see the next column) |
+| `interested_firms_contractor_entry` | the entries of `interested_firms_named` that are the J&A's own proposed contractor (`vendor` or `additional_vendors`): the same name once case, punctuation and legal suffixes (Inc, LLC, Corp) are removed. 30 of 30 random matches were the same firm. Exact names only, so a blank means "no exact match", not "the contractor isn't listed": a parent company, a division or a misspelling is not caught |
 | `not_to_exceed_usd` (`_quote`, `_quote_pages`) | a stated not-to-exceed amount for the action; caps on one part of it, estimate ranges and the VA's $5 million sole-source limit are left out (all 43 values read, 43 right) |
 | `delay_to_compete_quote` (`_pages`) | the document's sentence on how long competing would delay the work (30 of 30) |
 | `cost_to_compete_quote` (`_pages`) | the document's sentence on what competing would cost (29 of 30, 1 unclear) |

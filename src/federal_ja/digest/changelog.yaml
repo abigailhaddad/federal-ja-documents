@@ -9,6 +9,20 @@
 
 entries:
   - date: "2026-11-12"
+    where: "Dataset"
+    title: "Which interested firm is the contractor itself"
+    text: >-
+      analysis/extractions.parquet gains interested_firms_contractor_entry: the entries of
+      interested_firms_named that are the J&A's own proposed contractor, by exact name (case,
+      punctuation and Inc/LLC/Corp aside). In the table of 2026-11-11, 989 of 2,177 lists contained the
+      contractor by exact name, and on 730 it was the only firm, so counting interested_firms_named overstates
+      competition. 30 of 30 random matches were right. Looser matching caught parent companies and
+      sibling units and is not used, so a blank means no exact match, not that the contractor isn't
+      listed. The dataset card also now says that its checks are samples: 30 of 30 still allows an
+      error rate up to about 10%.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/blob/main/src/federal_ja/analysis/extras.py"
+
+  - date: "2026-11-12"
     where: "Email and website"
     title: "The picks see the checked facts"
     text: >-

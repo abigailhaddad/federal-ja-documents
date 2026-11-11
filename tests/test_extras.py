@@ -531,3 +531,14 @@ def test_stored_record_gives_the_same_published_columns():
     assert b["delay_to_compete_quote"] == "This adds 6 to 12 months of delay."
     assert b["cost_to_compete_quote"] == "Recompeting would cost $250,000."
     assert a == b
+
+
+def test_interested_contractor_entries_exact_names_only():
+    lst = "60240 | GENTEX CORP; 4GPC1 | S3 AeroDefense LLC; BAE Systems Technology Solutions & Services Inc."
+    # same firm once case, punctuation and the legal suffix are removed
+    assert extras.interested_contractor_entries(lst, ["Gentex Corporation"]) == "60240 | GENTEX CORP"
+    # a parent or sibling name is not the contractor
+    assert extras.interested_contractor_entries(lst, ["BAE Systems Inc."]) is None
+    # any of several proposed contractors; blanks ignored
+    assert extras.interested_contractor_entries(lst, ["", "S3 AERODEFENSE, L.L.C."]) == "4GPC1 | S3 AeroDefense LLC"
+    assert extras.interested_contractor_entries(None, ["Gentex"]) is None

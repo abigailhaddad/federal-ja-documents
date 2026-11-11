@@ -946,6 +946,30 @@ def interested_firms_named(rec: dict | None) -> str | None:
     return "; ".join((f"{c} | " if c else "") + n for c, n in lst) if lst else None
 
 
+_LEGAL_WORDS = re.compile(r"\b(inc|incorporated|llc|l l c|corp|corporation|co|company|ltd|limited|lp|llp|plc|the|dba)\b")
+
+
+def _firm_key(name: str) -> str:
+    """A firm name lowercased, without punctuation or legal suffixes (Inc, LLC, Corp ...)."""
+    s = re.sub(r"[^a-z0-9 ]", " ", (name or "").lower())
+    return " ".join(_LEGAL_WORDS.sub(" ", s).split())
+
+
+def interested_contractor_entries(interested: str | None, contractors: list[str]) -> str | None:
+    """The entries of interested_firms_named that are the J&A's own proposed
+    contractor: same name once case, punctuation and legal suffixes are
+    removed. Exact only (2026-11-11): 30 of 30 random matches were the same
+    firm. Looser matching (one name starting the other) caught parent
+    companies and sibling units (BAE Systems Inc. vs BAE Systems Technology
+    Solutions & Services), so it is not used, and a blank means "no exact
+    name match", not "the contractor is not in the list"."""
+    if not interested:
+        return None
+    keys = {k for k in (_firm_key(c) for c in contractors) if k}
+    hits = [e for e in interested.split("; ") if _firm_key(e.split(" | ", 1)[-1]) in keys]
+    return "; ".join(hits) or None
+
+
 def flat_row(rec: dict, meta: dict, awardee_names: list[str] | None = None) -> dict:
     """One row of extras.csv / the published table."""
     f = rec["fields"]
