@@ -457,3 +457,57 @@ def test_other_interested_firms_leave_out_the_awardee():
     assert extras.flat_row(rec, {})["other_interested_sources"] is None          # no awardee name: can't tell
     assert extras.flat_row(rec, {}, ["Midmark"])["interested_sources_confirmed"] == \
         "Midmark Corporation; Acme Medical LLC"
+
+
+
+def test_same_firm_handles_parentheticals_and_acronyms():
+    sf = extras.same_firm
+    aw = ["Hindustan Aeronautics Ltd. (HAL)", "MTU Berlin-Brandenburg GmbH", "Tusas Engine Industries, Inc. (TEI)"]
+    assert sf("HAL", aw) and sf("TEI", aw) and sf("MTU", aw)                       # fc54adb6
+    assert sf("California Waste Recovery, LLC (Cal-Waste)", ["California Waste Recovery Systems, LLC"])  # 489a5d08
+    assert sf("GDIT", ["General Dynamics Information Technology, Inc."])
+    assert not sf("We Haul It All LLC", ["California Waste Recovery Systems, LLC"])
+    assert not sf("Rolls-Royce", aw) and not sf("General", ["General Dynamics"]) and not sf("GE", ["General Electric"])
+
+
+@pytest.mark.parametrize("quote,want", [
+    ("The Government does not own the data or the rights to the data needed to purchase this part",
+     ["government_does_not_own_data", "government_lacks_rights"]),
+    ("The rights to use the data needed to purchase/repair this part from additional source(s) are not owned by the "
+     "Government and cannot be purchased", ["government_lacks_rights"]),
+    ("The data is owned by Rockwell Collins Inc and the Government will not initiate", []),   # no proprietary reason
+    ("Astronics owns all technical data rights for this component.", []),
+    ("Since the Navy does not possess sufficient rights to data such as drawings", ["government_lacks_rights"]),
+    ("technical data is not available and cannot be developed to permit full and open competition", ["data_not_available"]),
+    ("NGSC presently maintains sole authority over the hardware technical data package (TDP)", []),
+    ("L3 is unwilling to sell a production level Technical Data Package", []),   # the owner's position, not rights
+    ("The Government does not have the pertinent Technical Data Package (TDP) or specifications", ["data_not_available"]),
+    ("No other vendor has current data access as this data cannot be archived for secondary use", []),
+])
+def test_technical_data_reasons_come_from_the_quotes_own_words(quote, want):
+    assert sorted(extras.data_rights_reasons(quote)) == sorted(want)
+
+
+def test_a_not_to_exceed_quoted_from_mid_sentence_is_read_with_the_start_of_its_sentence():
+    # the model quoted "will not exceed ..." but the sentence caps only the special projects
+    text = ("Five task orders are covered. The sum of all special projects under these orders "
+            "will not exceed $6,615,821.77 in total for all actions executed under this justification.")
+    d = Document("n1", {"title": "J&A"}, [Page("r1", "JA.pdf", 1, "native", text)])
+    f, dropped = extras.verify({"facts": [fact("not_to_exceed", "6615821.77",
+                                               "will not exceed $6,615,821.77 in total for all actions executed under this justification.")]}, d)
+    assert f["not_to_exceed"] is None and "part of the action" in dropped[0]["reason"]
+    whole = text.replace("The sum of all special projects under these orders", "The total value")
+    d = Document("n1", {"title": "J&A"}, [Page("r1", "JA.pdf", 1, "native", whole)])
+    f, _ = extras.verify({"facts": [fact("not_to_exceed", "6615821.77", "will not exceed $6,615,821.77 in total")]}, d)
+    assert f["not_to_exceed"] == 6615821.77
+
+
+@pytest.mark.parametrize("quote, want", [
+    # round-4 check (2026-11-11): not owning data *rights* is lacking rights
+    ("The Government does not own the necessary intellectual property data rights to the pertinent technical data",
+     ["government_lacks_rights"]),
+    ("The Government does not own the data or the rights to the data needed", ["government_does_not_own_data", "government_lacks_rights"]),
+    ("The data is proprietary, and the contractor is unwilling to sell it", []),
+])
+def test_round_four_data_rights_phrasings(quote, want):
+    assert extras.data_rights_reasons(quote) == want

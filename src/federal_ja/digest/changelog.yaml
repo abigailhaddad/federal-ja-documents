@@ -21,6 +21,19 @@ entries:
 
   - date: "2026-11-11"
     where: "Dataset"
+    title: "Five more columns from the second reading"
+    text: >-
+      analysis/extractions.parquet gains interested_firms_named (firms the document names as having
+      responded or expressed interest; it can include the firm that got the award and can miss some, so
+      a blank is "not found", never "none"), not_to_exceed_usd (all 43 values read and right),
+      delay_to_compete_quote and cost_to_compete_quote (the document's own sentence; 30 of 30 and 29 of
+      30), and technical_data_reasons (four reasons read from the document's own words; 39 of 41 right in
+      random samples). A fifth reason, "proprietary to the contractor", was right on only 11 of 20 and is
+      not published.
+    link: "https://github.com/abigailhaddad/federal-ja-documents/blob/main/docs/extras.md"
+
+  - date: "2026-11-11"
+    where: "Dataset"
     title: "Six new columns from a second reading of each J&A"
     text: >-
       analysis/extractions.parquet gains columns from a second model call: a current or previous

@@ -318,10 +318,10 @@ usable text have `status` `skipped` and a `skip_reason`.
 
 **From a second model call** (added 2026-11-11; [docs/extras.md](@@PROJECT_URL@@/blob/main/docs/extras.md)).
 A separate call reads each J&A again for facts the main extraction doesn't ask for. Only the fields
-below are published, because only these held up when 30 random notices each were read against the
-document; others it asks for (interested firms, delay and cost to compete, not-to-exceed amounts, the
-technical-data reason) did not, and are not published. Each value is as the document states it, with
-its quote; a blank means it was not found, not that the document doesn't say it.
+below are published, because only these held up when random notices were read against the document;
+the rest of what it asks for (unit prices, a proprietary-to-the-contractor reason, and others) is not
+published. Each value is as the document states it, with its quote; a blank means it was not found,
+not that the document doesn't say it.
 
 | Field | What it is |
 |---|---|
@@ -331,6 +331,11 @@ its quote; a blank means it was not found, not that the document doesn't say it.
 | `gao_protest_numbers` | GAO protest numbers (B-4xxxxx) the document mentions in a sentence about a protest, of this or a related procurement; decisions cited as precedent are left out (all 120 numbers read) |
 | `dla_approved_sources` | on DLA's AVN Form S53, the approved sources (CAGE \| name) from the form's own table, read by rule |
 | `nsns` | National Stock Numbers written in the text, read by rule |
+| `interested_firms_named` | firms (CAGE \| name where given) the document names as having responded or expressed interest. Can include the firm that got the award, and is not always every firm: in 20 random lists none named a firm that shouldn't be there, but 4 left out firms the document names. Never "none"; blank means none found |
+| `not_to_exceed_usd` (`_quote`, `_quote_pages`) | a stated not-to-exceed amount for the action; caps on one part of it, estimate ranges and the VA's $5 million sole-source limit are left out (all 43 values read, 43 right) |
+| `delay_to_compete_quote` (`_pages`) | the document's sentence on how long competing would delay the work (30 of 30) |
+| `cost_to_compete_quote` (`_pages`) | the document's sentence on what competing would cost (29 of 30, 1 unclear) |
+| `technical_data_reasons` (`_quote`, `_quote_pages`) | why missing technical data blocks competition, read by rule from the quote's own words: `data_not_available`, `government_lacks_rights`, `government_does_not_own_data`, `data_uneconomical_to_obtain` ("; "-joined). 39 of 41 judged in random samples right, 1 unclear, 1 a software subscription |
 | `second_call_version` | the second call's prompt and checks version |
 
 `extras_record_json` holds the second call's stored record for these fields only (the model's

@@ -174,8 +174,9 @@ def build_table(out: Path, docs_meta: dict[str, dict], *, exclude: set[str] = fr
     rows = []
     for nid, r in latest.items():
         x = second.get(nid)
+        flat = extract.flat_row(r, docs_meta.get(nid) or {})
         rows.append({"notice_id": nid, "status": "extracted", "skip_reason": None,
-                     **extract.flat_row(r, docs_meta.get(nid) or {}), "effort": r.get("effort"),
+                     **flat, "effort": r.get("effort"),
                      "run_at": r.get("run_at"), "experimental": True,
                      "record_json": json.dumps(r, ensure_ascii=False),
                      **extras.published_columns(x),
