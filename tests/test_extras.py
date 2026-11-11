@@ -432,3 +432,28 @@ def test_gao_numbers_are_split_into_protests_and_cited_decisions():
     r = extras.rule_fields(d)
     assert r["gao_protests"] == ["B-424143.2", "B-424920"] and r["gao_cited"] == ["B-401472", "B-407223.2"]
     assert r["gao_unclear"] == []
+
+
+def test_same_firm_matches_suffixes_and_parents_but_not_generic_words():
+    sf = extras.same_firm
+    assert sf("BHPE LLC", ["BHPE"]) and sf("Raytheon Company", ["RAYTHEON CO."])
+    assert sf("BAE Systems San Diego Ship Repair Inc.", ["BAE Systems"])
+    assert sf("Boeing", ["Boeing Defense, Space, and Security"])
+    assert sf("Johnson & Johnson", ["JOHNSON AND JOHNSON"])
+    assert not sf("General Dynamics Information Technology", ["General Electric Company"])
+    assert not sf("General", ["General Dynamics"])                 # a generic word never matches as a prefix
+    assert not sf("Lockheed Martin", ["Northrop Grumman"]) and not sf("", ["Acme"])
+
+
+def test_other_interested_firms_leave_out_the_awardee():
+    d = Document("n16", {}, [Page("r", "a.pdf", 1, "native",
+        "10. Interested Sources: The following firms responded to the sources sought: "
+        "a. Midmark Corporation, Versailles, OH b. Acme Medical LLC, Dayton, OH.")])
+    raw = {"facts": [fact("interested_source", "Midmark Corporation", "a. Midmark Corporation, Versailles, OH"),
+                     fact("interested_source", "Acme Medical LLC", "b. Acme Medical LLC, Dayton, OH")]}
+    rec = extras._record(d, raw, {}, "", False, "m", None)
+    assert extras.flat_row(rec, {}, ["MIDMARK CORP"])["other_interested_sources"] == "Acme Medical LLC"
+    assert extras.flat_row(rec, {}, ["Midmark", "Acme Medical"])["other_interested_sources"] == "none"
+    assert extras.flat_row(rec, {})["other_interested_sources"] is None          # no awardee name: can't tell
+    assert extras.flat_row(rec, {}, ["Midmark"])["interested_sources_confirmed"] == \
+        "Midmark Corporation; Acme Medical LLC"

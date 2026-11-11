@@ -122,6 +122,10 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--notice-id", action="append", default=None, help="only these notices (repeatable)")
     e.add_argument("--notice-file", type=Path, default=None, help="file of notice ids, one per line")
     e.add_argument("--since", default=None, help="only notices posted on or after YYYY-MM-DD")
+    e.add_argument("--only-with-extraction", action="store_true",
+                   help="only notices with an extraction or skip record in --out (the daily run: a second-call "
+                        "record is stored with the notice's table row, so one without a row would be lost and "
+                        "paid for again), and not those the extraction says are not a J&A")
     e.add_argument("--out", required=True, type=Path, help="output directory (extras.jsonl, extras.csv)")
     e.add_argument("--data-dir", type=Path, default=Path("work/hf_tables"),
                    help="where the dataset tables are cached (default work/hf_tables)")
@@ -559,6 +563,10 @@ def cmd_extras(a) -> int:
         want |= {ln.strip() for ln in a.notice_file.read_text().splitlines() if ln.strip()}
     if want:
         notices = notices[notices.notice_id.isin(want)]
+    if getattr(a, "only_with_extraction", False):
+        # ...and not the ones the extraction says are not a J&A (they go to the
+        # excluded table, not the published one; 163 on 2026-11-11)
+        notices = notices[notices.notice_id.isin(table.notice_ids(a.out) - table.model_says_not_ja(a.out))]
     if a.since:
         notices = notices[notices.posted_date.fillna("") >= a.since]
     notices = notices.sort_values(["posted_date", "notice_id"], ascending=[False, True])

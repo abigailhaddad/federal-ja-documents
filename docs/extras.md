@@ -96,8 +96,33 @@ python -m federal_ja.analysis extras --out work/extras --notice-file ids.txt --m
 
 `--max-usd` is applied to an estimate before anything is sent, in both modes. The estimate is set above the largest answer the extras1 pilot produced, so a run spends less than its cap.
 
-## What is for display
+## What is published (2026-11-11)
 
-Decided 2026-11-10, not built: shown are the data-rights basis, delay and cost to compete, the source-approval path, the incumbent (labelled "a current or previous contractor named in the document"), not-to-exceed, interested firms, approved sources (DLA forms only), and GAO protest numbers. Ceilings are shown only when the increase, prior and new ceiling are all present and add up. Not shown: unit price and quantity, `gao_cited`, `gao_unclear`, `uses_52_217_8`. `barrier_action` is kept but not featured. Interested firms are shown as "other firms that expressed interest", with the awardee taken out by the notice's award name (SAM or USAspending, not the model); where a notice has no award name (599 of the 2,237 with interested firms), the label says the list may include the firm awarded. A blank means "not found on this run", not "not stated".
+We publish only what we can justify: a field goes into `analysis/extractions.parquet` only after 30 random notices (fewer where there are fewer) were read against the document text and it held up. The reading was done by Claude subagents with written criteria, and every item marked wrong or unclear, plus a sample of those marked right, was re-read. Proof files with each value next to the document text: `group1_check/` and `group2_check/` in the comparison folder (outside the repo).
 
-Not built yet: publishing the table to the dataset, and a workflow.
+| Field | Check | Published as |
+|---|---|---|
+| current or previous contractor named | 29 right, 0 wrong, 1 unclear | `contractor_named` (+ quote, pages) |
+| how a new source can be approved | 30 / 30 | `new_source_approval_quote` (+ pages) |
+| ceiling change, all three stated and adding up (186 notices) | 30 / 30 | `ceiling_prior_usd`, `ceiling_increase_usd`, `ceiling_new_usd` (+ quotes; some are a whole program's ceiling, which the quote says) |
+| GAO protest numbers | all 120 numbers read; 74 protests, 44 precedent cites, 2 unclear | `gao_protest_numbers` (protests only) |
+| DLA approved sources | form table, read by rule; agrees with the model on 1,064 of 1,197 | `dla_approved_sources` (not shown when the model names a CAGE the table lacks) |
+| NSNs | by rule; 55 / 55 | `nsns` |
+
+Not published, and why:
+
+| Field | Check | What went wrong |
+|---|---|---|
+| other interested firms (awardee removed) | 26 / 30 | "none" while a redacted firm responded; a list cut at a page break; a VA template line ("appear qualified and interested") counted as interest. To fix: never say "none", label as "named in the document", rule out that template line, then check again. |
+| delay to compete | 28 / 30 | a bridge's period of performance taken as the delay; several values are one part of a longer stated span |
+| cost to compete | 25 / 30 | one line item instead of the stated total; a per-year or per-project rate |
+| not-to-exceed | 25 / 30 (8 of the 30 are one notice's copies) | the VA's $5 million statutory limit; the top of an estimate range; a cap on one part of the action |
+| technical-data reason | 18 / 30 | software licenses read as technical data; "does not possess" read as "does not own" |
+
+Also not published: unit price and quantity, GAO decisions cited as precedent, the 52.217-8 flag, barrier-removal quotes.
+
+`extras_record_json` stores the call's record cut down to the published fields (`extras.public_record`): the model's answers for those kinds only, what the checks kept, and the bookkeeping the daily run needs (model, prompt version, effort, document length, cost). The facts that are not published are not in it. The full records of the 2026-11-10 run are kept outside the dataset.
+
+The daily job (`extract-daily.yml`) runs the call after the extraction for notices that have a table row, are J&As, and have no record, one call at a time, under `second_call_max_usd` (default $0.25, about 80 notices by the estimate; about $0.04 a day actual).
+
+A column added here needs an entry in `src/federal_ja/digest/changelog.yaml` (the Changes page on woah-jas.abigailhaddad.com) in the same pull request.
