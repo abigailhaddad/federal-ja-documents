@@ -1,0 +1,126 @@
+[
+ {
+  "notice_id": "3d60e0c36e484d39a10e1bac6b637232",
+  "verdict": "correct",
+  "reason": "Section 12 \"A listing of sources, if any, indicating an interest in writing in the acquisition\" lists only 7Z016 KAMPI COMPONENTS CO INC; awardee Robertson not involved.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "30659f99779e43f59ef28ef95794ffab",
+  "verdict": "wrong",
+  "reason": "Under \"10. Interested Sources\" the document says \"SpartanNash Company (acquired by C&S)\", so SpartanNash is a subsidiary of the awardee C&S and must be left out; the other five firms are correctly listed as interested sources.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "f15c868009fe4a0dbfd8fb65e247f1ec",
+  "verdict": "correct",
+  "reason": "\"The sources sought received a response from DMG Mori, who is the sole source provider, and United Robotics Group America\"; United Robotics is not the awardee (DMG MORI).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "ec5c8a84363b4943a4a58c8b23603976",
+  "verdict": "correct",
+  "reason": "\"Three vendors responded to the sources sought notice: Trimble Inc, Promethean General Contractors, and Hexagon US Federal\"; awardee Trimble correctly left out.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "dfe124b1a2584f62851469c1a68408fd",
+  "verdict": "correct",
+  "reason": "Table follows \"the Sources Sought only garnered six (6) responses\" and lists all six with \"Capability Statement\" as the source; note Rock Railroad's evaluation column reads \"No response\", which is ambiguous but the count of six responses includes it.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "4992a1a2f9514a45a41ef5b2edd5b9d0",
+  "verdict": "wrong",
+  "reason": "JA Moody LLC is the awardee's \"exclusive authorized distributor\" and \"This acquisition will be solicited to JA Moody LLC\", so it is the awardee's sales channel / intended offeror, not a separate interested firm.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "7fe867b937f9402ebf5cde57f1edcd53",
+  "verdict": "correct",
+  "reason": "Section 12 sources \"indicating an interest in writing\" lists \"98571 | Teledyne Controls LLC 1WZZ2 | Martin Military Inc.\"; awardee Teledyne correctly left out.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "a4aa47c029c9446380fe85bc9aed25c6",
+  "verdict": "correct",
+  "reason": "Sources sought \"Two responses received: TRS (61CH3); DCX-CHOL Enterprises (27456); Hydro Group Systems Inc. (9DAE6)\" and section 12 lists Hydro Group; awardee DCX-CHOL left out.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "4ad2c28602454626ad13a4a7bd07d383",
+  "verdict": "wrong",
+  "reason": "\"Quotation provided is from Nortek USA\" - Nortek USA is the awardee (NortekUSA).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "a643e2ec13be4981a2366e99567b21da",
+  "verdict": "correct",
+  "reason": "\"On 6/17/2024, a response to sources sought was received from CAP 360, LLC (6PTP0)\" and CAP 360 is in the interest listing; the other listed firms (Vehicle Maintenance Program, Peerless Chain) are among awardee_names.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "0b8fdf1f68a44240907ce97f406b254f",
+  "verdict": "correct",
+  "reason": "\"9. Interested Sources: The following are listed of sources expressing interest in the follow-on award\" lists Giant, JTG, and Samsung Welstory; awardee Coastal Pacific correctly left out.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "27e01f99226440929d010f260026c6f9",
+  "verdict": "correct",
+  "reason": "Section 12 sources \"indicating an interest in writing\" lists \"9SWS7 | BHPE LLC\" and p1 says \"One response received from BHPE, cage 9SWS7\" (no model quote supplied; verified in pages.parquet).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "0e139a88e57c4c7ebf5b8d6a8f564250",
+  "verdict": "correct",
+  "reason": "\"While major firms (IBM, Red Hat, Deloitte, Booz Allen Hamilton) and numerous small businesses responded\"; awardee Scalar \"despite not responding to the RFI\".",
+  "missing_firms": [
+   "unnamed small businesses; full list is in Attachment A - Interested Sources List (not in text)"
+  ]
+ },
+ {
+  "notice_id": "30ad13525c3d438a96f1a739831de5e8",
+  "verdict": "wrong",
+  "reason": "Shown list includes \"Microchip Technology, Inc.\", which is the awardee (Microchip/Microsemi); Adtran/Oscilloquartz and BHPE LLC did respond.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "8460d072a02d4125ac9cf76b44b10b15",
+  "verdict": "correct",
+  "reason": "\"Transaero, Inc. expressed an interest via email on 01/16/2026\"; awardee is Telephonics.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "2674936225c94fc9b4b5a62b75da7442",
+  "verdict": "correct",
+  "reason": "\"The following companies expressed written interest to the SCS acquisition a. Crowe LLP ... b. Deloitte Consulting LLP c. Webacy, Inc. d. Metrika, Inc.\"; awardee Metrika left out, but Crowe LLP (split across a page break) is missing.",
+  "missing_firms": [
+   "Crowe LLP"
+  ]
+ },
+ {
+  "notice_id": "41652f376471495eae9528d9fc1423a9",
+  "verdict": "correct",
+  "reason": "Section 12 sources \"indicating an interest in writing\" lists \"9LYF8 | ATZ Solution LLC\"; awardee is Boeing.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "33eba605d365462fa1065fa2d85c2c52",
+  "verdict": "unclear",
+  "reason": "\"66200 | PIONEER SPARES\" appears in the interest listing, but the awardee is PIONEER INDUSTRIES, LLC and Enviro Systems referred the agency to \"DISTRIBUTOR TO CONTACT (PIONEER)\"; Pioneer Spares is very likely the awardee under another name, which the text cannot settle (Sikorsky and Enviro Systems did respond).",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "1e1bfaec28a5432bbe3d66a486ee86b7",
+  "verdict": "wrong",
+  "reason": "\"only one response was received, from Coffamn Electrical Equipment Co.\" - a misspelling of the awardee COFFMAN ELECTRICAL EQUIPMENT CO.",
+  "missing_firms": []
+ },
+ {
+  "notice_id": "5ca8bdc963f24124a7ad9227db163a42",
+  "verdict": "correct",
+  "reason": "\"New Tech Solutions, Inc. submitted a capabilities statement\" and \"TrueTandem submitted a capabilities statement\"; awardee Microsoft left out (the third respondent, GSA, is a government agency, not a firm).",
+  "missing_firms": []
+ }
+]

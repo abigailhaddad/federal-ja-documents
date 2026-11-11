@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "47e7cb8f1ffe41368179f89f73b4cc99",
+  "verdict": "correct",
+  "reason": "States 'the Navy does not possess sufficient rights to data such as drawings, specifications' for this item, matching government_lacks_rights."
+ },
+ {
+  "notice_id": "5ac629f2f0b84f358d4d8a771b94ae8c",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "04a8e8f51a1946b6a02b3083fd604623",
+  "verdict": "unclear",
+  "reason": "Context gives several reasons at once: Government 'does not have the pertinent TDP' (not available), 'does not have rights to the TDP' (lacks rights), and Oshkosh 'owns all the data rights' (proprietary); 'does not own' is not the document's wording."
+ },
+ {
+  "notice_id": "58ffdc1029794561bf3d1dee754fb651",
+  "verdict": "wrong",
+  "reason": "About a software subscription: 'The source code is proprietary to Bentley' and 'Software licenses are a supply' -- software licensing, not technical data for competition."
+ },
+ {
+  "notice_id": "73b989bb56cc4789a09d3137c016a608",
+  "verdict": "correct",
+  "reason": "Document applies A/RMSC R and restates for this item 'The Government does not own the data, or the rights to the data needed to openly compete this repair requirement'."
+ },
+ {
+  "notice_id": "5bc187da36fa42c496709df27cb86352",
+  "verdict": "correct",
+  "reason": "States 'the Navy does not possess sufficient rights to information such as drawings, specifications' for this item, matching government_lacks_rights."
+ },
+ {
+  "notice_id": "6aebeab76aa34efe942c3f26aedea692",
+  "verdict": "correct",
+  "reason": "Checked box '☒ A patent, copyright or proprietary data limits competition' followed by 'Southwest Industries, Inc., the OEM, owns and maintains the proprietary data for the requested screen upgrade'."
+ },
+ {
+  "notice_id": "00d7cce90a3c44cc94261b259351592f",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "f3e9f0297ce843bbaffc12a9e89f5962",
+  "verdict": "wrong",
+  "reason": "About proprietary software compatibility ('Only proprietary Explorance software is compatible'), a brand-name software license reason, not a technical-data reason."
+ },
+ {
+  "notice_id": "6e8ae6041cf84b32ad93ade27a0c4c6d",
+  "verdict": "correct",
+  "reason": "Section IV states 'The Government does not own the data or the rights to the data needed to purchase this part from additional sources'."
+ },
+ {
+  "notice_id": "6a3886d1fb92498889fc0f9f494a4c08",
+  "verdict": "unclear",
+  "reason": "Quote is the standard A/RMSC C code definition ('retain data rights, manufacturing/repair knowledge, or technical data that are not economically available'), a disjunctive list that fits proprietary/lacks-rights as well as uneconomical; no item-specific data statement in context."
+ },
+ {
+  "notice_id": "f12a6577a4674b8a81ab1a27bacd0a51",
+  "verdict": "correct",
+  "reason": "States for this camera repair 'The hardware package contains proprietary technology that would otherwise require the procurement of data rights to technical data', i.e., data proprietary to Teledyne FLIR."
+ },
+ {
+  "notice_id": "1c46714cc3bd4291a8362193c6a36ce2",
+  "verdict": "unclear",
+  "reason": "Document says the Government 'does not physically possess' the data, which is 'not physically available and is uneconomical to obtain' and Thales 'has/owns the data' -- not_available/uneconomical/proprietary fit at least as well as does_not_own; context also lists several AMSC code paragraphs (D, M, P)."
+ },
+ {
+  "notice_id": "f43e7b9a787c44299efdeb875350053b",
+  "verdict": "unclear",
+  "reason": "Data is 'not physically available and is uneconomical to obtain' -- data_not_available and data_uneconomical_to_obtain fit equally."
+ },
+ {
+  "notice_id": "da4fdab18e4f404093ff4189ecbaf662",
+  "verdict": "wrong",
+  "reason": "About access to a research survey dataset held by the incumbent ('this data cannot be archived for secondary use due to the risk of disclosure of survey participants'), not technical data or data rights for the item."
+ },
+ {
+  "notice_id": "a0714f3f5be94ee592360961416d1688",
+  "verdict": "correct",
+  "reason": "States 'the Navy does not possess sufficient rights to data such as drawings, specifications' for this item."
+ },
+ {
+  "notice_id": "7cb6c232a3d34445ac7c1a7fca961c43",
+  "verdict": "correct",
+  "reason": "States 'the Navy does not possess sufficient rights to information such as drawings, specifications' for this repair."
+ },
+ {
+  "notice_id": "b1854bc0fba547b4a407862f6d695fec",
+  "verdict": "correct",
+  "reason": "Next sentence states 'The Government does not own the necessary intellectual property data rights to the pertinent technical data to enable competitive re-procurement'."
+ },
+ {
+  "notice_id": "9de31949540445368a3c999b34e6f5be",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "2f15fa14c7364c798981b225a5066b36",
+  "verdict": "wrong",
+  "reason": "Selected A/RMSC P says 'This code is used in situations where the Government has the data but does not own the rights to the data', which is government_lacks_rights, not government_does_not_own_data."
+ },
+ {
+  "notice_id": "fd1cd2619e4e45138db71fe307feb8b3",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "822994423261405eb51a2508b54d47bb",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "136e106dea6c47cf9587170ea71d7def",
+  "verdict": "correct",
+  "reason": "Box is marked: '[X] Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "a483e4ed1a5a46749d9d25f480d8d0ec",
+  "verdict": "correct",
+  "reason": "States 'KI retains proprietary specifications for the seating installed in B5 and is the only qualified source'."
+ },
+ {
+  "notice_id": "11ff910db17347cb886f161204776fc4",
+  "verdict": "unclear",
+  "reason": "Services J&A says the work requires 'access to technical data, and technical expertise that the Government does not possess' -- that is lack of possession (closer to data_not_available), not a statement about ownership."
+ },
+ {
+  "notice_id": "dc599a7a36084ae7b5a8986b14f4e327",
+  "verdict": "correct",
+  "reason": "Box is ticked: '☑ Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "1593169bbb1c4ae69b7c96ef84693a92",
+  "verdict": "unclear",
+  "reason": "Several reasons stated together: Government 'does not possess the complete technical data package or Government purpose data rights', TDP 'now owned by Extant', and 'This data is proprietary and the contractor refuses to release the rights' -- proprietary_to_contractor fits at least as well."
+ },
+ {
+  "notice_id": "78442be81a164ee1a08efd844137ff13",
+  "verdict": "correct",
+  "reason": "Box is marked: '[X] Based upon the technical certification on file, technical data is not available and cannot be developed'."
+ },
+ {
+  "notice_id": "2be03c839d4f4c5685eef793a7364938",
+  "verdict": "wrong",
+  "reason": "About software licensing: 'requires the use of IBM-proprietary mainframe operating system software' and IBM 'retains exclusive control over the licensing', not technical data."
+ },
+ {
+  "notice_id": "9ff3630dcffd41dfba6f32f57e4294b8",
+  "verdict": "wrong",
+  "reason": "Brand-name software purchase: 'the required software, licenses, and maintenance services are proprietary to JFrog' -- software licensing, not technical data."
+ }
+]

@@ -1,0 +1,342 @@
+[
+ {
+  "notice_id": "50ee9106f40848249119d5d1ac81a5c7",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'proprietary and patented to BOH' supports proprietary_to_contractor; 'Government does not possess complete, unrestricted technical data' supports data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "1fe63027cd904f858f2eddda28946a2a",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'Navy does not possess sufficient rights to data such as drawings, specifications' = government_lacks_rights.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "15c2ce549a7d4b979db9af2ee0272603",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available and cannot be developed' = data_not_available; nothing about cost.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "c23a6f4f00574e1b89767cd5a5d99fbc",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'no data/data rights will be supplied to the government' supports government_lacks_rights. data_not_available not added: context says 'Drawing 4011-3 is proprietary in Air Force files', so the government holds at least a drawing; refusal to supply is not a clear statement that it lacks the data. Borderline.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "833475070c534cb8a673ad39c73720a4",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "228bc32326c746c2b3548dc0915b6cd3",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'proprietary technical data owned by Allison Transmission' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "2c0bbab6c5124b1284f4e03f6601e64d",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "980ad2e4f16c428fb8cf0629f904cbb8",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'has top-level drawings but does not own the rights to the drawings' = government_lacks_rights; it says rights, not the data, are not owned, so government_does_not_own_data is not required.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "afa258f4a04348368f169a426cd59f36",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'not physically available and is uneconomical to obtain' = data_not_available + data_uneconomical_to_obtain.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "ff65fd0445274b2abb937ed849e4b039",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'USG does not possess the necessary technical data, software, personnel' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "5f5daa60a4df476d8352469f8f1bc192",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "66a2eaae434241b38380d45dbe7db040",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'Navy does not possess sufficient rights to information such as drawings, specifications' = government_lacks_rights.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "7e34b1d1e47749e092db671c5d6f8fd8",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'Government does not possess a full technical data package' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "c7c07c4f8f6d48a8a7e4df0a37c52be4",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'Due to technical data unavailability' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "c11637ae142c4fe1b0bcb315be83c37b",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'Government does not have access to the technical data necessary' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "bfd593cb2dcd4c9aa31a1de56fca9622",
+  "file": "data_rights",
+  "verdict": "wrong",
+  "reason": "Not technical data: 'national HEDIS benchmark data ... proprietary property of NCQA' is a licensed data product (the purchase is 'the Commercial Quality Compass HEDIS Benchmarks user product'), not drawings/specs/TDP needed to compete the work.",
+  "unsupported_labels": [
+   "proprietary_to_contractor"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "37025809d0cd4043871826d0ab2eebd4",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "524404999efb43e38f22c6435ce03327",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'not physically available and is uneconomical to obtain' = data_not_available + data_uneconomical_to_obtain.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "427931f5aee24cf783f9901bc22132b2",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "424c59ac01c94baa8eca53186cb5151c",
+  "file": "data_rights",
+  "verdict": "correct",
+  "reason": "'technical data is not available' = data_not_available.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "2d11df8aa29545dd956624bd1493b2de",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'The data is proprietary, and the contractor is unwilling to sell it.' supports proprietary_to_contractor, but says nothing about the government's rights or licence; government_lacks_rights is an inference. (If anything, refusal to sell implies data_not_available, which is also not stated.)",
+  "unsupported_labels": [
+   "government_lacks_rights"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "25a297fdcd37416c87e5f4fd6dbadd08",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "About a commercial SaaS platform's 'software architecture and these highly specialized configurations', not technical data; and 'no other vendor has the data rights' is about other vendors, not the government, so government_lacks_rights is unsupported.",
+  "unsupported_labels": [
+   "proprietary_to_contractor",
+   "government_lacks_rights"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "8a09f6983f494c7392e54eb4a0bcfee8",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'The Will-Burt Company owns the data, and are unwilling to sell it' supports proprietary_to_contractor; nothing about government rights/licence, so government_lacks_rights is unsupported by the words.",
+  "unsupported_labels": [
+   "government_lacks_rights"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "3e2e4dabd13c4baf9a9f7cb05ed3de87",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'Savi continues to own the rights to all of the applications making up ADA' is ownership of software applications (a software IP/licence matter), not technical data such as drawings, specs or a TDP.",
+  "unsupported_labels": [
+   "proprietary_to_contractor"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "595705e79d6f4b95bb75a873a5f7a814",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'UMANO beds have proprietary rights over their \"Umano Ook Snow beds\"' is a proprietary product/brand claim, not technical data.",
+  "unsupported_labels": [
+   "proprietary_to_contractor"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "b79a80e13520429a94903040e4215391",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'All design drawings, programming data, and installation criteria are their proprietary information' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "ba417edc6a284e8285ef7e18df836504",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "Quote 'The Government does not own the necessary intellectual property data rights to the pertinent technical data' supports government_lacks_rights only. It never mentions the contractor, so proprietary_to_contractor is unsupported by the quote (that is in a later sentence: 'Beaver ... is the sole owner of the technical data package'). government_does_not_own_data is borderline: it says the government does not own data rights, not the data.",
+  "unsupported_labels": [
+   "proprietary_to_contractor",
+   "government_does_not_own_data"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "daed4368fa0b4812a733d415502b9a3d",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'[REDACTED] Industries owns all data rights to the technical data' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "1d7f41c357b945c9a8368694c6060f21",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'FMD owns the rights to the proprietary design, fabrication and assembly drawings' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "9a6dd9a78b9f4a6caabede9475409780",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'The data required to successfully produce these assets is proprietary to Raytheon' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "d5bbb60df8f94172b30a2c1edbde1854",
+  "file": "proprietary",
+  "verdict": "unclear",
+  "reason": "'ITE ... holds the intellectual property rights to the entire family of ITS infrastructure standards' - contractor owns the IP, but these are published industry standards the contractor develops, not technical data the government needs to compete a build/repair; unclear whether this counts as technical data.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "880a2bcf68024339a919ca4e15a1eb5b",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'Timken has proprietary drawings and specifications to the Main Reduction Gear' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "e28e42098d3b432287458e7ac3b57102",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'Fairbanks holds the proprietary rights to all drawings' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "f61267a429c742c6855f3bd0d610d079",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'FMD is the sole owner of the rights to the proprietary design, fabrication and assembly drawings' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "cf9463acfe2f41068ebab59372b9fa7a",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'has not had success obtaining the full data rights' = government_lacks_rights; 'due to the proprietary nature of the drawings' (Sargent's drawings per context) = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "993a0355b28545d485240aed8cbcf368",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'BWR has developed a proprietary system for collecting energy jobs data' is a proprietary survey method/dataset, not technical data (drawings, specs, TDP).",
+  "unsupported_labels": [
+   "proprietary_to_contractor"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "361b6cdda1fa4db6a14550b588a98450",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'Hubbel Electric Heater Company is the owner of the technical data for this NSN' = proprietary_to_contractor.",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "14d1720d76e247e0b107d3dc0e21a5c6",
+  "file": "proprietary",
+  "verdict": "wrong",
+  "reason": "'The hardware and algorithm that Sofar Ocean Technologies uses ... is proprietary' is a proprietary product/system, not technical data.",
+  "unsupported_labels": [
+   "proprietary_to_contractor"
+  ],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "dfefb20c7e52468e89d2baf487d7eae2",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'their technical specifications and designs are officially registered with the UK Intellectual Property Office' - the firm's own specs/designs, registered IP = proprietary_to_contractor. Somewhat borderline (registered design, word 'proprietary' not used).",
+  "unsupported_labels": [],
+  "missing_labels": []
+ },
+ {
+  "notice_id": "5063416bc9d24ecd990bcdaba75bc661",
+  "file": "proprietary",
+  "verdict": "correct",
+  "reason": "'The engineering data is proprietary, AF has contacted them to procure data and they refused to sell' = proprietary_to_contractor. Refusal to sell arguably implies data_not_available but it is not stated; not counted as clearly missing (same standard as 2d11/8a09).",
+  "unsupported_labels": [],
+  "missing_labels": []
+ }
+]

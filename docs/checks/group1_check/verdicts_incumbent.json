@@ -1,0 +1,152 @@
+[
+ {
+  "notice_id": "ec3653c8e615422fa5448d03f1a9d7b0",
+  "verdict": "correct",
+  "reason": "Text says the modification for Contract W9124C23C0005 \"must be awarded to the incumbent, Blue Dog Environmental, Inc.\""
+ },
+ {
+  "notice_id": "9caf7e6615e9434ebf7f37b09b3cfee4",
+  "verdict": "correct",
+  "reason": "Text says Parrot Investment Company has \"successfully been delivering water to the Llano Seco Unit since 1991\" and \"continues to provide\" service to the Refuge (spelled \"Parrot\" in the document)."
+ },
+ {
+  "notice_id": "037d776095034ec4931c1828a31f8870",
+  "verdict": "correct",
+  "reason": "\"QuestTech is the incumbent contractor.\""
+ },
+ {
+  "notice_id": "25f7bda46d494a7b89cb15fd31c31af6",
+  "verdict": "correct",
+  "reason": "\"This acquisition is a continuation of services for contract 36C24E19D0031 with the University of Washington.\""
+ },
+ {
+  "notice_id": "de7588fe120246c68b0755f14bfdd423",
+  "verdict": "correct",
+  "reason": "\"The current task order was a sole source awarded under GSA IDIQ ... to Tyto Government Solutions.\""
+ },
+ {
+  "notice_id": "7c0c563478ff408095dabbc92546a5e7",
+  "verdict": "correct",
+  "reason": "Action is \"a modification to ... Task Order (TO) W911QX25F0053 with Link Solutions\", i.e. Link already holds the order being modified."
+ },
+ {
+  "notice_id": "c65d36f9463a4094806926dceaf7f8c5",
+  "verdict": "correct",
+  "reason": "\"bridge Task order with the incumbent LinTech Global, Inc.\"; current task order HT0011-21-F-0060."
+ },
+ {
+  "notice_id": "7e594e869a104b8092fe6cff1f8b91a4",
+  "verdict": "correct",
+  "reason": "Procurement history lists \"Incumbent name: TM3 Solutions, Inc.\" for HQ0034-19-C-0165 and bridge HC102825C0003."
+ },
+ {
+  "notice_id": "953167d162af45539acbd3b44ebe18c3",
+  "verdict": "correct",
+  "reason": "\"The current DO was awarded off Geotab's ... (MAS), GS-35F-164GA\" and the action modifies that existing DO FA445223F0084."
+ },
+ {
+  "notice_id": "612e192f87cc4d7890a72c8ef42a4829",
+  "verdict": "correct",
+  "reason": "\"ConServe has successfully performed PCA Services for the Fiscal Service since 2012 under TFMSHQ12K0018, 2033H618F00102, and ... 2033H624F00064.\""
+ },
+ {
+  "notice_id": "69f5d832981b4dc8a767a1448225f119",
+  "verdict": "correct",
+  "reason": "\"Innovative Solution and Support is currently providing repair services on sole source contract FA8117-20-D-0039\" (value spelled as in this sentence; firm is Innovative Solutions and Support, Inc.)."
+ },
+ {
+  "notice_id": "6962db9a7da743e398a976f56b0a7b12",
+  "verdict": "correct",
+  "reason": "Action is to \"Award modifications under contract N3220526C1206 ... to Alabama Shipyard\", the existing competitively awarded contract."
+ },
+ {
+  "notice_id": "4150fa139f324010bb9a4302868a4ff6",
+  "verdict": "correct",
+  "reason": "Market research refers to \"the vendor that currently provides JCITS support, Argonne Ridge.\""
+ },
+ {
+  "notice_id": "a8fe781362354eb4acc6625c3334bb92",
+  "verdict": "correct",
+  "reason": "\"Contract 89243323CFE000075 ... was awarded to KeyLogic Systems, LLC on October 31, 2022\" and this J&A modifies that contract."
+ },
+ {
+  "notice_id": "58fccbfdcb3d4b2ca04ffdda85f9be85",
+  "verdict": "unclear",
+  "reason": "Quote only shows the proposed sole-source award to L3Harris \"for continued sustainment services\"; the document mentions a \"current IDIQ contract\", a \"current contractor developed capability\" and a bridge action whose awardee is [REDACTED], but never names L3Harris as holder of any of them."
+ },
+ {
+  "notice_id": "59d8f587c3094ca4a9c219cab2b10284",
+  "verdict": "correct",
+  "reason": "Requirements are supported by task orders \"against an Indefinite Delivery Indefinite Quantity (IDIQ) contract (CTSS III) performed by General Dynamics Information Technology, Inc.\" and the action extends that contract."
+ },
+ {
+  "notice_id": "d459d64ab6e44384a3a55d3ac0d79739",
+  "verdict": "correct",
+  "reason": "\"KBR is the regionally aligned contractor for USNORTHCOM and is the only LOGCAP V contractor currently providing LOGCAP support\" in that area."
+ },
+ {
+  "notice_id": "c3dc8841acd7402a9e6f2f7c0e943fa3",
+  "verdict": "correct",
+  "reason": "Purchase is \"from the current sole service provider, Abbott Rapid Diagnostics Informatics, Inc.\""
+ },
+ {
+  "notice_id": "ed2991f7b3ba437f8cdc248eccc5fb0e",
+  "verdict": "correct",
+  "reason": "\"Previous and current sensors have been purchased from Sea-Bird Electronics Inc.\""
+ },
+ {
+  "notice_id": "8eed707e91b242ceb1f239c11d516587",
+  "verdict": "correct",
+  "reason": "\"The current pilot program is awarded to Eplison3.\" Same firm as Epsilon3, Inc.; the value copies the document's misspelling \"Eplison3\" (the document elsewhere spells it Epsilon3)."
+ },
+ {
+  "notice_id": "56c873fcd4a5466c91f93853ebe95605",
+  "verdict": "correct",
+  "reason": "RFI responses came from \"the incumbent contractor L3Harris\"."
+ },
+ {
+  "notice_id": "1526c3c2164b46ee94c8e1a26893ff9f",
+  "verdict": "correct",
+  "reason": "\"Industrial Economics Incorporated, the incumbent vendor that has previously assisted in the development and execution of the tasks\"."
+ },
+ {
+  "notice_id": "7ef9161aebb2425ab6043697f5e9c8d4",
+  "verdict": "correct",
+  "reason": "\"continue services with the incumbent contractor, Millbrook Support Services\" after current contract 36C25625P0581."
+ },
+ {
+  "notice_id": "ae949622d2a44640a9b8f0b33afd0b69",
+  "verdict": "correct",
+  "reason": "\"As the incumbent, Bellese Technologies maintains a fully onboarded, credentialed team\"."
+ },
+ {
+  "notice_id": "6bdafd7dbb264850bd2d62900108e906",
+  "verdict": "correct",
+  "reason": "\"logical follow-on Task Order with Lumen Technologies to extend ... services currently provided under Task Order 65310221F00006\" (a logical follow-on goes to the holder of the original order)."
+ },
+ {
+  "notice_id": "868dd2ede438427488ddbddbb549228d",
+  "verdict": "correct",
+  "reason": "Adds work under \"Delivery Order (Order No. N5005426FL002) awarded to BAE systems\", an existing order."
+ },
+ {
+  "notice_id": "d409b5def4454c8399c2ca8e6da15bd8",
+  "verdict": "correct",
+  "reason": "\"Award went to Snap-On Industrial under contract GS-06F-DA144 with POP from April 01, 2016 to March 31,2021\"; Snap-On also held the earlier TACOM IDIQ."
+ },
+ {
+  "notice_id": "8d46360995064937b53e2e95389a951f",
+  "verdict": "correct",
+  "reason": "\"The contract was awarded to the contractor Heidrick & Struggles International, Inc. (H&S) on September 18, 2025\" and this action modifies it."
+ },
+ {
+  "notice_id": "975495dee86a4dd8a4597d112b1e03dd",
+  "verdict": "correct",
+  "reason": "\"The incumbent contractor, M-4 Engineering, is the only source capable\" (firm is M4 Engineering, Inc.)."
+ },
+ {
+  "notice_id": "f94ea97063f94058962b4e6b7592fe8e",
+  "verdict": "correct",
+  "reason": "Cites Axle's \"successful execution to date of the existing N3C Dynamic Workspaces contract.\""
+ }
+]

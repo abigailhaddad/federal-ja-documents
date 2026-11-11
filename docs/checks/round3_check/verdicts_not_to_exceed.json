@@ -1,0 +1,232 @@
+[
+ {
+  "notice_id": "71c4d8cfdc524f6ba7dfb9f0cb2003e9",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value is 300% of the estimated value, $99,000,000.00\" for the proposed bridge contract."
+ },
+ {
+  "notice_id": "0db3068b99ec4cd9ad62703b93de7197",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "cd259eb15906429389ceb15bba8ec1f8",
+  "verdict": "correct",
+  "reason": "\"Total Value: Not to exceed $249,999.99\" for the CLO BPA."
+ },
+ {
+  "notice_id": "7544e3a0a83348f5b02f4f66d788ddc4",
+  "verdict": "correct",
+  "reason": "\"Table 3 provides the total estimated maximum dollar value for this procurement of $2,500,000.00.\""
+ },
+ {
+  "notice_id": "19fcc490a6834bce9d18a13297764b57",
+  "verdict": "correct",
+  "reason": "IDIQ follow-on \"at a not-to-exceed value of $95 million.\""
+ },
+ {
+  "notice_id": "0ec0d027c57c45bb9d97d4e6410d2c82",
+  "verdict": "correct",
+  "reason": "\"The total cumulative estimated value for all Phase III awards is anticipated not-to-exceed $5M\", covering all awards under this J&A."
+ },
+ {
+  "notice_id": "de99779d561a49e28e5ed72ad109ac36",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value is 300% of the estimated value, $2,100,000.00\" for the bridge contract."
+ },
+ {
+  "notice_id": "780a515435314f1f8bec32cf76c18a9f",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value is 300% of the estimated value, $210,000,000.00\" for the bridge contract."
+ },
+ {
+  "notice_id": "1627aa3ebda24da2b7726837c3d0e51a",
+  "verdict": "correct",
+  "reason": "\"The total estimated maximum value of this sole-source acquisition, inclusive of the base period and all options, is $4.8M.\""
+ },
+ {
+  "notice_id": "24843b2725774d8faa5e5874669f6182",
+  "verdict": "correct",
+  "reason": "\"This modification is estimated not to exceed $2,000,000.00\", and the modification is the action approved."
+ },
+ {
+  "notice_id": "750cf294dfee40db9cdc5dd7eea1359b",
+  "verdict": "correct",
+  "reason": "\"recommended not-to-exceed value of $15,192 to cover three priced contingency options\" is the stated NTE for the whole well-pump action (base $11,277 plus contingencies)."
+ },
+ {
+  "notice_id": "1bb0ea02b2544f748f1964e773b8fddd",
+  "verdict": "wrong",
+  "reason": "$49M is only the \"initial Not-To-Exceed (NTE) value\" of the initial UCA phase; the class J&A states \"The total estimated value authorized by this Class justification is $124M\" and \"The total approved Class J&A ceiling of $124M\"."
+ },
+ {
+  "notice_id": "b0e6aa4b0a964a879c23ff32d8d1072f",
+  "verdict": "wrong",
+  "reason": "$6,615,821.77 caps only \"The sum of all special projects\", one of five task-order lines under the J&A, not the whole action."
+ },
+ {
+  "notice_id": "bfc5e7f098fd47779473af4e8205dcdb",
+  "verdict": "correct",
+  "reason": "Approval states \"The maximum estimated value of the planned purchase order to lease with the sole source vendor is $1,750,000.00.\""
+ },
+ {
+  "notice_id": "b02c49232eda4f6a9f7467f0bf85723b",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $810,852.99 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "4852e719d8304c6d8a6c98dd0431c3c1",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "fdf1d9be18fb4dbaad1f4e8f6c5dd7cf",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "9b780932af814577a3470b9f90d5bee9",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "6c0f08b504034f7a810070d4334ba078",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "6d50ac18589a45b0ad1ae9660c01368c",
+  "verdict": "correct",
+  "reason": "\"Estimated Dollar Value, inclusive of options: $20,300,000.00 Maximum Dollar Value: $24,300,000.00\"."
+ },
+ {
+  "notice_id": "aae55bd348df4ee59298593b3dd67536",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "cd198c6549ba4f6c95540073be4d7fe6",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "0e1f9b21c9c54ab3a7d0ee0ce24f399f",
+  "verdict": "correct",
+  "reason": "\"The total estimated value for all actions, orders, or calls placed under the authority of this Class J&A shall not exceed $25,000,000.\""
+ },
+ {
+  "notice_id": "dbff26ae74884741869d3295a4d6b7bf",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $782,650.53 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "0702129655024445a1c0ca5188e3766a",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $838,000.00 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "efdacc36d55145a2ab74bf7a9d9da3b8",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $838,000.00 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "104315067e31404491d4cfc23e9016f7",
+  "verdict": "correct",
+  "reason": "\"Total estimated dollar value and performance/delivery period. $838,000.00 (NTE $900K)\" states $900K as the not-to-exceed for this short-term J&J Maintenance extension."
+ },
+ {
+  "notice_id": "0a296a05e99f4d11b56eae7b7477c79a",
+  "verdict": "correct",
+  "reason": "\"the anticipated total cost for a five-year procurement ... will not exceed $120,000\"."
+ },
+ {
+  "notice_id": "bf86098c5ae447d4abd04e3dee15427c",
+  "verdict": "correct",
+  "reason": "\"The proposed contract maximum dollar value is $100,000,000.00 which is 200% of the estimated contract value\"."
+ },
+ {
+  "notice_id": "7e9afbd1af2947eaa3b17c85f937031c",
+  "verdict": "correct",
+  "reason": "\"the negotiated amount will not exceed the approved J&A value of $3.2 Million\" for adding this work to Dawson's TO."
+ },
+ {
+  "notice_id": "260ef82206534d688555a576a0437805",
+  "verdict": "correct",
+  "reason": "\"grants the VA the authority to award a contract valued Not-to-Exceed $13.5 Million\" for this task order (estimate $13,283,290)."
+ },
+ {
+  "notice_id": "dd4db893eff24180ad63717c002c6a0e",
+  "verdict": "correct",
+  "reason": "\"The anticipated price for this procurement will not exceed $4.5 Million.\""
+ },
+ {
+  "notice_id": "efd8f383412d4c4e931f0ea105d0f771",
+  "verdict": "correct",
+  "reason": "\"The proposed contract maximum dollar value is $5,400,000.00 which is 300% of the estimated contract value\"."
+ },
+ {
+  "notice_id": "cf9fc88f22964137a1090d155bcd3da0",
+  "verdict": "correct",
+  "reason": "\"The proposed contract maximum dollar value is $308,700,000.00 which is 300% of the estimated contract value\"."
+ },
+ {
+  "notice_id": "7fa59223b95748a1afa6449ce44907df",
+  "verdict": "correct",
+  "reason": "Class J&A valid \"until the value of contract actions using this J&A reaches but does not exceed the $750,000 ceiling\" - a J&A ceiling, not the FAR approval threshold."
+ },
+ {
+  "notice_id": "f4aa136bb59a4f5bb9d53ceb6527258f",
+  "verdict": "correct",
+  "reason": "Class J&A valid \"until the value of contract actions using this J&A reaches but does not exceed the $750,000 ceiling\" (text identical to f4aa.../7fa5... Vance AFB Honeywell J&A)."
+ },
+ {
+  "notice_id": "085981b0c7294c9a8441ef732649849a",
+  "verdict": "correct",
+  "reason": "Class J&A valid \"until the value of contract actions using this J&A reaches but does not exceed the $750,000 ceiling\" (text identical to other Vance AFB Honeywell items)."
+ },
+ {
+  "notice_id": "953684e125d544e584aa5df354a44e85",
+  "verdict": "correct",
+  "reason": "Page 2 scope: \"destruction and melting services ... for 60 months, not-to-exceed $749,000.00\" (context field said not located, but the quote is verbatim in pages.parquet p2; J&A estimate on p1 is redacted)."
+ },
+ {
+  "notice_id": "f0d284169c764feca10d05b7aac2f562",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value of the proposed bridge contract is $28,000,000.00\"."
+ },
+ {
+  "notice_id": "7a016d6ee50a4fd9afc778a67d714ae6",
+  "verdict": "correct",
+  "reason": "\"The maximum dollar value of the proposed bridge contract is $52,000,000.00.\""
+ },
+ {
+  "notice_id": "dd0bf50dc8134026816ff4707cde3e70",
+  "verdict": "unclear",
+  "reason": "\"J&A Basic Value: $2,600,000 Variance up to $2,800,000 is requested for negotiations\" - a requested negotiation variance, not stated as a maximum or not-to-exceed."
+ },
+ {
+  "notice_id": "28d853aded6a4a1aa730c517d0276ebf",
+  "verdict": "correct",
+  "reason": "\"Estimated total award including option is not to exceed US$20,000.00.\""
+ },
+ {
+  "notice_id": "cc0c79960261492891a85d9f06cdb5b5",
+  "verdict": "correct",
+  "reason": "\"The total estimated contract value is $620,352.00 with a contract ceiling of $750,000.00\"."
+ },
+ {
+  "notice_id": "d0ff12075d304f71ae6c17fa5e23f6e9",
+  "verdict": "correct",
+  "reason": "\"We are anticipating a not to exceed amount of $30,000 (18,000,000 XOF)\" for the PO."
+ },
+ {
+  "notice_id": "064dc7fcded94dd8a920a07a53be69b3",
+  "verdict": "correct",
+  "reason": "\"with a not to exceed amount of 796,859.92 EUR all taxes included or US $ 821,100.00\" - USD figure as printed."
+ },
+ {
+  "notice_id": "79454b4615b34e3fb1447520d80525b7",
+  "verdict": "correct",
+  "reason": "\"ESTIMATED TOTAL VALUE (BASE + OPTIONS) MAXIMUM CONTRACT VALUE : $684,002.30\"."
+ }
+]

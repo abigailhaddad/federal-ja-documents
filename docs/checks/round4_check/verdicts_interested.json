@@ -1,0 +1,166 @@
+[
+  {
+    "notice_id": "db2381abf223462c9b55e5b29ca01448",
+    "verdict": "wrong",
+    "reason": "Sec. 6b-c: 'A total of twelve (12) written capability statements were [received] ... and one (1) via direct market inquiry to the incumbent (DevelopUs Worldwide, LLC).' 'c. Sources Expressing Interest: Submissions from the eleven (11) non-incumbent sources ... rejected as follows:' then lists Capstone Pacific, Renie Consulting, Valens Global, Metanoia Consultants & Closed Gap Solutions, WATT Global, PACE Consulting, Clear Thoughts, C3PT Executive Solutions, Walking With Others, AI Workforce Alliance. Shown value has only 2 of the 11 non-incumbent submitters (plus the incumbent also submitted).",
+    "missing_firms": [
+      "Valens Global, LLC",
+      "Metanoia Consultants, LLC",
+      "Closed Gap Solutions (CGS)",
+      "WATT Global, LLC",
+      "PACE Consulting, LLC",
+      "Clear Thoughts, LLC",
+      "C3PT Executive Solutions",
+      "Walking With Others",
+      "AI Workforce Alliance",
+      "DevelopUs Worldwide, LLC"
+    ],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "85dfb51f090f42159ea71aed9082e4bb",
+    "verdict": "wrong",
+    "reason": "Item 10: 'A listing of sources, if any, indicating an interest in the acquisition are: Metrex Valve Corp. CAGE 21013, Kampi Components CAGE 7Z016 and BHPE Inc. (no CAGE provided).' Market survey: Metrex and Kampi each 'Stated they are interested in submitting an offer.' Shown lists only BHPE. (Sarco Inc. CAGE 0ABX5 'Replied with no interest' - not counted.)",
+    "missing_firms": [
+      "21013 | Metrex Valve Corp.",
+      "7Z016 | Kampi Components"
+    ],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "acef045363a0424484d7bd3f41bf4f90",
+    "verdict": "correct",
+    "reason": "Item 12 table: '329E3 | MIDWAYS SUPPLY; 073S2 | MADISON ELECTRIC'. Sources sought had 'No responses'; no other responder named.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "4c1105f58cc9431db0e53c6664842977",
+    "verdict": "correct",
+    "reason": "Sec. 10: 'A listing of the sources, if any, that expressed a written interest in the acquisition. Tecan U.S., Inc., 9401 Globe Center Dr...' Beckman, Eppendorf, Hamilton are only products surveyed, not responders.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "e19da3b1768744dfa12863ed02dbe1a9",
+    "verdict": "correct",
+    "reason": "Item 12: '32CW5 | ATLANTIC SIGNAL LLC'. Sources sought: 'no responses'; no other responder named.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "9dbcfc53c02644699fd75077d21c7f8b",
+    "verdict": "correct",
+    "reason": "Sec. 11: 'The following sources expressed interest in providing firearms training range services: Heritage Training and Shooting Center, Maryland Police and Correctional Training Commissions (MPCTC), FLETC Cheltenham, and the CBP facility in Harper's Ferry, West Virginia.' Matches shown (note: FLETC and CBP are government facilities, but the document lists them as interested sources).",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "34c7dc4b3f924383ae99c21b50105a0d",
+    "verdict": "correct",
+    "reason": "Sec. 10: 'The following source has expressed, in writing, an interest in performing this requirement: Polaris Imaging, LLC'. Market feedback sources are redacted; no other responder named.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "5970b2323c504f5eab2b374ae5f14a05",
+    "verdict": "correct",
+    "reason": "Sources sought 'yielded the following results: response from cage 08U11'; item 9 listing: '08U11 Periparts Group Inc'. Market survey: 'No responses received.'",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "234ff30058fa470b820bb8f1596aa870",
+    "verdict": "wrong",
+    "reason": "Sec. 6 / market research: 'Two responses were received, one from Teledyne who is the approved source and one from DCX-CHOL Enterprises, Inc. (CAGE 30463), who is large business, but ... not eligible to propose.' Also: 'Previous Synopsis was completed by the Navy in which they received one response from SUPPLY SOLUTIONS INTERNATIONAL, CAGE 8FBX3, stating they are a distributor for Teledyne.' Shown lists only 'Teledyne' (and omits its CAGE 17476 given in the document as Teledyne Instruments, Inc).",
+    "missing_firms": [
+      "30463 | DCX-CHOL Enterprises, Inc.",
+      "8FBX3 | SUPPLY SOLUTIONS INTERNATIONAL (responded to a previous Navy synopsis)"
+    ],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "14a2cb95287e4fc1b9d304367be10bcd",
+    "verdict": "unclear",
+    "reason": "Sec. X: 'New Mexico Spaceport Authority is the only capable vendor that expressed interest in this requirement.' But Sec. V: 'the majority of Contractors were non-responsive ... USAFADS conducted a site visit at the two locations that were responsive, to include the location at Spaceport America Airfield and Ft. Huachuca/Libby Army Airfield.' Ft. Huachuca/Libby Army Airfield is named as responsive but is an Army installation contacted by the agency, not clearly a firm; whether it should be listed depends on that call. NMSA itself is correctly listed.",
+    "missing_firms": [
+      "Ft. Huachuca/Libby Army Airfield (possible; government installation)"
+    ],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "e98dc3aa61824d65927db30aaa01dc11",
+    "verdict": "correct",
+    "reason": "Sec. 10: 'Listing of Sources that Expressed, in Writing, an Interest in the Acquisition: Point Breeze Communications, Inc.'",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "eb9da8cd5b50486399f7e999e78ed8a3",
+    "verdict": "correct",
+    "reason": "Sec. 10 lists 'Abbott Laboratories, Inc., Mikayla Graham...'. Sec. 8: 'The zero responses to the Notice of Intent to Sole Source'.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "7bb22c7af20b442eabdeed1ba17e4c42",
+    "verdict": "wrong",
+    "reason": "Sec. 10 table 'Business Name / Business Socio-economic Category' lists Avalon Contracting, Vesequ, METGreen Solutions, and the table continues after the page-4 signature block: 'Mountain Veteran Solutions  Native-Owned Service-Disabled Veteran Owned Small Business (SDVOSB); Arayna Technology Solutions  Women-Owned Small Business (WOSB); ByteForza  SBA Certified 8(a) Small Business (EDWOSB); Kode Labs  Large Business'. Kode Labs is consistent with the 'one large business did respond ... alternative BMS'. Shown omits the four continuation rows.",
+    "missing_firms": [
+      "Mountain Veteran Solutions",
+      "Arayna Technology Solutions",
+      "ByteForza",
+      "Kode Labs"
+    ],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "43ba5de1951947c3a315055d45a5728e",
+    "verdict": "correct",
+    "reason": "Item 12: '13567 | ELBIT SYSTEM OF AMERICA-NIGHT VISION'; sources sought had no response; MR by email: 'ELBIT will submit a proposal'.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "90cdfa43a36c462f83d8ec0068c61564",
+    "verdict": "correct",
+    "reason": "Sec. 10: 'R&M Government Services Inc (6FN58); Kampi Components Co. Inc. (7Z016); Sanitz Enterprises (57AD8)'; all three 'Responded ... and provided a market survey.' Firms correct; format note: shown uses 'Name (CAGE)' instead of the specified 'CAGE | Name'.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "b4f87a3a73cb49a5beb5d70d45e07ee4",
+    "verdict": "correct",
+    "reason": "Sec. 8: 'One response was received ... BHPE LLC (CAGE 9SWS7) responded on 5 February 2025 expressing interest'; Sec. 9 refers back to Sec. 8. JLG is the intended source, no response from it described.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "3a5eade046a44ffba971b0e7d4726696",
+    "verdict": "correct",
+    "reason": "Item 12: 'NONE | NONE'; sources sought: 'No responses received from industry.' 'Contacted known vendors' names no responder.",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "880e00dbf6a344d48e7a1bac600758d5",
+    "verdict": "correct",
+    "reason": "Item 12: 'NONE | NONE'; sources sought: 'No responses received'; 'No vendors responded with the intent to provide this item.'",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "6434600f040f4f51a234194c0b1f2b0a",
+    "verdict": "correct",
+    "reason": "Item 12: 'None | None'; 'No sources replied to the posting.' GE Aviation was sent a data request letter: 'No response has been received.'",
+    "missing_firms": [],
+    "extra_firms": []
+  },
+  {
+    "notice_id": "260d55ee82f244be9f46588571967291",
+    "verdict": "correct",
+    "reason": "Item 12: 'NONE'; 'Sources Sought yielded no response.' Rexnord appears only as approved source.",
+    "missing_firms": [],
+    "extra_firms": []
+  }
+]

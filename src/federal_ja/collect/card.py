@@ -320,7 +320,9 @@ usable text have `status` `skipped` and a `skip_reason`.
 A separate call reads each J&A again for facts the main extraction doesn't ask for. Only the fields
 below are published: for each, a random sample of notices (usually 20 or 30) was read against the
 document, and the counts below are the results. A sample is not a guarantee: 30 right out of 30 is still
-consistent with an error rate of up to about 10% across the whole table. The rest of what the call asks
+consistent with an error rate of up to about 10% across the whole table. The samples were judged by
+Claude subagents (an AI model) reading the document text against written criteria, not by a person; each
+item, its document text and its verdict are in [docs/checks](@@PROJECT_URL@@/tree/main/docs/checks). The rest of what the call asks
 for (unit prices, a proprietary-to-the-contractor reason, and others) did worse in its samples and is not
 published. Each value is as the document states it, with its quote; a blank means it was not found,
 not that the document doesn't say it.
