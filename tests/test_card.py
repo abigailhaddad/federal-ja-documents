@@ -108,3 +108,20 @@ def test_card_documents_sam_award_columns(tmp_path):
         assert f"`{c}`" in card, c
     assert "deliveryOrderNumber" in card
     assert "{'ok': 1, 'unfetched': 1}" in card
+
+
+def test_card_has_no_dated_backfill_promise():
+    # 2026-11-15 audit: the card still said the extract6 backfill was "expected
+    # within a few days of 2026-10-21"; on HF 12,351 of 12,352 extracted rows
+    # were extract6.
+    assert "within a few days" not in EXPERIMENTAL_SECTION
+    assert "@@" not in EXPERIMENTAL_SECTION
+
+
+def test_card_lists_every_justification_authority_value(tmp_path):
+    # 2026-11-15 audit: a fixed "seen:" list left out far2 (927 notices), 1 (505) and others.
+    s = Store(str(tmp_path))
+    for i, v in enumerate(["far1", "far1", "far2", "1", None]):
+        s.notices[str(i)] = {"notice_id": str(i), "posted_date": "2025-03-01", "sam_justification_authority": v}
+    card = render_card(s, "2025-01-20", "2026-11-15T00:00:00")
+    assert "`far1` (2), `1` (1), `far2` (1)" in card
