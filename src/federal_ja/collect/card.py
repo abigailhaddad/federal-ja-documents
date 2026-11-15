@@ -391,10 +391,10 @@ stated types found). The model's answers for them are still in `record_json`, un
   and the table is republished. Each row says its `extract_version` and the
   dataset commit it was read from (`dataset_revision`). When the prompt
   changes, older rows are re-extracted the same way, a cap's worth per run.
-  The current prompt is `2026-10-21.extract6`; until its backfill finishes
-  (expected within a few days of 2026-10-21), rows from the older
-  `2026-10-17.extract2` prompt, which have none of the newer fields, sit
-  next to `extract6` rows. Filter on `extract_version` to use one version.
+  The current prompt is `@@EXTRACT_VERSION@@`. Until a new prompt's
+  backfill catches up, rows from the older prompt, which lack the fields
+  added since, sit next to rows from the current one. Filter on
+  `extract_version` to use one version.
   The second call runs in the same job, after the extraction, for notices
   that have a row but no second-call record, under its own spend cap.
 * **Themes** (`analysis/theme_tags.parquet`, `analysis/theme_status.parquet`)
@@ -405,6 +405,10 @@ stated types found). The model's answers for them are still in `record_json`, un
 The model name and every prompt are in [prompts.yaml](@@PROJECT_URL@@/blob/main/src/federal_ja/analysis/prompts.yaml).
 """
 EXPERIMENTAL_SECTION = EXPERIMENTAL_SECTION.replace("@@PROJECT_URL@@", config.PROJECT_URL)
+# Read from prompts.yaml rather than typed here: the card once said the extract6
+# backfill was "expected within a few days of 2026-10-21" long after it finished.
+from ..analysis.promptfile import CONFIG as _PROMPTS  # noqa: E402
+EXPERIMENTAL_SECTION = EXPERIMENTAL_SECTION.replace("@@EXTRACT_VERSION@@", _PROMPTS["extraction"]["version"])
 
 
 def render_card(store: Store, start_date: str, built_at: str,
@@ -484,7 +488,7 @@ them (surrounding whitespace removed, nothing else changed):
 | `sam_award_date`, `sam_award_amount` | `award.date`, `award.amount` |
 | `sam_awardee_name`, `sam_awardee_uei` | `award.awardee.name`, `award.awardee.ueiSAM` (often empty on J&As) |
 | `sam_award_modification_number` | `award.justificationAuthority.modificationNumber` |
-| `sam_justification_authority` | `award.justificationAuthority.authority`, SAM's code for the authority selected on the form, as stored (seen: `brand`, `far1`, `far13`, `FAR13`, `FAR5`, `2`, `3`, `5`) |
+| `sam_justification_authority` | `award.justificationAuthority.authority`, SAM's code for the authority selected on the form, as stored, not normalised; values at build time, with notice counts: {authority_values} |
 | `sam_organization_id` | `data2.organizationId`, the posting office's SAM Federal Hierarchy key; `agency`, `sub_tier`, `office` and `aac_code` are the same office's names and code from the CSV |
 
 Caveats:
@@ -504,9 +508,19 @@ Coverage at build time, notices by `sam_award_status`: {coverage}
 """
 
 
+def authority_values(store: Store) -> str:
+    """Every sam_justification_authority value with its notice count, most
+    common first. Computed so the card can't fall behind the data (a fixed
+    'seen:' list once left out far2, 1, far3 and others)."""
+    from collections import Counter
+    c = Counter(n.get("sam_justification_authority") for n in store.notices.values()
+                if n.get("sam_justification_authority"))
+    return ", ".join(f"`{k}` ({v:,})" for k, v in sorted(c.items(), key=lambda kv: (-kv[1], kv[0]))) or "none yet"
+
+
 def sam_award_section(store: Store) -> str:
     from .sam_award import coverage
-    return SAM_AWARD_TEMPLATE.format(coverage=coverage(store))
+    return SAM_AWARD_TEMPLATE.format(coverage=coverage(store), authority_values=authority_values(store))
 
 
 USASPENDING_TEMPLATE = """## Vendor and amount from USAspending (`usaspending_*` columns in `notices`)
