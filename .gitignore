@@ -7,3 +7,5 @@ work/
 *.egg-info/
 site/
 .DS_Store
+hf_data/
+*.sqlite

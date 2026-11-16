@@ -428,9 +428,10 @@ def cmd_publish(args, store: Store) -> dict:
     now = pipeline.now_iso()
     card = render_card(store, args.start_date, now, us_cols=us_cols)
     if getattr(args, "dry_run", False):
+        from .card import add_dictionary
         paths = published.write(store, us_cols)
         with open(store.path(published.PUBLISH_DIR, "README.md"), "w") as f:
-            f.write(card)
+            f.write(add_dictionary(card, store.path(published.PUBLISH_DIR)))
         return {"dry_run": True, "tables": paths, "usaspending": store.state.get("usaspending")}
     if args.mode == "full":
         out = hf_sync.publish_full(store, card, now=now, delete_stale=args.delete_stale,

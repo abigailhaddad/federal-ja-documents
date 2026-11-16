@@ -21,6 +21,7 @@ tests/         tests (collection, and the analysis package on synthetic fixtures
 docs/analysis_validation.md   how the analysis categories were validated
 docs/field_extraction.md      how field extraction works and how it was checked
 docs/digest.md                the daily "WOAH! J&As" email digest, its web archive and RSS feed
+docs/tables.toml              column descriptions; docs/data_dictionary.md is generated from it
 .github/workflows/daily.yml   daily collection job
 ```
 
@@ -213,6 +214,21 @@ value; DoD data reaches USAspending about 90 days late).
 ```sh
 uv run ja-collect --workdir $W publish --dry-run   # builds <workdir>/publish/ without uploading
 ```
+
+## Data dictionary
+
+[`docs/data_dictionary.md`](docs/data_dictionary.md) lists every column of all eight tables (the four `data/` tables and the four experimental `analysis/` tables) with its type, a description, the share of rows that have a value, and an example, plus a diagram of how the tables join. Types, counts and examples are read from the published parquet files; descriptions are in [`docs/tables.toml`](docs/tables.toml), written from the code that builds each column and the dataset card. Columns copied from SAM.gov whose meaning SAM doesn't document are marked "(meaning not confirmed)". Regenerate it with
+
+    uv run python -m federal_ja.collect.data_docs fetch hf_data   # download the current tables (not files/) from Hugging Face
+    uv run python -m federal_ja.collect.data_docs write hf_data   # write docs/data_dictionary.md
+
+Each publish puts the same section, for the `data/` tables only, on the Hugging Face dataset card (`card.add_dictionary`, after `published.write`); the `analysis/` tables aren't built by the daily job, so the card links to the full dictionary instead. Both stop with an error if a parquet column has no description in `docs/tables.toml` or a described column is gone, and the daily workflow runs that check on all eight tables too.
+
+## SQLite download
+
+After a daily run that published, the workflow's `sqlite` job builds `federal-ja-documents.sqlite` from the tables on Hugging Face (one SQLite table per parquet file, plus `_source`, which records the Hugging Face commit; the original files in `files/` are not in it) and attaches it to the GitHub release [`latest-data`](https://github.com/abigailhaddad/federal-ja-documents/releases/tag/latest-data). The release is replaced whenever the Hugging Face commit changes. The file was about 810 MiB on 2026-11-16; the build stops if it reaches GitHub's 2 GiB asset limit. To build it yourself:
+
+    uv run python -m federal_ja.collect.build_sqlite hf_data federal-ja-documents.sqlite
 
 ## Running it
 

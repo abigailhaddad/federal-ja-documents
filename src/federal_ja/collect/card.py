@@ -257,6 +257,8 @@ Token counts and cost are recorded per document.
 * These are U.S. government records obtained from a public website. Some
   attachments may contain contractor-supplied material.
 
+{dictionary_mark}
+
 ## License
 
 The dataset is released under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/):
@@ -461,7 +463,39 @@ def render_card(store: Store, start_date: str, built_at: str,
         usaspending_section=usaspending_section(store, us_cols),
         experimental_section=EXPERIMENTAL_SECTION,
         n_tx_failed_pages=len(failed), link_lines=link_lines, n_tx_failed_docs=len({k for k, _ in failed}),
+        dictionary_mark=DICTIONARY_MARK,
     )
+
+
+# The data dictionary is computed from the published tables, which are written
+# after the card is rendered, so render_card leaves this marker and
+# add_dictionary fills it in once published.write has run (hf_sync).
+DICTIONARY_MARK = "<!-- data dictionary goes here -->"
+
+
+def dictionary_section(publish_root: str) -> str:
+    """The data dictionary of the data/ tables as published (from
+    <workdir>/publish/), by data_docs.py from docs/tables.toml. Stops with an
+    error if their columns no longer match the descriptions. The analysis/
+    tables are not built by this job, so they are described only in
+    docs/data_dictionary.md on GitHub."""
+    from . import data_docs
+
+    cfg = data_docs.load_config()
+    tables = {n: t for n, t in cfg["tables"].items() if t["file"].startswith("data/")}
+    joins = [j for j in cfg.get("joins", [])
+             if j["left"].split(".")[0] in tables and j["right"].split(".")[0] in tables]
+    md = data_docs.markdown(publish_root, {**cfg, "tables": tables, "joins": joins}, level=2,
+                            source="the data/ tables in this dataset")
+    return md + (f"\nThe `analysis/` tables are described in "
+                 f"[docs/data_dictionary.md]({config.PROJECT_URL}/blob/main/docs/data_dictionary.md).\n")
+
+
+def add_dictionary(card_text: str, publish_root: str) -> str:
+    """Fill in render_card's marker. A text without the marker is returned as is."""
+    if DICTIONARY_MARK not in card_text:
+        return card_text
+    return card_text.replace(DICTIONARY_MARK, dictionary_section(publish_root))
 
 
 SAM_AWARD_TEMPLATE = """## Award and order number from the SAM notice record (`sam_award_*` columns in `notices`)

@@ -86,6 +86,17 @@ def _table_ops(store: Store, tables: dict[str, str]) -> list:
     return ops
 
 
+def write_tables_and_card(store: Store, card_text: str, us_cols: dict | None) -> dict[str, str]:
+    """Write the published tables, then the card with its data dictionary
+    (computed from those tables). Returns published.write's paths."""
+    from .card import add_dictionary
+
+    paths = published.write(store, us_cols)
+    with open(store.path("README.md"), "w") as f:
+        f.write(add_dictionary(card_text, store.path(published.PUBLISH_DIR)))
+    return paths
+
+
 def files_to_upload(store: Store) -> list[str]:
     return sorted(a["file_path"] for a in store.attachments.values()
                   if a.get("download_status") == "ok" and a.get("file_path")
@@ -108,9 +119,7 @@ def publish_delta(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID
         for p in batch:
             by_path[p]["uploaded_at"] = now
     store.save()
-    with open(store.path("README.md"), "w") as f:
-        f.write(card_text)
-    ops = _table_ops(store, published.write(store, us_cols))
+    ops = _table_ops(store, write_tables_and_card(store, card_text, us_cols))
     api.create_commit(repo_id, ops, repo_type="dataset",
                       commit_message="Update notices, attachments and dataset card")
     return len(paths)
@@ -133,9 +142,7 @@ def publish_full(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID,
         if a.get("download_status") == "ok" and a.get("file_path"):
             a["uploaded_at"] = now
     store.save()
-    with open(store.path("README.md"), "w") as f:
-        f.write(card_text)
-    ops = _table_ops(store, published.write(store, us_cols))
+    ops = _table_ops(store, write_tables_and_card(store, card_text, us_cols))
     api.create_commit(repo_id, ops, repo_type="dataset",
                       commit_message="Notices, attachments and dataset card")
     deleted = 0
@@ -167,9 +174,7 @@ def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_I
     if missing:
         raise UploadVerifyError(f"{len(missing)} stored files are not on the hub, e.g. {missing[:3]}")
     store.save()
-    with open(store.path("README.md"), "w") as f:
-        f.write(card_text)
-    ops = _table_ops(store, published.write(store, us_cols))
+    ops = _table_ops(store, write_tables_and_card(store, card_text, us_cols))
     info = api.create_commit(repo_id, ops, repo_type="dataset",
                              commit_message="Notices, attachments and pages tables; dataset card")
     out = {"tables_commit": getattr(info, "oid", ""), "deleted_stale": []}
