@@ -69,3 +69,35 @@ jobs:
             run_summary.json
             work/data/collection_state.json
           if-no-files-found: ignore
+
+  # Downloadable SQLite, in its own job so only it gets write access to the repo (to replace the release):
+  # download the tables now on Hugging Face (not files/), stop if their columns no longer match
+  # docs/tables.toml, build one SQLite file and attach it to the GitHub release `latest-data`. The release
+  # is deleted and recreated whenever the Hugging Face commit changes, so it always holds one file. Runs only
+  # after a collection run that published.
+  sqlite:
+    needs: collect
+    if: needs.collect.result == 'success' && (github.event_name == 'schedule' || inputs.publish)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: SQLite file on the latest-data release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          uv run python -m federal_ja.collect.data_docs fetch hf_data
+          uv run python -m federal_ja.collect.data_docs check hf_data
+          sha=$(cat hf_data/REVISION)
+          if gh release view latest-data --json body --jq .body 2>/dev/null | grep -q "$sha"; then
+            echo "latest-data already holds Hugging Face commit $sha; nothing to do"
+            exit 0
+          fi
+          built=$(uv run python -m federal_ja.collect.build_sqlite hf_data federal-ja-documents.sqlite | tail -n 1)
+          echo "$built"
+          gh release delete latest-data --cleanup-tag --yes 2>/dev/null || true
+          gh release create latest-data federal-ja-documents.sqlite --title "Latest data (SQLite)" --notes "SQLite copy of the tables in https://huggingface.co/datasets/abigailhaddad/federal-ja-documents at commit $sha (not the original files), built $(date -u +%Y-%m-%d) by the daily collection workflow. One table per parquet file; the analysis tables are experimental and AI-generated. Columns are described in docs/data_dictionary.md. ${built#wrote }"

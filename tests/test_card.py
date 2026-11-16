@@ -125,3 +125,27 @@ def test_card_lists_every_justification_authority_value(tmp_path):
         s.notices[str(i)] = {"notice_id": str(i), "posted_date": "2025-03-01", "sam_justification_authority": v}
     card = render_card(s, "2025-01-20", "2026-11-15T00:00:00")
     assert "`far1` (2), `1` (1), `far2` (1)" in card
+
+
+def test_card_gets_data_dictionary_of_published_tables(tmp_path):
+    """render_card leaves a marker; add_dictionary fills it from the published data/ tables and stops
+    if their columns no longer match docs/tables.toml."""
+    import pandas as pd
+
+    from federal_ja.collect import data_docs
+    from federal_ja.collect.card import DICTIONARY_MARK, add_dictionary
+
+    card = render_card(Store(str(tmp_path / "w")), "2025-01-20", "2026-11-16T00:00:00")
+    assert DICTIONARY_MARK in card
+    pub = tmp_path / "publish"
+    (pub / "data").mkdir(parents=True)
+    tables = {n: t for n, t in data_docs.load_config()["tables"].items() if t["file"].startswith("data/")}
+    for t in tables.values():
+        pd.DataFrame({c: pd.Series([], dtype="string") for c in t["columns"]}).to_parquet(pub / t["file"])
+    out = add_dictionary(card, str(pub))
+    assert DICTIONARY_MARK not in out and "## Data dictionary" in out
+    assert "| `notices` | `data/notices.parquet` |" in out and "analysis/extractions.parquet" not in out.split("## Data dictionary")[1].split("## License")[0].split("described in")[0]
+    first = next(iter(tables.values()))
+    pd.DataFrame({"x": pd.Series([], dtype="string")}).to_parquet(pub / first["file"])
+    with pytest.raises(SystemExit, match="SCHEMA DRIFT"):
+        add_dictionary(card, str(pub))
