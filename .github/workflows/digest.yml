@@ -10,19 +10,27 @@ name: Daily J&A digest email
 # * after each "Daily J&A collection" run, but only while the extraction job is
 #   off (EXTRACT_DAILY_ENABLED != 'true'); otherwise the extraction run above
 #   follows and triggers this;
-# * a fallback schedule (15:00 UTC = 10am ET) for days when neither of the
-#   above fired. If no digest went out that day it sends one (with no new
-#   notices, the short "nothing whoa-worthy (0 new notices)" email).
-#   2026-11-24: this was 22:30 UTC. GitHub fires schedules up to ~8h late (see
-#   daily.yml), and 22:30 UTC + 8h lands at 05:30-06:30 UTC the next day --
-#   right on top of collection's 06:15 UTC start. That happened: the late
-#   fallback ran at 06:16 UTC, before that morning's collection (still
-#   running) had added anything, found 0 new notices, and used up the day's
-#   one-send slot with a "nothing" email -- 26 minutes before collection
-#   actually found 20 new ones, which then had to wait for the next digest
-#   (no notices are lost; see the "one email a day" note below). Moved to
-#   15:00 UTC so even an 8h-late fire (23:00 UTC) stays well clear of both
-#   that morning's and the next morning's 06:15 UTC collection window.
+# * a fallback schedule, hourly from 07:00 to 23:00 UTC, for days when
+#   neither of the above fired (collection failed, the workflow_run chain
+#   didn't fire, GitHub itself had an outage). Each tick is cheap once a
+#   digest has already gone out that Eastern day (run.py's "one email a day"
+#   check returns before any model call), so this is a true retry-until-it-
+#   lands loop, not a single fixed time: whichever hour collection's data
+#   finally shows up in, the next tick sends it. The window starts at 07:00
+#   UTC, not 00:00, so a tick can never run before that morning's collection
+#   (06:15-06:45 UTC) has had a normal chance to finish -- see below.
+#   2026-11-24: the previous version of this was one fixed time (22:30 UTC).
+#   GitHub fires schedules up to ~8h late (see daily.yml), and 22:30 UTC + 8h
+#   lands at 05:30-06:30 UTC the next day -- right on top of collection's
+#   06:15 UTC start. That happened: the late fallback ran at 06:16 UTC,
+#   before that morning's collection (still running) had added anything,
+#   found 0 new notices, and used up the day's one-send slot with a
+#   "nothing" email -- 26 minutes before collection actually found 20 new
+#   ones, which then had to wait for the next digest (no notices are lost;
+#   see the "one email a day" note below). Hourly-from-07:00 fixes this two
+#   ways: no tick can fire inside the 06:15-07:00 danger window in the first
+#   place, and even if collection itself runs unusually long one day, the
+#   very next hourly tick (not tomorrow) picks up whatever it finds.
 # One email a day (2026-10-22): once a digest has been sent on an Eastern-time
 # day, every later run that day sends nothing, even with new notices; they go
 # in the next day's digest. Every trigger uses the same saved watermark
@@ -51,7 +59,7 @@ on:
     workflows: ["Daily experimental field extraction", "Daily J&A collection"]
     types: [completed]
   schedule:
-    - cron: "0 15 * * *"
+    - cron: "0 7-23 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
