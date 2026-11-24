@@ -10,9 +10,19 @@ name: Daily J&A digest email
 # * after each "Daily J&A collection" run, but only while the extraction job is
 #   off (EXTRACT_DAILY_ENABLED != 'true'); otherwise the extraction run above
 #   follows and triggers this;
-# * a fallback schedule (22:30 UTC) for days when neither of the above fired.
-#   If no digest went out that day it sends one (with no new notices, the
-#   short "nothing whoa-worthy (0 new notices)" email).
+# * a fallback schedule (15:00 UTC = 10am ET) for days when neither of the
+#   above fired. If no digest went out that day it sends one (with no new
+#   notices, the short "nothing whoa-worthy (0 new notices)" email).
+#   2026-11-24: this was 22:30 UTC. GitHub fires schedules up to ~8h late (see
+#   daily.yml), and 22:30 UTC + 8h lands at 05:30-06:30 UTC the next day --
+#   right on top of collection's 06:15 UTC start. That happened: the late
+#   fallback ran at 06:16 UTC, before that morning's collection (still
+#   running) had added anything, found 0 new notices, and used up the day's
+#   one-send slot with a "nothing" email -- 26 minutes before collection
+#   actually found 20 new ones, which then had to wait for the next digest
+#   (no notices are lost; see the "one email a day" note below). Moved to
+#   15:00 UTC so even an 8h-late fire (23:00 UTC) stays well clear of both
+#   that morning's and the next morning's 06:15 UTC collection window.
 # One email a day (2026-10-22): once a digest has been sent on an Eastern-time
 # day, every later run that day sends nothing, even with new notices; they go
 # in the next day's digest. Every trigger uses the same saved watermark
@@ -41,7 +51,7 @@ on:
     workflows: ["Daily experimental field extraction", "Daily J&A collection"]
     types: [completed]
   schedule:
-    - cron: "30 22 * * *"
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

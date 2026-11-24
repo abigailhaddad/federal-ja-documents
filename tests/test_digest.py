@@ -396,6 +396,34 @@ def test_quiet_day_with_a_pick_sends(tmp_path):
     assert len(sent) == 1
 
 
+def test_thanksgiving_and_black_friday_send_nothing_with_no_picks(tmp_path):
+    sent, ok = _sender()
+    _seed(tmp_path, "2026-11-23")                              # last digest Monday
+    for day in ("2026-11-26", "2026-11-27"):                   # Thanksgiving, Black Friday
+        before = json.loads((tmp_path / "state.json").read_text())
+        assert _at(tmp_path, ok, day, picks=[], extra=("--max-age-days", "60")) == 0
+        assert sent == []
+        assert _skipped(tmp_path).startswith(f"no picks on {day} (Thanksgiving/Black Friday)")
+        assert json.loads((tmp_path / "state.json").read_text()) == before
+
+
+def test_thanksgiving_still_sends_a_real_pick(tmp_path):
+    sent, ok = _sender()
+    _seed(tmp_path, "2026-11-23")
+    assert _at(tmp_path, ok, "2026-11-26", picks=[pick()], extra=("--max-age-days", "60")) == 0
+    assert len(sent) == 1
+
+
+def test_is_quiet_holiday_matches_known_thanksgiving_dates():
+    from datetime import date
+    for year, thanksgiving, black_friday in ((2025, 27, 28), (2026, 26, 27), (2027, 25, 26)):
+        assert digest_run.is_quiet_holiday(date(year, 11, thanksgiving))
+        assert digest_run.is_quiet_holiday(date(year, 11, black_friday))
+        assert not digest_run.is_quiet_holiday(date(year, 11, thanksgiving - 1))
+        assert not digest_run.is_quiet_holiday(date(year, 11, black_friday + 1))
+    assert not digest_run.is_quiet_holiday(date(2026, 12, 26))  # not November
+
+
 def test_no_hold_without_a_previous_digest_or_when_turned_off(tmp_path):
     sent, ok = _sender()
     _at(tmp_path, ok, "2026-10-21", picks=[])                 # no state yet: sends

@@ -98,6 +98,20 @@ def _label(d: datetime | None) -> str:
     return f"{e:%b} {e.day} {e:%H:%M} ET"
 
 
+def is_quiet_holiday(d: date) -> bool:
+    """Thanksgiving (the 4th Thursday of November) or the day after it, any year.
+
+    On these two days a zero-picks run sends nothing at all, not even the
+    usual 'nothing WOAH-worthy' email (2026-11-24: a reader asked not to be
+    emailed "nothing" on a day nobody expects J&A news anyway). A day with
+    real picks still sends as normal."""
+    if d.month != 11:
+        return False
+    thursdays = [day for day in range(1, 31) if date(d.year, 11, day).weekday() == 3]
+    thanksgiving = thursdays[3]
+    return d.day in (thanksgiving, thanksgiving + 1)
+
+
 def recover_from_buttondown(state: dict, store, recent_fn) -> dict:
     """If Buttondown has a digest whose watermark is newer than the saved
     state (the email went out but saving the state failed), adopt it."""
@@ -248,8 +262,11 @@ def _run(a, report, store, archive, reader_factory, revision_fn, call_fn, send_f
 
     if not a.send:
         return 0
-    if not picks and a.zero_picks == "skip":
-        report["skipped"] = "no picks and --zero-picks skip"
+    quiet_holiday = is_quiet_holiday(date.fromisoformat(today_et))
+    if not picks and (a.zero_picks == "skip" or quiet_holiday):
+        report["skipped"] = ("no picks and --zero-picks skip" if a.zero_picks == "skip" else
+                             f"no picks on {today_et} (Thanksgiving/Black Friday): sending nothing, not even "
+                             "the usual 'nothing WOAH-worthy' email")
         return 0
     # Quiet days (2026-11-01): nothing picked and fewer than --hold-under
     # notices (most weekends and holidays) sends nothing. The state is not
