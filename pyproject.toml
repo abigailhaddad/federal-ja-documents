@@ -18,6 +18,8 @@ dependencies = [
     "cryptography>=42",
     "duckdb>=1.5.6",
     "pyyaml>=6.0",
+    # topic lookup for the Federal Data Stories list (the digest goes to the "J&A digest" topic only)
+    "topic-mail @ git+https://github.com/abigailhaddad/topic-mail@dcd7fd5",
 ]
 
 [project.scripts]
@@ -29,6 +31,9 @@ dev = ["pytest>=8"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true   # topic-mail is installed from its git repo at a pinned commit
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/federal_ja"]
