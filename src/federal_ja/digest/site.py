@@ -143,11 +143,12 @@ but check the source before relying on anything. <a href="{root}about.html">Abou
 
 
 def signup_form() -> str:
-    return (f'<form class="signup" action="{SUBSCRIBE_FORM_URL}" method="post">'
+    return (f'<form class="signup" id="subscribe" action="{SUBSCRIBE_FORM_URL}" method="post">'
             '<label for="bd-email">Get the daily email</label> '
             '<input type="email" name="email" id="bd-email" required autocomplete="email" '
             'placeholder="you@example.com"> '
             '<input type="hidden" name="embed" value="1">'
+            f'<input type="hidden" name="tag" value="{e(config.SUBSCRIBE_TAG)}">'
             '<button type="submit">Subscribe</button></form>')
 
 

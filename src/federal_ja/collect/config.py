@@ -23,7 +23,11 @@ USASPENDING_HF_DATASET = os.environ.get("JA_USASPENDING_DATASET", "abigailhaddad
 # "report a problem" link.
 SITE_URL = os.environ.get("JA_SITE_URL", "https://woah-jas.abigailhaddad.com")
 BUTTONDOWN_USER = os.environ.get("JA_BUTTONDOWN_USER", "abigailhaddad")
-SUBSCRIBE_URL = f"https://buttondown.com/{BUTTONDOWN_USER}"
+# The Buttondown list carries several topics (subscriber-editable tags). Signing up here subscribes
+# to the J&A digest only, so links go to the site's own form, which sets this tag, not to
+# Buttondown's generic page, which would sign people up with no topic at all.
+SUBSCRIBE_TAG = "J&A digest"
+SUBSCRIBE_URL = f"{SITE_URL}/#subscribe"
 SUBSCRIBE_FORM_URL = f"https://buttondown.com/api/emails/embed-subscribe/{BUTTONDOWN_USER}"
 ISSUE_URL = f"{PROJECT_URL}/issues/new"
 
