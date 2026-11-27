@@ -46,7 +46,7 @@ from ..collect import config
 from . import archive as ar
 from .render import DATASET_URL, ET, FIELDS_NOTE, FIGURE_SOURCE_NOTE, GISTS_NOTE, PROJECT_URL, SITE_URL
 
-TITLE = "WOAH! J&As"
+TITLE = "Federal Data Stories: J&A digest"   # the newsletter is Federal Data Stories; this is its J&A topic
 SUBSCRIBE_URL = config.SUBSCRIBE_URL
 # Buttondown's no-JavaScript embed form: a plain POST; Buttondown shows its own
 # confirmation page and sends the double-opt-in email (2026-10-22)
@@ -276,7 +276,7 @@ def changelog_page() -> str:
     body = (f"<h1>Changes</h1>\n<p>Changes to the fields the email, this site and the "
             f'<a href="{e(DATASET_URL)}">dataset</a> show: what each change was and why, newest first.</p>\n'
             f'<ul class="issues">\n' + "\n".join(rows) + "\n</ul>")
-    return page(f"Changes · {TITLE}", body, description="Changes to the fields WOAH! J&As and its dataset show")
+    return page(f"Changes · {TITLE}", body, description="Changes to the fields the J&A digest and its dataset show")
 
 
 def not_found_page() -> str:
