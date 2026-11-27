@@ -467,7 +467,8 @@ def test_buttondown_request(monkeypatch):
 
     def post(url, json, headers, timeout):
         seen.update(url=url, json=json, headers=headers)
-        return SimpleNamespace(status_code=201, json=lambda: {"id": "em_x", "status": "about_to_send"}, headers={})
+        return SimpleNamespace(status_code=201, json=lambda: {"id": "em_x", "status": "about_to_send",
+                                                               "filters": json["filters"]}, headers={})
     monkeypatch.setenv("BUTTONDOWN_API_KEY", "k-secret")
     monkeypatch.setattr(buttondown.requests, "post", post)
     out = buttondown.send_email("S", "B", metadata={"to_watermark": "t"})
@@ -476,6 +477,30 @@ def test_buttondown_request(monkeypatch):
     assert seen["headers"]["X-Buttondown-Live-Dangerously"] == "true"
     assert seen["headers"]["X-API-Version"] == "2026-04-01"
     assert seen["json"]["status"] == "about_to_send" and seen["json"]["metadata"]["kind"] == buttondown.METADATA_KIND
+    # 2026-11-27: the list has several topics; the digest goes to the J&A topic only
+    assert seen["json"]["filters"] == {"predicate": "and", "groups": [], "filters": [
+        {"field": "subscriber.tags", "operator": "contains", "value": "sub_tag_test_ja"}]}
+
+
+def test_digest_is_not_sent_when_the_topic_tag_is_missing(monkeypatch):
+    from topic_mail.core import TopicMailError
+    posted = []
+    def missing(topic):
+        raise TopicMailError(f"topic {topic!r}: expected exactly one Buttondown tag with that name, found 0")
+    monkeypatch.setattr(buttondown, "_topic_tag_id", missing)
+    monkeypatch.setattr(buttondown.requests, "post", lambda *a, **k: posted.append(1))
+    monkeypatch.setenv("BUTTONDOWN_API_KEY", "k")
+    with pytest.raises(buttondown.SendError, match="J&A digest"):
+        buttondown.send_email("S", "B", metadata={})
+    assert posted == []
+
+
+def test_an_email_created_without_the_topic_filter_is_an_error(monkeypatch):
+    monkeypatch.setenv("BUTTONDOWN_API_KEY", "k")
+    monkeypatch.setattr(buttondown.requests, "post", lambda url, json, headers, timeout: SimpleNamespace(
+        status_code=201, headers={}, json=lambda: {"id": "em_y", "status": "about_to_send", "filters": None}))
+    with pytest.raises(buttondown.SendError, match="without the 'J&A digest' topic filter"):
+        buttondown.send_email("S", "B", metadata={})
 
 
 def test_buttondown_error_is_loud_and_hides_the_key(monkeypatch):
@@ -586,7 +611,7 @@ def test_send_email_schedules_when_publish_date_given(monkeypatch):
     class R:
         status_code = 201
         def json(self):
-            return {"id": "em_1", "status": "scheduled"}
+            return {"id": "em_1", "status": "scheduled", "filters": sent["filters"]}
 
     def fake_post(url, json=None, headers=None, timeout=None):
         sent.update(json)

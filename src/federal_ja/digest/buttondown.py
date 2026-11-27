@@ -14,6 +14,11 @@ https://api.buttondown.com/v1/openapi.json, and changelog on 2026-10-21).
 * ``GET /v1/emails?creation_date__start=...`` lists recent emails; run.py uses
   it to find a digest that was sent but whose state was never saved.
 
+* Since 2026-11-27 the list (Federal Data Stories) carries several topics as subscriber-editable tags.
+  Every digest carries ``filters`` so it goes only to subscribers tagged ``TOPIC``; the tag id is looked up
+  by name through topic_mail, an unknown topic stops the send, and the created email must come back with
+  that filter.
+
 The key comes from ``BUTTONDOWN_API_KEY`` and is never printed: errors show
 the status code and Buttondown's ``code``/``detail`` only.
 """
@@ -25,10 +30,13 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import requests
+from topic_mail.core import TopicMailError
+from topic_mail.core import topic_tag_id as _topic_tag_id
 
 API = "https://api.buttondown.com/v1"
 API_VERSION = "2026-04-01"
 METADATA_KIND = "federal-ja-digest"
+TOPIC = "J&A digest"
 
 
 class SendError(RuntimeError):
@@ -73,6 +81,16 @@ def _request(method: str, url: str, *, attempts: int = 4, **kw):
     raise SendError(f"Buttondown {method} {url} failed after {attempts} attempts: {last}")
 
 
+def topic_filters() -> dict:
+    """Buttondown audience filter: subscribers tagged TOPIC. Raises SendError if the tag isn't there."""
+    try:
+        tag_id = _topic_tag_id(TOPIC)
+    except TopicMailError as exc:
+        raise SendError(str(exc)) from None
+    return {"predicate": "and", "groups": [],
+            "filters": [{"field": "subscriber.tags", "operator": "contains", "value": tag_id}]}
+
+
 def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_to_send",
                publish_date: str | None = None) -> dict:
     """Create (and, with about_to_send, send) one email. Returns
@@ -84,7 +102,7 @@ def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_
         raise SendError(f"unsupported status {status!r}")
     if body.lstrip().startswith("---"):
         raise SendError("body starts with '---' (Buttondown reads that as frontmatter)")
-    payload = {"subject": subject, "body": body, "status": status,
+    payload = {"subject": subject, "body": body, "status": status, "filters": topic_filters(),
                "metadata": {"kind": METADATA_KIND, **metadata}}
     if publish_date and status == "about_to_send":
         # 2026-10-21: deliver at a set time (the run itself finishes ~3am ET).
@@ -109,6 +127,9 @@ def send_email(subject: str, body: str, *, metadata: dict, status: str = "about_
         if r.status_code != 201:
             raise SendError(f"Buttondown refused the email: {_err(r)}")
         j = r.json()
+        if j.get("filters") != payload["filters"]:
+            raise SendError(f"Buttondown created email {j.get('id')} without the {TOPIC!r} topic filter "
+                            f"(got {j.get('filters')!r}); check it in the dashboard now")
         return {"id": j.get("id"), "status": j.get("status"), "absolute_url": j.get("absolute_url")}
     raise SendError(f"Buttondown POST failed: {last}")
 
