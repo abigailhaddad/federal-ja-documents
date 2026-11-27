@@ -188,9 +188,23 @@ def test_signup_form_on_index_about_and_issues(tmp_path):
     site.build([("2026-10-21.json", entry)], out)
     for rel in ("index.html", "about.html", "issues/2026-10-21.html"):
         t = (out / rel).read_text()
-        assert f'<form class="signup" action="{config.SUBSCRIBE_FORM_URL}" ' \
+        assert f'<form class="signup" id="subscribe" action="{config.SUBSCRIBE_FORM_URL}" ' \
                'method="post">' in t, rel
         assert 'type="email" name="email"' in t, rel
+        # 2026-11-27: the list has several topics; this form must subscribe to the J&A one only
+        assert '<input type="hidden" name="tag" value="J&amp;A digest">' in t, rel
+
+
+def test_subscribe_links_go_to_the_tagged_form_not_buttondowns_page(tmp_path):
+    # Buttondown's own page signs people up with no topic tag, so they would get nothing.
+    from federal_ja.digest import render, site
+    out = tmp_path / "dist"
+    entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
+    site.build([("2026-10-21.json", entry)], out)
+    for f in out.rglob("*.html"):
+        assert f'href="https://buttondown.com/{config.BUTTONDOWN_USER}"' not in f.read_text(), f
+    assert config.SUBSCRIBE_URL == f"{config.SITE_URL}/#subscribe"
+    assert render.SUBSCRIBE_URL == config.SUBSCRIBE_URL
 
 
 def test_report_a_problem_link_on_every_page(tmp_path):
