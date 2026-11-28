@@ -180,13 +180,14 @@ def test_email_footer_links_the_archive():
     assert f"Archive & RSS: [{render.SITE_URL}]({render.SITE_URL})" in render.footer(1, {})
 
 
-def test_signup_form_on_index_about_and_issues(tmp_path):
+def test_signup_form_on_index_and_issues(tmp_path):
     # 2026-10-22: Buttondown's plain-POST embed form, no JavaScript
+    # (2026-11-28: no longer on about.html, which is now one sentence plus links)
     from federal_ja.digest import site
     out = tmp_path / "dist"
     entry = {"date": "2026-10-21", "subject": "s", "picks": [], "notices_reviewed": 0, "window": {}}
     site.build([("2026-10-21.json", entry)], out)
-    for rel in ("index.html", "about.html", "issues/2026-10-21.html"):
+    for rel in ("index.html", "issues/2026-10-21.html"):
         t = (out / rel).read_text()
         assert f'<form class="signup" id="subscribe" action="{config.SUBSCRIBE_FORM_URL}" ' \
                'method="post">' in t, rel
@@ -238,3 +239,30 @@ def test_changelog_page_lists_every_entry_newest_first_escaped(tmp_path):
     assert "J&amp;A" in out and "J&A notices" not in out             # text is escaped
     assert 'href="changelog.html"' in (tmp_path / "dist" / "about.html").read_text()
     assert 'href="../changelog.html"' in (tmp_path / "dist" / "issues" / "2026-10-21.html").read_text()
+
+
+def test_about_page_is_short_and_hard_codes_nothing_that_drifts(tmp_path):
+    """2026-11-28: the about page is one sentence plus links to the files that
+    hold the rules. Models, dollar amounts, counts and prompt text live in
+    those files and must not be copied into the page."""
+    import re as _re
+    from importlib.resources import files as _files
+
+    import yaml as _yaml
+
+    site.build([], tmp_path / "dist")
+    about = (tmp_path / "dist" / "about.html").read_text()
+    main = about[about.index("<main>"):about.index("</main>")]
+    text = _re.sub(r"<[^>]+>", " ", main)
+    assert "claude-" not in main.lower()
+    assert not _re.search(r"\$\s?\d", text)
+    assert not _re.search(r"\d", text), "no numbers (counts, thresholds) on the about page"
+    for name in ("candidates.py", "prompts.yaml", "verify.py"):
+        assert f"/blob/main/src/federal_ja/digest/{name}" in main
+    assert render.DATASET_URL in main
+    prompts = _yaml.safe_load(_files("federal_ja.digest").joinpath("prompts.yaml").read_text())
+    for stage in ("screen", "rank"):
+        assert prompts[stage]["model"] not in main
+        for line in prompts[stage]["prompt"].splitlines():
+            if len(line.strip()) > 40:
+                assert line.strip()[:40] not in text

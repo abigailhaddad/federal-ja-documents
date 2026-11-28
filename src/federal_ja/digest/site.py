@@ -54,7 +54,6 @@ SUBSCRIBE_URL = config.SUBSCRIBE_URL
 ISSUE_URL = config.ISSUE_URL
 SUBSCRIBE_FORM_URL = config.SUBSCRIBE_FORM_URL
 # the same links without the scheme, as shown on the about page
-PROJECT_LABEL = PROJECT_URL.removeprefix("https://")
 DATASET_LABEL = DATASET_URL.removeprefix("https://")
 # 2026-10-22: not "a daily pick of sole-source justifications": every email lists all the
 # new J&As (not all sole-source), and Claude only picks out a few of them
@@ -233,25 +232,19 @@ def index_page(items: list[tuple[str, dict]]) -> str:
 
 
 def about_page() -> str:
+    # 2026-11-28: one sentence on what is covered and from where, then one link
+    # per pipeline step. No counts, models, thresholds or dollar amounts here:
+    # they live in the linked files (tests/test_digest_site.py checks).
+    src = f"{PROJECT_URL}/blob/main/src/federal_ja/digest"
     body = f"""<h1>About {e(TITLE)}</h1>
-<p>{e(TAGLINE)}. The notices come from the public <a href="{e(DATASET_URL)}">federal-ja-documents dataset</a>.
-Each email has the few most remarkable new J&amp;A notices the collector picked up since the previous one
-(at most five, sometimes none), each with verbatim quotes from the documents and links to SAM.gov,
-then every new notice it reviewed, one line each.</p>
-<p><strong>Chosen and written up by Claude.</strong> Quotes are checked word for word against the documents,
-and dollar figures come from those quotes or from quote-checked extraction fields,
-but AI can still misread a document: check the source before relying on anything.</p>
-<p>This site shows each email exactly as it was sent. Code, rules and checks:
-<a href="{e(PROJECT_URL)}">{e(PROJECT_LABEL)}</a>
-(<a href="{e(PROJECT_URL)}/blob/main/docs/digest.md">how the digest works</a>).
-Data: <a href="{e(DATASET_URL)}">{e(DATASET_LABEL)}</a>.</p>
-<p>Spotted a wrong pick, quote or figure, or have a suggestion?
-<a href="{ISSUE_URL}">Open an issue on GitHub</a>.</p>
-<p>Subscribe with any feed reader: <a href="feed.xml">RSS feed</a>, or by email (sent through Buttondown):</p>
-{signup_form()}
-<p>When we change what a field shows or how it is checked, it is listed under
-<a href="changelog.html">Changes</a>.</p>
-<p>No JavaScript, no cookies, no trackers on this site.</p>"""
+<p>Each email lists every new federal J&amp;A notice posted on SAM.gov, from the public
+<a href="{e(DATASET_URL)}">federal-ja-documents dataset</a>, with the most remarkable few picked out and written up by Claude.</p>
+<ul>
+<li>Data: <a href="{e(DATASET_URL)}">{e(DATASET_LABEL)}</a></li>
+<li>Selection: <a href="{e(src)}/candidates.py">candidates.py</a></li>
+<li>Claude: <a href="{e(src)}/prompts.yaml">prompts.yaml</a></li>
+<li>Checks: <a href="{e(src)}/verify.py">verify.py</a></li>
+</ul>"""
     return page(f"About · {TITLE}", body)
 
 
