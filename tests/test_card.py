@@ -91,11 +91,13 @@ def test_card_documents_special_notice_gate(tmp_path):
     assert "{'justification_type': 1, 'special_notice_title_match': 1}" in card
 
 
-def test_readme_shows_the_same_gate():
+def test_collection_notes_show_the_same_gate():
+    # 2026-11-28: the gate moved with the collection notes from README.md to docs/collection.md (the README no
+    # longer pastes patterns; the dataset card prints the live one)
     from pathlib import Path
     from federal_ja.collect.sources import JA_TITLE_PATTERN
-    readme = (Path(__file__).resolve().parents[1] / "README.md").read_text()
-    assert JA_TITLE_PATTERN.pattern in readme
+    notes = (Path(__file__).resolve().parents[1] / "docs" / "collection.md").read_text()
+    assert JA_TITLE_PATTERN.pattern in notes
 
 
 def test_card_documents_sam_award_columns(tmp_path):

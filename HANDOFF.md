@@ -3,7 +3,7 @@
 ## What this is
 Justification notices from SAM.gov (why a federal agency skipped competition), with the original files, extracted text and LLM-extracted fields. A daily email digest ("WOAH! J&As") and a small archive site come with it.
 
-- Code: https://github.com/abigailhaddad/federal-ja-documents (README: sources, tables, how collection works)
+- Code: https://github.com/abigailhaddad/federal-ja-documents (README; sources, tables and how collection works: docs/collection.md)
 - Data: https://huggingface.co/datasets/abigailhaddad/federal-ja-documents (the dataset card has the columns and known limits)
 - Sites: https://federal-ja-documents.abigailhaddad.com (browse the data), https://woah-jas.abigailhaddad.com (email archive)
 
@@ -28,7 +28,7 @@ Variables: `DAILY_ENABLED`, `EXTRACT_DAILY_ENABLED`, `DIGEST_ENABLED` (each `tru
 - Most owner names live in `src/federal_ja/collect/config.py`; each default can be set with an environment variable (`JA_GITHUB_REPO`, `JA_HF_REPO`, `JA_USASPENDING_DATASET`, `JA_SITE_URL`, `JA_BUTTONDOWN_USER`). The rest: `cron-trigger/wrangler.toml` and the docs. To find them all: `grep -rn abigailhaddad --exclude-dir=.git .`
 - Create: a Hugging Face dataset and token, a Cloudflare Pages project and Worker, a Buttondown account, and the variables above.
 - Award matching reads a second dataset, `abigailhaddad/usaspending-bulk-awards` (public). Point `JA_USASPENDING_DATASET` elsewhere if you copy it.
-- Seed an empty dataset with the first-publish step in the README ("Running it"). The daily job starts by downloading the dataset's tables, and I haven't tried it against an empty one.
+- Seed an empty dataset with the first-publish step in docs/collection.md ("Running it"). The daily job starts by downloading the dataset's tables, and I haven't tried it against an empty one.
 - PDF text is read with `pdftotext` (poppler), falling back to `pypdf`. `pages.text_engine` says which read each page; older pages used `pypdf`. `JA_PDF_ENGINE=pypdf` forces the old reader.
 
 ## When it breaks

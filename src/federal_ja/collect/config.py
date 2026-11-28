@@ -7,7 +7,7 @@ import os
 
 # Who owns what. A new owner sets these (as environment variables or by editing the
 # defaults) and every link, dataset id and signup form below follows. HANDOFF.md
-# lists the places that cannot read this file (workflows, the cron worker, README).
+# lists the places that cannot read this file (workflows, the cron worker, README, docs/collection.md).
 GITHUB_REPO = os.environ.get("JA_GITHUB_REPO", "abigailhaddad/federal-ja-documents")
 PROJECT_URL = f"https://github.com/{GITHUB_REPO}"
 USER_AGENT = f"federal-ja-documents/0.1 (+{PROJECT_URL})"
