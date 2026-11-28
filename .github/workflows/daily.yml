@@ -111,3 +111,25 @@ jobs:
           echo "$built"
           gh release delete latest-data --cleanup-tag --yes 2>/dev/null || true
           gh release create latest-data federal-ja-documents.sqlite --title "Latest data (SQLite)" --notes "SQLite copy of the tables in https://huggingface.co/datasets/abigailhaddad/federal-ja-documents at commit $sha (not the original files), built $(date -u +%Y-%m-%d) by the daily collection workflow. One table per parquet file; the analysis tables are experimental and AI-generated. Columns are described in docs/data_dictionary.md. ${built#wrote }"
+
+  # GitHub disables scheduled workflows in a public repo after 60 days with no commits, and this workflow
+  # never commits. Same check as oira-meetings: an empty commit once the newest commit is 45+ days old.
+  keepalive:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    permissions:
+      contents: write
+    # Never let a keepalive problem mark the collection run failed (digest.yml follows this workflow).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keepalive commit
+        run: |
+          age=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "newest commit is $age days old"
+          if [ "$age" -ge 45 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Keepalive: no commits in $age days"
+            git push
+          fi
