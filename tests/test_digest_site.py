@@ -176,8 +176,9 @@ def test_rss_feed_is_valid_rss2_with_the_last_30_issues():
     assert its[-1].findtext("link").endswith("/issues/2026-09-12")     # 30 newest: Sep 12 .. Oct 20 + the -2
 
 
-def test_email_footer_links_the_archive():
-    assert f"Archive & RSS: [{render.SITE_URL}]({render.SITE_URL})" in render.footer(1, {})
+def test_about_page_links_the_archive_from_the_one_line_footer():
+    # 2026-11-28: the footer is one line; the archive is reached through the about page it links
+    assert f"[How this is made]({render.SITE_URL}/about)" in render.footer()
 
 
 def test_signup_form_on_index_and_issues(tmp_path):

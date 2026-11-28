@@ -43,21 +43,26 @@ def _fmt_et(iso: str | None) -> str:
     return f"{d:%b} {d.day}, {d:%H:%M} ET"
 
 
-def footer(n_reviewed: int, window: dict) -> str:
+def reviewed_line(n_reviewed: int, window: dict) -> str:
+    """How many notices this email reviewed and from when (the as-of statement), after the picks. It used to be
+    in the footer (moved 2026-11-28)."""
     old = window.get("left_out_old")
-    return (
-        "---\n\n"
-        f"*WOAH! J&As:* new federal J&As (justifications for contracts awarded without full and open "
-        f"competition) posted on SAM.gov, all listed above, with the most remarkable few picked out by Claude, "
-        f"via the "
-        f"[federal-ja-documents dataset]({DATASET_URL}). {n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
-        f"reviewed today (first collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
-        + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "")
-        + ").\n\n"
-        "Chosen and written up by Claude. Quotes are checked word for word against the documents, "
-        f"but check the source before relying on anything. [How this is made]({SITE_URL}/about) · [Code]({PROJECT_URL}).\n\n"
-        f"Archive & RSS: [{SITE_URL}]({SITE_URL}) · Subscribe: [{SUBSCRIBE_URL}]({SUBSCRIBE_URL})"
-    )
+    return (f"{n_reviewed} new notice{'s' if n_reviewed != 1 else ''} reviewed today (first collected "
+            f"{window.get('from_label', '?')} to {window.get('to_label', '?')}"
+            + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "") + ").")
+
+
+def collected_line(window: dict) -> str:
+    """The as-of statement for an email with no picks: "First collected X to Y (N older notices skipped)." """
+    old = window.get("left_out_old")
+    return (f"First collected {window.get('from_label', '?')} to {window.get('to_label', '?')}"
+            + (f"; {old} older notice{'s' if old != 1 else ''} skipped" if old else "") + ".")
+
+
+def footer(n_reviewed: int = 0, window: dict | None = None) -> str:
+    """ONE line (2026-11-28, the rule for every Federal Data Stories topic). What the digest is, how quotes are
+    checked and the caveats are on the about page; the archive and sign-up are linked from there."""
+    return f"---\n\nWritten with Claude. [How this is made]({SITE_URL}/about) · [Code]({PROJECT_URL})"
 
 
 _SMALL = frozenset({"and", "of", "the", "for", "on", "in", "to", "at"})
@@ -183,7 +188,7 @@ def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window
     listing = ("\n" + all_notices(all_cands, picks, gists)) if all_cands else ""
     if not picks:
         return (f"Nothing WOAH-worthy today ({n_reviewed} new notice{'s' if n_reviewed != 1 else ''} "
-                f"reviewed).\n" + listing + "\n" + footer(n_reviewed, window) + "\n")
+                f"reviewed). {collected_line(window)}\n" + listing + "\n" + footer() + "\n")
     out = []
     for p in picks:
         v = pick_view(p, cands[p["notice_id"]])
@@ -205,4 +210,4 @@ def body(picks: list[dict], cands: dict[str, Candidate], n_reviewed: int, window
         if v["more_documents"]:
             links.append(f"+{v['more_documents']} more on SAM.gov")
         out.append(" · ".join(links) + "\n")
-    return "\n".join(out) + listing + "\n" + footer(n_reviewed, window) + "\n"
+    return "\n".join(out) + "\n" + reviewed_line(n_reviewed, window) + "\n" + listing + "\n" + footer() + "\n"

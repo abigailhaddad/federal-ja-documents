@@ -244,6 +244,7 @@ def about_page() -> str:
 <li>Selection: <a href="{e(src)}/candidates.py">candidates.py</a></li>
 <li>Claude: <a href="{e(src)}/prompts.yaml">prompts.yaml</a></li>
 <li>Checks: <a href="{e(src)}/verify.py">verify.py</a></li>
+<li>Caveat: quotes are checked word for word against the documents, but AI can still misread a document; check the source before relying on anything.</li>
 </ul>"""
     return page(f"About · {TITLE}", body)
 

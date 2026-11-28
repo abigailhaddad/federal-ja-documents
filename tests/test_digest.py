@@ -186,7 +186,7 @@ def test_render_pick():
     assert "> “The Government lost all of its contracting staff" in b and "> — JA_Redacted.pdf, p. 1" in b
     assert "[SAM.gov notice](https://sam.gov/opp/n1/view)" in b and "JA%20Redacted.pdf" in b
     assert "12 new notices reviewed" in b and "3 older notices skipped" in b
-    assert "Chosen and written up by Claude" in b and not b.startswith("---")
+    assert b.rstrip("\n").endswith(render.footer()) and not b.startswith("---")
 
 
 def test_render_zero_picks():
@@ -560,7 +560,7 @@ def test_zero_picks_email_still_lists_all_notices():
     b = render.body([], {}, 1, {"from_label": "a", "to_label": "b"}, all_cands=[c])
     assert b.startswith("Nothing WOAH-worthy today (1 new notice reviewed).")
     assert "## All new notices (1)" in b and "[SAM.gov](https://sam.gov/opp/n1/view)" in b
-    assert b.index("All new notices") < b.index("*WOAH! J&As:*")
+    assert b.index("All new notices") < b.index("Written with Claude.")
 
 
 def test_excerpt_shares_the_budget_between_versions_of_the_justification():
@@ -747,11 +747,16 @@ def test_checked_facts_come_from_the_published_columns_and_reach_the_card():
     assert "CHECKED FACTS" in model.CONFIG["rank"]["prompt"] and model.VERSION.endswith("digest3")
 
 
-def test_footer_links_how_this_is_made_and_the_code():
-    # 2026-11-28: the methods link (canonical URL, no .html) and the repo, from config
+def test_footer_is_exactly_one_line():
+    # 2026-11-28: one short line for every topic; the methods link (no .html) and the repo, from config. The
+    # caveats are on the about page; the as-of window moved into the body.
     from federal_ja.collect import config
     from federal_ja.digest import render
-    f = render.footer(2, {"from_label": "a", "to_label": "b"})
-    line = next(x for x in f.splitlines() if "How this is made" in x)
-    assert line.endswith(f"[How this is made]({config.SITE_URL}/about) · [Code]({config.PROJECT_URL}).")
+    f = render.footer()
+    assert f.startswith("---\n\n")
+    lines = [x for x in f.removeprefix("---").splitlines() if x.strip()]
+    assert lines == [f"Written with Claude. [How this is made]({config.SITE_URL}/about) · [Code]({config.PROJECT_URL})"]
     assert config.PROJECT_URL == "https://github.com/abigailhaddad/federal-ja-documents"
+    for b in (render.body([], {}, 3, {"from_label": "a", "to_label": "b", "left_out_old": 2}),):
+        assert b.rstrip("\n").splitlines()[-1] == lines[0]
+        assert "3 new notices reviewed" in b and "First collected a to b; 2 older notices skipped." in b
