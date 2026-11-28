@@ -745,3 +745,13 @@ def test_checked_facts_come_from_the_published_columns_and_reach_the_card():
     # a row with none of the columns (before 2026-11-11, or nothing found) adds nothing
     assert checked_facts({"ceiling_prior_usd": float("nan")}) == {}
     assert "CHECKED FACTS" in model.CONFIG["rank"]["prompt"] and model.VERSION.endswith("digest3")
+
+
+def test_footer_links_how_this_is_made_and_the_code():
+    # 2026-11-28: the methods link (canonical URL, no .html) and the repo, from config
+    from federal_ja.collect import config
+    from federal_ja.digest import render
+    f = render.footer(2, {"from_label": "a", "to_label": "b"})
+    line = next(x for x in f.splitlines() if "How this is made" in x)
+    assert line.endswith(f"[How this is made]({config.SITE_URL}/about) · [Code]({config.PROJECT_URL}).")
+    assert config.PROJECT_URL == "https://github.com/abigailhaddad/federal-ja-documents"
