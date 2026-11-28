@@ -24,6 +24,14 @@ on:
         description: "Publish to Hugging Face"
         type: boolean
         default: true
+      allow_shrink:
+        description: "Publish even if notices/attachments have fewer rows than on Hugging Face"
+        type: boolean
+        default: false
+      allow_small_csv:
+        description: "Merge SAM's active CSV even if it parsed to under 10,000 rows"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-collection
@@ -38,6 +46,8 @@ jobs:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      ALLOW_SHRINK: ${{ inputs.allow_shrink == true && '1' || '' }}
+      ALLOW_SMALL_CSV: ${{ inputs.allow_small_csv == true && '1' || '' }}
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4

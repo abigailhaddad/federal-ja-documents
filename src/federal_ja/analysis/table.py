@@ -222,6 +222,7 @@ def upload_table(path: Path, message: str, *, new_rows: int, excluded_path: Path
     ops = [CommitOperationAdd(path_in_repo=TABLE_PATH, path_or_fileobj=str(path))]
     if excluded_path is not None:
         ops.append(CommitOperationAdd(path_in_repo=EXCLUDED_PATH, path_or_fileobj=str(excluded_path)))
-    info = HfApi().create_commit(repo_id=HF_DATASET, repo_type="dataset", operations=ops,
-                                 commit_message=message)
+    from ..hf_retry import with_retry
+    info = with_retry(HfApi().create_commit, repo_id=HF_DATASET, repo_type="dataset", operations=ops,
+                      commit_message=message)
     return str(getattr(info, "commit_url", info))

@@ -42,8 +42,24 @@ def _record_run(store: Store, kind: str, info: dict) -> None:
     store.state["runs"] = store.state["runs"][-200:]
 
 
-def _merge_scan(store: Store, sources: list, start: dt.date) -> dict:
+# SAM's active-notices CSV has had about 72,000 rows (2026-11-28). A download that parses to far fewer
+# (an HTML error or challenge page served with a 200, a cut-off file) would otherwise "succeed" with
+# no new notices and the dataset would quietly stop growing.
+MIN_ACTIVE_ROWS = 10_000
+
+
+def check_active_csv(stats) -> None:
+    for fs in stats.files:
+        if fs.label == config.ACTIVE_LABEL and fs.rows < MIN_ACTIVE_ROWS \
+                and os.environ.get("ALLOW_SMALL_CSV") not in ("1", "true"):
+            raise SystemExit(f"{fs.label}: only {fs.rows} rows parsed (expected tens of thousands); "
+                             "SAM may have served an error page. Not merging. Set ALLOW_SMALL_CSV=1 to override.")
+
+
+def _merge_scan(store: Store, sources: list, start: dt.date, remote: bool = False) -> dict:
     res = collect_ja_notices(sources, start)
+    if remote:
+        check_active_csv(res.stats)
     diff = pipeline.merge_notices(store, res)
     in_scope = set(res.notices)
     rec = report.reconcile(store, in_scope)
@@ -67,7 +83,7 @@ def cmd_scan(args, store: Store) -> dict:
             }
     else:
         sources = _remote_sources(args, store, start)
-    info = _merge_scan(store, sources, start)
+    info = _merge_scan(store, sources, start, remote=not args.csv)
     _record_run(store, "scan", info)
     store.save()
     return info

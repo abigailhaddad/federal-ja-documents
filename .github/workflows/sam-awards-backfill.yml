@@ -23,6 +23,10 @@ on:
         description: "Publish tables to Hugging Face"
         type: boolean
         default: true
+      allow_shrink:
+        description: "Publish even if notices/attachments have fewer rows than on Hugging Face"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-collection
@@ -34,6 +38,7 @@ jobs:
     timeout-minutes: 300
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      ALLOW_SHRINK: ${{ inputs.allow_shrink == true && '1' || '' }}
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4

@@ -11,6 +11,7 @@ import json
 import logging
 import os
 
+from ..hf_retry import with_retry
 from . import config, published
 from .store import LAYOUT_VERSION, Store
 
@@ -24,6 +25,37 @@ TABLE_FILES = ["data/notices.parquet", "data/attachments.parquet", "data/pages.p
 # (not built by the daily job), so they are not in TABLE_FILES or in the
 # attachments table, and would otherwise look stale.
 KEEP_PREFIXES = ("analysis/",)
+
+# Row counts of the tables as pulled from the hub, written by pull_tables. Notices and
+# attachments are never removed (an attachment SAM no longer lists gets
+# in_latest_listing=False), so a publish with fewer rows than were pulled is a bug or a
+# bad pull and is refused unless ALLOW_SHRINK=1.
+PULLED_ROWS = "data/pulled_rows.json"
+NO_SHRINK_TABLES = ("data/notices.parquet", "data/attachments.parquet")
+
+
+class ShrinkError(Exception):
+    pass
+
+
+def _rows(path: str) -> int:
+    import pyarrow.parquet as pq
+    return pq.read_metadata(path).num_rows
+
+
+def check_not_shrinking(workdir: str, tables: dict[str, str]) -> None:
+    """Compare the tables about to be published with the counts pull_tables saved."""
+    p = os.path.join(workdir, PULLED_ROWS)
+    if not os.path.exists(p) or os.environ.get("ALLOW_SHRINK") in ("1", "true"):
+        return
+    with open(p) as f:
+        pulled = json.load(f)
+    for rel in NO_SHRINK_TABLES:
+        if rel in pulled and rel in tables:
+            n = _rows(tables[rel])
+            if n < pulled[rel]:
+                raise ShrinkError(f"{rel}: {n} rows to publish, {pulled[rel]} on the hub when pulled; "
+                                  "not publishing (set ALLOW_SHRINK=1 if this is intended)")
 
 
 def stale_paths(remote: list[str], keep: set[str]) -> list[str]:
@@ -71,6 +103,9 @@ def pull_tables(workdir: str, repo_id: str = config.HF_REPO_ID) -> bool:
         return False
     for rel in TABLE_FILES:
         hf_hub_download(repo_id, rel, repo_type="dataset", local_dir=workdir)
+    counts = {rel: _rows(os.path.join(workdir, rel)) for rel in NO_SHRINK_TABLES}
+    with open(os.path.join(workdir, PULLED_ROWS), "w") as f:
+        json.dump(counts, f)
     return True
 
 
@@ -81,6 +116,7 @@ def _table_ops(store: Store, tables: dict[str, str]) -> list:
 
     if set(tables) != set(TABLE_FILES):
         raise ValueError(f"expected tables {TABLE_FILES}, got {sorted(tables)}")
+    check_not_shrinking(store.workdir, tables)
     ops = [CommitOperationAdd(path_in_repo=rel, path_or_fileobj=tables[rel]) for rel in TABLE_FILES]
     ops.append(CommitOperationAdd(path_in_repo="README.md", path_or_fileobj=store.path("README.md")))
     return ops
@@ -114,14 +150,14 @@ def publish_delta(store: Store, card_text: str, repo_id: str = config.HF_REPO_ID
     for i in range(0, len(paths), batch_size):
         batch = paths[i:i + batch_size]
         ops = [CommitOperationAdd(path_in_repo=p, path_or_fileobj=store.path(p)) for p in batch]
-        api.create_commit(repo_id, ops, repo_type="dataset",
-                          commit_message=f"Add {len(batch)} attachment files")
+        with_retry(api.create_commit, repo_id, ops, repo_type="dataset",
+                   commit_message=f"Add {len(batch)} attachment files")
         for p in batch:
             by_path[p]["uploaded_at"] = now
     store.save()
     ops = _table_ops(store, write_tables_and_card(store, card_text, us_cols))
-    api.create_commit(repo_id, ops, repo_type="dataset",
-                      commit_message="Update notices, attachments and dataset card")
+    with_retry(api.create_commit, repo_id, ops, repo_type="dataset",
+               commit_message="Update notices, attachments and dataset card")
     return len(paths)
 
 
@@ -175,8 +211,8 @@ def publish_tables(store: Store, card_text: str, repo_id: str = config.HF_REPO_I
         raise UploadVerifyError(f"{len(missing)} stored files are not on the hub, e.g. {missing[:3]}")
     store.save()
     ops = _table_ops(store, write_tables_and_card(store, card_text, us_cols))
-    info = api.create_commit(repo_id, ops, repo_type="dataset",
-                             commit_message="Notices, attachments and pages tables; dataset card")
+    info = with_retry(api.create_commit, repo_id, ops, repo_type="dataset",
+                      commit_message="Notices, attachments and pages tables; dataset card")
     out = {"tables_commit": getattr(info, "oid", ""), "deleted_stale": []}
     if delete_stale:
         keep = set(TABLE_FILES) | {"README.md", ".gitattributes"} | expected
@@ -237,8 +273,8 @@ def upload_verify_delete(store: Store, rows: list[dict], now: str,
     ops = [CommitOperationAdd(path_in_repo=r["file_path"], path_or_fileobj=store.path(r["file_path"]))
            for r in rows]
     nbytes = sum(r["downloaded_size"] or 0 for r in rows)
-    info = api.create_commit(repo_id, ops, repo_type="dataset",
-                             commit_message=f"Add {len(rows)} J&A attachment files")
+    info = with_retry(api.create_commit, repo_id, ops, repo_type="dataset",
+                      commit_message=f"Add {len(rows)} J&A attachment files")
     commit = getattr(info, "oid", "") or ""
     problems = verify_remote(api, repo_id, rows)
     if problems:

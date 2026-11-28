@@ -59,8 +59,11 @@ class HFState:
 
     def save(self, state: dict, message: str) -> str:
         from huggingface_hub import HfApi
-        info = HfApi().upload_file(path_or_fileobj=json.dumps(state, indent=1).encode(), path_in_repo=STATE_PATH,
-                                   repo_id=HF_DATASET, repo_type="dataset", commit_message=message)
+
+        from ..hf_retry import with_retry
+        info = with_retry(HfApi().upload_file, path_or_fileobj=json.dumps(state, indent=1).encode(),
+                          path_in_repo=STATE_PATH, repo_id=HF_DATASET, repo_type="dataset",
+                          commit_message=message)
         return str(getattr(info, "commit_url", info))
 
 
